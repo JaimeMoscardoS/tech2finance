@@ -1,4 +1,4 @@
-# Asistente inteligente de inversión
+# Tech2Finance
 
 ## Qué es
 
