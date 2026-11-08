@@ -2,17 +2,15 @@
 
 ## Qué es
 
-Área responsable de las pantallas y del recorrido del usuario. Trabaja principalmente en `frontend/`.
+Responsabilidad de la persona 1: interfaz de la aplicación bancaria simulada. Esta carpeta documenta el área; el código se integrará en la aplicación compartida de Next.js.
 
 ## Trabajo
 
-- Mostrar configuración, cartera ficticia, resultados y conversación con el tutor.
-- Adaptar el detalle del lenguaje a principiante, intermedio o avanzado, sin confundir nivel de conocimientos con perfil de riesgo.
-- Identificar claramente escenarios y operaciones simuladas, y mostrar errores y funcionalidades pendientes.
+- Preparar selección de nivel, dashboard, simulador, resultados y conversación contextual, con una única interfaz adaptable.
+- Mostrar también una cartera ficticia existente y su resumen cuando esté disponible.
+- Representar escenarios, supuestos y pérdidas sin presentarlos como predicciones; mostrar errores y funcionalidades pendientes.
+- Consumir ejemplos ficticios compartidos para avanzar sin esperar a otros módulos.
 
-## Intercambio con otros componentes
+## Intercambio
 
-- Recibe del backend el catálogo de activos y escenarios, el resultado de simulación y la respuesta del tutor.
-- Envía al backend la solicitud de simulación y, después, la pregunta junto con el identificador de la simulación.
-- Implementa estos intercambios siguiendo [los contratos comunes](../docs/contratos.md). Puede usar datos de ejemplo locales mientras el backend no esté listo, indicando que son ficticios.
-- Acordar cambios de campos con la persona de backend; no modificar el cálculo del simulador ni generar respuestas por su cuenta.
+Recibe del backend catálogo, simulaciones, cartera ficticia y respuestas del tutor; envía la configuración y las preguntas con su contexto según [los contratos](../docs/contratos.md). Coordina los archivos de UI compartidos con backend y tutor. No realiza cálculos financieros propios ni modifica saldos.

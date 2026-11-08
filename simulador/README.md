@@ -1,18 +1,16 @@
-# Simulador
+# Simulador y motor de inversión educativa
 
 ## Qué es
 
-Área responsable de calcular y explicar la evolución de una cartera ficticia. Trabaja principalmente en `simulador/` y coordina las muestras y fuentes con `datos/`.
+Responsabilidad de la persona 3: cálculos verificables y escenarios hipotéticos. El código formará parte de la aplicación compartida; esta carpeta documenta el área.
 
 ## Trabajo
 
-- Definir escenarios identificados y documentar sus supuestos, periodos, fuentes y reglas de cálculo.
-- Calcular el valor final, la diferencia respecto al importe inicial y las posiciones y operaciones simuladas.
-- Devolver explicaciones estructuradas y el estado de los límites que efectivamente se hayan implementado.
-- Documentar qué partes de los modos supervisado y automático están disponibles; ninguna opera con dinero real.
+- Calcular una evolución reproducible a partir del importe inicial, aportaciones, plazo y supuestos documentados. Distinguir capital aportado de beneficio o pérdida.
+- Generar datos para gráficos y escenarios identificados; validar entradas y probar fórmulas y límites.
+- Si hay tiempo, preparar propuestas educativas de distribución o alertas ficticias basadas en reglas transparentes. Son ilustraciones: no ejecutan compras ni ventas, no cambian saldos y no constituyen recomendaciones reales.
+- Coordinar con la persona 5 las muestras y con backend el formato descrito en [los contratos](../docs/contratos.md).
 
-## Intercambio con otros componentes
+## Intercambio
 
-- Recibe del backend la configuración descrita en [los contratos comunes](../docs/contratos.md).
-- Entrega al backend el resultado de simulación con cartera, operaciones, límites y explicación; también facilita el catálogo de activos y escenarios.
-- Utiliza datos de `datos/` identificados como ficticios, hipotéticos o históricos. Coordina los cambios de estructura con backend y tutor.
+Recibe parámetros validados por el backend y devuelve resultados, evolución y supuestos; no depende del modelo de lenguaje para calcular. Las cifras y escenarios deben identificarse como ficticios o hipotéticos.

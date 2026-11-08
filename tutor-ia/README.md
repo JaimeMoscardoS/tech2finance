@@ -1,17 +1,16 @@
-# Tutor de IA
+# Tutor de IA y voz
 
 ## Qué es
 
-Área responsable de explicar al usuario los datos de la simulación. Trabaja principalmente en `tutor-ia/`.
+Responsabilidad de la persona 4: copiloto educativo que explica la simulación o cartera ficticia mostrada, adaptándose al nivel del usuario.
 
 ## Trabajo
 
-- Responder con lenguaje adaptado al nivel solicitado y conservar la etiqueta del escenario.
-- Usar las cifras y resultados facilitados por el simulador a través del backend. Si no hay información para explicar una causa, reconocerlo.
-- Preparar primero la respuesta de texto; la voz es opcional y dependerá del tiempo y de los medios disponibles.
+- Integrar Claude mediante servidor con claves en variables de entorno. Responder a partir del contexto estructurado de pantalla, simulación o cartera entregado por backend.
+- Distinguir hechos de hipótesis, reconocer información insuficiente y no inventar cifras, causas ni prometer rentabilidades.
+- Explicar conceptos y riesgos sin recomendar compras reales ni realizar cálculos o decisiones de inversión.
+- Preparar primero texto; ElevenLabs para escuchar una respuesta es opcional, con alternativa textual si falla.
 
-## Intercambio con otros componentes
+## Intercambio
 
-- Recibe del backend la pregunta, el nivel, el identificador y el resultado completo de la simulación.
-- Devuelve al backend una respuesta textual y, si existe, una referencia al audio, según [los contratos comunes](../docs/contratos.md).
-- Coordina cambios de contexto con backend y simulador. No realiza cálculos de cartera ni operaciones.
+Recibe pregunta, nivel, pantalla y contexto disponible; devuelve texto y, opcionalmente, una referencia de audio según [los contratos](../docs/contratos.md). Coordina los formatos con backend y usa ejemplos ficticios preparados por la persona 5.

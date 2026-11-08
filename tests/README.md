@@ -2,12 +2,11 @@
 
 ## Qué es
 
-Área responsable de comprobar el recorrido completo de la demo, coordinada por la persona que prepara la presentación. Cada área también prueba sus propios componentes.
+Responsabilidad de coordinación de la persona 5. Cada área prueba sus propios componentes; la persona 3 cubre cálculos y las cinco colaboran en la integración.
 
 ## Trabajo e intercambio
 
-- Usar [los contratos comunes](../docs/contratos.md) para preparar casos y comunicar problemas a la persona responsable del componente.
-- Comprobar el recorrido: seleccionar nivel y escenario, solicitar simulación, mostrar resultado y hacer una pregunta al tutor.
-- Verificar que coincidan identificadores, moneda y cifras entre componentes; que se etiqueten los escenarios y operaciones ficticias; y que se muestren errores cuando falten datos o servicios.
-- Probar que no se presente una operación supervisada como aprobada sin acción del usuario y documentar qué flujos siguen pendientes.
-- Pasar a presentación la lista de funciones comprobadas y sus limitaciones antes del ensayo.
+- Comprobar el flujo principal: nivel, simulación ficticia, gráfico y pregunta contextual; comparar campos y cifras con [los contratos](../docs/contratos.md).
+- Probar el segundo flujo cuando esté disponible: cartera ficticia, resumen y pregunta contextual, sin inventar causas.
+- Verificar supuestos, aportaciones, resultados, mensajes de error y etiquetas de simulación; comprobar que las propuestas no alteran saldos ni ejecutan operaciones.
+- Registrar qué funciona, qué queda pendiente y qué hacer si falla un proveedor, y trasladarlo a presentación antes del ensayo.

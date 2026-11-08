@@ -1,12 +1,12 @@
-# Datos
+# Datos de demostración
 
 ## Qué es
 
-Área de muestras, escenarios y fuentes para la demostración, coordinada por la persona responsable del simulador.
+Responsabilidad principal de la persona 5, coordinada con simulador y backend: muestras y cartera ficticia para construir y ensayar la demo desde el principio.
 
 ## Trabajo e intercambio
 
-- Preparar con simulador un catálogo de activos y escenarios para que backend lo ponga a disposición del frontend. Cada escenario tendrá identificador, nombre, tipo y fuente; los activos tendrán identificador y nombre.
-- Documentar origen, fecha, licencia, periodo disponible y supuestos. Distinguir datos ficticios, hipotéticos e históricos.
-- Usar identificadores coherentes con [los contratos comunes](../docs/contratos.md) y avisar a backend y simulador antes de cambiarlos.
-- No incluir datos privados, claves ni información financiera real de usuarios.
+- Preparar escenarios, catálogo y una cartera ficticia existente con valores, variaciones y comisiones coherentes y documentados. Coordinar cálculos y supuestos con la persona 3 y los formatos con la persona 2.
+- Pasar a frontend y tutor muestras estables compatibles con [los contratos](../docs/contratos.md).
+- Etiquetar datos ficticios e hipotéticos, documentar fuentes y supuestos y distinguir hechos de posibles causas. No incluir datos de clientes ni secretos.
+- Si se usa un informe ficticio, disponer también de sus datos estructurados; extraer PDFs automáticamente es opcional.

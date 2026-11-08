@@ -2,17 +2,14 @@
 
 ## Qué es
 
-Área responsable de conectar interfaz, simulador y tutor. Trabaja principalmente en `backend/` y coordina los acuerdos de integración.
+Responsabilidad de la persona 2: coordinar los contratos y conectar los componentes de una sola aplicación mediante rutas de servidor de Next.js.
 
 ## Trabajo
 
-- Facilitar a la interfaz el catálogo de activos y escenarios.
-- Validar solicitudes, llamar al simulador y devolver su resultado.
-- Recuperar el resultado de una simulación y enviarlo al tutor junto con la pregunta y el nivel; devolver su respuesta a la interfaz.
-- Gestionar errores y mantener los identificadores de simulación disponibles durante el recorrido. El mecanismo de almacenamiento queda por decidir.
+- Definir con las demás personas los tipos y rutas definitivos antes de conectar módulos; mantener [los contratos](../docs/contratos.md) actualizados.
+- Validar solicitudes, conectar el simulador y proporcionar catálogo, resultados y cartera ficticia al frontend.
+- Enviar al tutor la pregunta y solo el contexto disponible y pertinente de pantalla, simulación o cartera.
+- Mantener claves de proveedores en el servidor, gestionar fallos y preparar el despliegue. La persistencia y el transporte concretos se acuerdan antes de implementar.
+- Coordinar la integración con el responsable de cada módulo; no asumir en solitario las pruebas o correcciones de otros módulos.
 
-## Intercambio con otros componentes
-
-- Recibe configuración y preguntas del frontend; recibe el catálogo y los resultados del simulador y la respuesta del tutor.
-- Envía solicitudes al simulador y contexto completo al tutor, sin calcular cifras ni inventar resultados.
-- Coordina [los contratos comunes](../docs/contratos.md) y consulta a las áreas afectadas antes de cambiarlos. La tecnología y las rutas concretas de API se deciden en equipo.
+Los formatos actuales son propuestas documentales, no endpoints implementados. No calcula valores financieros ni ejecuta operaciones.
