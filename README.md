@@ -27,7 +27,7 @@ El documento original describe el alcance deseado; el equipo debe priorizar qué
 | [docs](docs/) | Idea original, acuerdos, decisiones y coordinación. |
 | [presentacion](presentacion/) | Guion, materiales y demostración para el hackathon. |
 
-Las responsabilidades son una propuesta: una persona puede asumir varias y varias pueden colaborar en una. Acordad las interfaces y tecnologías antes de implementar.
+El reparto para cinco personas y las responsabilidades están detallados en cada carpeta. Consultad el [acuerdo de integración](docs/contratos.md) para conocer los datos que intercambian los componentes; las tecnologías quedan por decidir.
 
 ## Empezar a colaborar
 
