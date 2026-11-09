@@ -12,7 +12,9 @@ Agentes de desarrollo del repositorio, independientes de la IA que usará la apl
 | 4 | `t2f-04-tutor-executor` | `t2f-04-tutor-reviewer` |
 | 5 | `t2f-05-producto-executor` | `t2f-05-producto-reviewer` |
 
-Planificador: `t2f-planner`. En Claude Code el ejecutor usa Sonnet y planificación/revisión Opus. En Codex el ejecutor usa `gpt-6.1-terra` y planificación/revisión `gpt-6.1-sol`. Los modelos dependen del acceso de cada persona: si no están disponibles, comunicarlo.
+Planificador: `t2f-planner`. En sesiones Claude, Sonnet ejecuta y Opus planifica y revisa. En sesiones Codex, el principal `gpt-6.1-sol` solo orquesta, lee, revisa y verifica: no escribe archivos. Los planificadores y revisores Sol también trabajan en solo lectura.
+
+Toda escritura del proyecto en Codex se delega a un ejecutor o especialista `gpt-6.1-terra` con `model_reasoning_effort = "high"`: código, documentación, configuraciones, pruebas, correcciones y textos de pull requests. Esto incluye las modificaciones necesarias tras una revisión. El principal asigna archivos concretos y comprueba el resultado. Si Terra high no está disponible, comunicar el bloqueo de escritura y las comprobaciones pendientes; no sustituirlo silenciosamente. Esta política afecta a los agentes de desarrollo, no al modelo del tutor de la aplicación.
 
 Configuraciones de proyecto en `.claude/agents/` y `.codex/agents/`; Codex utiliza `.codex/config.toml`. Abrir la raíz del proyecto y confiar en la configuración si la herramienta lo solicita; puede hacer falta iniciar otra sesión. Pedir por nombre, con tarea y archivos concretos. Ejemplo: «Usa `t2f-03-simulador-executor` para esta tarea y después `t2f-03-simulador-reviewer` para revisar el diff». El revisor informa y no edita; una persona o el agente principal verifica el resultado.
 
