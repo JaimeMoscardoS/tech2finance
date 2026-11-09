@@ -16,3 +16,7 @@ Ejecutor: `t2f-03-simulador-executor`. Revisor: `t2f-03-simulador-reviewer`. Pla
 
 - `t2f-03-cuantitativo`: Implementa cálculos reproducibles de aportaciones, evolución histórica y escenarios; documenta unidades, comisiones y supuestos.
 - `t2f-03-revisor-matematico`: Comprueba resultados, unidades, periodicidad, aportaciones, datos, supuestos, pérdidas y pruebas sin declarar validación de mercado.
+
+## Motor de análisis de caídas
+
+Definir y verificar criterios de comparación histórica, caídas y recuperación observada, incluyendo episodios sin recuperación en el periodo disponible. Consulta `docs/contexto-proyecto.md` y `docs/contratos.md`.

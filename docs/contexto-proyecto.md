@@ -56,6 +56,26 @@ Esta función busca dar contexto cuando el usuario ve una caída o inicia una ve
 
 El asistente no debe bloquear la decisión ni presionar al usuario para conservar la inversión. Puede mostrar episodios pasados cuando existan datos comparables, explicando sus límites; la recuperación de un caso histórico no garantiza una recuperación futura. Si el usuario necesita liquidez o cambian sus circunstancias, esas necesidades deben poder considerarse sin que el sistema imponga una respuesta.
 
+## Motor de análisis de caídas y comparación histórica
+
+El equipo propone un motor que ayude a entender una caída y a ponerla en perspectiva, especialmente cuando el usuario ha indicado un objetivo a largo plazo. Su función es aportar información verificable para decidir con calma, sin asegurar que no haya motivos de preocupación ni que sea conveniente mantener la inversión.
+
+### Cómo funcionaría
+
+1. Identificar el fondo o posición afectada, el periodo y la magnitud de la caída. Obtener la serie y los datos del producto desde fuentes identificadas; en la demo se utilizarán datos ficticios etiquetados o históricos verificables.
+2. Buscar episodios anteriores en el **mismo fondo** cuando exista suficiente historial. Si no lo hay, buscar fondos o índices comparables solo cuando se pueda justificar la semejanza por sus activos, estrategia, moneda y periodo. Indicar que son instrumentos diferentes y que sus resultados pueden no coincidir.
+3. Comparar los episodios mediante reglas documentadas: fechas, magnitud y duración de la caída, evolución posterior disponible y, si se observa en el periodo de datos, tiempo hasta recuperar el nivel anterior. Mostrar también episodios que no se hayan recuperado dentro del periodo observado y explicar cuándo no hay datos suficientes. Evitar seleccionar únicamente ejemplos favorables.
+4. Recopilar documentos y noticias verificables del periodo y del producto que aporten contexto. Diferenciar hechos acreditados de posibles factores; una coincidencia temporal no prueba la causa de la caída. Si no se puede explicar el porqué con evidencia, comunicarlo.
+5. Entregar al tutor un informe estructurado con datos, episodios, fuentes, fechas, criterios de comparación y límites. Claude adapta la explicación al nivel del usuario y puede recordar el objetivo y el horizonte si están disponibles. El motor y los cálculos, no el modelo de lenguaje, determinan las cifras.
+6. Mostrar el resultado en texto y, si está disponible, por voz: qué ha ocurrido, qué se sabe y qué no, ejemplos comparables con sus límites y preguntas útiles sobre plazo y necesidad de liquidez. El usuario conserva la decisión de vender, mantener o consultar a un profesional.
+
+Un horizonte largo puede ayudar a contextualizar la volatilidad y disponer de más tiempo para afrontar fluctuaciones, pero no garantiza ganancias ni recuperación y no elimina el riesgo de pérdidas. El motor no debe presentar una inversión concreta como segura o aconsejar mantenerla solo porque anteriormente se recuperó.
+
+### Reparto y estado
+
+La persona 5 identifica y verifica fuentes y licencias; la 3 define las reglas de comparación y realiza los cálculos; la 2 conecta datos y resultados; la 4 prepara la explicación y la voz; y la 1 presenta los resultados y sus limitaciones. Cada responsable participa en las pruebas de su componente y la persona 5 coordina las pruebas del flujo completo.
+
+Este motor es una funcionalidad **propuesta**, aún sin implementar. Para el hackathon puede demostrarse primero con un conjunto pequeño de episodios preparados y verificados; la búsqueda automática de noticias y comparables dependerá de las fuentes, licencias y tiempo disponibles. Si no hay datos suficientes, la interfaz debe mostrarlo.
 ## Noticias y explicación de movimientos
 
 La intención del equipo es poder contrastar las explicaciones con noticias reales y actuales de fuentes fiables. Para ello habría que conectar una fuente, conservar título, enlace y fechas relevantes y comprobar que la información corresponde a la cartera y al periodo. Esa conexión todavía no existe ni se ha elegido un proveedor.

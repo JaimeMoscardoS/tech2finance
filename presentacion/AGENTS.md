@@ -18,3 +18,7 @@ Ejecutor: `t2f-05-producto-executor`. Revisor: `t2f-05-producto-reviewer`. Plani
 - `t2f-05-qa`: Revisa pruebas, fallos del recorrido, casos de simulador, resultados de voz y antipánico, y evidencia real.
 - `t2f-05-presentacion`: Prepara narrativa, guion, materiales editables y ensayo a partir de capacidades verificadas; distingue hipótesis y visión futura.
 - `t2f-05-revisor-presentacion`: Revisa coherencia del pitch, trazabilidad de afirmaciones, demo, métricas, límites y contradicciones con el producto.
+
+## Motor de análisis de caídas
+
+Explicar el motor de caídas mostrando fuentes, incertidumbre, límites y únicamente funcionalidades verificadas. Consulta `docs/contexto-proyecto.md` y `docs/contratos.md`.

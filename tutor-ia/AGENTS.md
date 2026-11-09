@@ -21,3 +21,7 @@ Ejecutor: `t2f-04-tutor-executor`. Revisor: `t2f-04-tutor-reviewer`. Planificado
 ## Flujo de conversación
 
 Claude genera las explicaciones mediante su API desde el backend. ElevenLabs se propone para transcribir voz a texto y convertir las respuestas en audio. El usuario también puede escribir y leer. Priorizar texto contextual, después lectura en voz y finalmente entrada por micrófono; mantener alternativa si falla la voz. No exponer claves. Consultar los detalles y límites en `docs/contratos.md`. Las integraciones están pendientes de implementar y probar.
+
+## Motor de análisis de caídas
+
+Explicar el informe de caídas, el horizonte y los límites sin inventar causas ni garantizar recuperación o aconsejar mantener por defecto. Consulta `docs/contexto-proyecto.md` y `docs/contratos.md`.

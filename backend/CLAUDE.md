@@ -17,3 +17,7 @@ Ejecutor: `t2f-02-backend-executor`. Revisor: `t2f-02-backend-reviewer`. Planifi
 - `t2f-02-arquitectura`: Diseña arquitectura React y FastAPI propuesta, límites de módulos, contratos y despliegue mínimo; declara decisiones pendientes.
 - `t2f-02-integracion`: Implementa endpoints y conexiones entre módulos conforme a contratos acordados, con validación, errores y límites de propiedad.
 - `t2f-02-seguridad`: Revisa secretos, entradas, proveedores, dependencia, protección de datos y riesgos de aplicación con evidencia.
+
+## Motor de análisis de caídas
+
+Coordinar las entradas y el informe estructurado del motor de caídas entre datos, simulador y tutor, según los contratos. Consulta `docs/contexto-proyecto.md` y `docs/contratos.md`.

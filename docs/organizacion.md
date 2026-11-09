@@ -22,6 +22,8 @@ Cada responsable ayuda a integrar su módulo; la persona 2 no asume todos los pr
 4. Mostrar una cartera ficticia en caída y una pausa informativa antes de una venta simulada. Se recuerda objetivo y horizonte; siempre decide el usuario.
 5. Presentar una posible transición al banco sin transmitir órdenes ni dinero.
 
+El motor de análisis de caídas buscará antecedentes del mismo fondo o comparables justificados y aportará contexto con fuentes. Las tareas y sus límites están en [contexto del proyecto](contexto-proyecto.md#motor-de-análisis-de-caídas-y-comparación-histórica).
+
 La conversación de perfil y el filtrado de opciones son propuestas futuras sujetas a la entidad y revisión especializada; no se debe presentar la demo como evaluación regulatoria válida. Las noticias y la voz son deseables, con alternativa ante fallos; no prometer causas ni acceso a noticias que no se haya implementado.
 
 ## Trabajo conjunto y tecnología
