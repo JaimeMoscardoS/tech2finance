@@ -16,6 +16,14 @@ Planificador: `t2f-planner`. En Claude Code el ejecutor usa Sonnet y planificaci
 
 Configuraciones de proyecto en `.claude/agents/` y `.codex/agents/`; Codex utiliza `.codex/config.toml`. Abrir la raíz del proyecto y confiar en la configuración si la herramienta lo solicita; puede hacer falta iniciar otra sesión. Pedir por nombre, con tarea y archivos concretos. Ejemplo: «Usa `t2f-03-simulador-executor` para esta tarea y después `t2f-03-simulador-reviewer` para revisar el diff». El revisor informa y no edita; una persona o el agente principal verifica el resultado.
 
+## Uso en el trabajo
+
+Asignad cada implementación al ejecutor o especialista adecuado y la revisión a un revisor del área, dando tareas y archivos concretos. El responsable principal verifica los resultados y coordina el trabajo compartido. Usad únicamente los agentes necesarios y añadid otro especialista cuando cubra un riesgo o área distinta.
+
+Si no se puede utilizar un agente o el modelo previsto, indicadlo junto con el motivo y las comprobaciones pendientes. En los pull requests grandes siguen vigentes la nota mínima de 8/10 y el máximo de cuatro rondas descritos más abajo; todos los cambios se trabajan mediante rama y pull request.
+
+Cada cambio debe actualizar el contexto y la documentación afectados en el mismo pull request, distinguiendo lo propuesto, implementado, comprobado y pendiente, según las instrucciones de la raíz.
+
 ## Especialistas por responsabilidad
 
 ### 1
@@ -53,6 +61,6 @@ Un pull request es grande a efectos de esta regla cuando introduce una funcional
 
 - Elegir un revisor adecuado al cambio. Añadir otro especialista solo si existe un riesgo o área distinta que el primero no pueda evaluar. No lanzar revisiones repetidas por rutina.
 - Cada revisor asignado entrega una nota de **0 a 10** con una explicación breve y evidencias. La nota mínima para superar su revisión es **8/10**. Una nota alta no compensa un hallazgo crítico o de gravedad alta sin resolver, ni permite afirmar que pasaron comprobaciones no ejecutadas.
-- Hacer una revisión inicial y, si hay cambios, como máximo una segunda revisión centrada en las correcciones y sus efectos. No iniciar más rondas automáticas ni repetir revisiones ya resueltas.
-- Si tras la segunda ronda la nota sigue por debajo de 8, queda un hallazgo crítico o alto, o falta evidencia imprescindible, comunicar lo pendiente y dejar el cambio sin aprobar; no rebajar la nota ni ocultar los problemas para cerrar. El equipo decide el siguiente paso.
+- Hacer una revisión inicial y, si hay cambios, hasta tres revisiones adicionales centradas en las correcciones y sus efectos: un máximo de cuatro rondas en total. No iniciar más rondas automáticas ni repetir revisiones ya resueltas.
+- Si tras la cuarta ronda la nota sigue por debajo de 8, queda un hallazgo crítico o alto, o falta evidencia imprescindible, comunicar lo pendiente y dejar el cambio sin aprobar; no rebajar la nota ni ocultar los problemas para cerrar. El equipo decide el siguiente paso.
 - Los revisores informan y no editan. La nota no sustituye las pruebas apropiadas ni la decisión de integración del equipo.

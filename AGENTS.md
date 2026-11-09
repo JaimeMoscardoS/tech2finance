@@ -20,10 +20,22 @@ Un pull request es grande a efectos de esta regla cuando introduce una funcional
 
 - Elegir un revisor adecuado al cambio. Añadir otro especialista solo si existe un riesgo o área distinta que el primero no pueda evaluar. No lanzar revisiones repetidas por rutina.
 - Cada revisor asignado entrega una nota de **0 a 10** con una explicación breve y evidencias. La nota mínima para superar su revisión es **8/10**. Una nota alta no compensa un hallazgo crítico o de gravedad alta sin resolver, ni permite afirmar que pasaron comprobaciones no ejecutadas.
-- Hacer una revisión inicial y, si hay cambios, como máximo una segunda revisión centrada en las correcciones y sus efectos. No iniciar más rondas automáticas ni repetir revisiones ya resueltas.
-- Si tras la segunda ronda la nota sigue por debajo de 8, queda un hallazgo crítico o alto, o falta evidencia imprescindible, comunicar lo pendiente y dejar el cambio sin aprobar; no rebajar la nota ni ocultar los problemas para cerrar. El equipo decide el siguiente paso.
+- Hacer una revisión inicial y, si hay cambios, hasta tres revisiones adicionales centradas en las correcciones y sus efectos: un máximo de cuatro rondas en total. No iniciar más rondas automáticas ni repetir revisiones ya resueltas.
+- Si tras la cuarta ronda la nota sigue por debajo de 8, queda un hallazgo crítico o alto, o falta evidencia imprescindible, comunicar lo pendiente y dejar el cambio sin aprobar; no rebajar la nota ni ocultar los problemas para cerrar. El equipo decide el siguiente paso.
 - Los revisores informan y no editan. La nota no sustituye las pruebas apropiadas ni la decisión de integración del equipo.
 
 ## Flujo obligatorio con pull requests
 
 Todos los cambios se realizan en una rama y se presentan mediante pull request para revisión. No integrar directamente en main. La revisión ampliada y su nota mínima solo se exigen en los pull requests grandes, conforme al apartado anterior.
+
+## Uso de agentes
+
+Usar los agentes de desarrollo adecuados al área y a la tarea: asignar la implementación al ejecutor o especialista correspondiente y su revisión a un revisor adecuado, consultando `docs/agentes.md`. Dar a cada agente una tarea y unos archivos concretos, conservar las ediciones ajenas y comprobar sus resultados antes de dar el trabajo por terminado. El responsable principal conserva la decisión final.
+
+Usar solo los agentes necesarios: incorporar un segundo especialista únicamente cuando cubra un área o riesgo diferente, sin repetir revisiones por rutina. En los pull requests grandes se mantienen la nota mínima y el límite de rondas de la sección anterior. Si no se pueden utilizar los agentes o modelos previstos, indicar cuáles y por qué, y qué comprobaciones han quedado pendientes; no afirmar que se ha hecho una revisión que no se ha ejecutado.
+
+## Mantener actualizado el contexto
+
+En cada cambio, actualizar en el mismo pull request la documentación y el contexto afectados: describir las funcionalidades y cambios relevantes, sus entradas y salidas, decisiones y dependencias, y cómo utilizarlos o comprobarlos cuando corresponda. Mantener `docs/contexto-proyecto.md` como visión general actualizada, y editar los README, contratos e instrucciones de área que correspondan, sin duplicar detalles innecesariamente.
+
+Distinguir siempre lo que está propuesto, implementado y comprobado de lo que sigue pendiente; indicar las limitaciones y pruebas realizadas con evidencia. No presentar como integrado en `main`, desplegado o conectado a servicios lo que solo existe en una rama o en una demo. No incluir secretos ni datos privados.
