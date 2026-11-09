@@ -13,3 +13,13 @@ Copiloto de inversión para una aplicación bancaria simulada: interfaz adaptabl
 - El LLM explica; las reglas y los cálculos corresponden a código verificable. Mantener claves en el servidor y fuera de Git.
 - Coordinar contratos y cambios compartidos; preservar cambios ajenos. El plan completo generado por Claude era un artefacto oculto no disponible.
 - Modelo por rol: ejecutor Claude Sonnet / Codex gpt-6.1-terra; planificación y revisión Claude Opus / Codex gpt-6.1-sol. Si no está disponible, informar, sin sustituir silenciosamente. Revisores no editan.
+
+## Revisión de pull requests grandes
+
+Un pull request es grande a efectos de esta regla cuando introduce una funcionalidad completa, modifica varios componentes o contratos compartidos, o cambia cálculos financieros, seguridad o flujos principales. El responsable indica por qué requiere revisión; un cambio pequeño no necesita esta revisión ampliada.
+
+- Elegir un revisor adecuado al cambio. Añadir otro especialista solo si existe un riesgo o área distinta que el primero no pueda evaluar. No lanzar revisiones repetidas por rutina.
+- Cada revisor asignado entrega una nota de **0 a 10** con una explicación breve y evidencias. La nota mínima para superar su revisión es **8/10**. Una nota alta no compensa un hallazgo crítico o de gravedad alta sin resolver, ni permite afirmar que pasaron comprobaciones no ejecutadas.
+- Hacer una revisión inicial y, si hay cambios, como máximo una segunda revisión centrada en las correcciones y sus efectos. No iniciar más rondas automáticas ni repetir revisiones ya resueltas.
+- Si tras la segunda ronda la nota sigue por debajo de 8, queda un hallazgo crítico o alto, o falta evidencia imprescindible, comunicar lo pendiente y dejar el cambio sin aprobar; no rebajar la nota ni ocultar los problemas para cerrar. El equipo decide el siguiente paso.
+- Los revisores informan y no editan. La nota no sustituye las pruebas apropiadas ni la decisión de integración del equipo.

@@ -46,3 +46,13 @@ Configuraciones de proyecto en `.claude/agents/` y `.codex/agents/`; Codex utili
 - `t2f-05-qa`: Revisa pruebas, fallos del recorrido, casos de simulador, resultados de voz y antipánico, y evidencia real.
 - `t2f-05-presentacion`: Prepara narrativa, guion, materiales editables y ensayo a partir de capacidades verificadas; distingue hipótesis y visión futura.
 - `t2f-05-revisor-presentacion`: Revisa coherencia del pitch, trazabilidad de afirmaciones, demo, métricas, límites y contradicciones con el producto.
+
+## Revisión de pull requests grandes
+
+Un pull request es grande a efectos de esta regla cuando introduce una funcionalidad completa, modifica varios componentes o contratos compartidos, o cambia cálculos financieros, seguridad o flujos principales. El responsable indica por qué requiere revisión; un cambio pequeño no necesita esta revisión ampliada.
+
+- Elegir un revisor adecuado al cambio. Añadir otro especialista solo si existe un riesgo o área distinta que el primero no pueda evaluar. No lanzar revisiones repetidas por rutina.
+- Cada revisor asignado entrega una nota de **0 a 10** con una explicación breve y evidencias. La nota mínima para superar su revisión es **8/10**. Una nota alta no compensa un hallazgo crítico o de gravedad alta sin resolver, ni permite afirmar que pasaron comprobaciones no ejecutadas.
+- Hacer una revisión inicial y, si hay cambios, como máximo una segunda revisión centrada en las correcciones y sus efectos. No iniciar más rondas automáticas ni repetir revisiones ya resueltas.
+- Si tras la segunda ronda la nota sigue por debajo de 8, queda un hallazgo crítico o alto, o falta evidencia imprescindible, comunicar lo pendiente y dejar el cambio sin aprobar; no rebajar la nota ni ocultar los problemas para cerrar. El equipo decide el siguiente paso.
+- Los revisores informan y no editan. La nota no sustituye las pruebas apropiadas ni la decisión de integración del equipo.
