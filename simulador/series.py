@@ -93,20 +93,25 @@ def parse_series(data: Any) -> Series:
         obs.append(Observation(d, v))
     return Series(meta, tuple(obs), tuple(gaps))
 
+def read_json(path: str | Path) -> Any:
+    try:
+        with open(path, encoding='utf-8-sig') as f:
+            return json.load(f)
+    except (OSError, UnicodeError, ValueError, RecursionError) as exc:
+        raise InputError(f'cannot read JSON: {exc}') from None
+
 def load_series(path: str | Path, metadata_path: str | Path | None = None) -> Series:
     try:
         path = Path(path)
         if path.suffix.lower() == '.csv':
             if metadata_path is None:
                 raise InputError('CSV requires a separate metadata JSON file')
-            with open(metadata_path, encoding='utf-8-sig') as f:
-                metadata = json.load(f)
+            metadata = read_json(metadata_path)
             with path.open(encoding='utf-8-sig', newline='') as f:
                 rows = list(csv.DictReader(f))
             return parse_series({'schema_version': '1.0', 'metadata': metadata, 'observations': rows})
         if metadata_path is not None:
             raise InputError('metadata file is only accepted with CSV')
-        with path.open(encoding='utf-8-sig') as f:
-            return parse_series(json.load(f))
+        return parse_series(read_json(path))
     except (OSError, UnicodeError, json.JSONDecodeError, csv.Error) as exc:
         raise InputError(f'cannot read series: {exc}') from None

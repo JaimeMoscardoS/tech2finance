@@ -1,0 +1,27 @@
+.investment-chart { min-width: 0; color: var(--ink); }
+.investment-chart__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.investment-chart__heading h3 { margin: 0; font-size: 1rem; }
+.investment-chart__heading p { margin: 6px 0 0; color: var(--muted); font-size: .85rem; line-height: 1.45; }
+.investment-chart__switch { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: 12px; }
+.investment-chart__switch button { min-height: 44px; border: 1px solid transparent; border-radius: 8px; padding: 8px 12px; background: transparent; color: var(--ink); cursor: pointer; font: inherit; font-size: .8rem; font-weight: 600; }
+.investment-chart__switch button[aria-pressed='true'] { background: var(--surface); border-color: var(--border); color: var(--accent); }
+.investment-chart__switch button:focus-visible, .investment-chart summary:focus-visible, .investment-chart .recharts-wrapper:focus-visible, .investment-chart__table-wrap:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.investment-chart__legend { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 22px 0 4px; font-size: .75rem; font-weight: 600; }
+.investment-chart__legend span { display: inline-flex; align-items: center; gap: 8px; }
+.investment-chart__line { display: inline-block; width: 26px; border-top: 3px solid var(--accent); }
+.investment-chart__line--dashed { border-top: 2px dashed var(--muted); }
+.investment-chart__figure { margin: 0; min-width: 0; }
+.investment-chart__plot { width: 100%; min-width: 0; height: 300px; }
+.investment-chart--compact .investment-chart__plot { height: 250px; }
+.investment-chart__tooltip { display: grid; gap: 4px; max-width: min(260px, 65vw); padding: 10px 12px; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 4px 18px #0002; font-size: .75rem; line-height: 1.4; }
+.investment-chart__hint { color: var(--muted); font-size: .72rem; margin-top: 3px; }
+.investment-chart__empty { padding: 42px 0; color: var(--muted); }
+.investment-chart__details { margin-top: 12px; border-top: 1px solid var(--border); }
+.investment-chart__details summary { display: list-item; min-height: 44px; padding: 13px 0; color: var(--accent); cursor: pointer; font-size: .85rem; font-weight: 700; }
+.investment-chart__table-wrap { max-height: 320px; overflow: auto; }
+.investment-chart table { width: 100%; border-collapse: collapse; font-size: .78rem; text-align: right; white-space: nowrap; }
+.investment-chart caption { text-align: left; padding: 4px 0 10px; font-weight: 600; }
+.investment-chart th, .investment-chart td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+.investment-chart th:first-child { text-align: left; }
+@media (max-width: 600px) { .investment-chart__plot, .investment-chart--compact .investment-chart__plot { height: 240px; } .investment-chart__switch { width: 100%; } .investment-chart__switch button { flex: 1; } }
+@media (forced-colors: active) { .investment-chart__line { border-color: CanvasText; } .investment-chart__switch button[aria-pressed='true'] { border: 2px solid Highlight; color: Highlight; } .investment-chart .recharts-line-curve { stroke: CanvasText; } .investment-chart .recharts-cartesian-grid line { stroke: GrayText; } .investment-chart .recharts-text { fill: CanvasText; } .investment-chart__tooltip { border: 1px solid CanvasText; } }

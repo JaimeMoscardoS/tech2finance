@@ -195,3 +195,27 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .history-table caption { text-align: left; font-weight: 700; margin-bottom: 8px; }
 .history-table th, .history-table td { text-align: left; padding: 8px 4px; border-bottom: 1px solid var(--border); }
 .history-table th:last-child, .history-table td:last-child { text-align: right; }
+
+/* Simulator layout: preserve space for the chart without stretching the form. */
+.sim-grid { grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); align-items: start; }
+.portfolio-content { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 20px; }
+.portfolio-content > * { min-width: 0; width: 100%; }
+.sim-grid > * { min-width: 0; }
+.sim-values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.sim-values strong { font-size: clamp(20px, 2vw, 24px); overflow-wrap: anywhere; }
+.sim-values > div:first-child strong { font-size: clamp(28px, 2.6vw, 32px); }
+.sim-values small { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+.sim-form label small, .selected-instrument { display: block; margin-top: 7px; color: var(--muted); font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.preference-button.selected { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+.modal-backdrop { overflow-y: auto; }
+.pause-modal { max-height: calc(100dvh - 30px); overflow-y: auto; overscroll-behavior: contain; }
+@media (max-width: 1100px) {
+  .sim-grid { grid-template-columns: minmax(0, 1fr); }
+  .lower-grid { grid-template-columns: minmax(0, 1fr); }
+  .topbar .breadcrumb, .demo-badge { display: none; }
+  .top-actions { gap: 8px; margin-left: auto; }
+}
+@media (max-width: 520px) {
+  .sim-values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sim-values > div:first-child { grid-column: 1 / -1; }
+}

@@ -1,6 +1,8 @@
 """Deterministic scenarios and drawdowns from observed values."""
 from __future__ import annotations
 from decimal import Decimal, localcontext
+from fractions import Fraction
+from copy import deepcopy
 from typing import Any
 from .series import InputError, Series, number
 from .engine import ZERO, ONE, CALC_CONTEXT, text
@@ -42,8 +44,11 @@ def drawdowns(series: Series, threshold: Any = '0') -> dict[str, Any]:
     episodes = []
     with localcontext(CALC_CONTEXT):
         def append(recovery):
-            depth = ONE - trough.value / peak.value
-            if depth >= threshold:
+            exact_depth = (Fraction(peak.value) - Fraction(trough.value)) / Fraction(peak.value)
+            if exact_depth >= Fraction(threshold):
+                with localcontext() as precision:
+                    precision.prec = 120
+                    depth = Decimal(exact_depth.numerator) / Decimal(exact_depth.denominator)
                 end = recovery.date if recovery else obs[-1].date
                 episodes.append({'peak_date': peak.date.isoformat(), 'peak_value': text(peak.value), 'trough_date': trough.date.isoformat(), 'trough_value': text(trough.value), 'depth': text(depth), 'recovery_date': recovery.date.isoformat() if recovery else None, 'days_to_trough': (trough.date - peak.date).days, 'days_to_recovery': (end - peak.date).days if recovery else None, 'observed_days': (end - peak.date).days, 'status': 'recovered' if recovery else 'open'})
         for point in obs[1:]:
@@ -56,4 +61,4 @@ def drawdowns(series: Series, threshold: Any = '0') -> dict[str, Any]:
                 trough = point
         if trough is not None:
             append(None)
-    return {'schema_version': '1.0', 'threshold': text(threshold), 'episodes': episodes, 'provenance': series.metadata, 'gaps': list(series.gaps), 'comparison': {'status': 'insufficient_evidence', 'reason': 'No independently justified comparable series supplied.'}, 'causes': {'status': 'unknown', 'sources': []}, 'assumptions': ['Based on observations only, not portfolio cashflows; exact intragap extrema and recovery dates are unknown.', 'Recovery means first observed value at or above the previous peak.', 'No prediction, causal attribution or guarantee.']}
+    return {'schema_version': '1.0', 'threshold': text(threshold), 'episodes': episodes, 'provenance': deepcopy(series.metadata), 'gaps': deepcopy(list(series.gaps)), 'comparison': {'status': 'insufficient_evidence', 'reason': 'No independently justified comparable series supplied.'}, 'causes': {'status': 'unknown', 'sources': []}, 'assumptions': ['Based on observations only, not portfolio cashflows; exact intragap extrema and recovery dates are unknown.', 'Recovery means first observed value at or above the previous peak.', 'No prediction, causal attribution or guarantee.']}

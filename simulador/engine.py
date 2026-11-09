@@ -1,6 +1,7 @@
 """Historical simulation and virtual decision comparison."""
 from __future__ import annotations
 import calendar
+from copy import deepcopy
 from datetime import date
 from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
 from typing import Any
@@ -40,14 +41,13 @@ def historical(series: Series, request: dict[str, Any], sell: bool = False) -> d
     if not relevant:
         raise InputError('no observation in requested range')
     events = [(start, initial, 'initial')]
-    n = 1
-    while True:
-        d = month_date(start, n)
-        if d > end:
-            break
-        if monthly:
+    if monthly:
+        max_offset = (end.year - start.year) * 12 + end.month - start.month
+        for n in range(1, max_offset + 1):
+            d = month_date(start, n)
+            if d > end:
+                break
             events.append((d, monthly, 'monthly'))
-        n += 1
     def execution(d: date) -> date:
         for o in relevant:
             if o.date >= d:
@@ -87,7 +87,7 @@ def historical(series: Series, request: dict[str, Any], sell: bool = False) -> d
             total = cash + units * o.value
             timeline.append({'date': o.date.isoformat(), 'price': text(o.value), 'contributed': text(contributed), 'cash': text(cash), 'units': text(units), 'fees': text(fees), 'total': text(total), 'operations': operations})
         profit = total - contributed
-        return {'schema_version': '1.0', 'currency': series.metadata['currency'], 'unit_type': 'synthetic' if series.metadata['value_type'] != 'nav' else 'fractional_virtual_nav', 'contributed': text(contributed), 'cash': text(cash), 'units': text(units), 'fees': text(fees), 'value': text(total), 'profit': text(profit), 'simple_return': text(profit / contributed) if contributed else None, 'timeline': timeline, 'provenance': series.metadata, 'gaps': list(series.gaps), 'assumptions': ['Virtual fractional units; transaction fees apply to gross amount.', 'Scheduled contributions execute at first available observation on or after schedule, inside the requested range.', 'No taxes, interest on cash, separate distributions or unobserved prices are modeled.', 'Declared metadata and license are not independently verified.']}
+        return {'schema_version': '1.0', 'currency': series.metadata['currency'], 'unit_type': 'synthetic' if series.metadata['value_type'] != 'nav' else 'fractional_virtual_nav', 'contributed': text(contributed), 'cash': text(cash), 'units': text(units), 'fees': text(fees), 'value': text(total), 'profit': text(profit), 'simple_return': text(profit / contributed) if contributed else None, 'timeline': timeline, 'provenance': deepcopy(series.metadata), 'gaps': deepcopy(list(series.gaps)), 'assumptions': ['Virtual fractional units; transaction fees apply to gross amount.', 'Scheduled contributions execute at first available observation on or after schedule, inside the requested range.', 'No taxes, interest on cash, separate distributions or unobserved prices are modeled.', 'Declared metadata and license are not independently verified.']}
 
 def simulate(series: Series, request: dict[str, Any]) -> dict[str, Any]:
     return historical(series, request)
