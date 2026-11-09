@@ -22,3 +22,8 @@ build/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Frontend test and TypeScript artifacts
+playwright-report/
+test-results/
+*.tsbuildinfo
