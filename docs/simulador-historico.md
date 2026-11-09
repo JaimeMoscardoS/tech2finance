@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Un motor de reproducción histórica que calcula cómo habría evolucionado una cartera ficticia usando una serie verificada de valores liquidativos o precios de un instrumento durante un periodo pasado. En esta rama hay una primera implementación aislada para la máquina del tiempo educativa; las fuentes aún no están verificadas y el motor no predice resultados futuros.
+Un motor de reproducción histórica que calcula cómo habría evolucionado una cartera ficticia usando una serie verificada de valores liquidativos o precios de un instrumento durante un periodo pasado. El motor Python aislado aún no consume una fuente real. Por separado, el frontend incluye una reconstrucción limitada a rentabilidades anuales publicadas; véanse [datos y límites](contratos.md#muestra-histórica-anual-de-caixabank). Ninguno predice resultados futuros.
 
 ## Opción recomendada
 
@@ -17,7 +17,7 @@ Para una integración bancaria real, la primera opción es solicitar a la entida
 - **Proveedor bancario de valores liquidativos:** la [API de HSBC](https://develop.hsbc.com/api-overview/fund-administration-nav-asset-value-prices-api-eu) describe datos históricos por fondo y clase. Es un ejemplo de integración posible, no una conexión disponible para el equipo; hay que consultar acceso y condiciones.
 - **`yfinance`:** puede servir para investigación y pruebas educativas cuando sus términos lo permitan, pero su [documentación](https://ranaroussi.github.io/yfinance/) indica que no es oficial de Yahoo y advierte que los datos de Yahoo Finance están destinados a uso personal. No tomarlo como fuente autorizada para un producto comercial o para redistribuir datos sin comprobar los derechos.
 
-Un ETF, un índice y un fondo de inversión no son el mismo producto. Un índice o ETF comparable solo puede utilizarse como referencia identificada y explicando sus diferencias; no debe etiquetarse como histórico del fondo del banco. No hay ninguna serie, licencia ni cobertura de fondo concreto comprobada aún para la demo.
+Un ETF, un índice y un fondo de inversión no son el mismo producto. Un índice o ETF comparable solo puede utilizarse como referencia identificada y explicando sus diferencias; no debe etiquetarse como histórico del fondo del banco. La muestra anual del frontend no constituye una serie diaria de valores liquidativos ni verifica derechos de redistribución.
 
 ## Datos mínimos y validación
 

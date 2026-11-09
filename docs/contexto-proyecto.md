@@ -107,9 +107,9 @@ El trabajo se divide entre [cinco áreas](organizacion.md): interfaz, backend, s
 
 En `main` existe una primera demo React/TypeScript con catálogo y cartera ficticios, simulador ilustrativo, asistente de respuestas predefinidas y pausa ante una caída. La demo incluye tres niveles con distinta información, español/inglés y temas claro/oscuro. El frontend inicial y las vistas adaptativas se integraron mediante los pull requests #1 y #2. La [guía para backend](backend-contexto.md) recoge las decisiones y los puntos de conexión pendientes.
 
-La demo frontend usa valores ficticios. En esta rama se ha añadido un motor Python aislado de reproducción, escenarios y análisis básico de caídas; no está conectado a la demo ni dispone de datos reales verificados. El backend y las conexiones a Claude, ElevenLabs y noticias siguen pendientes. Python/FastAPI, Claude y ElevenLabs son la dirección propuesta para las piezas pendientes; sus detalles deben acordarse. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
+La demo usa capital ficticio y, en esta rama, incluye una reconstrucción a partir de rentabilidades anuales publicadas de un fondo. El motor Python aislado de reproducción, escenarios y análisis básico de caídas no está conectado a la demo ni consume esa muestra. El backend y las conexiones a Claude, ElevenLabs y noticias siguen pendientes. Python/FastAPI, Claude y ElevenLabs son la dirección propuesta para las piezas pendientes; sus detalles deben acordarse. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
 
 
 ## Catálogo local de práctica (rama de trabajo)
 
-La rama de trabajo incorpora un catálogo local con muestras ficticias y fichas de fondos reales sin series; los detalles y límites constan en [contratos](contratos.md#catálogo-local-de-práctica-rama-de-trabajo).
+La rama de trabajo incorpora ejemplos ficticios y una reconstrucción de cinco rentabilidades anuales publicadas de CaixaBank; las fichas de BBVA y Santander no tienen histórico conectado. Los detalles y límites constan en [contratos](contratos.md#catálogo-local-de-práctica-rama-de-trabajo).

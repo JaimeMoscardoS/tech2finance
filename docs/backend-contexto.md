@@ -8,9 +8,9 @@ Punto de entrada para la persona 2 y sus agentes. Resume el estado del frontend 
 
 El frontend es una aplicación React/TypeScript con Vite en `frontend/`. Incluye inicio, catálogo de ejemplo, simulador, cartera ficticia y asistente de muestra. Ofrece vistas de principiante, intermedio y avanzado, español/inglés y temas claro/oscuro. Los niveles cambian la cantidad de información, no el riesgo ni el cálculo. El idioma y el tema se guardan en el navegador mediante `localStorage`.
 
-Todavía **no llama a una API de backend**. La cartera y los ejemplos de práctica son ficticios; algunas fichas identifican fondos reales sin histórico; el asistente devuelve respuestas predefinidas, no utiliza Claude; y la voz, las noticias y el análisis histórico de caídas no están conectados. El frontend identifica estas limitaciones en la interfaz.
+Todavía **no llama a una API de backend**. La cartera y el capital de práctica son ficticios; una muestra usa rentabilidades anuales publicadas y otras fichas identifican fondos reales sin histórico; el asistente devuelve respuestas predefinidas, no utiliza Claude; y la voz, las noticias y el análisis histórico de caídas no están conectados. El frontend identifica estas limitaciones en la interfaz.
 
-La simulación actual se ejecuta localmente en `frontend/src/demo.ts`. Recibe importe inicial, aportación mensual y número de meses; utiliza una secuencia ficticia diferente por ejemplo, repetida cada 12 meses, aplica la aportación al inicio de cada mes y no incluye comisiones. Devuelve valores de evolución, valor final y capital aportado. Es una ayuda visual provisional: no representa el comportamiento histórico de un fondo ni una predicción. No debe trasladarse al backend como modelo financiero validado.
+La simulación ficticia se ejecuta localmente en `frontend/src/demo.ts`. Recibe importe inicial, aportación mensual y número de meses; utiliza una secuencia ficticia diferente por ejemplo, repetida cada 12 meses, aplica la aportación al inicio de cada mes y no incluye comisiones. La reconstrucción anual independiente está en `frontend/src/annual-history.ts`; sus datos y límites se detallan en [contratos](contratos.md#muestra-histórica-anual-de-caixabank). Ninguna de las dos funciones está conectada al backend o al motor Python.
 
 ## Decisiones de producto que debe respetar
 

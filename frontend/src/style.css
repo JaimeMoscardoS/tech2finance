@@ -185,3 +185,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .sim-result [role="status"] p { margin-top: 12px; line-height: 1.55; overflow-wrap: anywhere; }
 .sim-result a { color: var(--accent); }
 .button:disabled { opacity: .5; cursor: not-allowed; }
+.history-shortcut { margin: 0 0 20px; }
+.sim-result .assumption { background: var(--surface-raised); color: var(--ink); }
+.history-period { margin: 18px 0; padding: 14px; background: var(--surface-raised); border-radius: 10px; color: var(--ink); font-size: 13px; line-height: 1.5; }
+.history-period p { margin-top: 6px; }
+.source-details { margin: 14px 0; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.source-details p + p { margin-top: 6px; }
+.history-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+.history-table caption { text-align: left; font-weight: 700; margin-bottom: 8px; }
+.history-table th, .history-table td { text-align: left; padding: 8px 4px; border-bottom: 1px solid var(--border); }
+.history-table th:last-child, .history-table td:last-child { text-align: right; }
