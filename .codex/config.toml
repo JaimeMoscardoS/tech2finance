@@ -1,0 +1,46 @@
+[agents]
+max_threads = 6
+
+[agents.t2f-01-frontend-executor]
+description = "Interfaz y experiencia: implementa tareas del área"
+config_file = "agents/t2f-01-frontend-executor.toml"
+
+[agents.t2f-01-frontend-reviewer]
+description = "Interfaz y experiencia: revisa el área sin editar"
+config_file = "agents/t2f-01-frontend-reviewer.toml"
+
+[agents.t2f-02-backend-executor]
+description = "Backend e integración: implementa tareas del área"
+config_file = "agents/t2f-02-backend-executor.toml"
+
+[agents.t2f-02-backend-reviewer]
+description = "Backend e integración: revisa el área sin editar"
+config_file = "agents/t2f-02-backend-reviewer.toml"
+
+[agents.t2f-03-simulador-executor]
+description = "Simulador y motor: implementa tareas del área"
+config_file = "agents/t2f-03-simulador-executor.toml"
+
+[agents.t2f-03-simulador-reviewer]
+description = "Simulador y motor: revisa el área sin editar"
+config_file = "agents/t2f-03-simulador-reviewer.toml"
+
+[agents.t2f-04-tutor-executor]
+description = "IA, voz y antipánico: implementa tareas del área"
+config_file = "agents/t2f-04-tutor-executor.toml"
+
+[agents.t2f-04-tutor-reviewer]
+description = "IA, voz y antipánico: revisa el área sin editar"
+config_file = "agents/t2f-04-tutor-reviewer.toml"
+
+[agents.t2f-05-producto-executor]
+description = "Datos, pruebas y presentación: implementa tareas del área"
+config_file = "agents/t2f-05-producto-executor.toml"
+
+[agents.t2f-05-producto-reviewer]
+description = "Datos, pruebas y presentación: revisa el área sin editar"
+config_file = "agents/t2f-05-producto-reviewer.toml"
+
+[agents.t2f-planner]
+description = "Planifica el trabajo y coordina contratos y revisiones."
+config_file = "agents/t2f-planner.toml"

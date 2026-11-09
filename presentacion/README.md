@@ -1,13 +1,7 @@
-# Producto, pruebas y presentación
+# 5 — Datos, pruebas y presentación
 
 ## Qué es
 
-Responsabilidad de la persona 5: definir el recorrido de usuario, preparar datos ficticios, coordinar pruebas y organizar la presentación junto con el resto del equipo.
+Datos y noticias con procedencia, pruebas de integración, narrativa, presentación y ensayo. Organizar la historia, demo verificada, métricas medidas y alternativa ante fallos.
 
-## Trabajo e intercambio
-
-- Preparar con la persona 3 y backend los [datos de demostración](../datos/) y una cartera ficticia desde el principio; coordinar [pruebas](../tests/) y documentación.
-- Construir la historia de dos clientes: quien explora su primera simulación y quien intenta comprender su cartera existente. Priorizar un recorrido completo y añadir el segundo cuando funcione.
-- Preparar diapositivas, pitch, ensayo y alternativa ante fallos. Las cinco personas aportan contenido y participan en el ensayo.
-- Presentar el banco como cliente comercial y los beneficios como hipótesis pendientes de validar; distinguir prototipo ficticio de integración bancaria futura.
-- Mostrar únicamente funciones comprobadas. La voz y las propuestas automáticas educativas son opcionales; no se realizan operaciones ni se modifican saldos.
+Lee las [instrucciones del área](AGENTS.md), el [reparto](../docs/organizacion.md) y los [contratos](../docs/contratos.md). La implementación está pendiente.

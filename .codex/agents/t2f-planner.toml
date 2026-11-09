@@ -1,0 +1,3 @@
+model = "gpt-6.1-sol"
+model_reasoning_effort = "high"
+developer_instructions = "Lee AGENTS.md, docs/organizacion.md y docs/contratos.md. Planifica por responsables, dependencias y pruebas. Declara incertidumbres. Trabaja en lectura y no modifiques archivos."

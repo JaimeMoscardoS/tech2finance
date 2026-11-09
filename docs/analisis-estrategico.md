@@ -1,3 +1,5 @@
+> **Antecedente:** este análisis recoge una propuesta anterior. El enfoque actual acordado está en [organización](organizacion.md); las hipótesis, cifras y recomendaciones de este archivo no se han verificado en esta revisión.
+
 # Análisis estratégico de la fintech: de tres propuestas a una idea sólida para el hackathon
 
 ## Conclusión ejecutiva
