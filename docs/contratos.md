@@ -35,3 +35,10 @@ En esta rama existe análisis cuantitativo básico local; los contratos de integ
 ## Contrato del motor Python, versión 1.0
 
 En esta rama se implementa el motor aislado `simulador`, no una API HTTP. La [referencia del simulador](../simulador/README.md) define los campos, validaciones y errores, ejemplos de CLI y firmas Python exactas: `load_series`, `parse_series`, `simulate`, `compare`, `drawdowns` y `scenarios`. Los números de salida son cadenas decimales. La persona 2 deberá acordar adaptaciones HTTP y validación de datos al integrarlo; no existen endpoints ni conexión al frontend por este cambio. Las fuentes y licencias son declaraciones sin verificación. Comparables y causas devuelven información insuficiente o desconocida.
+
+
+## Catálogo local de práctica (rama de trabajo)
+
+El frontend configura el catálogo en `frontend/src/catalog.ts`: cada instrumento tiene `instrumentId`, `assetType` (fondo, ETF o acción), `assetClass` (mixta, variable, fija o desconocida), `bankId`, gestora, relación con la entidad (`own`, `third_party`, `fictional` o `unknown`), identificador y clase cuando se conocen, moneda, fuente, fecha de consulta y estado de datos. La relación identifica el vínculo con la gestora o entidad, no la propiedad de los activos. Los campos desconocidos son nulos. El catálogo local es configuración de demo, no una API ni una carga desde archivo.
+
+Tres fondos, un ETF y una acción ficticios usan secuencias inventadas diferentes que se repiten cada doce meses; no representan el historial de ningún producto ni una previsión. BBVA, Santander y CaixaBank tienen fichas de identidad enlazadas, consultadas el 9 de noviembre de 2026, pero no hay series históricas ni costes verificados: no se calcula ni se dibuja una evolución para ellos. La identidad de un producto no valida una serie ni sus licencias. Para datos reales faltan serie del mismo instrumento y clase, moneda, frecuencia, ajustes, comisiones, cobertura y derechos de uso verificados, y acordar el contrato HTTP y la integración con el motor Python. No existe carga ni conexión bancaria.

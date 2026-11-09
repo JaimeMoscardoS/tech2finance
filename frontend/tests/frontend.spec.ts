@@ -112,3 +112,50 @@ test('opening the assistant from the mobile menu transfers focus to the dialog',
  await expect(page.getByRole('button', { name: 'Abrir menú' })).toBeFocused();
  await context.close();
 });
+
+test('catalogue selection changes the example and real funds have no invented result', async ({ page }) => {
+ await page.goto('/');
+ await page.getByRole('button', {name:'Simulador', exact:true}).click();
+ const panel=page.locator('.sim-result');
+ const original=await panel.locator('.sim-values strong').first().textContent();
+ await page.getByLabel('Tipo de activo').selectOption('etf');
+ await expect(page.getByLabel('Instrumento')).toHaveValue('demo-etf');
+ expect(await panel.locator('.sim-values strong').first().textContent()).not.toBe(original);
+ const newValue=await panel.locator('.sim-values strong').first().textContent();
+ await page.getByRole('button', {name:/Nivel: Principiante/}).click();
+ await page.getByRole('button', {name:'Avanzado', exact:true}).click();
+ await expect(panel.locator('.sim-values strong').first()).toHaveText(newValue!);
+ await page.getByLabel('Tipo de activo').selectOption('fund');
+ await page.getByLabel('Entidad').selectOption('bbva');
+ await expect(panel.getByText(/No hay histórico verificado/)).toBeVisible();
+ await expect(panel.locator('.chart')).toHaveCount(0);
+ await expect(page.getByRole('button', {name:'Ver mi ejemplo'})).toBeDisabled();
+ await page.getByLabel('Entidad').selectOption('caixabank');
+ await expect(page.getByLabel('Instrumento')).toHaveValue('caixabank-monetario-estandar');
+ await expect(panel.getByText(/ES0138045002/)).toBeVisible();
+ await expect(panel.locator('.chart')).toHaveCount(0);
+ await page.screenshot({path:'test-results/catalog-desktop.png',fullPage:true});
+});
+
+test('explore transfers the chosen fictional instrument', async ({page}) => {
+ await page.goto('/');
+ await page.getByRole('button',{name:'Explorar',exact:true}).click();
+ await page.locator('.fund-card').nth(1).getByRole('button',{name:'Practicar con este ejemplo'}).click();
+ await expect(page.getByLabel('Instrumento')).toHaveValue('demo-equity');
+ await expect(page.locator('.sim-result')).toContainText('Fondo Horizonte');
+});
+
+test('catalogue fits mobile in English dark mode', async ({browser}) => {
+ const context=await browser.newContext({viewport:{width:320,height:700}});
+ const page=await context.newPage(); await page.goto('/');
+ await page.getByRole('button',{name:'English'}).click();
+ await page.getByRole('button',{name:'Dark theme'}).click();
+ await page.getByRole('button',{name:'Open menu'}).click();
+ await page.getByRole('button',{name:'Simulator',exact:true}).click();
+ await page.getByLabel('Asset type').selectOption('fund');
+ await page.getByLabel('Institution').selectOption('caixabank');
+ await page.screenshot({path:'test-results/catalog-mobile.png',fullPage:true});
+ await expect(page.getByText(/No verified historical series/).first()).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+ await context.close();
+});

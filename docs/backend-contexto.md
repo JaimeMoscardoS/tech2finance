@@ -8,9 +8,9 @@ Punto de entrada para la persona 2 y sus agentes. Resume el estado del frontend 
 
 El frontend es una aplicación React/TypeScript con Vite en `frontend/`. Incluye inicio, catálogo de ejemplo, simulador, cartera ficticia y asistente de muestra. Ofrece vistas de principiante, intermedio y avanzado, español/inglés y temas claro/oscuro. Los niveles cambian la cantidad de información, no el riesgo ni el cálculo. El idioma y el tema se guardan en el navegador mediante `localStorage`.
 
-Todavía **no llama a una API de backend**. Los fondos y la cartera se muestran con datos ficticios; el asistente devuelve respuestas predefinidas, no utiliza Claude; y la voz, las noticias y el análisis histórico de caídas no están conectados. El frontend identifica estas limitaciones en la interfaz.
+Todavía **no llama a una API de backend**. La cartera y los ejemplos de práctica son ficticios; algunas fichas identifican fondos reales sin histórico; el asistente devuelve respuestas predefinidas, no utiliza Claude; y la voz, las noticias y el análisis histórico de caídas no están conectados. El frontend identifica estas limitaciones en la interfaz.
 
-La simulación actual se ejecuta localmente en `frontend/src/demo.ts`. Recibe importe inicial, aportación mensual y número de meses; utiliza una secuencia de variaciones ficticias repetida cada 12 meses, aplica la aportación al inicio de cada mes y no incluye comisiones. Devuelve valores de evolución, valor final y capital aportado. Es una ayuda visual provisional: no representa el comportamiento histórico de un fondo ni una predicción. No debe trasladarse al backend como modelo financiero validado.
+La simulación actual se ejecuta localmente en `frontend/src/demo.ts`. Recibe importe inicial, aportación mensual y número de meses; utiliza una secuencia ficticia diferente por ejemplo, repetida cada 12 meses, aplica la aportación al inicio de cada mes y no incluye comisiones. Devuelve valores de evolución, valor final y capital aportado. Es una ayuda visual provisional: no representa el comportamiento histórico de un fondo ni una predicción. No debe trasladarse al backend como modelo financiero validado.
 
 ## Decisiones de producto que debe respetar
 
@@ -36,3 +36,8 @@ Consultar los PR y `main` en GitHub para saber qué cambios se han integrado. Pa
 ## Motor disponible en esta rama
 
 El módulo `simulador` ofrece funciones Python y CLI sin servidor. Ver [contrato y ejemplos](../simulador/README.md). `InputError` identifica entrada inválida; fechas y números se validan en el motor. El backend futuro debe traducir errores y cadenas decimales a su contrato HTTP acordado, conservar fuentes y lagunas, y no presentar los ejemplos sintéticos como históricos. Sigue pendiente la integración con frontend, fuentes reales y tutor.
+
+
+## Catálogo local de práctica (rama de trabajo)
+
+El catálogo local y los estados de disponibilidad se describen en [contratos](contratos.md#catálogo-local-de-práctica-rama-de-trabajo); no existe una API ni carga de datos.
