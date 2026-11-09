@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Un motor de reproducción histórica que calcula cómo habría evolucionado una cartera ficticia usando una serie verificada de valores liquidativos o precios de un instrumento durante un periodo pasado. Es una propuesta para la máquina del tiempo educativa; todavía no está implementada y no predice resultados futuros.
+Un motor de reproducción histórica que calcula cómo habría evolucionado una cartera ficticia usando una serie verificada de valores liquidativos o precios de un instrumento durante un periodo pasado. En esta rama hay una primera implementación aislada para la máquina del tiempo educativa; las fuentes aún no están verificadas y el motor no predice resultados futuros.
 
 ## Opción recomendada
 
@@ -35,10 +35,10 @@ Rechazar fechas inválidas o duplicadas, valores no finitos o no positivos y per
 
 Una serie ajustada por dividendos o splits no es necesariamente un precio al que se pudiera operar históricamente. Si se divide cada aportación entre valores ajustados, las unidades resultantes son sintéticas y deben etiquetarse como tales, explicando los supuestos de reinversión. Para representar participaciones y ventas históricas se requieren valores transaccionables y un tratamiento separado de los eventos y distribuciones, con la información y los supuestos necesarios.
 
-Los criterios numéricos concretos, precisión, redondeo y tratamiento fiscal quedan por acordar. Una caída puede no recuperarse dentro de los datos disponibles; la ausencia de recuperación observada debe mostrarse como tal. Nunca elegir solo periodos favorables.
+Las reglas locales de precisión y redondeo figuran en [simulador/README.md](../simulador/README.md); el motor no modela impuestos. Una caída puede no recuperarse dentro de los datos disponibles; la ausencia de recuperación observada debe mostrarse como tal. Nunca elegir solo periodos favorables.
 
 ## Distribución y verificación
 
 La persona 5 selecciona y documenta fuentes y permisos con el equipo; la persona 3 desarrolla y prueba el motor; la 2 acuerda con la 1 los contratos y la conexión; la 4 explica resultados sin inventar cifras. Las pruebas deben incluir un caso manual reproducible con serie de ejemplo, aportaciones, una caída no recuperada en la ventana, días ausentes, entradas inválidas y costes o ajustes, según las reglas elegidas. Las muestras sintéticas de pruebas deben marcarse como ficticias.
 
-La estructura definitiva de la API y los esquemas se decidirán conjuntamente y se registrarán en [contratos](contratos.md). No hay que confundir el simulador ficticio actual de `frontend/src/demo.ts` con este motor pendiente.
+La estructura definitiva de la API HTTP se decidirá conjuntamente; el contrato local se registra en [contratos](contratos.md). No hay que confundir el simulador ficticio actual de `frontend/src/demo.ts` con el motor aislado de esta rama. Las reglas y contratos implementados se detallan en [simulador/README.md](../simulador/README.md); la integración y fuentes reales siguen pendientes.

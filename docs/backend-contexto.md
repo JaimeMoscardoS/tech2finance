@@ -32,3 +32,7 @@ Python/FastAPI es la dirección propuesta para backend, pero no hay aún servici
 ## Cómo verificar el estado
 
 Consultar los PR y `main` en GitHub para saber qué cambios se han integrado. Para el frontend local, seguir [su README](../frontend/README.md); no asumir que el backend existe por poder abrir la demo. Registrar en el pull request las pruebas realizadas y distinguir lo implementado, lo comprobado y lo pendiente.
+
+## Motor disponible en esta rama
+
+El módulo `simulador` ofrece funciones Python y CLI sin servidor. Ver [contrato y ejemplos](../simulador/README.md). `InputError` identifica entrada inválida; fechas y números se validan en el motor. El backend futuro debe traducir errores y cadenas decimales a su contrato HTTP acordado, conservar fuentes y lagunas, y no presentar los ejemplos sintéticos como históricos. Sigue pendiente la integración con frontend, fuentes reales y tutor.

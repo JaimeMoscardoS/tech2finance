@@ -28,4 +28,4 @@ La conversación de perfil y el filtrado de opciones son propuestas futuras suje
 
 ## Trabajo conjunto y tecnología
 
-Acordar primero `docs/contratos.md`. La persona 5 prepara muestras ficticias mientras se verifican fuentes reales. Trabajar en ramas separadas y revisar cambios compartidos. React/TypeScript, Python/FastAPI, Claude y ElevenLabs son propuesta reciente, pendientes de acordar; la propuesta anterior de Next.js no se elimina del historial. No hay aplicación ni dependencias instaladas.
+Acordar primero `docs/contratos.md`. La persona 5 prepara muestras ficticias mientras se verifican fuentes reales. Trabajar en ramas separadas y revisar cambios compartidos. El frontend React/TypeScript existe en main; Python/FastAPI, Claude y ElevenLabs siguen como propuesta para las áreas pendientes. La propuesta anterior de Next.js permanece en el historial. En esta rama el motor Python está aislado y no está conectado a la demo.

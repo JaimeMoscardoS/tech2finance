@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Acuerdos conceptuales iniciales, no API ni esquemas implementados. La persona 2 coordina los formatos definitivos con quienes producen y consumen los datos.
+Acuerdos conceptuales para las áreas; el contrato local del motor Python se describe al final, sin API HTTP implementada. La persona 2 coordina los formatos definitivos con quienes producen y consumen los datos.
 
 - **1 → 2:** pantalla, nivel, parámetros del juego o pregunta; recibe resultados y errores.
 - **5 → 3 y 2:** catálogo ficticio y series verificadas con fuente, fecha, licencia, moneda, frecuencia, ajustes y costes; las muestras ficticias deben indicarlo.
@@ -30,4 +30,8 @@ Para el hackathon, implementar primero el chat de texto contextual, después la 
 - **4 → 1 a través de 2:** explicación adaptada que distinga hechos y posibles factores, muestre incertidumbre y no garantice recuperación ni presione a mantener. Si no hay datos o fuentes suficientes, debe decirlo.
 - **1–4 → 5:** evidencia y casos para probar mismo fondo, comparable diferente identificado, ausencia de histórico y fuentes, episodio no recuperado, plazo largo y necesidad de liquidez.
 
-Los formatos y umbrales concretos siguen pendientes de acordar. No hay motor, conexión a fuentes ni análisis implementados todavía.
+En esta rama existe análisis cuantitativo básico local; los contratos de integración, comparables justificados y conexión a fuentes siguen pendientes.
+
+## Contrato del motor Python, versión 1.0
+
+En esta rama se implementa el motor aislado `simulador`, no una API HTTP. La [referencia del simulador](../simulador/README.md) define los campos, validaciones y errores, ejemplos de CLI y firmas Python exactas: `load_series`, `parse_series`, `simulate`, `compare`, `drawdowns` y `scenarios`. Los números de salida son cadenas decimales. La persona 2 deberá acordar adaptaciones HTTP y validación de datos al integrarlo; no existen endpoints ni conexión al frontend por este cambio. Las fuentes y licencias son declaraciones sin verificación. Comparables y causas devuelven información insuficiente o desconocida.

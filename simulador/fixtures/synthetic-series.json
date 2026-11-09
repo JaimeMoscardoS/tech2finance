@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "metadata": {
+    "instrument_id": "SYNTH-EDUCATIONAL-01",
+    "instrument_name": "Serie ficticia educativa",
+    "instrument_class": "fictional_fund",
+    "currency": "EUR",
+    "value_type": "adjusted",
+    "source": "Datos sintéticos creados para pruebas Tech2Finance",
+    "license": "Ejemplo sintético del proyecto; verificar licencia del repositorio antes de reutilizar",
+    "license_date": "2026-11-09",
+    "frequency": "monthly observation",
+    "max_gap_days": 35,
+    "embedded_costs": "No se simulan costes internos",
+    "distribution_policy": "Índice sintético; no se modelan dividendos separados",
+    "data_kind": "synthetic"
+  },
+  "observations": [
+    {"date": "2020-01-01", "value": "100"},
+    {"date": "2020-02-01", "value": "80"},
+    {"date": "2020-03-01", "value": "100"},
+    {"date": "2020-04-01", "value": "90"}
+  ]
+}
