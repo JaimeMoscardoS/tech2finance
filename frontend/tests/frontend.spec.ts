@@ -112,3 +112,90 @@ test('opening the assistant from the mobile menu transfers focus to the dialog',
  await expect(page.getByRole('button', { name: 'Abrir menú' })).toBeFocused();
  await context.close();
 });
+
+test('catalogue selection changes the example and real funds have no invented result', async ({ page }) => {
+ await page.goto('/');
+ await page.getByRole('button', {name:'Simulador', exact:true}).click();
+ const panel=page.locator('.sim-result');
+ const original=await panel.locator('.sim-values strong').first().textContent();
+ await page.getByLabel('Tipo de activo').selectOption('etf');
+ await expect(page.getByLabel('Instrumento')).toHaveValue('demo-etf');
+ expect(await panel.locator('.sim-values strong').first().textContent()).not.toBe(original);
+ const newValue=await panel.locator('.sim-values strong').first().textContent();
+ await page.getByRole('button', {name:/Nivel: Principiante/}).click();
+ await page.getByRole('button', {name:'Avanzado', exact:true}).click();
+ await expect(panel.locator('.sim-values strong').first()).toHaveText(newValue!);
+ await page.getByLabel('Tipo de activo').selectOption('fund');
+ await page.getByLabel('Entidad').selectOption('bbva');
+ await expect(panel.getByText(/No hay histórico verificado/)).toBeVisible();
+ await expect(panel.locator('.chart')).toHaveCount(0);
+ await expect(page.getByRole('button', {name:'Ver mi ejemplo'})).toBeDisabled();
+ await page.getByLabel('Entidad').selectOption('caixabank');
+ await expect(page.getByLabel('Instrumento')).toHaveValue('caixabank-monetario-estandar');
+ await expect(panel.getByText(/ES0138045002/)).toBeVisible();
+ await expect(panel.locator('.chart')).toHaveCount(1);
+ await expect(panel.getByText('529,02 €')).toBeVisible();
+ await page.screenshot({path:'test-results/catalog-desktop.png',fullPage:true});
+});
+
+test('explore transfers the chosen fictional instrument', async ({page}) => {
+ await page.goto('/');
+ await page.getByRole('button',{name:'Explorar',exact:true}).click();
+ await page.locator('.fund-card').nth(1).getByRole('button',{name:'Practicar con este ejemplo'}).click();
+ await expect(page.getByLabel('Instrumento')).toHaveValue('demo-equity');
+ await expect(page.locator('.sim-result')).toContainText('Fondo Horizonte');
+});
+
+test('catalogue fits mobile in English dark mode', async ({browser}) => {
+ const context=await browser.newContext({viewport:{width:320,height:700}});
+ const page=await context.newPage(); await page.goto('/');
+ await page.getByRole('button',{name:'English'}).click();
+ await page.getByRole('button',{name:'Dark theme'}).click();
+ await page.getByRole('button',{name:'Open menu'}).click();
+ await page.getByRole('button',{name:'Simulator',exact:true}).click();
+ await page.getByLabel('Asset type').selectOption('fund');
+ await page.getByLabel('Institution').selectOption('caixabank');
+ await page.screenshot({path:'test-results/catalog-mobile.png',fullPage:true});
+ await expect(page.getByText('ANNUAL HISTORY')).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+ await context.close();
+});
+
+test('annual history keeps fixed period and excludes monthly contributions', async ({ page }) => {
+ await page.goto('/');
+ await page.getByRole('button', {name:'Simulador', exact:true}).click();
+ await page.getByLabel('Aportación mensual').fill('200');
+ await page.getByRole('button', {name:'Probar histórico 2021–2025'}).click();
+ const panel=page.locator('.sim-result');
+ await expect(page.getByLabel('Instrumento')).toHaveValue('caixabank-monetario-estandar');
+ await expect(page.getByLabel('Aportación mensual')).toHaveCount(0);
+ await expect(page.getByText('Periodo fijo: 2021–2025')).toBeVisible();
+ await expect(panel.getByText('529,02 €')).toBeVisible();
+ await expect(panel.getByText('500,00 €')).toBeVisible();
+ await expect(panel.getByRole('table').locator('tbody tr')).toHaveCount(5);
+ expect((await panel.locator('polyline').getAttribute('points'))!.split(' ')).toHaveLength(6);
+ await expect(panel.getByText('31/12/2020')).toBeVisible();
+ await expect(panel.getByText('31/12/2025')).toBeVisible();
+ await expect(panel.getByText(/MES 5/)).toHaveCount(0);
+ await page.getByRole('button',{name:'Abrir asistente'}).click();
+ await page.getByRole('button',{name:'¿Cómo funciona la simulación?'}).click();
+ await page.getByRole('button',{name:'Enviar pregunta'}).click();
+ await expect(page.getByText(/reconstrucción con rentabilidades anuales publicadas/)).toBeVisible();
+ await page.keyboard.press('Escape');
+ await page.getByLabel('Importe inicial').fill('1000');
+ await expect(panel.locator('.chart')).toHaveCount(0);
+ await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
+ await expect(panel.getByText('1058,05 €')).toBeVisible();
+ await page.getByRole('button',{name:/Nivel: Principiante/}).click();
+ await page.getByRole('button',{name:'Avanzado',exact:true}).click();
+ await expect(panel.getByText('1058,05 €')).toBeVisible();
+ await page.getByRole('button',{name:'Modo oscuro'}).click();
+ await page.getByRole('button',{name:'English'}).click();
+ await expect(panel.getByText('€1,058.05')).toBeVisible();
+ await page.getByLabel('Institution').selectOption('bbva');
+ await expect(panel.locator('.chart')).toHaveCount(0);
+ await page.getByLabel('Institution').selectOption('santander');
+ await expect(panel.locator('.chart')).toHaveCount(0);
+ await page.getByLabel('Institution').selectOption('demo');
+ await expect(page.getByLabel('Monthly contribution')).toHaveValue('200');
+});
