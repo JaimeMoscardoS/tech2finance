@@ -1,62 +1,1037 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowRight, ArrowUpRight, AudioLines, BarChart3, BookOpen, Check, ChevronDown, CircleHelp, Compass, FlaskConical, Grid2X2, Leaf, LockKeyhole, Menu, MessageCircle, Moon, Pause, Send, ShieldCheck, Sparkles, Sun, TrendingDown, Wallet, X } from "lucide-react";
+import {
+  ArrowRight,
+  AudioLines,
+  BarChart3,
+  BookOpen,
+  Check,
+  ChevronDown,
+  Compass,
+  FlaskConical,
+  Grid2X2,
+  Leaf,
+  LockKeyhole,
+  Menu,
+  MessageCircle,
+  Moon,
+  Pause,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  Sun,
+  TrendingDown,
+  Wallet,
+  X,
+} from "lucide-react";
 import CountUp from "./CountUp";
 import { simulate } from "./demo";
-import { annualHistory, replayAnnual } from "./annual-history";
-import { banks, instruments, type Instrument } from "./catalog";
+import { replayAnnual } from "./annual-history";
+import { instruments, type Instrument } from "./catalog";
+import InvestmentChart from "./LazyInvestmentChart";
+import Simulator, { type FieldError } from "./Simulator";
+import { MAX_SIMULATION_AMOUNT } from "./simulation-types";
 import { copy, type Language } from "./copy";
 
 type Page = "home" | "explore" | "simulator" | "portfolio";
 type Level = "beginner" | "intermediate" | "advanced";
-type Message = { from:"user"; text:string } | { from:"assistant"; kind:"fall"|"fund"|"sim"; level:Level };
-function saved(key:string, options:string[], fallback:string) { try { const value=localStorage.getItem(key); return value && options.includes(value) ? value : fallback; } catch { return fallback; } }
-function Chart({points,label}:{points:number[];label:string}) {
- const min=Math.min(...points)*.94, max=Math.max(...points)*1.06||1, range=max-min||1;
- const coords=points.map((p,i)=>`${(i/(points.length-1))*100},${86-((p-min)/range)*72}`).join(" ");
- return <div className="chart" role="img" aria-label={label}><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="100" y1="25" y2="25" stroke="var(--chart-grid)" strokeWidth=".35"/><line x1="0" x2="100" y1="55" y2="55" stroke="var(--chart-grid)" strokeWidth=".35"/><line x1="0" x2="100" y1="85" y2="85" stroke="var(--chart-grid)" strokeWidth=".35"/><polyline fill="none" stroke="var(--accent)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" points={coords}/></svg></div>;
+type Message =
+  | { from: "user"; text: string }
+  | { from: "assistant"; kind: "fall" | "fund" | "sim"; level: Level };
+function saved(key: string, options: string[], fallback: string) {
+  try {
+    const value = localStorage.getItem(key);
+    return value && options.includes(value) ? value : fallback;
+  } catch {
+    return fallback;
+  }
 }
 export default function App() {
- const [language,setLanguage]=useState<Language>(()=>saved("t2f-language",["es","en"],"es") as Language);
- const [theme,setTheme]=useState<"light"|"dark">(()=>saved("t2f-theme",["light","dark"],"light") as "light"|"dark");
- const [page,setPage]=useState<Page>("home"), [level,setLevel]=useState<Level>("beginner"), [levelOpen,setLevelOpen]=useState(false), [mobileNav,setMobileNav]=useState(false), [assistant,setAssistant]=useState(false), [pause,setPause]=useState(false);
- const [messages,setMessages]=useState<Message[]>([]), [input,setInput]=useState(""), [initial,setInitial]=useState("500"), [monthly,setMonthly]=useState("50"), [months,setMonths]=useState("12"), [result,setResult]=useState<(ReturnType<typeof simulate> & {instrumentId:string; initial:number; monthly:number; months:number}) | null>(()=>({...simulate(500,50,12), instrumentId:"demo-mixed", initial:500, monthly:50, months:12})), [error,setError]=useState(false), [notice,setNotice]=useState<number|null>(null);
- const [selectedId,setSelectedId]=useState("demo-mixed");
- const selected=instruments.find(item=>item.instrumentId===selectedId)!;
- const modalRef=useRef<HTMLElement>(null), assistantRef=useRef<HTMLElement>(null), navRef=useRef<HTMLElement>(null), menuButtonRef=useRef<HTMLButtonElement>(null), assistantTriggerRef=useRef<HTMLElement|null>(null);
- const t=copy[language];
- const names={home:t.home,explore:t.explore,simulator:t.simulator,portfolio:t.portfolio};
- const levelNames={beginner:t.beginner,intermediate:t.intermediate,advanced:t.advanced};
- const euro=(n:number)=>new Intl.NumberFormat(language==="es"?"es-ES":"en-GB",{style:"currency",currency:"EUR"}).format(n);
- useEffect(()=>{document.documentElement.lang=language;document.documentElement.dataset.theme=theme;try{localStorage.setItem("t2f-language",language);localStorage.setItem("t2f-theme",theme);}catch{}},[language,theme]);
- useEffect(()=>{if(!pause&&!assistant)return; const panel=pause?modalRef.current:assistantRef.current; const previous=pause?(document.activeElement instanceof HTMLElement?document.activeElement:null):assistantTriggerRef.current; const items=()=>Array.from(panel?.querySelectorAll<HTMLElement>("button, a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])")??[]);items()[0]?.focus();const key=(e:KeyboardEvent)=>{if(e.key==="Escape"){pause?setPause(false):setAssistant(false);return;}if(e.key!=="Tab")return;const a=items();if(!a.length)return;if(e.shiftKey&&document.activeElement===a[0]){e.preventDefault();a[a.length-1].focus();}else if(!e.shiftKey&&document.activeElement===a[a.length-1]){e.preventDefault();a[0].focus();}};document.addEventListener("keydown",key);return()=>{document.removeEventListener("keydown",key);previous?.focus();};},[pause,assistant]);
- useEffect(()=>{if(!mobileNav)return;const items=()=>Array.from(navRef.current?.querySelectorAll<HTMLElement>("button, a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])")??[]).filter(item=>item.offsetParent!==null);const focusFrame=requestAnimationFrame(()=>items()[0]?.focus());const key=(e:KeyboardEvent)=>{if(e.key==="Escape"){setMobileNav(false);return;}if(e.key!=="Tab")return;const a=items();if(!a.length)return;if(e.shiftKey&&document.activeElement===a[0]){e.preventDefault();a[a.length-1].focus();}else if(!e.shiftKey&&document.activeElement===a[a.length-1]){e.preventDefault();a[0].focus();}};document.addEventListener("keydown",key);return()=>{cancelAnimationFrame(focusFrame);document.removeEventListener("keydown",key);menuButtonRef.current?.focus();};},[mobileNav]);
- const points=useMemo(()=>[1000,1032,1010,1040,1026,1060,1045,1088,1072,1103,1084,1110,1080,1093],[]);
- const nav=[{key:"home" as const,icon:Grid2X2},{key:"explore" as const,icon:Compass},{key:"simulator" as const,icon:FlaskConical},{key:"portfolio" as const,icon:Wallet}];
- const cards=[{name:t.fundOne,tag:t.diversified,risk:3,desc:t.fundOneDesc,color:"sage"},{name:t.fundTwo,tag:t.equities,risk:5,desc:t.fundTwoDesc,color:"sand"},{name:t.fundThree,tag:t.fixedIncome,risk:2,desc:t.fundThreeDesc,color:"lavender"}];
- const choose=(p:Page)=>{setPage(p);if(mobileNav){setMobileNav(false);menuButtonRef.current?.focus();}setNotice(null);};
- const openAssistant=()=>{assistantTriggerRef.current=mobileNav?menuButtonRef.current:(document.activeElement instanceof HTMLElement?document.activeElement:null);if(mobileNav)setMobileNav(false);setAssistant(true);};
- const closeMenu=()=>{setMobileNav(false);menuButtonRef.current?.focus();};
- function selectInstrument(item:Instrument){setSelectedId(item.instrumentId);setResult(null);setError(false);if(item.dataStatus==="fictional" && item.returns){try{if(!initial.trim()||!months.trim())return;setResult({...simulate(Number(initial),Number(monthly),Number(months),item.returns),instrumentId:item.instrumentId,initial:Number(initial),monthly:Number(monthly),months:Number(months)});}catch{}}else if(item.dataStatus==="annual_history"){try{if(!initial.trim())return;setResult({...replayAnnual(Number(initial)),instrumentId:item.instrumentId,initial:Number(initial),monthly:0,months:0});}catch{}}}
- function run(e:FormEvent){e.preventDefault();try{if(!initial.trim())throw Error();const outcome=selected.dataStatus==="annual_history"?replayAnnual(Number(initial)):selected.dataStatus==="fictional"&&selected.returns&&months.trim()?simulate(Number(initial),Number(monthly),Number(months),selected.returns):null;if(!outcome)throw Error();setResult({...outcome,instrumentId:selected.instrumentId,initial:Number(initial),monthly:selected.dataStatus==="annual_history"?0:Number(monthly),months:selected.dataStatus==="annual_history"?0:Number(months)});setError(false);}catch{setResult(null);setError(true);}}
- function send(e:FormEvent){e.preventDefault();const q=input.trim();if(!q)return;const low=q.toLowerCase();const kind=/fondo|fund|etf/.test(low)?"fund":/simula|aport|contrib/.test(low)?"sim":"fall";setMessages(m=>[...m,{from:"user",text:q},{from:"assistant",kind,level}]);setInput("");}
- const levelTitle={beginner:t.beginnerView,intermediate:t.intermediateView,advanced:t.advancedView}[level];
- const levelText={beginner:t.beginnerText,intermediate:t.intermediateText,advanced:t.advancedText}[level];
- return <div className="app-shell">
- <aside ref={navRef} className={`sidebar ${mobileNav?"open":""}`} aria-label={t.space}><div className="brand"><div className="brand-mark"><span>t</span><span>2</span></div><div><strong>tech<span>2</span>finance</strong><small>{t.app}</small></div><button className="icon-button close-mobile" onClick={closeMenu} aria-label={t.closeMenu}><X size={20}/></button></div>
- <div className="nav-label">{t.space}</div><nav>{nav.map(({key,icon:Icon})=><button key={key} className={`nav-item ${page===key?"active":""}`} onClick={()=>choose(key)} aria-current={page===key?"page":undefined}><Icon size={18}/><span>{names[key]}</span>{page===key&&<span className="active-dot"/>}</button>)}</nav><div className="side-divider"/><div className="nav-label">{t.learn}</div><button className="nav-item" onClick={openAssistant}><MessageCircle size={18}/><span>{t.assistant}</span><span className="new-tag">{t.demo}</span></button><button className="nav-item" onClick={()=>choose("explore")}><BookOpen size={18}/><span>{t.basics}</span></button><div className="side-bottom"><div className="profile"><div className="avatar">TF</div><div><strong>{t.demoAccount}</strong><span>{t.personalSpace}</span></div></div></div></aside>
- {mobileNav&&<button className="scrim" onClick={closeMenu} aria-label={t.closeMenu}/>}
- <main className="main"><header className="topbar"><div className="top-left"><button ref={menuButtonRef} className="icon-button hamburger" onClick={()=>setMobileNav(true)} aria-label={t.openMenu}><Menu size={20}/></button><span className="breadcrumb">{t.space} <span>/</span> <strong>{names[page]}</strong></span></div><div className="top-actions"><span className="demo-badge">{t.demonstration}</span><div className="preferences" aria-label={t.languageLabel}><button className={`preference-button ${language==="es"?"selected":""}`} onClick={()=>setLanguage("es")} aria-pressed={language==="es"} aria-label={t.switchSpanish}>ES</button><button className={`preference-button ${language==="en"?"selected":""}`} onClick={()=>setLanguage("en")} aria-pressed={language==="en"} aria-label={t.switchEnglish}>EN</button></div><button className="icon-button theme-button" onClick={()=>setTheme(theme==="light"?"dark":"light")} aria-label={theme==="light"?t.darkTheme:t.lightTheme}>{theme==="light"?<Moon size={19}/>:<Sun size={19}/>}</button><div className="level-wrap"><button className="level-button" onClick={()=>setLevelOpen(v=>!v)} aria-expanded={levelOpen} aria-label={`${t.level}: ${levelNames[level]}`}><span>{t.level}: <strong>{levelNames[level]}</strong></span><ChevronDown size={15}/></button>{levelOpen&&<div className="level-menu">{(["beginner","intermediate","advanced"] as Level[]).map(l=><button key={l} onClick={()=>{setLevel(l);setLevelOpen(false)}}>{levelNames[l]}{level===l&&<Check size={15}/>}</button>)}</div>}</div></div></header>
- <div className="content">{page==="home"&&<><div className="page-heading"><div><div className="eyebrow">{t.eyebrow}</div><h1>{t.title}</h1><p>{t.intro}</p></div></div><section className={`welcome-card level-${level}`}><div className="welcome-content"><span className="view-tag">{level==="beginner"?t.modeSmall:level==="intermediate"?t.modeMedium:t.modeAdvanced}</span><h2>{levelTitle}</h2><p>{levelText}</p><p>{t.knowledgeNote}</p><div className="welcome-actions"><button className="button dark" onClick={()=>choose("simulator")}>{t.trySimulator}<ArrowRight size={16}/></button><button className="text-link" onClick={()=>choose("explore")}>{t.viewFunds}<ArrowRight size={15}/></button></div></div>{level!=="beginner"&&<div className="view-summary"><span className="kicker">{t.examplePortfolio}</span><strong>{euro(1093)}</strong><small>{t.fictional}</small>{level==="advanced"&&<p>{t.detailNote}</p>}</div>}</section>
- {level==="intermediate"&&<div className="metric-grid"><div className="metric-card"><span>{t.portfolioValue}</span><strong>{euro(1093)}</strong><small>{t.fictional}</small></div><div className="metric-card"><span>{t.goal}</span><strong>{t.longTerm}</strong><small>{t.exampleGoal}</small></div><div className="metric-card"><span>{t.assumptions}</span><strong>—</strong><small>{t.noHistory}</small></div></div>}
- {level==="advanced"&&<div className="metric-grid advanced"><div className="metric-card"><span>{t.portfolioValue}</span><strong>{euro(1093)}</strong><small>{t.fictional}</small></div><div className="metric-card"><span>{t.totalContributions}</span><strong>—</strong><small>{t.unavailable}</small></div><div className="metric-card"><span>{t.difference}</span><strong>—</strong><small>{t.unavailable}</small></div><div className="metric-card"><span>{t.assumptions}</span><strong>—</strong><small>{t.noHistory}</small></div></div>}
- <div className="section-head"><div><span className="kicker">{t.learn}</span><h2>{t.learnSteps}</h2></div></div><div className="action-grid"><button className="action-card" onClick={()=>choose("explore")}><div className="action-icon mint"><Compass size={21}/></div><h3>{t.discoverFunds}</h3><p>{t.discoverDesc}</p><span>{t.go}<ArrowRight size={14}/></span></button><button className="action-card" onClick={()=>choose("simulator")}><div className="action-icon peach"><FlaskConical size={21}/></div><h3>{t.practice}</h3><p>{t.practiceDesc}</p><span>{t.go}<ArrowRight size={14}/></span></button><button className="action-card" onClick={openAssistant}><div className="action-icon lilac"><MessageCircle size={21}/></div><h3>{t.ask}</h3><p>{t.askDesc}</p><span>{t.go}<ArrowRight size={14}/></span></button></div><div className="lower-grid"><section className="portfolio-card"><div className="card-heading"><div><span className="kicker">{t.fictional}</span><h3>{t.examplePortfolio}</h3></div><button className="mini-link" onClick={()=>choose("portfolio")}>{t.viewDetails}<ArrowRight size={14}/></button></div><div className="portfolio-content"><div><p>{t.portfolioValue}</p><div className="amount"><CountUp from={1093} to={1093} duration={1.2} separator={language==="es"?".":","} trigger="load"/> €</div><small>{t.noRealValue}</small></div><Chart points={points} label={t.chartLabel}/></div></section><section className="insight-card"><div className="insight-icon"><Sparkles size={18}/></div><span className="kicker">{t.assistantTitle}</span><h3>{t.levelExplanation}</h3><p>{t.knowledgeNote}</p><button onClick={openAssistant}>{t.askButton}<ArrowRight size={15}/></button></section></div></>}
- {page==="explore"&&<><PageIntro label={t.catalog} title={t.exploreTitle} description={t.exploreIntro}/><div className="info-banner"><ShieldCheck size={20}/><span>{t.fictionalFunds}</span></div>{notice!==null&&<div className="notice" role="status">{cards[notice].name} {t.fundNotice}<button onClick={()=>setNotice(null)} aria-label={t.close}><X size={15}/></button></div>}<div className="section-head"><h2>{t.funds}</h2></div><div className="fund-grid">{cards.map((c,i)=><article className="fund-card" key={i}><div className={`fund-art ${c.color}`}><span>0{i+1}</span><Leaf size={26}/></div><div className="fund-body"><span className="kicker">{c.tag}</span><h3>{c.name}</h3><p>{c.desc}</p><div className="fund-meta"><span>{t.exampleRisk}</span><strong>{c.risk} {t.of} 7</strong></div>{level!=="beginner"&&<div className="fund-meta"><span>{t.costData}</span><strong>{t.unavailable}</strong></div>}<button onClick={()=>{selectInstrument(instruments.find(item=>item.instrumentId===["demo-mixed","demo-equity","demo-fixed"][i])!);choose("simulator")}}>{t.practiceInstrument}<ArrowRight size={15}/></button></div></article>)}</div></>}
- {page==="simulator"&&<><PageIntro label={t.configure} title={t.simTitle} description={t.simIntro}/><div className="info-banner"><FlaskConical size={20}/><span>{selected.dataStatus==="fictional"?t.simWarning:selected.dataStatus==="annual_history"?t.historyIntro:t.missingHistory}</span></div><button className="text-link history-shortcut" type="button" onClick={()=>selectInstrument(instruments.find(item=>item.instrumentId===annualHistory.instrumentId)!)}>{t.tryHistory}<ArrowRight size={15}/></button><div className="sim-grid"><form className="panel sim-form" onSubmit={run}><div className="panel-number">01 / {t.configure}</div><h2>{t.configureTitle}</h2><p>{t.configureIntro}</p><label>{t.assetType}<div className="field"><select aria-label={t.assetType} value={selected.assetType} onChange={e=>{const item=instruments.find(x=>x.assetType===e.target.value);if(item)selectInstrument(item)}}><option value="fund">{t.mixedAsset}</option><option value="etf">{t.equityAsset}</option><option value="stock">{t.fixedAsset}</option></select></div></label><label>{t.entity}<div className="field"><select aria-label={t.entity} value={selected.bankId} onChange={e=>{const item=instruments.find(x=>x.assetType===selected.assetType&&x.bankId===e.target.value);if(item)selectInstrument(item)}}>{banks.filter(bank=>instruments.some(item=>item.assetType===selected.assetType&&item.bankId===bank.id)).map(bank=><option key={bank.id} value={bank.id}>{bank.name[language]}</option>)}</select></div></label><label>{t.instrument}<div className="field"><select aria-label={t.instrument} value={selected.instrumentId} onChange={e=>{const item=instruments.find(x=>x.instrumentId===e.target.value);if(item)selectInstrument(item)}}>{instruments.filter(item=>item.assetType===selected.assetType&&item.bankId===selected.bankId).map(item=><option key={item.instrumentId} value={item.instrumentId}>{item.name[language]}</option>)}</select></div></label><label>{t.initial}<span>{t.fakeMoney}</span><div className="field"><input type="number" min="0" max={selected.dataStatus==="annual_history"?1e15:undefined} step="1" value={initial} onChange={e=>{setInitial(e.target.value);setResult(null)}} required/><span>€</span></div></label>{selected.dataStatus==="annual_history"?<div className="history-period"><strong>{t.historyPeriod}</strong><p>{t.historyNoMonthly}</p></div>:<><label>{t.monthly}<span>{t.optional}</span><div className="field"><input type="number" min="0" step="1" value={monthly} onChange={e=>{setMonthly(e.target.value);setResult(null)}}/><span>{t.perMonth}</span></div></label><label>{t.duration}<div className="field"><select value={months} onChange={e=>{setMonths(e.target.value);setResult(null)}}><option value="6">{t.months6}</option><option value="12">{t.year1}</option><option value="36">{t.years3}</option><option value="60">{t.years5}</option></select></div></label></>}{error&&<p className="error" role="alert">{t.invalid}</p>}<button className="button dark full" type="submit" disabled={selected.dataStatus==="missing_history"}>{t.showExample}<ArrowRight size={16}/></button></form><section className="panel sim-result"><div className="card-heading"><div><div className="panel-number">02 / {t.discover}</div><h2>{selected.dataStatus==="fictional"?t.resultTitle:selected.dataStatus==="annual_history"?t.historyTitle:t.noHistory}</h2></div><span className="pill">{selected.dataStatus==="fictional"?t.hypothetical:selected.dataStatus==="annual_history"?t.historical:t.unavailable}</span></div><p><strong>{selected.name[language]}</strong> · {selected.relationship==="fictional"?t.fictionalInstrument:selected.relationship==="own"?t.ownFund:selected.relationship==="third_party"?t.thirdParty:t.unknownRelation}</p>{selected.dataStatus!=="fictional"&&<div className="source-details"><p>{t.managerLabel}: {selected.manager}{selected.identifier&&<> · {t.identifierLabel}: {selected.identifier}</>}{selected.shareClass&&<> · {t.classLabel}: {selected.shareClass}</>}{selected.currency&&<> · {selected.currency}</>}</p>{selected.sourceUrl&&<p><a href={selected.sourceUrl} target="_blank" rel="noreferrer">{t.sourceLink} <ArrowUpRight size={14}/></a> · {t.sourceChecked}: {selected.sourceDate}</p>}</div>}{selected.dataStatus==="missing_history"?<div role="status"><p>{t.missingHistory}</p></div>:!result||result.instrumentId!==selected.instrumentId?<p role="status">{t.selectResult}</p>:<><p>{selected.dataStatus==="annual_history"?t.historyIntro:t.resultIntro}</p><div className="sim-values"><div><span>{t.finalValue}</span><strong>{euro(result.value)}</strong></div><div><span>{t.totalPaid}</span><strong>{euro(result.contributed)}</strong></div><div><span>{t.delta}</span><strong>{euro(result.value-result.contributed)}</strong></div></div><Chart points={result.points} label={selected.dataStatus==="annual_history"?t.historyChart:t.chartLabel}/><div className="chart-labels"><span>{selected.dataStatus==="annual_history"?t.historyBaseline:t.start}</span><span>{selected.dataStatus==="annual_history"?t.historyEnd:`${t.month} ${result.points.length-1}`}</span></div>{selected.dataStatus==="annual_history"&&<table className="history-table"><caption>{t.annualReturns}</caption><thead><tr><th scope="col">{t.yearLabel}</th><th scope="col">{t.returnLabel}</th></tr></thead><tbody>{annualHistory.returns.map(row=><tr key={row.year}><td>{row.year}</td><td>{new Intl.NumberFormat(language==="es"?"es-ES":"en-GB",{style:"percent",minimumFractionDigits:2,maximumFractionDigits:2,signDisplay:"exceptZero"}).format(row.rate)}</td></tr>)}</tbody></table>}<div className="assumption"><CircleHelp size={16}/><span>{selected.dataStatus==="annual_history"?t.historyAssumption:<>{t.simulationAssumption}{level!=="beginner"&&t.extraIntermediate}{level==="advanced"&&t.extraAdvanced}</>}</span></div></>}</section></div>{selected.dataStatus==="fictional"&&result?.instrumentId===selected.instrumentId&&<div className="tip-box"><MessageCircle size={19}/><div><strong>{t.explainResult}</strong><p>{t.askExample}</p></div><button className="button outline" onClick={openAssistant}>{t.askButton}<ArrowRight size={15}/></button></div>}</>}
- {page==="portfolio"&&<><PageIntro label={t.examplePortfolioLabel} title={t.portfolioTitle} description={t.portfolioIntro}/><div className="info-banner"><LockKeyhole size={19}/><span>{t.portfolioWarning}</span></div><div className="portfolio-page-grid"><section className="panel large-portfolio"><div className="card-heading"><div><span className="kicker">{t.totalValue}</span><div className="big-amount">{euro(1093)}</div><span className="change">{t.fictional}</span></div><span className="pill">{t.examplePortfolioLabel}</span></div><Chart points={points} label={t.chartLabel}/><div className="chart-labels"><span>{t.start}</span><span>{t.now}</span></div></section><section className="panel objective"><div className="action-icon mint"><Leaf size={21}/></div><span className="kicker">{t.exampleGoal}</span><h3>{t.goalTitle}</h3><p>{t.goalText}</p><div className="objective-row"><span>{t.illustrativeHorizon}</span><strong>{t.longTerm}</strong></div><button className="button outline full" onClick={()=>setPause(true)}><TrendingDown size={17}/>{t.understandFall}</button></section></div><div className="section-head"><div><span className="kicker">{t.insidePortfolio}</span><h2>{t.distribution}</h2></div></div><div className="holdings"><div className="holding-icon"><BarChart3 size={20}/></div><div><strong>{t.fundOne}</strong><small>{t.fictionalFund}</small></div><div className="holding-value"><strong>{euro(1093)}</strong><small>{t.fullPortfolio}</small></div></div>{level==="advanced"&&<p className="advanced-note">{t.dataUnavailable}</p>}</>}
- <footer><span>© Tech2Finance · {t.footer}</span><span><LockKeyhole size={13}/>{t.noAccounts}</span></footer></div></main>
- <button className="floating-assistant" onClick={openAssistant} aria-label={t.openAssistant}><Sparkles size={18}/><span>{t.assistantTitle}</span></button>
- {assistant&&<><button className="drawer-overlay" onClick={()=>setAssistant(false)} aria-label={t.closeAssistant}/><aside ref={assistantRef} className="assistant-panel" role="dialog" aria-modal="true" aria-label={t.assistantTitle}><div className="assistant-head"><div className="assistant-avatar"><Sparkles size={20}/></div><div><strong>{t.assistantTitle}</strong><span>{t.assistantSubtitle}</span></div><button className="icon-button" onClick={()=>setAssistant(false)} aria-label={t.closeAssistant}><X size={20}/></button></div><div className="assistant-banner">{t.assistantNotice}</div><div className="messages" aria-live="polite"><div className="message assistant"><p>{t.assistantHello}</p></div>{messages.map((m,i)=><div className={`message ${m.from}`} key={i}><p>{m.from==="user"?m.text:(m.kind==="fund"?t.replyFund:m.kind==="sim"?t.replySim:t.replyFall)+(m.level==="intermediate"?t.replyMid:m.level==="advanced"?t.replyAdvanced:"")}</p></div>)}</div><div className="suggestions"><button onClick={()=>setInput(t.askFund)}>{t.askFund}</button><button onClick={()=>setInput(t.askSimulation)}>{t.askSimulation}</button></div><form className="chat-form" onSubmit={send}><label className="sr-only" htmlFor="chat-input">{t.inputLabel}</label><input id="chat-input" value={input} onChange={e=>setInput(e.target.value)} placeholder={t.inputPlaceholder}/><button type="submit" aria-label={t.send}><Send size={17}/></button></form><p className="assistant-foot"><AudioLines size={14}/>{t.voicePending}</p></aside></>}
- {pause&&<div className="modal-backdrop" onClick={()=>setPause(false)}><section ref={modalRef} className="pause-modal" role="dialog" aria-modal="true" aria-labelledby="pause-title" onClick={e=>e.stopPropagation()}><button className="icon-button modal-close" onClick={()=>setPause(false)} aria-label={t.close}><X size={20}/></button><div className="pause-icon"><Pause size={22}/></div><span className="kicker">{t.pauseLabel}</span><h2 id="pause-title">{t.pauseTitle}</h2><p>{t.pauseText}</p><div className="pause-note"><TrendingDown size={18}/><div><strong>{t.whyDown}</strong><p>{t.pauseUnavailable}</p></div></div><p className="pause-disclaimer">{t.pauseRisk}</p><button className="button dark full" onClick={()=>setPause(false)}>{t.understood}<Check size={17}/></button><button className="plain-link" onClick={()=>{setPause(false);setTimeout(openAssistant,0)}}>{t.askAssistant}<ArrowRight size={15}/></button></section></div>}
- </div>;
+  const [language, setLanguage] = useState<Language>(
+    () => saved("t2f-language", ["es", "en"], "es") as Language,
+  );
+  const [theme, setTheme] = useState<"light" | "dark">(
+    () => saved("t2f-theme", ["light", "dark"], "light") as "light" | "dark",
+  );
+  const [page, setPage] = useState<Page>("home"),
+    [level, setLevel] = useState<Level>("beginner"),
+    [levelOpen, setLevelOpen] = useState(false),
+    [mobileNav, setMobileNav] = useState(false),
+    [assistant, setAssistant] = useState(false),
+    [pause, setPause] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]),
+    [input, setInput] = useState(""),
+    [initial, setInitial] = useState("500"),
+    [monthly, setMonthly] = useState("50"),
+    [annual, setAnnual] = useState("0"),
+    [months, setMonths] = useState("12"),
+    [result, setResult] = useState<
+      | (ReturnType<typeof simulate> & {
+          instrumentId: string;
+          initial: number;
+          monthly: number;
+          months: number;
+          annual: number;
+        })
+      | null
+    >(() => ({
+      ...simulate(500, 50, 12),
+      instrumentId: "demo-mixed",
+      initial: 500,
+      monthly: 50,
+      months: 12,
+      annual: 0,
+    })),
+    [error, setError] = useState<FieldError>(null),
+    [notice, setNotice] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState("demo-mixed");
+  useEffect(() => {
+    if (!levelOpen) return;
+    const close = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLevelOpen(false);
+    };
+    document.addEventListener("keydown", close);
+    return () => document.removeEventListener("keydown", close);
+  }, [levelOpen]);
+  const selected = instruments.find(
+    (item) => item.instrumentId === selectedId,
+  )!;
+  const modalRef = useRef<HTMLElement>(null),
+    assistantRef = useRef<HTMLElement>(null),
+    navRef = useRef<HTMLElement>(null),
+    menuButtonRef = useRef<HTMLButtonElement>(null),
+    assistantTriggerRef = useRef<HTMLElement | null>(null);
+  const t = copy[language];
+  const names = {
+    home: t.home,
+    explore: t.explore,
+    simulator: t.simulator,
+    portfolio: t.portfolio,
+  };
+  const levelNames = {
+    beginner: t.beginner,
+    intermediate: t.intermediate,
+    advanced: t.advanced,
+  };
+  const euro = (n: number) =>
+    new Intl.NumberFormat(language === "es" ? "es-ES" : "en-GB", {
+      style: "currency",
+      currency: "EUR",
+    }).format(n);
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem("t2f-language", language);
+      localStorage.setItem("t2f-theme", theme);
+    } catch {}
+  }, [language, theme]);
+  useEffect(() => {
+    if (!pause && !assistant) return;
+    const panel = pause ? modalRef.current : assistantRef.current;
+    const previous = pause
+      ? document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+      : assistantTriggerRef.current;
+    const items = () =>
+      Array.from(
+        panel?.querySelectorAll<HTMLElement>(
+          "button, a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
+        ) ?? [],
+      );
+    items()[0]?.focus();
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        pause ? setPause(false) : setAssistant(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const a = items();
+      if (!a.length) return;
+      if (e.shiftKey && document.activeElement === a[0]) {
+        e.preventDefault();
+        a[a.length - 1].focus();
+      } else if (!e.shiftKey && document.activeElement === a[a.length - 1]) {
+        e.preventDefault();
+        a[0].focus();
+      }
+    };
+    document.addEventListener("keydown", key);
+    return () => {
+      document.removeEventListener("keydown", key);
+      previous?.focus();
+    };
+  }, [pause, assistant]);
+  useEffect(() => {
+    if (!mobileNav) return;
+    const items = () =>
+      Array.from(
+        navRef.current?.querySelectorAll<HTMLElement>(
+          "button, a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
+        ) ?? [],
+      ).filter((item) => item.offsetParent !== null);
+    const focusFrame = requestAnimationFrame(() => items()[0]?.focus());
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileNav(false);
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const a = items();
+      if (!a.length) return;
+      if (e.shiftKey && document.activeElement === a[0]) {
+        e.preventDefault();
+        a[a.length - 1].focus();
+      } else if (!e.shiftKey && document.activeElement === a[a.length - 1]) {
+        e.preventDefault();
+        a[0].focus();
+      }
+    };
+    document.addEventListener("keydown", key);
+    return () => {
+      cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", key);
+      menuButtonRef.current?.focus();
+    };
+  }, [mobileNav]);
+  const points = useMemo(
+    () => [
+      1000, 1032, 1010, 1040, 1026, 1060, 1045, 1088, 1072, 1103, 1084, 1110,
+      1080, 1093,
+    ],
+    [],
+  );
+  const nav = [
+    { key: "home" as const, icon: Grid2X2 },
+    { key: "explore" as const, icon: Compass },
+    { key: "simulator" as const, icon: FlaskConical },
+    { key: "portfolio" as const, icon: Wallet },
+  ];
+  const cards = [
+    {
+      name: t.fundOne,
+      tag: t.diversified,
+      risk: 3,
+      desc: t.fundOneDesc,
+      color: "sage",
+    },
+    {
+      name: t.fundTwo,
+      tag: t.equities,
+      risk: 5,
+      desc: t.fundTwoDesc,
+      color: "sand",
+    },
+    {
+      name: t.fundThree,
+      tag: t.fixedIncome,
+      risk: 2,
+      desc: t.fundThreeDesc,
+      color: "lavender",
+    },
+  ];
+  const choose = (p: Page) => {
+    setPage(p);
+    if (mobileNav) {
+      setMobileNav(false);
+      menuButtonRef.current?.focus();
+    }
+    setNotice(null);
+  };
+  const openAssistant = () => {
+    assistantTriggerRef.current = mobileNav
+      ? menuButtonRef.current
+      : document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    if (mobileNav) setMobileNav(false);
+    setAssistant(true);
+  };
+  const closeMenu = () => {
+    setMobileNav(false);
+    menuButtonRef.current?.focus();
+  };
+  function validateInputs(item: Instrument): FieldError {
+    const valid = (value: string, required: boolean) => (!required && !value.trim()) || (value.trim() !== "" && Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= MAX_SIMULATION_AMOUNT);
+    if (!valid(initial, true)) return "initial";
+    if (item.dataStatus === "annual_history" && !valid(annual, false)) return "annual";
+    if (item.dataStatus === "fictional" && !valid(monthly, false)) return "monthly";
+    return null;
+  }
+  function selectInstrument(item: Instrument) {
+    setSelectedId(item.instrumentId);
+    setResult(null);
+    setError(null);
+    const invalid = validateInputs(item);
+    if (invalid) { setError(invalid); return; }
+    try {
+      const outcome =
+        item.dataStatus === "annual_history"
+          ? replayAnnual(Number(initial), Number(annual))
+          : item.dataStatus === "fictional" && item.returns && months.trim()
+            ? simulate(
+                Number(initial),
+                Number(monthly),
+                Number(months),
+                item.returns,
+              )
+            : null;
+      if (outcome)
+        setResult({
+          ...outcome,
+          instrumentId: item.instrumentId,
+          initial: Number(initial),
+          monthly: Number(monthly),
+          annual: Number(annual),
+          months: Number(months),
+        });
+    } catch {
+      setError("general");
+    }
+  }
+  function run(e: FormEvent) {
+    e.preventDefault();
+    const invalid = validateInputs(selected);
+    if (invalid) { setResult(null); setError(invalid); return; }
+    try {
+      const outcome =
+        selected.dataStatus === "annual_history"
+          ? replayAnnual(Number(initial), Number(annual))
+          : selected.dataStatus === "fictional" &&
+              selected.returns &&
+              months.trim()
+            ? simulate(
+                Number(initial),
+                Number(monthly),
+                Number(months),
+                selected.returns,
+              )
+            : null;
+      if (!outcome) throw Error();
+      setResult({
+        ...outcome,
+        instrumentId: selected.instrumentId,
+        initial: Number(initial),
+        monthly: Number(monthly),
+        annual: Number(annual),
+        months: Number(months),
+      });
+      setError(null);
+    } catch {
+      setResult(null);
+      setError("general");
+    }
+  }
+  function send(e: FormEvent) {
+    e.preventDefault();
+    const q = input.trim();
+    if (!q) return;
+    const low = q.toLowerCase();
+    const kind = /fondo|fund|etf/.test(low)
+      ? "fund"
+      : /simula|aport|contrib/.test(low)
+        ? "sim"
+        : "fall";
+    setMessages((m) => [
+      ...m,
+      { from: "user", text: q },
+      { from: "assistant", kind, level },
+    ]);
+    setInput("");
+  }
+  const levelTitle = {
+    beginner: t.beginnerView,
+    intermediate: t.intermediateView,
+    advanced: t.advancedView,
+  }[level];
+  const levelText = {
+    beginner: t.beginnerText,
+    intermediate: t.intermediateText,
+    advanced: t.advancedText,
+  }[level];
+  return (
+    <div className="app-shell">
+      <aside
+        ref={navRef}
+        className={`sidebar ${mobileNav ? "open" : ""}`}
+        role={mobileNav ? "dialog" : undefined}
+        aria-modal={mobileNav ? true : undefined}
+        aria-label={t.space}
+      >
+        <div className="brand">
+          <div className="brand-mark">
+            <span>t</span>
+            <span>2</span>
+          </div>
+          <div>
+            <strong>
+              tech<span>2</span>finance
+            </strong>
+            <small>{t.app}</small>
+          </div>
+          <button
+            className="icon-button close-mobile"
+            onClick={closeMenu}
+            aria-label={t.closeMenu}
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <div className="nav-label">{t.space}</div>
+        <nav>
+          {nav.map(({ key, icon: Icon }) => (
+            <button
+              key={key}
+              className={`nav-item ${page === key ? "active" : ""}`}
+              onClick={() => choose(key)}
+              aria-current={page === key ? "page" : undefined}
+            >
+              <Icon size={18} />
+              <span>{names[key]}</span>
+              {page === key && <span className="active-dot" />}
+            </button>
+          ))}
+        </nav>
+        <div className="side-divider" />
+        <div className="nav-label">{t.learn}</div>
+        <button className="nav-item" onClick={openAssistant}>
+          <MessageCircle size={18} />
+          <span>{t.assistant}</span>
+          <span className="new-tag">{t.demo}</span>
+        </button>
+        <button className="nav-item" onClick={() => choose("explore")}>
+          <BookOpen size={18} />
+          <span>{t.basics}</span>
+        </button>
+        <div className="side-bottom">
+          <div className="profile">
+            <div className="avatar">TF</div>
+            <div>
+              <strong>{t.demoAccount}</strong>
+              <span>{t.personalSpace}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+      {mobileNav && (
+        <button
+          className="scrim"
+          onClick={closeMenu}
+          aria-label={t.closeMenu}
+          aria-hidden="true"
+          tabIndex={-1}
+        />
+      )}
+      <main className="main" inert={mobileNav ? true : undefined}>
+        <header className="topbar">
+          <div className="top-left">
+            <button
+              ref={menuButtonRef}
+              className="icon-button hamburger"
+              onClick={() => setMobileNav(true)}
+              aria-label={t.openMenu}
+            >
+              <Menu size={20} />
+            </button>
+            <span className="breadcrumb">
+              {t.space} <span>/</span> <strong>{names[page]}</strong>
+            </span>
+          </div>
+          <div className="top-actions">
+            <span className="demo-badge">{t.demonstration}</span>
+            <div className="preferences" aria-label={t.languageLabel}>
+              <button
+                className={`preference-button ${language === "es" ? "selected" : ""}`}
+                onClick={() => setLanguage("es")}
+                aria-pressed={language === "es"}
+                aria-label={t.switchSpanish}
+              >
+                ES
+              </button>
+              <button
+                className={`preference-button ${language === "en" ? "selected" : ""}`}
+                onClick={() => setLanguage("en")}
+                aria-pressed={language === "en"}
+                aria-label={t.switchEnglish}
+              >
+                EN
+              </button>
+            </div>
+            <button
+              className="icon-button theme-button"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              aria-label={theme === "light" ? t.darkTheme : t.lightTheme}
+            >
+              {theme === "light" ? <Moon size={19} /> : <Sun size={19} />}
+            </button>
+            <button className="icon-button theme-button" onClick={openAssistant} aria-label={t.openAssistant}>
+              <Sparkles size={19} />
+            </button>
+            <div className="level-wrap">
+              <button
+                className="level-button"
+                onClick={() => setLevelOpen((v) => !v)}
+                aria-expanded={levelOpen}
+                aria-label={`${t.level}: ${levelNames[level]}`}
+              >
+                <span>
+                  {t.level}: <strong>{levelNames[level]}</strong>
+                </span>
+                <ChevronDown size={15} />
+              </button>
+              {levelOpen && (
+                <div className="level-menu">
+                  {(["beginner", "intermediate", "advanced"] as Level[]).map(
+                    (l) => (
+                      <button
+                        key={l}
+                        onClick={() => {
+                          setLevel(l);
+                          setLevelOpen(false);
+                        }}
+                      >
+                        {levelNames[l]}
+                        {level === l && <Check size={15} />}
+                      </button>
+                    ),
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+        <div className="content">
+          {page === "home" && (
+            <>
+              <div className="page-heading">
+                <div>
+                  <div className="eyebrow">{t.eyebrow}</div>
+                  <h1>{t.title}</h1>
+                  <p>{t.intro}</p>
+                </div>
+              </div>
+              <section className={`welcome-card level-${level}`}>
+                <div className="welcome-content">
+                  <span className="view-tag">
+                    {level === "beginner"
+                      ? t.modeSmall
+                      : level === "intermediate"
+                        ? t.modeMedium
+                        : t.modeAdvanced}
+                  </span>
+                  <h2>{levelTitle}</h2>
+                  <p>{levelText}</p>
+                  <p>{t.knowledgeNote}</p>
+                  <div className="welcome-actions">
+                    <button
+                      className="button dark"
+                      onClick={() => choose("simulator")}
+                    >
+                      {t.trySimulator}
+                      <ArrowRight size={16} />
+                    </button>
+                    <button
+                      className="text-link"
+                      onClick={() => choose("explore")}
+                    >
+                      {t.viewFunds}
+                      <ArrowRight size={15} />
+                    </button>
+                  </div>
+                </div>
+                {level !== "beginner" && (
+                  <div className="view-summary">
+                    <span className="kicker">{t.examplePortfolio}</span>
+                    <strong>{euro(1093)}</strong>
+                    <small>{t.fictional}</small>
+                    {level === "advanced" && <p>{t.detailNote}</p>}
+                  </div>
+                )}
+              </section>
+              {level === "intermediate" && (
+                <div className="metric-grid">
+                  <div className="metric-card">
+                    <span>{t.portfolioValue}</span>
+                    <strong>{euro(1093)}</strong>
+                    <small>{t.fictional}</small>
+                  </div>
+                  <div className="metric-card">
+                    <span>{t.goal}</span>
+                    <strong>{t.longTerm}</strong>
+                    <small>{t.exampleGoal}</small>
+                  </div>
+                  <div className="metric-card">
+                    <span>{t.assumptions}</span>
+                    <strong>—</strong>
+                    <small>{t.noHistory}</small>
+                  </div>
+                </div>
+              )}
+              {level === "advanced" && (
+                <div className="metric-grid advanced">
+                  <div className="metric-card">
+                    <span>{t.portfolioValue}</span>
+                    <strong>{euro(1093)}</strong>
+                    <small>{t.fictional}</small>
+                  </div>
+                  <div className="metric-card">
+                    <span>{t.totalContributions}</span>
+                    <strong>—</strong>
+                    <small>{t.unavailable}</small>
+                  </div>
+                  <div className="metric-card">
+                    <span>{t.difference}</span>
+                    <strong>—</strong>
+                    <small>{t.unavailable}</small>
+                  </div>
+                  <div className="metric-card">
+                    <span>{t.assumptions}</span>
+                    <strong>—</strong>
+                    <small>{t.noHistory}</small>
+                  </div>
+                </div>
+              )}
+              <div className="section-head">
+                <div>
+                  <span className="kicker">{t.learn}</span>
+                  <h2>{t.learnSteps}</h2>
+                </div>
+              </div>
+              <div className="action-grid">
+                <button
+                  className="action-card"
+                  onClick={() => choose("explore")}
+                >
+                  <div className="action-icon mint">
+                    <Compass size={21} />
+                  </div>
+                  <h3>{t.discoverFunds}</h3>
+                  <p>{t.discoverDesc}</p>
+                  <span>
+                    {t.go}
+                    <ArrowRight size={14} />
+                  </span>
+                </button>
+                <button
+                  className="action-card"
+                  onClick={() => choose("simulator")}
+                >
+                  <div className="action-icon peach">
+                    <FlaskConical size={21} />
+                  </div>
+                  <h3>{t.practice}</h3>
+                  <p>{t.practiceDesc}</p>
+                  <span>
+                    {t.go}
+                    <ArrowRight size={14} />
+                  </span>
+                </button>
+                <button className="action-card" onClick={openAssistant}>
+                  <div className="action-icon lilac">
+                    <MessageCircle size={21} />
+                  </div>
+                  <h3>{t.ask}</h3>
+                  <p>{t.askDesc}</p>
+                  <span>
+                    {t.go}
+                    <ArrowRight size={14} />
+                  </span>
+                </button>
+              </div>
+              <div className="lower-grid">
+                <section className="portfolio-card">
+                  <div className="card-heading">
+                    <div>
+                      <span className="kicker">{t.fictional}</span>
+                      <h3>{t.examplePortfolio}</h3>
+                    </div>
+                    <button
+                      className="mini-link"
+                      onClick={() => choose("portfolio")}
+                    >
+                      {t.viewDetails}
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+                  <div className="portfolio-content">
+                    <div>
+                      <p>{t.portfolioValue}</p>
+                      <div className="amount">
+                        <CountUp
+                          from={1093}
+                          to={1093}
+                          duration={1.2}
+                          separator={language === "es" ? "." : ","}
+                          trigger="load"
+                        />{" "}
+                        €
+                      </div>
+                      <small>{t.noRealValue}</small>
+                    </div>
+                    <InvestmentChart
+                      compact
+                      language={language}
+                      title={t.examplePortfolio}
+                      description={t.portfolioChartDescription}
+                      data={points.map((value, index) => ({
+                        label:
+                          index === 0 ? t.start : `${t.pointLabel} ${index}`,
+                        value,
+                        contributed: 1000,
+                        returnPercent: (value / 1000 - 1) * 100,
+                      }))}
+                    />
+                  </div>
+                </section>
+                <section className="insight-card">
+                  <div className="insight-icon">
+                    <Sparkles size={18} />
+                  </div>
+                  <span className="kicker">{t.assistantTitle}</span>
+                  <h3>{t.levelExplanation}</h3>
+                  <p>{t.knowledgeNote}</p>
+                  <button onClick={openAssistant}>
+                    {t.askButton}
+                    <ArrowRight size={15} />
+                  </button>
+                </section>
+              </div>
+            </>
+          )}
+          {page === "explore" && (
+            <>
+              <PageIntro
+                label={t.catalog}
+                title={t.exploreTitle}
+                description={t.exploreIntro}
+              />
+              <div className="info-banner">
+                <ShieldCheck size={20} />
+                <span>{t.fictionalFunds}</span>
+              </div>
+              {notice !== null && (
+                <div className="notice" role="status">
+                  {cards[notice].name} {t.fundNotice}
+                  <button onClick={() => setNotice(null)} aria-label={t.close}>
+                    <X size={15} />
+                  </button>
+                </div>
+              )}
+              <div className="section-head">
+                <h2>{t.funds}</h2>
+              </div>
+              <div className="fund-grid">
+                {cards.map((c, i) => (
+                  <article className="fund-card" key={i}>
+                    <div className={`fund-art ${c.color}`}>
+                      <span>0{i + 1}</span>
+                      <Leaf size={26} />
+                    </div>
+                    <div className="fund-body">
+                      <span className="kicker">{c.tag}</span>
+                      <h3>{c.name}</h3>
+                      <p>{c.desc}</p>
+                      <div className="fund-meta">
+                        <span>{t.exampleRisk}</span>
+                        <strong>
+                          {c.risk} {t.of} 7
+                        </strong>
+                      </div>
+                      {level !== "beginner" && (
+                        <div className="fund-meta">
+                          <span>{t.costData}</span>
+                          <strong>{t.unavailable}</strong>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => {
+                          selectInstrument(
+                            instruments.find(
+                              (item) =>
+                                item.instrumentId ===
+                                ["demo-mixed", "demo-equity", "demo-fixed"][i],
+                            )!,
+                          );
+                          choose("simulator");
+                        }}
+                      >
+                        {t.practiceInstrument}
+                        <ArrowRight size={15} />
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </>
+          )}
+          {page === "simulator" && (
+            <Simulator
+              {...{
+                t,
+                language,
+                level,
+                selected,
+                result,
+                error,
+                initial,
+                monthly,
+                annual,
+                months,
+                setInitial,
+                setMonthly,
+                setAnnual,
+                setMonths,
+                setResult,
+                setError,
+                selectInstrument,
+                run,
+                openAssistant,
+                euro,
+              }}
+            />
+          )}
+          {page === "portfolio" && (
+            <>
+              <PageIntro
+                label={t.examplePortfolioLabel}
+                title={t.portfolioTitle}
+                description={t.portfolioIntro}
+              />
+              <div className="info-banner">
+                <LockKeyhole size={19} />
+                <span>{t.portfolioWarning}</span>
+              </div>
+              <div className="portfolio-page-grid">
+                <section className="panel large-portfolio">
+                  <div className="card-heading">
+                    <div>
+                      <span className="kicker">{t.totalValue}</span>
+                      <div className="big-amount">{euro(1093)}</div>
+                      <span className="change">{t.fictional}</span>
+                    </div>
+                    <span className="pill">{t.examplePortfolioLabel}</span>
+                  </div>
+                  <InvestmentChart
+                    compact
+                    language={language}
+                    title={t.examplePortfolio}
+                    description={t.portfolioChartDescription}
+                    data={points.map((value, index) => ({
+                      label: index === 0 ? t.start : `${t.pointLabel} ${index}`,
+                      value,
+                      contributed: 1000,
+                      returnPercent: (value / 1000 - 1) * 100,
+                    }))}
+                  />
+                  <div className="chart-labels">
+                    <span>{t.start}</span>
+                    <span>{t.now}</span>
+                  </div>
+                </section>
+                <section className="panel objective">
+                  <div className="action-icon mint">
+                    <Leaf size={21} />
+                  </div>
+                  <span className="kicker">{t.exampleGoal}</span>
+                  <h3>{t.goalTitle}</h3>
+                  <p>{t.goalText}</p>
+                  <div className="objective-row">
+                    <span>{t.illustrativeHorizon}</span>
+                    <strong>{t.longTerm}</strong>
+                  </div>
+                  <button
+                    className="button outline full"
+                    onClick={() => setPause(true)}
+                  >
+                    <TrendingDown size={17} />
+                    {t.understandFall}
+                  </button>
+                </section>
+              </div>
+              <div className="section-head">
+                <div>
+                  <span className="kicker">{t.insidePortfolio}</span>
+                  <h2>{t.distribution}</h2>
+                </div>
+              </div>
+              <div className="holdings">
+                <div className="holding-icon">
+                  <BarChart3 size={20} />
+                </div>
+                <div>
+                  <strong>{t.fundOne}</strong>
+                  <small>{t.fictionalFund}</small>
+                </div>
+                <div className="holding-value">
+                  <strong>{euro(1093)}</strong>
+                  <small>{t.fullPortfolio}</small>
+                </div>
+              </div>
+              {level === "advanced" && (
+                <p className="advanced-note">{t.dataUnavailable}</p>
+              )}
+            </>
+          )}
+          <footer>
+            <span>© Tech2Finance · {t.footer}</span>
+            <span>
+              <LockKeyhole size={13} />
+              {t.noAccounts}
+            </span>
+          </footer>
+        </div>
+      </main>
+      {assistant && (
+        <>
+          <button
+            className="drawer-overlay"
+            onClick={() => setAssistant(false)}
+            aria-label={t.closeAssistant}
+          />
+          <aside
+            ref={assistantRef}
+            className="assistant-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.assistantTitle}
+          >
+            <div className="assistant-head">
+              <div className="assistant-avatar">
+                <Sparkles size={20} />
+              </div>
+              <div>
+                <strong>{t.assistantTitle}</strong>
+                <span>{t.assistantSubtitle}</span>
+              </div>
+              <button
+                className="icon-button"
+                onClick={() => setAssistant(false)}
+                aria-label={t.closeAssistant}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="assistant-banner">{t.assistantNotice}</div>
+            <div className="messages" aria-live="polite">
+              <div className="message assistant">
+                <p>{t.assistantHello}</p>
+              </div>
+              {messages.map((m, i) => (
+                <div className={`message ${m.from}`} key={i}>
+                  <p>
+                    {m.from === "user"
+                      ? m.text
+                      : (m.kind === "fund"
+                          ? t.replyFund
+                          : m.kind === "sim"
+                            ? t.replySim
+                            : t.replyFall) +
+                        (m.level === "intermediate"
+                          ? t.replyMid
+                          : m.level === "advanced"
+                            ? t.replyAdvanced
+                            : "")}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="suggestions">
+              <button onClick={() => setInput(t.askFund)}>{t.askFund}</button>
+              <button onClick={() => setInput(t.askSimulation)}>
+                {t.askSimulation}
+              </button>
+            </div>
+            <form className="chat-form" onSubmit={send}>
+              <label className="sr-only" htmlFor="chat-input">
+                {t.inputLabel}
+              </label>
+              <input
+                id="chat-input"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={t.inputPlaceholder}
+              />
+              <button type="submit" aria-label={t.send}>
+                <Send size={17} />
+              </button>
+            </form>
+            <p className="assistant-foot">
+              <AudioLines size={14} />
+              {t.voicePending}
+            </p>
+          </aside>
+        </>
+      )}
+      {pause && (
+        <div className="modal-backdrop" onClick={() => setPause(false)}>
+          <section
+            ref={modalRef}
+            className="pause-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pause-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="icon-button modal-close"
+              onClick={() => setPause(false)}
+              aria-label={t.close}
+            >
+              <X size={20} />
+            </button>
+            <div className="pause-icon">
+              <Pause size={22} />
+            </div>
+            <span className="kicker">{t.pauseLabel}</span>
+            <h2 id="pause-title">{t.pauseTitle}</h2>
+            <p>{t.pauseText}</p>
+            <div className="pause-note">
+              <TrendingDown size={18} />
+              <div>
+                <strong>{t.whyDown}</strong>
+                <p>{t.pauseUnavailable}</p>
+              </div>
+            </div>
+            <p className="pause-disclaimer">{t.pauseRisk}</p>
+            <button
+              className="button dark full"
+              onClick={() => setPause(false)}
+            >
+              {t.understood}
+              <Check size={17} />
+            </button>
+            <button
+              className="plain-link"
+              onClick={() => {
+                setPause(false);
+                setTimeout(openAssistant, 0);
+              }}
+            >
+              {t.askAssistant}
+              <ArrowRight size={15} />
+            </button>
+          </section>
+        </div>
+      )}
+    </div>
+  );
 }
-function PageIntro({label,title,description}:{label:string;title:string;description:string}) { return <div className="page-heading internal"><div><div className="eyebrow">{label}</div><h1>{title}</h1><p>{description}</p></div></div> }
+function PageIntro({
+  label,
+  title,
+  description,
+}: {
+  label: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="page-heading internal">
+      <div>
+        <div className="eyebrow">{label}</div>
+        <h1>{title}</h1>
+        <p>{description}</p>
+      </div>
+    </div>
+  );
+}

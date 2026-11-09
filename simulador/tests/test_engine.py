@@ -139,4 +139,58 @@ class AnalysisTests(unittest.TestCase):
         for bad in (True, 'NaN', 'Infinity', '-1'):
             with self.assertRaises(InputError): scenarios({'initial':'1', 'monthly':'0', 'months':12, 'annual_rates':{'unfavorable':bad, 'central':'0', 'favorable':'0.1'}})
 
+class ReliabilityTests(unittest.TestCase):
+    def test_results_are_independent(self):
+        x = data([('2020-01-01','100'), ('2020-03-01','80')])
+        x['metadata']['extra'] = {'nested': ['original']}
+        series = parse_series(x)
+        result = compare(series, req(sell_date='2020-03-01'))
+        result['hold']['provenance']['extra']['nested'][0] = 'changed'
+        result['hold']['gaps'][0]['days'] = 0
+        self.assertEqual(result['sell']['provenance']['extra']['nested'][0], 'original')
+        self.assertNotEqual(result['sell']['gaps'][0]['days'], 0)
+        d = drawdowns(series)
+        d['provenance']['extra']['nested'][0] = 'changed'
+        d['gaps'][0]['days'] = 0
+        self.assertEqual(series.metadata['extra']['nested'][0], 'original')
+        self.assertNotEqual(series.gaps[0]['days'], 0)
+
+    def test_calendar_final_year(self):
+        series = parse_series(data([('9999-10-31','100'), ('9999-11-30','100'), ('9999-12-31','100')]))
+        for monthly, expected in [('0', 1000), ('10', 1020)]:
+            result = simulate(series, req(start='9999-10-31', end='9999-12-31', monthly=monthly))
+            self.assertEqual(Decimal(result['contributed']), expected)
+        missing = parse_series(data([('9999-10-31','100'), ('9999-11-30','100'), ('9999-12-30','100')]))
+        with self.assertRaises(InputError):
+            simulate(missing, req(start='9999-10-31', end='9999-12-31', monthly='10'))
+        sparse = parse_series(data([('9999-10-29','100'), ('9999-11-29','100'), ('9999-12-31','100')]))
+        with self.assertRaises(InputError):
+            simulate(sparse, req(start='9999-10-29', end='9999-12-30', monthly='10'))
+
+    def test_drawdown_threshold_exact_and_extremes(self):
+        series = parse_series(data([('2020-01-01','100'), ('2020-02-01','80'), ('2020-03-01','100'), ('2020-04-01','90')]))
+        for threshold, count in [('0.199999',1), ('0.2',1), ('0.200001',0), ('0.15',1)]:
+            self.assertEqual(len(drawdowns(series, threshold)['episodes']), count)
+        near_total = parse_series(data([('2020-01-01','1e20'), ('2020-02-01','1e-20')]))
+        self.assertEqual(drawdowns(near_total, '1')['episodes'], [])
+        small = parse_series(data([('2020-01-01','1.0000000000000000001'), ('2020-02-01','1.0000000000000000000')]))
+        self.assertGreater(Decimal(drawdowns(small)['episodes'][0]['depth']), 0)
+        tiny = parse_series(data([('2020-01-01','100000000000000000000'), ('2020-02-01','99999999999999999999.99999999999999999999')]))
+        self.assertGreater(Decimal(drawdowns(tiny)['episodes'][0]['depth']), 0)
+
+    def test_scenario_independent_oracles(self):
+        rates = {'unfavorable':'0.1', 'central':'0.1', 'favorable':'0.1'}
+        r = scenarios({'initial':'1000', 'monthly':'0', 'months':12, 'annual_rates':rates})
+        self.assertAlmostEqual(float(r['results']['central']['value']), 1100, places=9)
+        rates = dict.fromkeys(rates, '-0.717570463519')
+        r = scenarios({'initial':'1000', 'monthly':'100', 'months':1, 'annual_rates':rates})
+        self.assertAlmostEqual(float(r['results']['central']['value']), 1000, places=8)
+
+    def test_loader_rejects_large_integer_and_depth(self):
+        with tempfile.TemporaryDirectory() as t:
+            path = Path(t)/'bad.json'
+            for value in ['9'*5000, '['*2000+'0'+']'*2000]:
+                path.write_text(value, encoding='utf-8')
+                with self.assertRaises(InputError): load_series(path)
+
 if __name__ == '__main__': unittest.main()

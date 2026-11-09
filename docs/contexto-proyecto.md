@@ -112,4 +112,4 @@ La demo usa capital ficticio y, en esta rama, incluye una reconstrucción a part
 
 ## Catálogo local de práctica (rama de trabajo)
 
-La rama de trabajo incorpora ejemplos ficticios y una reconstrucción de cinco rentabilidades anuales publicadas de CaixaBank; las fichas de BBVA y Santander no tienen histórico conectado. Los detalles y límites constan en [contratos](contratos.md#catálogo-local-de-práctica-rama-de-trabajo).
+La rama de trabajo incorpora ejemplos ficticios y una reconstrucción de cinco rentabilidades anuales publicadas de CaixaBank con aportaciones anuales al cierre; las fichas de BBVA y Santander no tienen histórico conectado. Los detalles y límites constan en [contratos](contratos.md#catálogo-local-de-práctica-rama-de-trabajo).

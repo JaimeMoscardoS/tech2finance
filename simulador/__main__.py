@@ -3,6 +3,7 @@ import argparse
 import json
 import sys
 from . import InputError, load_series, simulate, compare, scenarios, drawdowns
+from .series import read_json
 
 class Parser(argparse.ArgumentParser):
     def error(self, message):
@@ -18,8 +19,7 @@ def main():
         args = parser.parse_args()
         request = {}
         if args.request:
-            with open(args.request, encoding='utf-8-sig') as f:
-                request = json.load(f)
+            request = read_json(args.request)
         if args.command == 'scenarios':
             result = scenarios(request)
         else:

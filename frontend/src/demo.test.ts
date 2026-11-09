@@ -35,6 +35,6 @@ test("annual published returns reconstruct the fixed historical period", () => {
  assert.ok(Math.abs(result.value-1058.0466709384355)<1e-9);
  assert.equal(result.contributed,1000);
  assert.equal(replayAnnual(0).value,0);
- assert.ok(Number.isFinite(replayAnnual(1e15).value));
- for (const invalid of [-1, NaN, Infinity, 1e15+1, 1.69e308, Number.MAX_VALUE]) assert.throws(()=>replayAnnual(invalid));
+ assert.ok(Number.isFinite(replayAnnual(1e9).value));
+ for (const invalid of [-1, NaN, Infinity, 1e9+1, 1.69e308, Number.MAX_VALUE]) assert.throws(()=>replayAnnual(invalid));
 });

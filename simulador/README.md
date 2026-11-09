@@ -58,7 +58,7 @@ La venta se ejecuta en la primera observación en o después de `sell_date`. En 
 
 Salida histórica: `schema_version`, `currency`, `unit_type`, `contributed`, `cash`, `units`, `fees`, `value`, `profit`, `simple_return`, `timeline`, `provenance`, `gaps`, `assumptions`. Cada punto de `timeline` incluye fecha, precio, saldos, aportado, comisiones, valor y operaciones con fecha programada, importe bruto y comisión. `profit = value - contributed`; `simple_return = profit / contributed`, o `null` si aún no hay aportación. No es rentabilidad ponderada por tiempo ni TIR. `compare` contiene `hold`, `sell` y supuestos.
 
-Todos los valores numéricos de salida se serializan como cadenas decimales. Cálculos con `Decimal`, precisión 34 dígitos significativos y redondeo mitad al par, con contexto explícito independiente del llamante; no se redondea a céntimos en cada operación. La presentación puede redondear solo al mostrar. Los cálculos no incluyen redondeos ni restricciones de contratación reales.
+Los importes, tasas y valores calculados se serializan como cadenas decimales; las duraciones en días y el umbral `max_gap_days` son enteros JSON. En histórico y escenarios se usa `Decimal` con 34 cifras significativas y redondeo mitad al par, con contexto explícito independiente del llamante; no se redondea a céntimos en cada operación. La presentación puede redondear solo al mostrar. Los cálculos no incluyen redondeos ni restricciones de contratación reales.
 
 ### Escenarios
 
@@ -67,3 +67,5 @@ Solicitud: `{"initial":"1000","monthly":"100","months":12,"annual_rates":{"unfav
 ### Caídas
 
 `drawdowns(series, threshold)` o CLI con `--request` que contenga `{"threshold":"0.05"}`. Umbral entre 0 y 1 inclusive, medido como fracción de caída. Sobre la serie, sin flujos: cada máximo observado inicia un episodio si después cae; se registra su mínimo observado y la primera observación que iguala o supera el máximo, o un episodio abierto al final. Igualdad renueva el máximo. Se muestran episodios de magnitud igual o superior al umbral, fechas, valores, magnitud, días hasta mínimo, días observados, recuperación y duración cuando se observa. No se conocen extremos ni recuperación entre observaciones. `comparison.status` es siempre `insufficient_evidence`: aún no se admiten comparables; `causes.status` es `unknown` sin fuentes inventadas. La procedencia y huecos van en la salida. Una recuperación observada no garantiza otra futura.
+
+La comparación de caídas con el umbral usa fracciones exactas; la magnitud mostrada se calcula con 120 cifras significativas. Así, una caída positiva no se muestra como cero ni una inferior al 100 % se incluye en el umbral del 100 % por redondeo.
