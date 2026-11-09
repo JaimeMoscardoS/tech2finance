@@ -103,7 +103,7 @@ Una versión futura podría integrarse con una entidad, mostrar información aut
 
 ## Organización y estado
 
-El trabajo se divide entre [cinco áreas](organizacion.md): interfaz, backend, simulador, IA y voz, y datos/pruebas/presentación. Los [contratos](contratos.md) describen qué información deberían intercambiar y la [guía de agentes](agentes.md) identifica los asistentes de desarrollo.
+El trabajo se divide entre [cinco áreas](organizacion.md): interfaz, backend, simulador, IA y voz, y datos/pruebas/presentación. Los [contratos](contratos.md) describen qué información deberían intercambiar y la [guía de agentes](agentes.md) identifica los asistentes de desarrollo. En sesiones Codex, el principal solo coordina y verifica; toda escritura se delega a Terra high, conforme a la [política de agentes](agentes.md).
 
 En `main` existe una primera demo React/TypeScript con catálogo y cartera ficticios, simulador ilustrativo, asistente de respuestas predefinidas y pausa ante una caída. La demo incluye tres niveles con distinta información, español/inglés y temas claro/oscuro. El frontend inicial y las vistas adaptativas se integraron mediante los pull requests #1 y #2. La [guía para backend](backend-contexto.md) recoge las decisiones y los puntos de conexión pendientes.
 

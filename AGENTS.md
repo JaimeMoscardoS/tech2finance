@@ -12,7 +12,8 @@ Copiloto de inversión para una aplicación bancaria simulada: interfaz adaptabl
 - La pausa antipánico no bloquea ventas ni presiona a mantener. Considerar necesidades de liquidez, horizonte y objetivo. Las noticias son contexto y no prueban causalidad por sí mismas.
 - El LLM explica; las reglas y los cálculos corresponden a código verificable. Mantener claves en el servidor y fuera de Git.
 - Coordinar contratos y cambios compartidos; preservar cambios ajenos. El plan completo generado por Claude era un artefacto oculto no disponible.
-- Modelo por rol: ejecutor Claude Sonnet / Codex gpt-6.1-terra; planificación y revisión Claude Opus / Codex gpt-6.1-sol. Si no está disponible, informar, sin sustituir silenciosamente. Revisores no editan.
+- En sesiones Codex, el agente principal `gpt-6.1-sol` solo orquesta, lee, revisa y verifica; no escribe archivos. Toda escritura del proyecto, incluidos código, documentación, configuración, pruebas, correcciones y textos de pull requests, se delega a un ejecutor o especialista `gpt-6.1-terra` con `model_reasoning_effort = "high"`. Planificadores y revisores Sol trabajan en solo lectura. Si Terra con esfuerzo high no está disponible, comunicar el bloqueo de escritura y no sustituirlo silenciosamente.
+- En sesiones Claude, Sonnet ejecuta y Opus planifica y revisa; los revisores no editan. Esta distribución de agentes de desarrollo no cambia el modelo del tutor de la aplicación.
 
 ## Revisión de pull requests grandes
 
