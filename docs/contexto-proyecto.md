@@ -50,6 +50,8 @@ Si se comparan «mantener» y «vender», debe explicarse qué ocurre con el din
 
 Pueden añadirse escenarios futuros si hay tiempo y el equipo define un modelo verificable. Serán hipótesis con posibles pérdidas, no predicciones ni promesas. No se extrapolarán automáticamente los tres meses anteriores como si predijeran los siguientes.
 
+La [propuesta técnica del simulador histórico](simulador-historico.md) describe el motor recomendado, las fuentes candidatas, sus permisos y los cálculos que quedan por acordar.
+
 ## Pausa antes de vender
 
 Esta función busca dar contexto cuando el usuario ve una caída o inicia una venta dentro de la demo. Puede mostrar cuánto ha cambiado la cartera ficticia, qué objetivo y horizonte se habían indicado, y la información disponible para entender el movimiento. También puede preguntar si el usuario necesita el dinero pronto.

@@ -5,3 +5,5 @@
 Juego histórico verificable, aportaciones, cálculos y escenarios hipotéticos con supuestos y pruebas.
 
 Lee las [instrucciones del área](AGENTS.md), el [reparto](../docs/organizacion.md) y los [contratos](../docs/contratos.md). La implementación está pendiente.
+
+La [propuesta del simulador histórico](../docs/simulador-historico.md) explica el motor, las fuentes y las comprobaciones pendientes.

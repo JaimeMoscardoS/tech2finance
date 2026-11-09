@@ -22,3 +22,5 @@ Ejecutor: `t2f-05-producto-executor`. Revisor: `t2f-05-producto-reviewer`. Plani
 ## Motor de análisis de caídas
 
 Identificar series del mismo fondo y comparables justificados, noticias y fuentes verificables, con fechas, licencias y límites. Consulta `docs/contexto-proyecto.md` y `docs/contratos.md`.
+
+Consulta la propuesta de motor, fuentes y licencias en `docs/simulador-historico.md` antes de seleccionar datos o implementar cálculos.
