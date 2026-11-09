@@ -22,6 +22,8 @@ Asignad cada implementación al ejecutor o especialista adecuado y la revisión 
 
 Si no se puede utilizar un agente o el modelo previsto, indicadlo junto con el motivo y las comprobaciones pendientes. En los pull requests grandes siguen vigentes la nota mínima de 8/10 y el máximo de dos rondas descritos más abajo; todos los cambios se trabajan mediante rama y pull request.
 
+Cada cambio debe actualizar el contexto y la documentación afectados en el mismo pull request, distinguiendo lo propuesto, implementado, comprobado y pendiente, según las instrucciones de la raíz.
+
 ## Especialistas por responsabilidad
 
 ### 1

@@ -33,3 +33,9 @@ Todos los cambios se realizan en una rama y se presentan mediante pull request p
 Usar los agentes de desarrollo adecuados al área y a la tarea: asignar la implementación al ejecutor o especialista correspondiente y su revisión a un revisor adecuado, consultando `docs/agentes.md`. Dar a cada agente una tarea y unos archivos concretos, conservar las ediciones ajenas y comprobar sus resultados antes de dar el trabajo por terminado. El responsable principal conserva la decisión final.
 
 Usar solo los agentes necesarios: incorporar un segundo especialista únicamente cuando cubra un área o riesgo diferente, sin repetir revisiones por rutina. En los pull requests grandes se mantienen la nota mínima y el límite de rondas de la sección anterior. Si no se pueden utilizar los agentes o modelos previstos, indicar cuáles y por qué, y qué comprobaciones han quedado pendientes; no afirmar que se ha hecho una revisión que no se ha ejecutado.
+
+## Mantener actualizado el contexto
+
+En cada cambio, actualizar en el mismo pull request la documentación y el contexto afectados: describir las funcionalidades y cambios relevantes, sus entradas y salidas, decisiones y dependencias, y cómo utilizarlos o comprobarlos cuando corresponda. Mantener `docs/contexto-proyecto.md` como visión general actualizada, y editar los README, contratos e instrucciones de área que correspondan, sin duplicar detalles innecesariamente.
+
+Distinguir siempre lo que está propuesto, implementado y comprobado de lo que sigue pendiente; indicar las limitaciones y pruebas realizadas con evidencia. No presentar como integrado en `main`, desplegado o conectado a servicios lo que solo existe en una rama o en una demo. No incluir secretos ni datos privados.
