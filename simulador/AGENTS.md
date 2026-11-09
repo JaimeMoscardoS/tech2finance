@@ -20,3 +20,5 @@ Ejecutor: `t2f-03-simulador-executor`. Revisor: `t2f-03-simulador-reviewer`. Pla
 ## Motor de análisis de caídas
 
 Definir y verificar criterios de comparación histórica, caídas y recuperación observada, incluyendo episodios sin recuperación en el periodo disponible. Consulta `docs/contexto-proyecto.md` y `docs/contratos.md`.
+
+Consulta la propuesta de motor, fuentes y licencias en `docs/simulador-historico.md` antes de seleccionar datos o implementar cálculos.

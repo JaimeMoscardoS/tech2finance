@@ -27,7 +27,7 @@ La simulación actual se ejecuta localmente en `frontend/src/demo.ts`. Recibe im
 3. Con **tutor y voz (4)**: definir el contexto mínimo permitido, fuentes, respuesta en texto y fallos de proveedores. Mantener las claves en el servidor y fuera de Git; no registrar ni enviar datos personales reales en la demo.
 4. Con **pruebas (5)**: preparar casos de datos insuficientes, ausencia de noticias, errores de proveedor, pérdidas y episodios sin recuperación observada. El usuario siempre conserva la decisión.
 
-Python/FastAPI es la dirección propuesta para backend, pero no hay aún servicio, endpoints ni esquemas acordados. La persona 2 coordina las interfaces con los responsables de cada área; no tiene que resolver sola los problemas de integración. Antes de implementar, acordad contratos concretos en [contratos](contratos.md) y actualizad este documento cuando cambie el estado.
+Python/FastAPI es la dirección propuesta para backend, pero no hay aún servicio, endpoints ni esquemas acordados. La [propuesta de simulador histórico](simulador-historico.md) detalla las fuentes candidatas y el motor previsto. La persona 2 coordina las interfaces con los responsables de cada área; no tiene que resolver sola los problemas de integración. Antes de implementar, acordad contratos concretos en [contratos](contratos.md) y actualizad este documento cuando cambie el estado.
 
 ## Cómo verificar el estado
 
