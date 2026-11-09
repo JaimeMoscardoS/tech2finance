@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Interfaz de demostración en React y TypeScript para el copiloto de inversión del proyecto. Incluye inicio, catálogo ficticio, simulador ilustrativo, cartera ficticia, pausa antes de vender y un asistente de ejemplo con respuestas predefinidas. Los niveles cambian parte de la información y las explicaciones.
+Interfaz de demostración en React y TypeScript para el copiloto de inversión del proyecto. Incluye inicio, catálogo ficticio, simulador ilustrativo, cartera ficticia, pausa antes de vender y un asistente de ejemplo con respuestas predefinidas. Incluye tres vistas progresivas según conocimiento, interfaz en español e inglés y temas claro y oscuro. El idioma y el tema se guardan en el navegador. Los niveles cambian la presentación y las explicaciones, no el riesgo de las inversiones.
 
 La demo no está conectada al backend, Claude, ElevenLabs ni a fuentes financieras. El simulador utiliza variaciones ficticias repetidas, no datos históricos ni predicciones; no se realizan operaciones. La máquina del tiempo histórica y el motor de análisis de caídas quedan pendientes de las áreas correspondientes.
 

@@ -27,3 +27,9 @@ Un pull request es grande a efectos de esta regla cuando introduce una funcional
 ## Flujo obligatorio con pull requests
 
 Todos los cambios se realizan en una rama y se presentan mediante pull request para revisión. No integrar directamente en main. La revisión ampliada y su nota mínima solo se exigen en los pull requests grandes, conforme al apartado anterior.
+
+## Uso de agentes
+
+Usar los agentes de desarrollo adecuados al área y a la tarea: asignar la implementación al ejecutor o especialista correspondiente y su revisión a un revisor adecuado, consultando `docs/agentes.md`. Dar a cada agente una tarea y unos archivos concretos, conservar las ediciones ajenas y comprobar sus resultados antes de dar el trabajo por terminado. El responsable principal conserva la decisión final.
+
+Usar solo los agentes necesarios: incorporar un segundo especialista únicamente cuando cubra un área o riesgo diferente, sin repetir revisiones por rutina. En los pull requests grandes se mantienen la nota mínima y el límite de rondas de la sección anterior. Si no se pueden utilizar los agentes o modelos previstos, indicar cuáles y por qué, y qué comprobaciones han quedado pendientes; no afirmar que se ha hecho una revisión que no se ha ejecutado.

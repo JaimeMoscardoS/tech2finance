@@ -16,6 +16,12 @@ Planificador: `t2f-planner`. En Claude Code el ejecutor usa Sonnet y planificaci
 
 Configuraciones de proyecto en `.claude/agents/` y `.codex/agents/`; Codex utiliza `.codex/config.toml`. Abrir la raíz del proyecto y confiar en la configuración si la herramienta lo solicita; puede hacer falta iniciar otra sesión. Pedir por nombre, con tarea y archivos concretos. Ejemplo: «Usa `t2f-03-simulador-executor` para esta tarea y después `t2f-03-simulador-reviewer` para revisar el diff». El revisor informa y no edita; una persona o el agente principal verifica el resultado.
 
+## Uso en el trabajo
+
+Asignad cada implementación al ejecutor o especialista adecuado y la revisión a un revisor del área, dando tareas y archivos concretos. El responsable principal verifica los resultados y coordina el trabajo compartido. Usad únicamente los agentes necesarios y añadid otro especialista cuando cubra un riesgo o área distinta.
+
+Si no se puede utilizar un agente o el modelo previsto, indicadlo junto con el motivo y las comprobaciones pendientes. En los pull requests grandes siguen vigentes la nota mínima de 8/10 y el máximo de dos rondas descritos más abajo; todos los cambios se trabajan mediante rama y pull request.
+
 ## Especialistas por responsabilidad
 
 ### 1

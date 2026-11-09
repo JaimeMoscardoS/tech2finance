@@ -36,7 +36,79 @@ test('mobile navigation is hidden until opened', async ({ browser }) => {
   await expect(page.getByRole('button', { name: 'Simulador', exact: true })).toBeHidden();
   await page.getByRole('button', { name: 'Abrir menú' }).click();
   await page.getByRole('button', { name: 'Simulador', exact: true }).click();
-  await expect(page.getByRole('heading', { name: /Imaginar también/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Practica con dinero ficticio/ })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   await context.close();
+});
+test('language and theme switches apply across the interface and persist', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'English' }).click();
+  await expect(page.getByRole('heading', { name: /Investing starts/ })).toBeVisible();
+  await page.getByRole('button', { name: 'Dark theme' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.reload();
+  await expect(page.getByRole('heading', { name: /Investing starts/ })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+});
+
+test('experience levels show distinct views without changing the selected risk', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByText('Tu punto de partida')).toBeVisible();
+  await page.getByRole('button', { name: /Nivel: Principiante/ }).click();
+  await page.getByRole('button', { name: 'Intermedio' }).click();
+  await expect(page.getByText('Tu panorama')).toBeVisible();
+  await page.getByRole('button', { name: /Nivel: Intermedio/ }).click();
+  await page.getByRole('button', { name: 'Avanzado' }).click();
+  await expect(page.getByText('Panel de análisis')).toBeVisible();
+});
+test('English navigation, assistant and simulated portfolio are translated', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'English' }).click();
+  await page.getByRole('button', { name: 'Explore', exact: true }).click();
+  await expect(page.getByText('Fictional funds for learning. These are not recommendations.')).toBeVisible();
+  await page.getByRole('button', { name: 'My portfolio', exact: true }).click();
+  await page.getByRole('button', { name: 'Understand a decline' }).click();
+  await expect(page.getByText(/does not guarantee recovery/)).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Open assistant' }).click();
+  await expect(page.getByText('SAMPLE RESPONSES · AI AND VOICE NOT CONNECTED')).toBeVisible();
+  await page.getByRole('button', { name: 'What is a fund?' }).click();
+  await page.getByRole('button', { name: 'Send question' }).click();
+  await expect(page.getByText(/A fund pools contributions/)).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: 'Open assistant' })).toBeFocused();
+});
+
+test('mobile menu traps focus, closes with Escape and restores focus', async ({ browser }) => {
+ const context = await browser.newContext({ viewport: { width: 320, height: 700 } });
+ const page = await context.newPage(); await page.goto('/');
+ const trigger = page.getByRole('button', { name: 'Abrir menú' });
+ await trigger.click(); const close = page.getByRole('complementary', { name: 'MI ESPACIO' }).getByRole('button', { name: 'Cerrar menú', exact: true });
+ await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab');
+ await expect(page.getByRole('button', { name: 'Conceptos básicos' })).toBeFocused();
+ await page.keyboard.press('Escape'); await expect(trigger).toBeFocused();
+ await context.close();
+});
+
+test('English intermediate view fits a 320px screen', async ({ browser }) => {
+ const context = await browser.newContext({ viewport: { width: 320, height: 700 } });
+ const page = await context.newPage(); await page.goto('/');
+ await page.getByRole('button', { name: 'English' }).click();
+ await page.getByRole('button', { name: 'Level: Beginner' }).click();
+ await page.getByRole('button', { name: 'Intermediate', exact: true }).click();
+ expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
+ await context.close();
+});
+
+test('opening the assistant from the mobile menu transfers focus to the dialog', async ({ browser }) => {
+ const context = await browser.newContext({ viewport: { width: 320, height: 700 } });
+ const page = await context.newPage(); await page.goto('/');
+ await page.getByRole('button', { name: 'Abrir menú' }).click();
+ await page.getByRole('button', { name: 'Tu asistente DEMO' }).click();
+ const dialog = page.getByRole('dialog', { name: 'Tu asistente' });
+ await expect(dialog).toBeVisible();
+ await expect(dialog.getByRole('button', { name: 'Cerrar asistente' })).toBeFocused();
+ await page.keyboard.press('Escape');
+ await expect(page.getByRole('button', { name: 'Abrir menú' })).toBeFocused();
+ await context.close();
 });
