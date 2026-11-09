@@ -50,7 +50,7 @@ Si se comparan «mantener» y «vender», debe explicarse qué ocurre con el din
 
 Pueden añadirse escenarios futuros si hay tiempo y el equipo define un modelo verificable. Serán hipótesis con posibles pérdidas, no predicciones ni promesas. No se extrapolarán automáticamente los tres meses anteriores como si predijeran los siguientes.
 
-La [propuesta técnica del simulador histórico](simulador-historico.md) describe el motor recomendado, las fuentes candidatas, sus permisos y los cálculos que quedan por acordar.
+La [propuesta técnica del simulador histórico](simulador-historico.md) describe el motor, las fuentes candidatas y los permisos pendientes; la referencia del módulo precisa la implementación local.
 
 ## Pausa antes de vender
 
@@ -77,7 +77,7 @@ Un horizonte largo puede ayudar a contextualizar la volatilidad y disponer de m�
 
 La persona 5 identifica y verifica fuentes y licencias; la 3 define las reglas de comparación y realiza los cálculos; la 2 conecta datos y resultados; la 4 prepara la explicación y la voz; y la 1 presenta los resultados y sus limitaciones. Cada responsable participa en las pruebas de su componente y la persona 5 coordina las pruebas del flujo completo.
 
-Este motor es una funcionalidad **propuesta**, aún sin implementar. Para el hackathon puede demostrarse primero con un conjunto pequeño de episodios preparados y verificados; la búsqueda automática de noticias y comparables dependerá de las fuentes, licencias y tiempo disponibles. Si no hay datos suficientes, la interfaz debe mostrarlo.
+En esta rama existe un análisis cuantitativo básico de caídas observadas, aislado y con datos sintéticos. La búsqueda y comparación justificadas siguen pendientes. Para el hackathon puede demostrarse primero con un conjunto pequeño de episodios preparados y verificados; la búsqueda automática de noticias y comparables dependerá de las fuentes, licencias y tiempo disponibles. Si no hay datos suficientes, la interfaz debe mostrarlo.
 ## Noticias y explicación de movimientos
 
 La intención del equipo es poder contrastar las explicaciones con noticias reales y actuales de fuentes fiables. Para ello habría que conectar una fuente, conservar título, enlace y fechas relevantes y comprobar que la información corresponde a la cartera y al periodo. Esa conexión todavía no existe ni se ha elegido un proveedor.
@@ -107,4 +107,4 @@ El trabajo se divide entre [cinco áreas](organizacion.md): interfaz, backend, s
 
 En `main` existe una primera demo React/TypeScript con catálogo y cartera ficticios, simulador ilustrativo, asistente de respuestas predefinidas y pausa ante una caída. La demo incluye tres niveles con distinta información, español/inglés y temas claro/oscuro. El frontend inicial y las vistas adaptativas se integraron mediante los pull requests #1 y #2. La [guía para backend](backend-contexto.md) recoge las decisiones y los puntos de conexión pendientes.
 
-El simulador usa valores ficticios: la máquina del tiempo histórica, el backend, el motor de análisis de caídas y las conexiones a Claude, ElevenLabs y noticias aún no están implementados. Python/FastAPI, Claude y ElevenLabs son la dirección propuesta para las piezas pendientes; sus detalles deben acordarse. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
+La demo frontend usa valores ficticios. En esta rama se ha añadido un motor Python aislado de reproducción, escenarios y análisis básico de caídas; no está conectado a la demo ni dispone de datos reales verificados. El backend y las conexiones a Claude, ElevenLabs y noticias siguen pendientes. Python/FastAPI, Claude y ElevenLabs son la dirección propuesta para las piezas pendientes; sus detalles deben acordarse. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
