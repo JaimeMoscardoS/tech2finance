@@ -23,3 +23,7 @@ Un pull request es grande a efectos de esta regla cuando introduce una funcional
 - Hacer una revisión inicial y, si hay cambios, como máximo una segunda revisión centrada en las correcciones y sus efectos. No iniciar más rondas automáticas ni repetir revisiones ya resueltas.
 - Si tras la segunda ronda la nota sigue por debajo de 8, queda un hallazgo crítico o alto, o falta evidencia imprescindible, comunicar lo pendiente y dejar el cambio sin aprobar; no rebajar la nota ni ocultar los problemas para cerrar. El equipo decide el siguiente paso.
 - Los revisores informan y no editan. La nota no sustituye las pruebas apropiadas ni la decisión de integración del equipo.
+
+## Flujo obligatorio con pull requests
+
+Todos los cambios se realizan en una rama y se presentan mediante pull request para revisión. No integrar directamente en main. La revisión ampliada y su nota mínima solo se exigen en los pull requests grandes, conforme al apartado anterior.
