@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Juego histórico verificable, aportaciones, cálculos y escenarios hipotéticos con supuestos y pruebas. 
+Juego histórico verificable, aportaciones, cálculos y escenarios hipotéticos con supuestos y pruebas.
 
 ## Instrucciones
 
@@ -11,3 +11,8 @@ Leer `../AGENTS.md`, `../docs/organizacion.md` y `../docs/contratos.md`. Coordin
 ## Agentes
 
 Ejecutor: `t2f-03-simulador-executor`. Revisor: `t2f-03-simulador-reviewer`. Planificador común: `t2f-planner`. Sonnet/Terra ejecutan; Opus/Sol planifican y revisan. El revisor no edita.
+
+### Especialistas disponibles
+
+- `t2f-03-cuantitativo`: Implementa cálculos reproducibles de aportaciones, evolución histórica y escenarios; documenta unidades, comisiones y supuestos.
+- `t2f-03-revisor-matematico`: Comprueba resultados, unidades, periodicidad, aportaciones, datos, supuestos, pérdidas y pruebas sin declarar validación de mercado.

@@ -44,3 +44,59 @@ config_file = "agents/t2f-05-producto-reviewer.toml"
 [agents.t2f-planner]
 description = "Planifica el trabajo y coordina contratos y revisiones."
 config_file = "agents/t2f-planner.toml"
+
+[agents.t2f-01-diseno]
+description = "1 diseño de interfaz: planner especializado para Tech2Finance."
+config_file = "agents/t2f-01-diseno.toml"
+
+[agents.t2f-01-accesibilidad]
+description = "1 accesibilidad y UX: reviewer especializado para Tech2Finance."
+config_file = "agents/t2f-01-accesibilidad.toml"
+
+[agents.t2f-02-arquitectura]
+description = "2 arquitectura: planner especializado para Tech2Finance."
+config_file = "agents/t2f-02-arquitectura.toml"
+
+[agents.t2f-02-integracion]
+description = "2 integración API: executor especializado para Tech2Finance."
+config_file = "agents/t2f-02-integracion.toml"
+
+[agents.t2f-02-seguridad]
+description = "2 seguridad: reviewer especializado para Tech2Finance."
+config_file = "agents/t2f-02-seguridad.toml"
+
+[agents.t2f-03-cuantitativo]
+description = "3 ingeniería cuantitativa: executor especializado para Tech2Finance."
+config_file = "agents/t2f-03-cuantitativo.toml"
+
+[agents.t2f-03-revisor-matematico]
+description = "3 revisión matemática: reviewer especializado para Tech2Finance."
+config_file = "agents/t2f-03-revisor-matematico.toml"
+
+[agents.t2f-04-conversacion]
+description = "4 conversación contextual: executor especializado para Tech2Finance."
+config_file = "agents/t2f-04-conversacion.toml"
+
+[agents.t2f-04-voz]
+description = "4 integración de voz: executor especializado para Tech2Finance."
+config_file = "agents/t2f-04-voz.toml"
+
+[agents.t2f-04-revisor-fundamentos]
+description = "4 revisión de información financiera: reviewer especializado para Tech2Finance."
+config_file = "agents/t2f-04-revisor-fundamentos.toml"
+
+[agents.t2f-05-fuentes]
+description = "5 datos y fuentes: executor especializado para Tech2Finance."
+config_file = "agents/t2f-05-fuentes.toml"
+
+[agents.t2f-05-qa]
+description = "5 pruebas integradas: reviewer especializado para Tech2Finance."
+config_file = "agents/t2f-05-qa.toml"
+
+[agents.t2f-05-presentacion]
+description = "5 presentación y narrativa: executor especializado para Tech2Finance."
+config_file = "agents/t2f-05-presentacion.toml"
+
+[agents.t2f-05-revisor-presentacion]
+description = "5 revisión de presentación: reviewer especializado para Tech2Finance."
+config_file = "agents/t2f-05-revisor-presentacion.toml"

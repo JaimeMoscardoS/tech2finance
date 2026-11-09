@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Pantallas del banco simulado, niveles, catálogo, juego histórico, gráficos y pausa accesible. 
+Pantallas del banco simulado, niveles, catálogo, juego histórico, gráficos y pausa accesible.
 
 ## Instrucciones
 
@@ -11,3 +11,8 @@ Leer `../AGENTS.md`, `../docs/organizacion.md` y `../docs/contratos.md`. Coordin
 ## Agentes
 
 Ejecutor: `t2f-01-frontend-executor`. Revisor: `t2f-01-frontend-reviewer`. Planificador común: `t2f-planner`. Sonnet/Terra ejecutan; Opus/Sol planifican y revisan. El revisor no edita.
+
+### Especialistas disponibles
+
+- `t2f-01-diseno`: Diseña experiencias bancarias sencillas, pantallas y jerarquía visual para tres niveles, juego y pausa, con criterios claros y sin implementar.
+- `t2f-01-accesibilidad`: Revisa navegación por teclado, contraste, lector de pantalla, estados y experiencia de voz con evidencia real.
