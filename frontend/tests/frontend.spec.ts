@@ -1,6 +1,7 @@
 import { test, expect, devices } from '@playwright/test';
 
 test('users can explore, change level and run a labelled simulation', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Invertir empieza/ })).toBeVisible();
   await page.getByRole('button', { name: /Nivel: Principiante/ }).click();
@@ -17,6 +18,7 @@ test('users can explore, change level and run a labelled simulation', async ({ p
 });
 
 test('pause dialog handles keyboard focus and escape', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await page.getByRole('button', { name: 'Mi cartera', exact: true }).click();
   const trigger = page.getByRole('button', { name: /Entender una caída/ });
@@ -32,6 +34,7 @@ test('pause dialog handles keyboard focus and escape', async ({ page }) => {
 test('mobile navigation is hidden until opened', async ({ browser }) => {
   const context = await browser.newContext({ ...devices['iPhone 13'] });
   const page = await context.newPage();
+  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Simulador', exact: true })).toBeHidden();
   await page.getByRole('button', { name: 'Abrir menú' }).click();
@@ -41,6 +44,7 @@ test('mobile navigation is hidden until opened', async ({ browser }) => {
   await context.close();
 });
 test('language and theme switches apply across the interface and persist', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await page.getByRole('button', { name: 'English' }).click();
   await expect(page.getByRole('heading', { name: /Investing starts/ })).toBeVisible();
@@ -52,6 +56,7 @@ test('language and theme switches apply across the interface and persist', async
 });
 
 test('experience levels show distinct views without changing the selected risk', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await expect(page.getByText('Tu punto de partida')).toBeVisible();
   await page.getByRole('button', { name: /Nivel: Principiante/ }).click();
@@ -62,6 +67,7 @@ test('experience levels show distinct views without changing the selected risk',
   await expect(page.getByText('Panel de análisis')).toBeVisible();
 });
 test('English navigation, assistant and simulated portfolio are translated', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await page.getByRole('button', { name: 'English' }).click();
   await page.getByRole('button', { name: 'Explore', exact: true }).click();
@@ -81,7 +87,8 @@ test('English navigation, assistant and simulated portfolio are translated', asy
 
 test('mobile menu traps focus, closes with Escape and restores focus', async ({ browser }) => {
  const context = await browser.newContext({ viewport: { width: 320, height: 700 } });
- const page = await context.newPage(); await page.goto('/');
+ const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
  const trigger = page.getByRole('button', { name: 'Abrir menú' });
  await trigger.click(); const close = page.getByRole('dialog', { name: 'MI ESPACIO' }).getByRole('button', { name: 'Cerrar menú', exact: true });
  await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab');
@@ -92,7 +99,8 @@ test('mobile menu traps focus, closes with Escape and restores focus', async ({ 
 
 test('English intermediate view fits a 320px screen', async ({ browser }) => {
  const context = await browser.newContext({ viewport: { width: 320, height: 700 } });
- const page = await context.newPage(); await page.goto('/');
+ const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
  await page.getByRole('button', { name: 'English' }).click();
  await page.getByRole('button', { name: 'Level: Beginner' }).click();
  await page.getByRole('button', { name: 'Intermediate', exact: true }).click();
@@ -102,7 +110,8 @@ test('English intermediate view fits a 320px screen', async ({ browser }) => {
 
 test('opening the assistant from the mobile menu transfers focus to the dialog', async ({ browser }) => {
  const context = await browser.newContext({ viewport: { width: 320, height: 700 } });
- const page = await context.newPage(); await page.goto('/');
+ const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
  await page.getByRole('button', { name: 'Abrir menú' }).click();
  await page.getByRole('button', { name: 'Tu asistente DEMO' }).click();
  const dialog = page.getByRole('dialog', { name: 'Tu asistente' });
@@ -114,7 +123,8 @@ test('opening the assistant from the mobile menu transfers focus to the dialog',
 });
 
 test('catalogue selection changes the example and real funds have no invented result', async ({ page }) => {
- await page.goto('/');
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
  await page.getByRole('button', {name:'Simulador', exact:true}).click();
  const panel=page.locator('.sim-result');
  const original=await panel.locator('.sim-values strong').first().textContent();
@@ -139,7 +149,8 @@ test('catalogue selection changes the example and real funds have no invented re
 });
 
 test('explore transfers the chosen fictional instrument', async ({page}) => {
- await page.goto('/');
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
  await page.getByRole('button',{name:'Explorar',exact:true}).click();
  await page.locator('.fund-card').nth(1).getByRole('button',{name:'Practicar con este ejemplo'}).click();
  await expect(page.getByLabel('Instrumento')).toHaveValue('demo-equity');
@@ -148,7 +159,8 @@ test('explore transfers the chosen fictional instrument', async ({page}) => {
 
 test('catalogue fits mobile in English dark mode', async ({browser}) => {
  const context=await browser.newContext({viewport:{width:320,height:700}});
- const page=await context.newPage(); await page.goto('/');
+ const page=await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
  await page.getByRole('button',{name:'English'}).click();
  await page.getByRole('button',{name:'Dark theme'}).click();
  await page.getByRole('button',{name:'Open menu'}).click();
@@ -162,7 +174,8 @@ test('catalogue fits mobile in English dark mode', async ({browser}) => {
 });
 
 test('annual history keeps fixed period and excludes monthly contributions', async ({ page }) => {
- await page.goto('/');
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
  await page.getByRole('button', {name:'Simulador', exact:true}).click();
  await page.getByLabel('Aportación mensual').fill('200');
  await page.getByRole('button', {name:'Probar histórico 2021–2025'}).click();
@@ -206,7 +219,8 @@ test('annual history keeps fixed period and excludes monthly contributions', asy
 
 test('tablet layout, modal scrolling and mobile menu background', async ({ browser }) => {
  const tablet=await browser.newContext({viewport:{width:768,height:1024}});
- const page=await tablet.newPage(); await page.goto('/');
+ const page=await tablet.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
  await page.getByRole('button',{name:'English'}).click();
  await page.getByRole('button',{name:'Dark theme'}).click();
  await page.getByRole('button',{name:'Simulator',exact:true}).click();
@@ -217,7 +231,7 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await expect(page.getByRole('button',{name:'Level: Beginner'})).toHaveAttribute('aria-expanded','false');
  await tablet.close();
  const mobile=await browser.newContext({viewport:{width:568,height:320}});
- const phone=await mobile.newPage(); await phone.goto('/');
+ const phone=await mobile.newPage(); await phone.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local')); await phone.goto('/');
  await phone.getByRole('button',{name:'Abrir menú'}).click();
  await expect(phone.locator('main')).toHaveAttribute('inert','');
  await phone.getByRole('button',{name:'Mi cartera',exact:true}).click();
@@ -231,7 +245,8 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
 });
 
 test('annual deposits, table and percentage view stay consistent across preferences', async ({page}) => {
- await page.goto('/');
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
  await page.getByRole('button',{name:'Simulador',exact:true}).click();
  await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
  await page.getByLabel('Aportación anual').fill('50');
@@ -269,7 +284,8 @@ test('annual deposits, table and percentage view stay consistent across preferen
 });
 
 test('validation identifies the actual field and retains annual help', async ({page}) => {
- await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
  await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
  const initial=page.getByLabel('Importe inicial'); const annual=page.getByLabel('Aportación anual');
  await initial.fill('-1'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
@@ -286,7 +302,8 @@ test('validation identifies the actual field and retains annual help', async ({p
 test('home chart retains useful width on narrow screens', async ({browser}) => {
  for (const width of [320,768]) {
   const context=await browser.newContext({viewport:{width,height:900}});
-  const page=await context.newPage(); await page.goto('/');
+  const page=await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/');
   if (width===768) { await page.getByRole('button',{name:'English'}).click(); await page.getByRole('button',{name:'Dark theme'}).click(); }
   const plot=page.locator('.portfolio-content .investment-chart__plot');
   await expect(plot).toBeVisible();
@@ -299,7 +316,8 @@ test('home chart retains useful width on narrow screens', async ({browser}) => {
 test('local tutor grounds results, keeps previous messages and excludes dirty results', async ({page}) => {
  const providerRequests:string[]=[];
  page.on('request',request=>{if (/anthropic|elevenlabs/i.test(request.url())) providerRequests.push(request.url());});
- await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
  await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
  await page.getByLabel('Aportación anual').fill('50'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await page.getByRole('button',{name:'Abrir asistente'}).click();
@@ -327,7 +345,8 @@ test('local tutor grounds results, keeps previous messages and excludes dirty re
 
 test('assistant remains scrollable and voice controls reachable in short landscape', async ({browser}) => {
  const context=await browser.newContext({viewport:{width:568,height:320}}); const page=await context.newPage();
- await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
  const dialog=page.getByRole('dialog',{name:'Tu asistente'});
  await dialog.getByLabel('Tu pregunta').fill('¿Qué es un fondo?');
  await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
@@ -343,13 +362,15 @@ test('assistant remains scrollable and voice controls reachable in short landsca
 });
 
 test('decline explanations use observed series without inventing a current crisis', async ({page}) => {
- await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
  await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
  await page.getByRole('button',{name:'Entender las caídas'}).click();
  let dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});
  await expect(dialog.getByText(/última observación no hay caída/)).toBeVisible();
  await expect(dialog.getByText(/2021.*2022/)).toBeVisible();
  await expect(dialog.getByText(/causa es desconocida/i)).toBeVisible();
+ await dialog.getByText('Tu contexto (opcional)').click();
  await dialog.getByLabel('Objetivo (opcional)').fill('Ejemplo educativo');
  await dialog.getByLabel('¿Necesitas liquidez pronto? (opcional)').selectOption('yes');
  await dialog.getByRole('button',{name:'Preguntar al asistente'}).click();
@@ -373,7 +394,8 @@ test('dictation remains editable and never submits automatically', async ({page}
   }
   Object.defineProperty(window,'SpeechRecognition',{value:LocalRecognition,configurable:true});
  });
- await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
  const dialog=page.getByRole('dialog',{name:'Tu asistente'});
  await dialog.getByRole('button',{name:'Dictar'}).click();
  await expect(dialog.getByLabel('Tu pregunta')).toHaveValue('Quiero revisar el riesgo');
@@ -393,7 +415,8 @@ test('saved Spanish answer reads in Spanish while dictation follows English UI',
   Object.defineProperty(window,'SpeechSynthesisUtterance',{value:Utterance,configurable:true});
   Object.defineProperty(window,'SpeechRecognition',{value:Recognition,configurable:true});
  });
- await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+  await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
  await page.getByLabel('Tu pregunta').fill('¿Qué es un fondo?'); await page.getByRole('button',{name:'Enviar pregunta'}).click();
  await expect(page.locator('.message.assistant[lang="es"]')).toBeVisible();
  await page.keyboard.press('Escape'); await page.getByRole('button',{name:'English'}).click();
@@ -407,6 +430,7 @@ test('saved Spanish answer reads in Spanish while dictation follows English UI',
 test('local panels fit desktop and mobile in both themes', async ({browser}) => {
  for (const width of [320,768,1280]) {
   const context=await browser.newContext({viewport:{width,height:800}}); const page=await context.newPage();
+  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   if(width===320){await page.getByRole('button',{name:'English'}).click();await page.getByRole('button',{name:'Dark theme'}).click();}
   await page.getByRole('button',{name:width===320?'Open assistant':'Abrir asistente'}).click();

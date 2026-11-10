@@ -8,7 +8,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { annualHistory } from "./annual-history";
-import { banks, instruments, type Instrument } from "./catalog";
+import { type Bank, type Instrument } from "./catalog";
 import { copy, type Language } from "./copy";
 import {
   MAX_SIMULATION_AMOUNT,
@@ -29,6 +29,9 @@ type Props = {
   t: (typeof copy)[Language];
   language: Language;
   level: Level;
+  banks: Bank[];
+  instruments: Instrument[];
+  history: typeof annualHistory;
   selected: Instrument;
   result: ViewResult | null;
   error: FieldError;
@@ -53,6 +56,9 @@ export default function Simulator({
   language,
   level,
   selected,
+  banks,
+  instruments,
+  history,
   result,
   error,
   initial,
@@ -94,7 +100,7 @@ export default function Simulator({
         onClick={() =>
           selectInstrument(
             instruments.find(
-              (item) => item.instrumentId === annualHistory.instrumentId,
+              (item) => item.instrumentId === history.instrumentId,
             )!,
           )
         }
@@ -402,7 +408,7 @@ export default function Simulator({
                     </tr>
                   </thead>
                   <tbody>
-                    {annualHistory.returns.map((row) => (
+                    {history.returns.map((row) => (
                       <tr key={row.year}>
                         <td>{row.year}</td>
                         <td>

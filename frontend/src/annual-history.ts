@@ -1,21 +1,7 @@
 import { MAX_SIMULATION_AMOUNT, type SimulationResult, type TimelinePoint } from './simulation-types.ts';
 
-/** Published annual returns; rounded source figures, not transaction prices. */
-export const annualHistory = {
-  instrumentId: "caixabank-monetario-estandar",
-  kind: "annual_published_returns",
-  sourceUrl: "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
-  sourceDate: "2026-11-09",
-  baseline: "2020-12-31",
-  currency: "EUR",
-  returns: [
-    { year: 2021, rate: -0.0053 },
-    { year: 2022, rate: -0.0067 },
-    { year: 2023, rate: 0.0243 },
-    { year: 2024, rate: 0.0297 },
-    { year: 2025, rate: 0.0153 },
-  ],
-} as const;
+import data from '../../shared/demo-data.json' with { type: 'json' };
+export const annualHistory = data.annualHistory;
 
 /** Applies each published return, then adds the annual contribution at year end. */
 export function replayAnnual(initial: number, annualContribution: number = 0): SimulationResult {

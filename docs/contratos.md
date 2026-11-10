@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Acuerdos conceptuales para las áreas; el contrato local del motor Python se describe al final, sin API HTTP implementada. La persona 2 coordina los formatos definitivos con quienes producen y consumen los datos.
+Acuerdos entre áreas y contrato de la API local de demostración. El motor Python histórico independiente conserva su propio contrato.
 
 - **1 → 2:** pantalla, nivel, parámetros del juego o pregunta; recibe resultados y errores.
 - **5 → 3 y 2:** catálogo ficticio y series verificadas con fuente, fecha, licencia, moneda, frecuencia, ajustes y costes; las muestras ficticias deben indicarlo.
@@ -40,16 +40,16 @@ En esta rama existe análisis cuantitativo básico local; los contratos de integ
 
 ## Contrato del motor Python, versión 1.0
 
-En esta rama se implementa el motor aislado `simulador`, no una API HTTP. La [referencia del simulador](../simulador/README.md) define los campos, validaciones y errores, ejemplos de CLI y firmas Python exactas: `load_series`, `parse_series`, `simulate`, `compare`, `drawdowns` y `scenarios`. Los importes, tasas y valores se serializan como cadenas decimales; las duraciones y `max_gap_days` son enteros JSON. Histórico y escenarios usan `Decimal` con 34 cifras; el filtro de caídas compara fracciones exactas y muestra la profundidad con 120 cifras. La persona 2 deberá acordar adaptaciones HTTP y validación de datos al integrarlo; no existen endpoints ni conexión al frontend por este cambio. Las fuentes y licencias son declaraciones sin verificación. Comparables y causas devuelven información insuficiente o desconocida.
+El motor `simulador` sigue aislado de la API HTTP de demostración. La [referencia del simulador](../simulador/README.md) define los campos, validaciones y errores, ejemplos de CLI y firmas Python exactas: `load_series`, `parse_series`, `simulate`, `compare`, `drawdowns` y `scenarios`. Los importes, tasas y valores se serializan como cadenas decimales; las duraciones y `max_gap_days` son enteros JSON. Histórico y escenarios usan `Decimal` con 34 cifras; el filtro de caídas compara fracciones exactas y muestra la profundidad con 120 cifras. La API de demostración usa cálculos propios y no consume este motor. Las fuentes y licencias son declaraciones sin verificación. Comparables y causas devuelven información insuficiente o desconocida.
 
 
 ## Catálogo local de práctica (rama de trabajo)
 
-El frontend configura el catálogo en `frontend/src/catalog.ts`: cada instrumento tiene `instrumentId`, `assetType` (fondo, ETF o acción), `assetClass` (mixta, variable, fija o desconocida), `bankId`, gestora, relación con la entidad (`own`, `third_party`, `fictional` o `unknown`), identificador y clase cuando se conocen, moneda, fuente, fecha de consulta y estado de datos. La relación identifica el vínculo con la gestora o entidad, no la propiedad de los activos. Los campos desconocidos son nulos. El catálogo local es configuración de demo, no una API ni una carga desde archivo.
+El catálogo se comparte en `shared/demo-data.json` y el frontend lo expone mediante `frontend/src/catalog.ts`: cada instrumento tiene `instrumentId`, `assetType` (fondo, ETF o acción), `assetClass` (mixta, variable, fija o desconocida), `bankId`, gestora, relación con la entidad (`own`, `third_party`, `fictional` o `unknown`), identificador y clase cuando se conocen, moneda, fuente, fecha de consulta y estado de datos. La relación identifica el vínculo con la gestora o entidad, no la propiedad de los activos. Los campos desconocidos son nulos. El catálogo de demo se carga desde ese archivo tanto en el servidor como en el modo local.
 
-El tipo local vigente de los resultados y puntos temporales está en [`frontend/src/simulation-types.ts`](../frontend/src/simulation-types.ts); [backend-contexto](backend-contexto.md) resume su interpretación y las diferencias con el motor Python aislado. No existe todavía un contrato HTTP implementado.
+El tipo local vigente de los resultados y puntos temporales está en [`frontend/src/simulation-types.ts`](../frontend/src/simulation-types.ts); [backend-contexto](backend-contexto.md) resume su interpretación y las diferencias con el motor Python aislado. El contrato HTTP de demostración se describe en [backend-contexto](backend-contexto.md).
 
-Tres fondos, un ETF y una acción ficticios usan secuencias inventadas diferentes que se repiten cada doce meses; no representan el historial de ningún producto ni una previsión. Las fichas de BBVA y Santander siguen sin histórico disponible. CaixaBank incorpora la muestra anual descrita abajo. No existe carga, API ni conexión bancaria.
+Tres fondos, un ETF y una acción ficticios usan secuencias inventadas diferentes que se repiten cada doce meses; no representan el historial de ningún producto ni una previsión. Las fichas de BBVA y Santander siguen sin histórico disponible. CaixaBank incorpora la muestra anual descrita abajo. No existe conexión bancaria.
 
 ### Muestra histórica anual de CaixaBank
 
@@ -59,4 +59,8 @@ El frontend reconstruye una inversión ficticia aplicando cada tasa anual al sal
 
 Se muestran seis puntos: referencia al 31/12/2020 y cierres de 2021–2025. No se interpolan meses ni días ni se modelan impuestos o costes externos. Según la ficha, los gastos corrientes ya están deducidos de las rentabilidades; no se descuentan de nuevo. El resultado es aproximado por el redondeo de origen y no es un valor liquidativo, precio transaccionable ni predicción. Con 500 € iniciales y aportación cero se obtienen aproximadamente 529,02 € al cierre de 2025.
 
-Este ejemplo es local y manual: no hay histórico diario, proveedor conectado ni datos en tiempo real. Antes de una integración o distribución hay que comprobar derechos y condiciones de la fuente y acordar con backend y simulador el contrato HTTP, formato y tratamiento de datos; el motor Python no consume esta muestra.
+Este ejemplo es local y manual: no hay histórico diario, proveedor conectado ni datos en tiempo real. Antes de una integración o distribución hay que comprobar derechos y condiciones de la fuente y verificar los derechos de uso; el motor Python histórico independiente no consume esta muestra.
+
+## API local de demostración
+
+El contrato operativo, validaciones y errores están en [backend-contexto](backend-contexto.md). El cliente no envía al tutor resultados, fuentes ni saldos calculados; envía especificaciones y el servidor recalcula. `GET /api/catalog` devuelve `schemaVersion: "1.0"`, `banks`, `instruments` y `annualHistory`. `POST /api/simulations` devuelve el resultado temporal, identificador, moneda, momento de aportación, fuentes y supuestos; `POST /api/declines` devuelve el informe y `POST /api/tutor` devuelve `TutorReply` por reglas del servidor. No hay integración con proveedores externos ni datos reales de clientes.

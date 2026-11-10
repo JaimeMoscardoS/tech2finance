@@ -109,9 +109,13 @@ El trabajo se divide entre [cinco áreas](organizacion.md): interfaz, backend, s
 
 En `main` existe una primera demo React/TypeScript con catálogo y cartera ficticios, simulador ilustrativo, asistente de respuestas predefinidas y pausa ante una caída. La demo incluye tres niveles con distinta información, español/inglés y temas claro/oscuro. El frontend inicial y las vistas adaptativas se integraron mediante los pull requests #1 y #2. La [guía para backend](backend-contexto.md) recoge las decisiones y los puntos de conexión pendientes.
 
-La demo usa capital ficticio y, en esta rama, incluye una reconstrucción a partir de rentabilidades anuales publicadas de un fondo. El motor Python aislado de reproducción, escenarios y análisis básico de caídas no está conectado a la demo ni consume esa muestra. El backend y las conexiones a Claude, ElevenLabs y noticias siguen pendientes. Python/FastAPI, Claude y ElevenLabs son la dirección propuesta para las piezas pendientes; sus detalles deben acordarse. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
+La demo usa capital ficticio y, en esta rama, incluye una reconstrucción a partir de rentabilidades anuales publicadas de un fondo. El motor Python aislado de reproducción, escenarios y análisis básico de caídas no está conectado a la demo ni consume esa muestra. En esta rama existe una API FastAPI local; las conexiones a Claude, ElevenLabs y noticias siguen pendientes. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
 
 
 ## Catálogo local de práctica (rama de trabajo)
 
 La rama de trabajo incorpora ejemplos ficticios y una reconstrucción de cinco rentabilidades anuales publicadas de CaixaBank con aportaciones anuales al cierre; las fichas de BBVA y Santander no tienen histórico conectado. Los detalles y límites constan en [contratos](contratos.md#catálogo-local-de-práctica-rama-de-trabajo).
+
+## Integración local de demostración
+
+En esta rama, el frontend utiliza por defecto la API FastAPI local de catálogo, simulación, caídas y tutor por reglas. Ofrece demo local explícita ante fallo y comparte los ejemplos mediante `shared/demo-data.json`. El tutor se ejecuta mediante Node local; no usa LLM ni servicios externos. Véase [backend-contexto](backend-contexto.md) para contrato, ejecución y límites. Esta integración no implica despliegue ni conexión bancaria.

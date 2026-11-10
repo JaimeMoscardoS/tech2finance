@@ -1,0 +1,29 @@
+﻿import type { Instrument, Bank } from './catalog';
+import type { SimulationResult } from './simulation-types';
+import type { DeclineReport, DecisionContext, TutorReply, TutorProvider } from '../../tutor-ia/src/index';
+
+export type SimulationSpec = { instrumentId: string; initial: number; recurringContribution: number; periods: number };
+export type DeclineSpec = { basis: 'instrument' | 'portfolio_demo'; language: 'es' | 'en'; instrumentId?: string; periods?: number };
+export type Catalog = { schemaVersion: '1.0'; banks: Bank[]; instruments: Instrument[]; annualHistory: typeof import('./annual-history').annualHistory };
+export type ServerSimulation = SimulationResult & { instrumentId: string; contributionTiming: 'month_start' | 'year_end_after_return'; currency: 'EUR'; sources: unknown[]; assumptions: unknown[] };
+const object = (v: unknown): v is Record<string, any> => !!v && typeof v === 'object' && !Array.isArray(v);
+const num = (v: unknown) => typeof v === 'number' && Number.isFinite(v);
+const safeUrl = (v: unknown) => typeof v === 'string' && (() => { try { return new URL(v).protocol === 'https:'; } catch { return false; } })();
+const sources = (v: unknown) => Array.isArray(v) && v.every(s => object(s) && typeof s.label === 'string' && safeUrl(s.url));
+const localized = (v: unknown) => object(v) && typeof v.es === 'string' && typeof v.en === 'string';
+export const isCatalog = (v: unknown): v is Catalog => object(v) && v.schemaVersion === '1.0' && Array.isArray(v.banks) && v.banks.length > 0 && v.banks.every((b: unknown) => object(b) && typeof b.id === 'string' && localized(b.name)) && Array.isArray(v.instruments) && v.instruments.length > 0 && v.instruments.every((i: unknown) => object(i) && typeof i.instrumentId === 'string' && typeof i.bankId === 'string' && ['fund','etf','stock'].includes(i.assetType) && ['fictional','annual_history','missing_history'].includes(i.dataStatus) && localized(i.name) && (i.sourceUrl === null || safeUrl(i.sourceUrl))) && object(v.annualHistory) && typeof v.annualHistory.instrumentId === 'string' && typeof v.annualHistory.baseline === 'string' && Array.isArray(v.annualHistory.returns) && v.annualHistory.returns.every((r: unknown) => object(r) && num(r.year) && num(r.rate));
+export const isSimulation = (v: unknown): v is ServerSimulation => object(v) && ['fictional_monthly','annual_history'].includes(v.kind) && typeof v.instrumentId === 'string' && ['month_start','year_end_after_return'].includes(v.contributionTiming) && v.currency === 'EUR' && Array.isArray(v.points) && v.points.every(num) && Array.isArray(v.timeline) && v.timeline.length > 0 && v.timeline.every((p: unknown) => object(p) && ['period','valueBeforeContribution','contribution','contributed','value','profit','instrumentReturnPercent'].every(k=>num(p[k])) && (p.date === null || typeof p.date === 'string') && (p.periodReturn === null || num(p.periodReturn))) && ['value','contributed','profit'].every(k=>num(v[k])) && (v.simpleReturnPercent === null || num(v.simpleReturnPercent)) && sources(v.sources) && Array.isArray(v.assumptions);
+export const isDecline = (v: unknown): v is DeclineReport => object(v) && ['ok','insufficient_data'].includes(v.status) && typeof v.basisName === 'string' && ['fictional','annual_published_returns'].includes(v.dataKind) && num(v.observationCount) && ['latestLabel'].every(k=>v[k] === null || typeof v[k] === 'string') && ['latestValue','peakValue','currentDrawdownPercent','maxDrawdownPercent'].every(k=>v[k] === null || num(v[k])) && Array.isArray(v.episodes) && v.episodes.every((e: unknown)=>object(e) && typeof e.peakLabel === 'string' && typeof e.troughLabel === 'string' && (e.recoveryLabel === null || typeof e.recoveryLabel === 'string') && num(e.drawdownPercent) && num(e.observationsToTrough) && (e.observationsToRecovery === null || num(e.observationsToRecovery))) && sources(v.sources) && v.causesStatus === 'unknown' && v.comparablesStatus === 'not_available' && Array.isArray(v.limitations) && v.limitations.every((s:unknown)=>typeof s === 'string');
+const isTutor = (v: unknown): v is TutorReply => object(v) && typeof v.text === 'string' && ['es','en'].includes(v.language) && v.mode === 'api' && v.provider === 'server_rules' && typeof v.intent === 'string' && sources(v.sources);
+export async function requestJson<T>(path: '/api/catalog' | '/api/simulations' | '/api/declines' | '/api/tutor', validate: (v: unknown) => v is T, body?: unknown, signal?: AbortSignal): Promise<T> {
+ const controller = new AbortController(); const abort = () => controller.abort();
+ if (signal?.aborted) controller.abort(); else signal?.addEventListener('abort', abort, {once:true});
+ const timer = setTimeout(abort, 10000);
+ try { const response = await fetch(path, { method: body === undefined ? 'GET' : 'POST', ...(body === undefined ? {} : {headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}), signal:controller.signal });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const result: unknown = await response.json(); if (!validate(result)) throw new Error('Invalid server response'); return result;
+ } finally { clearTimeout(timer); signal?.removeEventListener('abort',abort); }
+}
+export function serverTutorProvider(context: {page:string;level:string;language:'es'|'en';instrumentId?:string;simulation?:SimulationSpec;decline?:DeclineSpec;decision?:DecisionContext}): TutorProvider {
+ return {id:'server_rules', async reply(request) { const result = await requestJson('/api/tutor',isTutor,{message:request.message,history:request.history?.map(({role,text,intent})=>({role,text,...(intent ? {intent}: {})})) ?? [],context},request.signal); if (result.language !== context.language) throw new Error('Invalid response language'); return result; }};
+}

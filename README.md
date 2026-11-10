@@ -16,7 +16,7 @@ La demo no usa dinero ni cuentas reales. Los datos históricos deben ser verific
 | 4 | IA, voz y antipánico | [tutor-ia](tutor-ia/) |
 | 5 | Datos, pruebas y presentación | [datos](datos/), [tests](tests/), [presentacion](presentacion/) |
 
-Consulta [organización](docs/organizacion.md), [contratos](docs/contratos.md) y [agentes](docs/agentes.md). El repositorio contiene documentación inicial, no una aplicación implementada.
+Consulta [organización](docs/organizacion.md), [contratos](docs/contratos.md) y [agentes](docs/agentes.md). El repositorio contiene una demo implementada y documentación de las funcionalidades propuestas y pendientes.
 
 ## Colaborar
 
@@ -27,3 +27,7 @@ git clone https://github.com/JaimeMoscardoS/tech2finance.git
 ```
 
 Abrir un pull request y pedir revisión antes de integrar. No subir claves ni datos privados.
+
+## Backend local de demostración
+
+La rama incluye una API FastAPI local para catálogo, simulación, caídas y tutor por reglas. El frontend utiliza el servidor por defecto y permite elegir demo local explícitamente. No conecta bancos ni proveedores externos. Véanse [backend-contexto](docs/backend-contexto.md) y [frontend/README](frontend/README.md) para contratos y ejecución.
