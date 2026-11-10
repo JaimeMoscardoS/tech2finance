@@ -62,10 +62,10 @@ Entrada, salida y custodia: 0 bps. Mínimos inicial y recurrente: 0 EUR. Las ór
 
 **Consume:** `BankProfile` verificado; contexto de petición con `bankId` opcional. **Produce:** perfil en catálogo y contexto interno enriquecido desde servidor. El contrato interno es `TutorContext.bank?: BankProfile` e `instrument.product?: BankProduct` anidado; no existe `product` al nivel superior. El cliente solo puede identificar el banco mediante `bankId`; no puede suministrar perfil ni producto. Rutas: `GET /api/catalog` y `POST /api/tutor`.
 
-- [ ] Red `unknownBank`: `context.bankId='unknown'` devuelve 400; omitido o `demo` selecciona el perfil demo. Campos extra, incluidos `bank`, `bankProfile` y `product` inyectados, devuelven 422.
-- [ ] Red `catalogProfile`: catálogo expone `demo-mixed` anual 75 bps y tratamiento `illustrative_excluded`; modificar una respuesta no cambia la siguiente.
-- [ ] Red `bankForFourPages`: `home`, `explore`, `simulator`, `portfolio` aportan banco; producto seleccionado únicamente en `explore`/`simulator`, y un instrumento externo no recibe comisiones demo.
-- [ ] Implementar `bankId` opcional con default `demo` en el esquema actual; resolver perfil desde dataset y conservar control estricto de extras. Mantener firmas y respuestas existentes salvo ampliación acordada.
+- [x] Aceptaci?n `unknownBank`: `context.bankId='unknown'` devuelve 400; omitido o `demo` selecciona el perfil demo. Campos extra, incluidos `bank`, `bankProfile` y `product` inyectados, devuelven 422.
+- [x] Aceptaci?n `catalogProfile`: catálogo expone `demo-mixed` anual 75 bps y tratamiento `illustrative_excluded`; modificar una respuesta no cambia la siguiente.
+- [x] Aceptaci?n `bankForFourPages`: `home`, `explore`, `simulator`, `portfolio` aportan banco; producto seleccionado únicamente en `explore`/`simulator`, y un instrumento externo no recibe comisiones demo.
+- [x] Implementado: `bankId` opcional con default `demo` en el esquema actual; resolver perfil desde dataset y conservar control estricto de extras. Mantener firmas y respuestas existentes salvo ampliación acordada.
 - [ ] Desde raíz: `python -m pytest backend/tests -q`; comprobar tests anteriores y regresiones con Python del entorno del proyecto.
 
 ## Tarea 3: tutor local y servidor — `bank_tutor`
@@ -76,10 +76,10 @@ Entrada, salida y custodia: 0 bps. Mínimos inicial y recurrente: 0 EUR. Las ór
 
 **Consume:** `TutorContext.bank?: BankProfile` y `instrument.product?: BankProduct` autorizados por tarea 2. **Produce:** `TutorProvider.reply(request)` con respuestas fundamentadas en perfil, idioma y página, sin ejecutar operaciones ni inventar costes. El reconocimiento usa plantillas limitadas; comprobar las frases exactas, sin presumir comprensión general.
 
-- [ ] Red `bankIdentity`: identidad y servicios desde perfil en cuatro páginas y ambos idiomas; sin perfil se abstiene de inventar información bancaria.
-- [ ] Red `feeAnswers`: `demo-mixed` responde 0,75 % anual informativo y dice que no se descuenta; ETF dice 1 EUR por orden informativa; acción no presenta `null` como 0 %.
-- [ ] Red `externalFeesNone`: producto externo no recibe costes de BancoT2F; sin selección o fuera de exploración/simulación no se usa producto anterior. Conservar protecciones existentes.
-- [ ] Implementar sobre `TutorContext` y `createLocalTutorProvider()` existentes; alinear contexto interno y tests entre modos. La voz de cliente pertenece a tarea 4.
+- [x] Aceptaci?n `bankIdentity`: identidad y servicios desde perfil en cuatro páginas y ambos idiomas; sin perfil se abstiene de inventar información bancaria.
+- [x] Aceptaci?n `feeAnswers`: `demo-mixed` responde 0,75 % anual informativo y dice que no se descuenta; ETF dice 1 EUR por orden informativa; acción no presenta `null` como 0 %.
+- [x] Aceptaci?n `externalFeesNone`: producto externo no recibe costes de BancoT2F; sin selección o fuera de exploración/simulación no se usa producto anterior. Conservar protecciones existentes.
+- [x] Implementado: sobre `TutorContext` y `createLocalTutorProvider()` existentes; alinear contexto interno y tests entre modos. La voz de cliente pertenece a tarea 4.
 - [ ] Desde raíz: `node --experimental-strip-types --test tutor-ia/tests/*.test.ts` y `node --experimental-strip-types tutor-ia/evals/run.ts --check`; informar fallos.
 
 ## Tarea 4: interfaz y voz — `bank_frontend`
@@ -90,12 +90,12 @@ Entrada, salida y custodia: 0 bps. Mínimos inicial y recurrente: 0 EUR. Las ór
 
 **Consume:** `BankProfile` del dataset local o catálogo servidor, `TutorProvider` y contexto de tarea 3. **Produce:** perfil visible y contextual en cuatro páginas; historial de voz limitado a sesión.
 
-- [ ] Red `bankForFourPages`: perfil disponible en `home`, `explore`, `simulator` y `portfolio`, modo local y servidor; idioma actualiza información y distingue productos externos.
-- [ ] Red `feesExcluded`: mostrar 75 bps como 0,75 % anual, orden ETF/acción 1 EUR informativa, `null` como no definido y aviso de exclusión; resultados no cambian.
-- [ ] Red `serverForgedProfile`: enviar `bankId` opcional al proveedor de servidor sin enviar perfil como hecho de cliente; producto solo en exploración/simulación.
-- [ ] Red `voiceEightReset`: voz conserva como máximo ocho mensajes previos de la sesión; al reiniciar sesión, historial enviado vacío; cambio de contexto no arrastra hechos anteriores.
-- [ ] Implementar en `serverTutorProvider(...)`, `App` y `VoiceAssistantPanel` existentes con pruebas y accesibilidad. No iniciar servicios antiguos ni proveedores externos.
-- [ ] Desde `frontend`: `npm test` y `npm run build`; integración con configuración de coordinación en 5177/8097, sin iniciar hasta coordinación.
+- [x] Aceptaci?n `bankForFourPages`: perfil disponible en `home`, `explore`, `simulator` y `portfolio`, modo local y servidor; idioma actualiza información y distingue productos externos.
+- [x] Aceptaci?n `feesExcluded`: mostrar 75 bps como 0,75 % anual, orden ETF/acción 1 EUR informativa, `null` como no definido y aviso de exclusión; resultados no cambian.
+- [x] Aceptaci?n `serverForgedProfile`: enviar `bankId` opcional al proveedor de servidor sin enviar perfil como hecho de cliente; producto solo en exploración/simulación.
+- [x] Aceptaci?n `voiceEightReset`: voz conserva como máximo ocho mensajes previos de la sesión; al reiniciar sesión, historial enviado vacío; cambio de contexto no arrastra hechos anteriores.
+- [x] Implementado: en `serverTutorProvider(...)`, `App` y `VoiceAssistantPanel` existentes con pruebas y accesibilidad. No iniciar servicios antiguos ni proveedores externos.
+- [x] Ejecutado desde `frontend`: `npm test` y `npm run build`; integración con configuración de coordinación en 5177/8097, sin iniciar hasta coordinación.
 
 ## Tarea 5: documentación, integración y revisión — `bank_demo_docs` + coordinación
 
