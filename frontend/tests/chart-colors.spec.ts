@@ -66,3 +66,22 @@ test('single observation shows a neutral point', async ({page}) => {
  await page.getByText('View data').click();
  await expect(page.getByRole('cell',{name:'Starting point'})).toBeVisible();
 });
+
+test('home destinations retain distinct readable backgrounds in all levels and themes', async ({page}) => {
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode','local'));
+ await page.goto('/');
+ for (const theme of ['light','dark']) {
+  if (theme === 'dark') await page.getByRole('button',{name:'Modo oscuro'}).click();
+  for (const [index, level] of ['Principiante','Intermedio','Avanzado'].entries()) {
+   if (index > 0 || theme === 'dark') { await page.locator('.level-button').click(); await page.locator('.level-menu').getByRole('button',{name:level,exact:true}).click(); }
+   const backgrounds = await page.locator('.action-grid .action-card').evaluateAll(cards => cards.map(card => getComputedStyle(card).backgroundColor));
+   expect(new Set(backgrounds).size).toBe(3);
+   const contrasts = await page.locator('.action-grid .action-card').evaluateAll(cards => {
+    const luminance = (color: string) => color.match(/\d+/g)!.slice(0,3).map(Number).map(v => v/255).map(v => v <= .04045 ? v/12.92 : ((v+.055)/1.055)**2.4).reduce((sum,v,i) => sum + v * [.2126,.7152,.0722][i],0);
+    return cards.flatMap(card => ['h3','p','span'].map(selector => { const bg = luminance(getComputedStyle(card).backgroundColor), fg = luminance(getComputedStyle(card.querySelector(selector)!).color); return (Math.max(bg,fg)+.05)/(Math.min(bg,fg)+.05); }));
+   });
+   for (const contrast of contrasts) expect(contrast).toBeGreaterThanOrEqual(4.5);
+   if (index === 0) await page.screenshot({path:`/tmp/t2f-home-cards-${theme}.png`,fullPage:true});
+  }
+ }
+});

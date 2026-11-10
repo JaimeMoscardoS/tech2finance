@@ -547,7 +547,7 @@ export default function App() {
               </div>
               <div className="action-grid">
                 <button
-                  className="action-card"
+                  className="action-card action-card--funds"
                   onClick={() => choose("explore")}
                 >
                   <div className="action-icon mint">
@@ -561,7 +561,7 @@ export default function App() {
                   </span>
                 </button>
                 <button
-                  className="action-card"
+                  className="action-card action-card--practice"
                   onClick={openPractice}
                 >
                   <div className="action-icon peach">
@@ -574,7 +574,7 @@ export default function App() {
                     <ArrowRight size={14} />
                   </span>
                 </button>
-                <button className="action-card" onClick={() => choose("portfolio")}>
+                <button className="action-card action-card--portfolio" onClick={() => choose("portfolio")}>
                   <div className="action-icon lilac"><Wallet size={21} /></div>
                   <h3>{t.examplePortfolio}</h3>
                   <p>{t.portfolioPathDesc}</p>
