@@ -16,7 +16,7 @@ class DomainError(ValueError):
 
 
 def get_catalog():
-    return deepcopy({**{key: _DATA[key] for key in ('schemaVersion', 'banks', 'instruments', 'annualHistory')}, 'provenance': _PROVENANCE})
+    return deepcopy({**{key: _DATA[key] for key in ('schemaVersion', 'banks', 'instruments', 'annualHistory', 'bankProfile')}, 'provenance': _PROVENANCE})
 
 
 def _instrument(identifier):
@@ -123,20 +123,27 @@ def build_tutor_context(context):
         page, level, language = context['page'], context['level'], context['language']
         if page not in ('home', 'explore', 'simulator', 'portfolio') or level not in ('beginner', 'intermediate', 'advanced') or language not in ('es', 'en'):
             raise ValueError
-        allowed = {'page', 'level', 'language', 'instrumentId', 'simulation', 'decline', 'decision'}
+        allowed = {'page', 'level', 'language', 'bankId', 'instrumentId', 'simulation', 'decline', 'decision'}
         if set(context) - allowed:
             raise ValueError
+        if context.get('bankId', 'demo') != _DATA['bankProfile']['bankId']:
+            raise DomainError('unknown_bank', 400, 'Bank not found.')
         sim, decline = context.get('simulation'), context.get('decline')
         if sim and page != 'simulator':
             raise ValueError
         ids = [x for x in (context.get('instrumentId'), sim.get('instrumentId') if sim else None, decline.get('instrumentId') if decline and decline.get('basis') == 'instrument' else None) if x is not None]
         if len(set(ids)) > 1 or decline and decline.get('language') != language:
             raise ValueError
-        result = {'page': page, 'level': level, 'language': language}
-        if page == 'simulator' and ids:
+        if ids:
+            _instrument(ids[0])
+        result = {'page': page, 'level': level, 'language': language, 'bank': deepcopy(_DATA['bankProfile'])}
+        if page in ('explore', 'simulator') and ids:
             inst = _instrument(ids[0])
             result['instrument'] = {'id': ids[0], 'name': inst['name'][language], 'currency': inst['currency'],
                                     'dataKind': 'annual_published_returns' if inst['dataStatus'] == 'annual_history' else inst['dataStatus'], 'sources': _source(inst, language)}
+            product = next((p for p in _DATA['bankProfile']['products'] if p['instrumentId'] == ids[0]), None)
+            if product is not None:
+                result['instrument']['product'] = deepcopy(product)
         if sim:
             calculated = run_simulation(sim)
             facts = {'kind': calculated['kind'], 'initial': sim['initial'], 'recurringContribution': sim['recurringContribution'],

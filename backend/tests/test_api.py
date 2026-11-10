@@ -13,6 +13,47 @@ VALID = {"instrumentId": "fictional", "initial": 100, "recurringContribution": 1
 CONTEXT = {"page": "home", "level": "beginner", "language": "es"}
 
 
+def test_bank_context_and_untrusted_fields(monkeypatch):
+    captured = {}
+    def capture(payload):
+        captured.clear()
+        captured.update(payload['context'])
+        return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
+    monkeypatch.setattr('backend.app.reply', capture)
+    assert client.get('/api/catalog').json()['bankProfile']['bankId'] == 'demo'
+    for page in ('home', 'explore', 'simulator', 'portfolio'):
+        result = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': page, 'instrumentId': 'demo-mixed'}})
+        assert result.status_code == 200
+        assert captured['bank']['bankId'] == 'demo'
+        assert ('product' in captured.get('instrument', {})) == (page in ('explore', 'simulator'))
+    assert client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'bankId': 'other'}}).json()['error']['code'] == 'unknown_bank'
+    for field in ('bank', 'bankProfile', 'product', 'fees', 'results'):
+        assert client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {field: {}}}).status_code == 422
+    assert client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': 'explore', 'instrumentId': 'bbva-mi-inversion-bolsa'}}).status_code == 200
+    assert 'product' not in captured['instrument']
+
+
+def test_bank_fee_through_real_bridge_and_unknown_selection():
+    context = CONTEXT | {'page': 'explore', 'instrumentId': 'demo-mixed'}
+    response = client.post('/api/tutor', json={'message': '¿Cuánto cuesta este fondo?', 'context': context})
+    assert response.status_code == 200
+    body = response.json()
+    assert '0,75%' in body['text'] and 'no se descuentan' in body['text']
+    assert body['intent'] == 'bank_fees' and body['sources'] == []
+    follow = client.post('/api/tutor', json={'message': '¿Y eso está descontado?', 'context': context, 'history': [{'role': 'assistant', 'text': body['text'], 'intent': body['intent']}]})
+    assert follow.status_code == 200 and 'no se descuentan' in follow.json()['text']
+    missing = client.post('/api/tutor', json={'message': 'hola', 'context': context | {'instrumentId': 'not-a-product'}})
+    assert missing.status_code == 404 and missing.json()['error']['code'] == 'unknown_instrument'
+
+
+def test_annual_contributions_are_not_mistaken_for_fees():
+    spec = {'instrumentId': 'caixabank-monetario-estandar', 'initial': 500, 'recurringContribution': 100, 'periods': 5}
+    context = {'page': 'simulator', 'level': 'beginner', 'language': 'en', 'simulation': spec}
+    reply = client.post('/api/tutor', json={'message': 'How much did I contribute?', 'context': context})
+    assert reply.status_code == 200
+    assert '1,000' in reply.json()['text'] and reply.json()['intent'] == 'result'
+
+
 def test_health_and_catalog():
     response = client.get("/api/health")
     assert response.json() == {"status": "ok", "mode": "demo", "tutorProvider": "server_rules", "externalProviders": False}

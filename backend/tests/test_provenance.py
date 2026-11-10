@@ -52,7 +52,9 @@ def test_snapshot_reproduces_authoritative_replay(tmp_path):
     shutil.copytree(ROOT, tmp_path / 'shared')
     root = tmp_path / 'shared'
     snapshot = read_json(root / 'snapshots/demo-2026-11-09.1/demo-data.json')
-    assert hashlib.sha256((root / 'snapshots/demo-2026-11-09.1/demo-data.json').read_bytes()).hexdigest() == 'c83dbcba95f30de7e7359b251b4aceeaf37865e1f2b51f6333660a299b0517f3'
+    old_path = root / 'snapshots/demo-2026-11-09.1/demo-data.json'
+    old_bytes = old_path.read_bytes()
+    assert hashlib.sha256(old_bytes.replace(b'\r\n', b'\n')).hexdigest() == 'bbe3f27302476aa080f30847a490658ce8323ae6c8ce04270f94736678a1f625'
     rates = snapshot['instruments'][0]['returns'][:1]
     result = replay(500, 50, rates, [None, None], 'fictional_monthly')
     assert result['value'] == 558.25
@@ -63,9 +65,18 @@ def test_snapshot_reproduces_authoritative_replay(tmp_path):
     with pytest.raises(ValueError):
         load_verified_dataset(root)
     retained = read_json(root / 'snapshots/demo-2026-11-09.1/demo-data.json')
+    assert old_path.read_bytes() == old_bytes
     manifest = read_json(root / 'data-manifest.json')
     assert manifest['calculationVersion'] == 'demo-calculations-1.0.0'
     assert replay(500, 50, retained['instruments'][0]['returns'][:1], [None, None], 'fictional_monthly') == result
+
+
+@pytest.mark.parametrize('newline', [b'\n', b'\r\n'])
+def test_old_snapshot_identity_accepts_git_line_endings(newline):
+    original = (ROOT / 'snapshots/demo-2026-11-09.1/demo-data.json').read_bytes()
+    lf = original.replace(b'\r\n', b'\n')
+    copy = lf.replace(b'\n', newline)
+    assert hashlib.sha256(copy.replace(b'\r\n', b'\n')).hexdigest() == 'bbe3f27302476aa080f30847a490658ce8323ae6c8ce04270f94736678a1f625'
 
 
 def test_metadata_stable_isolated_and_legacy_fields():

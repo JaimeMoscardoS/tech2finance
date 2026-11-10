@@ -1,0 +1,83 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { createLocalTutorProvider } from '../src/local-tutor.ts';
+import type { TutorContext } from '../src/types.ts';
+
+const bank = JSON.parse(readFileSync(new URL('../../shared/demo-data.json', import.meta.url), 'utf8')).bankProfile;
+const context: TutorContext = { page: 'simulator', level: 'beginner', language: 'es', bank, instrument: { id: 'demo-mixed', name: 'T2F Equilibrio', currency: 'EUR', dataKind: 'fictional', sources: [], product: bank.products.find((p: {instrumentId: string}) => p.instrumentId === 'demo-mixed') } };
+const ask = (message: string, c = context, history: {role: 'assistant'; text: string; intent: string}[] = []) => createLocalTutorProvider().reply({ message, context: c, history });
+test('bank questions use fictional contextual data and do not deduct fees', async () => {
+  assert.match((await ask('¿Qué es BancoT2F?')).text, /fictici/i);
+  assert.match((await ask('¿Qué condiciones tiene la cuenta de demo?')).text, /0 EUR/);
+  const fee = await ask('¿Cuánto cuesta este fondo?'); assert.match(fee.text, /0,75\s*%/); assert.match(fee.text, /no se descuentan/i);
+  assert.match((await ask('¿Y eso está descontado?', context, [{role:'assistant', text: fee.text, intent: fee.intent}])).text, /no se descuentan/i);
+  assert.doesNotMatch((await ask('¿Qué es una comisión?')).text, /0,75/);
+  assert.match((await ask('¿Qué ganaré el próximo año?')).text, /no|disponible|pred/i);
+  assert.match((await ask('¿Necesito mantener?')).text, /decisión es tuya/i);
+});
+test('foreign products, missing history and malformed data never inherit fees', async () => {
+  const external = { ...context, instrument: { ...context.instrument!, product: undefined, id: 'bbva', name: 'BBVA', dataKind: 'missing_history' as const } };
+  assert.match((await ask('¿Por qué no puedo simularlo?', external)).text, /histórico/i);
+  assert.doesNotMatch((await ask('¿Cuánto cuesta este fondo?', external)).text, /0,75|75/);
+  assert.doesNotMatch((await ask('¿Cuánto cuesta el fondo Tesla?')).text, /0,75|75/);
+  const malformed = { ...context, bank: { ...bank, services: null }, instrument: { ...context.instrument!, product: { ...context.instrument!.product!, fees: null } } } as unknown as TutorContext;
+  assert.doesNotMatch((await ask('¿Cuánto cuesta este fondo?', malformed)).text, /0,75|75/);
+});
+test('English script and latest abstention retain scope', async () => {
+  const c = { ...context, language: 'en' as const };
+  assert.match((await ask('What is BancoT2F?', c)).text, /fictional/i);
+  assert.match((await ask('What are the demo account terms?', c)).text, /maintenance.*0/i);
+  const fee = await ask('How much does this fund cost?', c); assert.match(fee.text, /0\.75%/);
+  assert.match((await ask('Is that deducted?', c, [{role:'assistant', text: fee.text, intent:fee.intent}])).text, /not deducted/i);
+  assert.match((await ask('What am I seeing?', c)).text, /simulator/i);
+  assert.match((await ask('Why can\'t I simulate it?', { ...c, instrument: { ...c.instrument!, dataKind:'missing_history' } })).text, /history/i);
+  assert.match((await ask('What will I earn next year?', c)).text, /not available|predict/i);
+  const refusal = await ask('How much does the Tesla fund cost?', c);
+  assert.doesNotMatch(refusal.text, /0\.75/);
+  const after = await ask('Is that deducted?', c, [{role:'assistant', text:fee.text, intent:fee.intent}, {role:'assistant', text:refusal.text, intent:refusal.intent}]);
+  assert.doesNotMatch(after.text, /0\.75|75 basis/);
+  assert.doesNotMatch((await ask('What is a fee?', c)).text, /0\.75/);
+});
+test('fees for stock remain unknown and external bank does not receive demo conditions', async () => {
+  const stock = { ...context, instrument: { ...context.instrument!, product: bank.products.find((p: {instrumentId:string}) => p.instrumentId === 'demo-stock'), id:'demo-stock', name:'Acción Empresa ficticia' } };
+  const reply = await ask('¿Cuánto cuesta esta acción?', stock);
+  assert.match(reply.text, /anual corriente no está disponible/);
+  assert.doesNotMatch(reply.text, /anual corriente: 0/);
+  assert.doesNotMatch((await ask('¿Qué condiciones tiene la cuenta de BBVA?')).text, /0 EUR/);
+  const external = { ...context, instrument: { ...context.instrument!, product: undefined, id: 'bbva', name: 'BBVA', dataKind:'missing_history' as const } };
+  assert.doesNotMatch((await ask('¿Qué condiciones tiene la cuenta de BBVA?', external)).text, /0 EUR/);
+  assert.doesNotMatch((await ask('¿Cuánto cuesta T2F Horizonte?')).text, /0,75/);
+});
+test('maintenance, external products, named banks and selected screen context', async () => {
+  for (const page of ['home', 'explore'] as const) {
+    const c = { ...context, page, language: 'en' as const };
+    const maintenance = await ask('What is the maintenance fee of BancoT2F?', c);
+    assert.match(maintenance.text, /maintenance.*0.*EUR|maintenance.*EUR.*0/i);
+    assert.doesNotMatch(maintenance.text, /0\.75/);
+    assert.match((await ask('¿Cuál es la comisión de mantenimiento de BancoT2F?', {...c, language:'es'})).text, /mantenimiento.*0 EUR/i);
+  }
+  const en = { ...context, page:'explore' as const, language:'en' as const };
+  assert.match((await ask('Are all products from BancoT2F?', en)).text, /no\..*other institutions/i);
+  assert.match((await ask('¿Todos los productos son de BancoT2F?', {...en,language:'es'})).text, /no\..*otras entidades/i);
+  for (const name of ['BancoFantasma', 'Banco Fantasma', 'ExampleBankOther', 'OtherBank', 'BankOther']) {
+    const reply = await ask(`What terms does ${name} have?`, en);
+    assert.equal(reply.intent, 'unknown'); assert.doesNotMatch(reply.text, /maintenance|0 EUR|no real account/i);
+  }
+  assert.match((await ask('What am I seeing?', en)).text, /catalogue.*T2F Equilibrio/i);
+  assert.doesNotMatch((await ask('What am I seeing?', {...en, page:'home'})).text, /Equilibrio/);
+  assert.match((await ask('What am I seeing?', {...en, instrument:undefined})).text, /no .*selected/i);
+  const conditions = await ask('What are the demo account terms?', en);
+  assert.match(conditions.text, /EUR/i); assert.match(conditions.text, /minimum/i);
+  assert.match((await ask('What are the terms of the bank?', en)).text, /maintenance/i);
+  assert.equal((await ask('What terms does BBVA have?', {...en, instrument: {...en.instrument!, id:'bbva', name:'BBVA', dataKind:'missing_history', product:undefined}})).intent, 'unknown');
+});
+test('how much contributed and lost refer to the calculated result, not fees', async () => {
+  const c: TutorContext = { ...context, language:'en', simulation: { kind:'fictional_monthly', initial:800, recurringContribution:100, contributionTiming:'month_start', periods:2, finalValue:900, totalContributed:1000, profit:-100, simpleReturnPercent:-10, instrumentReturnPercent:-10 } };
+  for (const message of ['How much did I contribute?', 'How much did I lose?', 'How much is the simulation result?']) {
+    const reply = await ask(message, c); assert.match(reply.text, /1,000/); assert.match(reply.text, /-100/);
+  }
+  for (const message of ['¿Cuánto he aportado?', '¿Cuál es el resultado de mi simulación?']) {
+    const reply = await ask(message, {...c, language:'es'}); assert.match(reply.text, /1\.?000/);
+  }
+});

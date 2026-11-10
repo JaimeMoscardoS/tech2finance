@@ -51,6 +51,7 @@ class TutorContext(RequestModel):
     page: Literal["home", "explore", "simulator", "portfolio"]
     level: Literal["beginner", "intermediate", "advanced"]
     language: Language
+    bankId: Identifier = "demo"
     instrumentId: Identifier | None = None
     simulation: SimulationSpec | None = None
     decline: DeclineSpec | None = None
