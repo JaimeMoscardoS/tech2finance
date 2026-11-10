@@ -74,6 +74,7 @@ export default function App() {
     [voiceAssistant, setVoiceAssistant] = useState(false),
     [pause, setPause] = useState<DeclineReport | null>(null);
   const [decision,setDecision]=useState<DecisionContext>({needsLiquidity:"unknown"});
+  const [voiceStartToken, setVoiceStartToken] = useState(0);
   const [assistantDecline,setAssistantDecline]=useState<DeclineReport | undefined>();
   const [initial, setInitial] = useState("500"),
     [monthly, setMonthly] = useState("50"),
@@ -274,6 +275,7 @@ export default function App() {
   const openVoice = () => {
     setAssistantDecline(undefined);
     voiceTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setVoiceStartToken(token => token + 1);
     setVoiceAssistant(true);
   };
   const talkDecline = () => { if (!pause) return; setAssistantDecline(pause); setPause(null); voiceTriggerRef.current=pauseTriggerRef.current; setVoiceAssistant(true); };
@@ -873,7 +875,7 @@ export default function App() {
         </div>
       </main>
       <AssistantPanel provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
-      <VoiceAssistantPanel open={voiceAssistant} onClose={()=>setVoiceAssistant(false)} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined}/>
+      <VoiceAssistantPanel open={voiceAssistant} onClose={()=>setVoiceAssistant(false)} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
       {pause && <AntiPanicPanel onTalk={talkDecline} report={pause} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
 
     </div>

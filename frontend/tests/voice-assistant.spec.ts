@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
  await page.addInitScript(() => {
-  const state: { starts: number; spoken: number; recognition: any; availability: string } = { starts: 0, spoken: 0, recognition: null, availability: 'available' };
+  const state: { starts: number; checks: number; spoken: number; recognition: any; availability: string; resolveCheck: null | ((value: string) => void) } = { starts: 0, checks: 0, spoken: 0, recognition: null, availability: 'available', resolveCheck: null };
   Object.assign(window, { voiceTest: state });
   class Recognition {
-   static async available() { return state.availability; }
+   static async available() { state.checks++; return state.availability === 'pending' ? new Promise<string>(resolve => { state.resolveCheck = resolve; }) : state.availability; }
    processLocally = false; lang = ''; continuous = false; interimResults = false;
    onstart: (() => void) | null = null; onend: (() => void) | null = null;
    onresult: ((event: unknown) => void) | null = null; onerror = null;
@@ -29,18 +29,22 @@ test('unavailable local dictation explains how to reach the written assistant', 
  await page.evaluate(() => { (window as any).voiceTest.availability = 'unavailable'; });
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
  const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
- await dialog.getByRole('button', { name: 'Hablar', exact: true }).click();
  await expect(dialog.getByRole('status')).toContainText('Para escribir, cierra esta ventana y abre Tu asistente.');
  expect(await page.evaluate(() => (window as any).voiceTest.starts)).toBe(0);
+ expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
+ await page.evaluate(() => { (window as any).voiceTest.availability = 'available'; });
+ await dialog.getByRole('button', { name: 'Hablar', exact: true }).click();
+ await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
 });
 
 test('voice question is submitted once after dictation ends, without starting another microphone session', async ({ page }) => {
  await page.goto('/');
+ expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(0);
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
  const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
  await expect(dialog).toBeVisible();
- expect(await page.evaluate(() => (window as any).voiceTest.starts)).toBe(0);
- await dialog.getByRole('button', { name: 'Hablar', exact: true }).click();
+ await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
+ expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
  await page.evaluate(() => {
   const recognition = (window as any).voiceTest.recognition;
   recognition.onresult({ resultIndex: 0, results: [{ isFinal: true, 0: { transcript: 'Qué es un fondo' } }] });
@@ -57,7 +61,7 @@ test('cancelled recognition cannot submit a late final result', async ({ page })
  await page.goto('/');
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
  const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
- await dialog.getByRole('button', { name: 'Hablar', exact: true }).click();
+ await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
  await page.evaluate(() => {
   const recognition = (window as any).voiceTest.recognition;
@@ -66,4 +70,45 @@ test('cancelled recognition cannot submit a late final result', async ({ page })
  });
  await expect(dialog.getByText('Resultado tardío')).toHaveCount(0);
  expect(await page.evaluate(() => (window as any).voiceTest.spoken)).toBe(0);
+});
+
+test('reopening the toolbar microphone starts a fresh session once', async ({ page }) => {
+ await page.goto('/');
+ await page.getByRole('button', { name: 'Hablar con IA' }).click();
+ await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
+ await page.getByRole('dialog', { name: 'Habla con tu asistente' }).getByRole('button', { name: 'Cerrar asistente de voz' }).click();
+ await page.getByRole('button', { name: 'Hablar con IA' }).click();
+ await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(2);
+ expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(2);
+});
+
+test('opening voice from the pause leaves the microphone off until requested', async ({ page }) => {
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+ await page.goto('/');
+ await page.getByRole('button', { name: 'Hablar con IA' }).click();
+ await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
+ await page.getByRole('dialog', { name: 'Habla con tu asistente' }).getByRole('button', { name: 'Cerrar asistente de voz' }).click();
+ await page.getByRole('button', { name: 'Mi cartera', exact: true }).click();
+ await page.getByRole('button', { name: 'Entender una caída' }).click();
+ await page.getByRole('dialog', { name: 'Una pausa para comprender' }).getByRole('button', { name: 'Hablar con el asistente' }).click();
+ const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
+ await expect(dialog.getByRole('button', { name: 'Hablar', exact: true })).toBeVisible();
+ expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
+ await dialog.getByRole('button', { name: 'Cerrar asistente de voz' }).click();
+ await page.getByRole('button', { name: 'Hablar con IA' }).click();
+ await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(2);
+ expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(2);
+});
+
+test('a language change cancels pending local availability without restarting', async ({ page }) => {
+ await page.goto('/');
+ await page.evaluate(() => { (window as any).voiceTest.availability = 'pending'; });
+ await page.getByRole('button', { name: 'Hablar con IA' }).click();
+ await expect.poll(() => page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
+ await page.locator('.preference-button').filter({ hasText: 'EN' }).evaluate((button: HTMLElement) => button.click());
+ await expect(page.getByRole('dialog', { name: 'Talk to your assistant' })).toBeVisible();
+ await page.evaluate(() => (window as any).voiceTest.resolveCheck('available'));
+ await expect(page.getByRole('dialog', { name: 'Talk to your assistant' }).getByRole('button', { name: 'Talk', exact: true })).toBeVisible();
+ expect(await page.evaluate(() => (window as any).voiceTest.starts)).toBe(0);
+ expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
 });

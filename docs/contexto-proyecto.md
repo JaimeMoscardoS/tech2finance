@@ -86,7 +86,7 @@ Una noticia que coincide con una caída no demuestra por sí misma que la haya c
 
 ## Conversación y voz
 
-En esta rama el tutor funciona mediante reglas locales y contexto explícito, no un LLM. La lectura de voz utiliza voces locales del dispositivo cuando están disponibles; el dictado solo se habilita con procesamiento local y modelo instalado. El texto sigue disponible y el dictado se revisa antes de enviarse. La arquitectura siguiente es futura:
+En esta rama el tutor funciona mediante reglas locales y contexto explícito, no un LLM. La lectura de voz utiliza voces locales del dispositivo cuando están disponibles; el dictado solo se habilita con procesamiento local y modelo instalado. El micrófono de la barra abre el panel y solicita el reconocimiento local de inmediato; el dictado final se procesa al terminar, sin reactivar el micrófono tras la respuesta. Desde la pausa el inicio es manual. En el chat escrito el dictado se revisa antes de enviarse. La arquitectura siguiente es futura:
 
 La arquitectura propuesta es:
 
