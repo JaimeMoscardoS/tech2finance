@@ -8,7 +8,8 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.domain import DomainError, analyze_decline, build_tutor_context, get_catalog, run_simulation
-from backend.schemas import DeclineSpec, SimulationSpec, TutorRequest
+from backend.domain.game import run_game
+from backend.schemas import DeclineSpec, GameSpec, SimulationSpec, TutorRequest
 from backend.tutor_bridge import TutorUnavailable, reply
 
 MAX_BODY = 65536
@@ -109,6 +110,11 @@ def catalog():
 @app.post("/api/simulations")
 def simulation(spec: SimulationSpec):
     return run_simulation(spec.model_dump(mode="json", exclude_none=True))
+
+
+@app.post("/api/game/compare")
+def game_compare(spec: GameSpec):
+    return run_game(spec.model_dump(mode="json"))
 
 
 @app.post("/api/declines")

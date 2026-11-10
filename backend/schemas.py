@@ -71,6 +71,27 @@ class TutorContext(RequestModel):
         return self
 
 
+Rate = Annotated[float, Field(ge=0, le=0.05)]
+
+
+class GameSpec(RequestModel):
+    instrumentId: Identifier
+    initial: Amount
+    monthly: Amount
+    months: Annotated[int, Field(ge=1, le=120)]
+    sellMonth: Annotated[int, Field(ge=0, le=120)]
+    buyFeeRate: Rate
+    sellFeeRate: Rate
+
+    @model_validator(mode="after")
+    def validate_game(self):
+        if self.sellMonth > self.months:
+            raise ValueError("sellMonth must not exceed months")
+        if self.initial + self.monthly <= 0:
+            raise ValueError("initial or monthly must be positive")
+        return self
+
+
 class TutorRequest(RequestModel):
     message: Annotated[str, Field(min_length=1, max_length=1500)]
     history: Annotated[list[HistoryMessage], Field(max_length=8)] = Field(default_factory=list)
