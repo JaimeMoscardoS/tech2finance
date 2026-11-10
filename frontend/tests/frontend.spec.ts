@@ -4,7 +4,7 @@ test('users can explore, change level and run a labelled simulation', async ({ p
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Invertir empieza/ })).toBeVisible();
-  await page.getByRole('button', { name: /Nivel: Principiante/ }).click();
+  await page.getByRole('button', { name: /Detalle: Principiante/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
   await page.getByRole('button', { name: 'Simulador', exact: true }).click();
   await expect(page.getByText(/variaciones son inventadas/)).toBeVisible();
@@ -59,10 +59,10 @@ test('experience levels show distinct views without changing the selected risk',
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await expect(page.getByText('Tu punto de partida')).toBeVisible();
-  await page.getByRole('button', { name: /Nivel: Principiante/ }).click();
+  await page.getByRole('button', { name: /Detalle: Principiante/ }).click();
   await page.getByRole('button', { name: 'Intermedio' }).click();
   await expect(page.getByText('Tu panorama')).toBeVisible();
-  await page.getByRole('button', { name: /Nivel: Intermedio/ }).click();
+  await page.getByRole('button', { name: /Detalle: Intermedio/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
   await expect(page.getByText('Panel de análisis')).toBeVisible();
 });
@@ -92,7 +92,7 @@ test('mobile menu traps focus, closes with Escape and restores focus', async ({ 
  const trigger = page.getByRole('button', { name: 'Abrir menú' });
  await trigger.click(); const close = page.getByRole('dialog', { name: 'MI ESPACIO' }).getByRole('button', { name: 'Cerrar menú', exact: true });
  await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab');
- await expect(page.getByRole('button', { name: 'Ver opciones' })).toBeFocused();
+ await expect(page.getByRole('button', { name: 'Tu asistente DEMO' })).toBeFocused();
  await page.keyboard.press('Escape'); await expect(trigger).toBeFocused();
  await context.close();
 });
@@ -102,7 +102,7 @@ test('English intermediate view fits a 320px screen', async ({ browser }) => {
  const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button', { name: 'English' }).click();
- await page.getByRole('button', { name: 'Level: Beginner' }).click();
+ await page.getByRole('button', { name: 'Detail: Beginner' }).click();
  await page.getByRole('button', { name: 'Intermediate', exact: true }).click();
  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
  await context.close();
@@ -132,7 +132,7 @@ test('catalogue selection changes the example and real funds have no invented re
  await expect(page.getByLabel('Instrumento')).toHaveValue('demo-etf');
  expect(await panel.locator('.sim-values strong').first().textContent()).not.toBe(original);
  const newValue=await panel.locator('.sim-values strong').first().textContent();
- await page.getByRole('button', {name:/Nivel: Principiante/}).click();
+ await page.getByRole('button', {name:/Detalle: Principiante/}).click();
  await page.getByRole('button', {name:'Avanzado', exact:true}).click();
  await expect(panel.locator('.sim-values strong').first()).toHaveText(newValue!);
  await page.getByLabel('Tipo de activo').selectOption('fund');
@@ -203,7 +203,7 @@ test('annual history keeps fixed period and excludes monthly contributions', asy
  await expect(panel.getByText(/Has cambiado los datos/)).toBeVisible();
  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await expect(panel.locator('.sim-values strong').filter({hasText:'1058,05 €'})).toBeVisible();
- await page.getByRole('button',{name:/Nivel: Principiante/}).click();
+ await page.getByRole('button',{name:/Detalle: Principiante/}).click();
  await page.getByRole('button',{name:'Avanzado',exact:true}).click();
  await expect(panel.locator('.sim-values strong').filter({hasText:'1058,05 €'})).toBeVisible();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
@@ -226,9 +226,9 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await page.getByRole('button',{name:'Simulator',exact:true}).click();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
  await page.screenshot({path:'test-results/simulator-tablet.png',fullPage:true});
- await page.getByRole('button',{name:'Level: Beginner'}).click();
+ await page.getByRole('button',{name:'Detail: Beginner'}).click();
  await page.keyboard.press('Escape');
- await expect(page.getByRole('button',{name:'Level: Beginner'})).toHaveAttribute('aria-expanded','false');
+ await expect(page.getByRole('button',{name:'Detail: Beginner'})).toHaveAttribute('aria-expanded','false');
  await tablet.close();
  const mobile=await browser.newContext({viewport:{width:568,height:320}});
  const phone=await mobile.newPage(); await phone.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local')); await phone.goto('/');
@@ -265,7 +265,7 @@ test('annual deposits, table and percentage view stay consistent across preferen
  await expect(rows.last()).toContainText('5,8 %');
  await panel.getByRole('button',{name:'Evolución del instrumento (%)'}).click();
  await expect(rows.last()).toContainText('5,8 %');
- await page.getByRole('button',{name:/Nivel: Principiante/}).click();
+ await page.getByRole('button',{name:/Detalle: Principiante/}).click();
  await page.getByRole('button',{name:'Intermedio',exact:true}).click();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
  await page.getByRole('button',{name:'English'}).click();
@@ -299,16 +299,18 @@ test('validation identifies the actual field and retains annual help', async ({p
  await expect(page.getByRole('alert')).toContainText('Aportación anual');
 });
 
-test('home chart retains useful width on narrow screens', async ({browser}) => {
+test('portfolio chart retains useful width on narrow screens', async ({browser}) => {
  for (const width of [320,768]) {
   const context=await browser.newContext({viewport:{width,height:900}});
   const page=await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   if (width===768) { await page.getByRole('button',{name:'English'}).click(); await page.getByRole('button',{name:'Dark theme'}).click(); }
-  const plot=page.locator('.portfolio-content .investment-chart__plot');
+  if (width===320) await page.getByRole('button',{name:'Abrir menú'}).click();
+  await page.getByRole('button',{name: width===768 ? 'My portfolio' : 'Mi cartera',exact:true}).click();
+  const plot=page.locator('.large-portfolio .investment-chart__plot');
   await expect(plot).toBeVisible();
-  expect((await plot.boundingBox())!.width).toBeGreaterThan(width===320?200:300);
-  await page.screenshot({path:`test-results/home-${width}.png`,fullPage:true});
+  expect((await plot.boundingBox())!.width).toBeGreaterThan(width===320?200:260);
+  await page.screenshot({path:`test-results/portfolio-${width}.png`,fullPage:true});
   await context.close();
  }
 });
@@ -448,4 +450,19 @@ test('local panels fit desktop and mobile in both themes', async ({browser}) => 
   expect(overflow.document,JSON.stringify(overflow)).toBeLessThanOrEqual(overflow.screen);
   await context.close();
  }
+});
+
+
+test('home destinations and connection controls fit at 390px', async ({ browser }) => {
+ const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+ const page = await context.newPage();
+ await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
+ await page.goto('/');
+ await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
+ await page.locator('.connection-settings summary').click();
+ await expect(page.getByRole('button', { name: 'Usar servidor de demo' })).toBeVisible();
+ expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
+ await page.getByRole('button', { name: /Practica sin riesgo/ }).click();
+ await expect(page.locator('.practice-lab h1')).toBeVisible();
+ await context.close();
 });

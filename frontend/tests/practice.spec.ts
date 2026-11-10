@@ -88,6 +88,7 @@ test('late responses and server errors never replace a changed practice', async 
   release?.();
   await delayedRequestFinished;
   await expect(page.locator('.practice-result-card').nth(1).locator('dd').first()).toHaveText(fresh);
+  await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();
   await expect(page.locator('.practice-result-card')).toHaveCount(0);
 });
@@ -98,7 +99,8 @@ test('server failure is visible and cannot silently compute locally', async ({pa
   await page.getByRole('button',{name:'Comparar ejemplos'}).click();
   await expect(page.getByRole('alert')).toContainText('No se ha podido completar');
   await expect(page.locator('.practice-result-card')).toHaveCount(0);
-  await expect(page.getByText('Servidor de demo',{exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Servidor de demo');
+  await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();
   await page.getByRole('button',{name:'Comparar ejemplos'}).click();
   await expect(page.locator('.practice-result-card')).toHaveCount(2);

@@ -2,7 +2,6 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type
 import {
   ArrowRight,
   BarChart3,
-  BookOpen,
   Check,
   ChevronDown,
   Compass,
@@ -21,7 +20,6 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import CountUp from "./CountUp";
 import { simulate } from "./demo";
 import { annualHistory, replayAnnual } from "./annual-history";
 import { banks as localBanks, instruments as localInstruments, type Instrument } from "./catalog";
@@ -373,7 +371,15 @@ export default function App() {
   const provider = useMemo(() => serverTutorProvider(serverContext), [serverContextKey]);
   const switchMode = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setCatalog(null); setResult(null); setMode(mode === "server" ? "local" : "server"); };
   const retryCatalog = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); setServerError(false); setServerLoading(true); setRetry(n => n + 1); };
-  const modeControls = <div className="info-banner"><span role="status">{mode === "server" ? (language === "es" ? "Servidor de demo" : "Demo server") : (language === "es" ? "Demo local" : "Local demo")}{(serverLoading || operationPending) ? (language === "es" ? " · Conectando…" : " · Connecting…") : serverError ? (language === "es" ? " · No se pudo completar la solicitud." : " · The request could not be completed.") : ""}</span>{mode === "server" && serverError && retryAction.current && <button type="button" onClick={()=>retryAction.current?.()}>{language === "es" ? "Reintentar" : "Retry"}</button>}<button type="button" onClick={switchMode}>{mode === "server" ? (language === "es" ? "Usar demo local" : "Use local demo") : (language === "es" ? "Usar servidor de demo" : "Use demo server")}</button></div>;
+  const modeControls = <div className="connection-area">
+    <details className="connection-settings">
+      <summary>{language === "es" ? "Conexión" : "Connection"} · {mode === "server" ? (language === "es" ? "Servidor de demo" : "Demo server") : (language === "es" ? "Demo local" : "Local demo")}</summary>
+      <p>{language === "es" ? "Elige dónde se ejecuta la demo. Cambiar de modo descarta los resultados actuales." : "Choose where the demo runs. Switching modes clears current results."}</p>
+      <button type="button" onClick={switchMode}>{mode === "server" ? (language === "es" ? "Usar demo local" : "Use local demo") : (language === "es" ? "Usar servidor de demo" : "Use demo server")}</button>
+    </details>
+    <div role="status" className="connection-status">{(serverLoading || operationPending) ? (language === "es" ? "Conectando…" : "Connecting…") : serverError ? (language === "es" ? "No se pudo completar la solicitud." : "The request could not be completed.") : ""}</div>
+    {mode === "server" && serverError && retryAction.current && <button type="button" className="connection-retry" onClick={()=>retryAction.current?.()}>{language === "es" ? "Reintentar" : "Retry"}</button>}
+  </div>;
   if (!catalog) return <Recovery ref={recoveryRef} language={language} theme={theme} failed={serverError} onLanguage={setLanguage} onTheme={setTheme} onRetry={retryCatalog} onLocal={switchMode} />;
   return (
     <div className="app-shell">
@@ -425,10 +431,6 @@ export default function App() {
           <MessageCircle size={18} />
           <span>{t.assistant}</span>
           <span className="new-tag">{t.demo}</span>
-        </button>
-        <button className="nav-item" onClick={() => choose("explore")}>
-          <BookOpen size={18} />
-          <span>{t.basics}</span>
         </button>
         <div className="side-bottom">
           <div className="profile">
@@ -502,10 +504,10 @@ export default function App() {
                 className="level-button"
                 onClick={() => setLevelOpen((v) => !v)}
                 aria-expanded={levelOpen}
-                aria-label={`${t.level}: ${levelNames[level]}`}
+                aria-label={`${t.detailLevel}: ${levelNames[level]}`}
               >
                 <span>
-                  {t.level}: <strong>{levelNames[level]}</strong>
+                  {t.detailLevel}: <strong>{levelNames[level]}</strong>
                 </span>
                 <ChevronDown size={15} />
               </button>
@@ -553,75 +555,8 @@ export default function App() {
                   <h2>{levelTitle}</h2>
                   <p>{levelText}</p>
                   <p>{t.knowledgeNote}</p>
-                  <div className="welcome-actions">
-                    <button
-                      className="button dark"
-                      onClick={() => choose("simulator")}
-                    >
-                      {t.trySimulator}
-                      <ArrowRight size={16} />
-                    </button>
-                    <button
-                      className="text-link"
-                      onClick={() => choose("explore")}
-                    >
-                      {t.viewFunds}
-                      <ArrowRight size={15} />
-                    </button>
-                  </div>
                 </div>
-                {level !== "beginner" && (
-                  <div className="view-summary">
-                    <span className="kicker">{t.examplePortfolio}</span>
-                    <strong>{euro(1093)}</strong>
-                    <small>{t.fictional}</small>
-                    {level === "advanced" && <p>{t.detailNote}</p>}
-                  </div>
-                )}
               </section>
-              {level === "intermediate" && (
-                <div className="metric-grid">
-                  <div className="metric-card">
-                    <span>{t.portfolioValue}</span>
-                    <strong>{euro(1093)}</strong>
-                    <small>{t.fictional}</small>
-                  </div>
-                  <div className="metric-card">
-                    <span>{t.goal}</span>
-                    <strong>{t.longTerm}</strong>
-                    <small>{t.exampleGoal}</small>
-                  </div>
-                  <div className="metric-card">
-                    <span>{t.assumptions}</span>
-                    <strong>—</strong>
-                    <small>{t.noHistory}</small>
-                  </div>
-                </div>
-              )}
-              {level === "advanced" && (
-                <div className="metric-grid advanced">
-                  <div className="metric-card">
-                    <span>{t.portfolioValue}</span>
-                    <strong>{euro(1093)}</strong>
-                    <small>{t.fictional}</small>
-                  </div>
-                  <div className="metric-card">
-                    <span>{t.totalContributions}</span>
-                    <strong>—</strong>
-                    <small>{t.unavailable}</small>
-                  </div>
-                  <div className="metric-card">
-                    <span>{t.difference}</span>
-                    <strong>—</strong>
-                    <small>{t.unavailable}</small>
-                  </div>
-                  <div className="metric-card">
-                    <span>{t.assumptions}</span>
-                    <strong>—</strong>
-                    <small>{t.noHistory}</small>
-                  </div>
-                </div>
-              )}
               <div className="section-head">
                 <div>
                   <span className="kicker">{t.learn}</span>
@@ -639,7 +574,7 @@ export default function App() {
                   <h3>{t.discoverFunds}</h3>
                   <p>{t.discoverDesc}</p>
                   <span>
-                    {t.go}
+                    {t.viewFunds}
                     <ArrowRight size={14} />
                   </span>
                 </button>
@@ -653,80 +588,18 @@ export default function App() {
                   <h3>{t.practice}</h3>
                   <p>{t.practiceDesc}</p>
                   <span>
-                    {t.go}
+                    {language === "es" ? "Comparar ejemplos" : "Compare examples"}
                     <ArrowRight size={14} />
                   </span>
                 </button>
-                <button className="action-card" onClick={openAssistant}>
-                  <div className="action-icon lilac">
-                    <MessageCircle size={21} />
-                  </div>
-                  <h3>{t.ask}</h3>
-                  <p>{t.askDesc}</p>
-                  <span>
-                    {t.go}
-                    <ArrowRight size={14} />
-                  </span>
+                <button className="action-card" onClick={() => choose("portfolio")}>
+                  <div className="action-icon lilac"><Wallet size={21} /></div>
+                  <h3>{t.examplePortfolio}</h3>
+                  <p>{t.portfolioPathDesc}</p>
+                  <span>{language === "es" ? "Ver cartera" : "View portfolio"}<ArrowRight size={14} /></span>
                 </button>
               </div>
-              <div className="lower-grid">
-                <section className="portfolio-card">
-                  <div className="card-heading">
-                    <div>
-                      <span className="kicker">{t.fictional}</span>
-                      <h3>{t.examplePortfolio}</h3>
-                    </div>
-                    <button
-                      className="mini-link"
-                      onClick={() => choose("portfolio")}
-                    >
-                      {t.viewDetails}
-                      <ArrowRight size={14} />
-                    </button>
-                  </div>
-                  <div className="portfolio-content">
-                    <div>
-                      <p>{t.portfolioValue}</p>
-                      <div className="amount">
-                        <CountUp
-                          from={1093}
-                          to={1093}
-                          duration={1.2}
-                          separator={language === "es" ? "." : ","}
-                          trigger="load"
-                        />{" "}
-                        €
-                      </div>
-                      <small>{t.noRealValue}</small>
-                    </div>
-                    <InvestmentChart
-                      compact
-                      language={language}
-                      title={t.examplePortfolio}
-                      description={t.portfolioChartDescription}
-                      data={points.map((value, index) => ({
-                        label:
-                          index === 0 ? t.start : `${t.pointLabel} ${index}`,
-                        value,
-                        contributed: 1000,
-                        returnPercent: (value / 1000 - 1) * 100,
-                      }))}
-                    />
-                  </div>
-                </section>
-                <section className="insight-card">
-                  <div className="insight-icon">
-                    <Sparkles size={18} />
-                  </div>
-                  <span className="kicker">{t.assistantTitle}</span>
-                  <h3>{t.levelExplanation}</h3>
-                  <p>{t.knowledgeNote}</p>
-                  <button onClick={openAssistant}>
-                    {t.askButton}
-                    <ArrowRight size={15} />
-                  </button>
-                </section>
-              </div>
+
             </>
           )}
           {page === "explore" && (
