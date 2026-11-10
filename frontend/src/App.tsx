@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -25,7 +25,7 @@ import CountUp from "./CountUp";
 import { simulate } from "./demo";
 import { annualHistory, replayAnnual } from "./annual-history";
 import { banks as localBanks, instruments as localInstruments, type Instrument } from "./catalog";
-import { requestJson, isCatalog, isSimulation, isDecline, serverTutorProvider, type Catalog, type SimulationSpec, type DeclineSpec } from "./server-api";
+import { requestJson, isCatalog, isSimulation, isDecline, serverTutorProvider, type Catalog, type SimulationSpec, type DeclineSpec, type ServerSimulation } from "./server-api";
 import InvestmentChart from "./LazyInvestmentChart";
 import Simulator, { type FieldError } from "./Simulator";
 import { MAX_SIMULATION_AMOUNT } from "./simulation-types";
@@ -35,6 +35,7 @@ import { portfolioPoints } from "./portfolio-demo";
 import AssistantPanel from "./AssistantPanel";
 import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
+const PracticeLab = lazy(() => import("./PracticeLab"));
 
 type Page = "home" | "explore" | "simulator" | "portfolio";
 type Level = "beginner" | "intermediate" | "advanced";
@@ -66,6 +67,8 @@ export default function App() {
   const declineRequest = useRef<AbortController | null>(null);
   const declineGeneration = useRef(0);
   const [declineSpec, setDeclineSpec] = useState<DeclineSpec | undefined>();
+  const [practiceOpen, setPracticeOpen] = useState(false);
+  const [practiceResult, setPracticeResult] = useState<{spec: SimulationSpec; result: ServerSimulation} | null>(null);
   const [page, setPage] = useState<Page>("home"),
     [level, setLevel] = useState<Level>("beginner"),
     [levelOpen, setLevelOpen] = useState(false),
@@ -213,7 +216,7 @@ export default function App() {
   useEffect(() => {
     try { localStorage.setItem("t2f-data-mode", mode); } catch {}
     simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort();
-    setResult(null); setPause(null); setAssistantDecline(undefined); setDeclineSpec(undefined); setServerError(false); setOperationPending(false); retryAction.current = null;
+    setResult(null); setPracticeResult(null); setPause(null); setAssistantDecline(undefined); setDeclineSpec(undefined); setServerError(false); setOperationPending(false); retryAction.current = null;
     catalogMode.current = mode === "local" ? "local" : null;
     if (mode === "local") { setCatalog({schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,annualHistory}); setServerLoading(false); return; }
     setCatalog(null); setServerLoading(true); const controller = new AbortController();
@@ -222,7 +225,7 @@ export default function App() {
   }, [mode, retry]);
   useEffect(() => () => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); }, []);
   useEffect(() => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false); }, [initial, monthly, annual, months, mode, language]);
-  useEffect(() => { if (catalog && catalogMode.current === mode) { const item = catalog.instruments.find(i => i.instrumentId === selectedId) ?? catalog.instruments[0]; selectInstrument(item); } }, [catalog, mode]);
+  useEffect(() => { if (catalog && !practiceOpen && catalogMode.current === mode) { const item = catalog.instruments.find(i => i.instrumentId === selectedId) ?? catalog.instruments[0]; selectInstrument(item); } }, [catalog, mode, practiceOpen]);
   const points = portfolioPoints;
   const nav = [
     { key: "home" as const, icon: Grid2X2 },
@@ -254,6 +257,7 @@ export default function App() {
     },
   ];
   const choose = (p: Page) => {
+    setPracticeOpen(false); setPracticeResult(null); setAssistantDecline(undefined); setDeclineSpec(undefined);
     if (p !== "simulator") { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false); }
     setPage(p);
     if (mobileNav) {
@@ -262,6 +266,29 @@ export default function App() {
     }
     setNotice(null);
   };
+  const openPractice = () => {
+    simulationGeneration.current++; simulationRequest.current?.abort();
+    declineGeneration.current++; declineRequest.current?.abort();
+    setOperationPending(false); setServerError(false); setResult(null);
+    setPracticeResult(null); setAssistantDecline(undefined); setDeclineSpec(undefined);
+    setPracticeOpen(true); setPage("simulator"); setNotice(null);
+  };
+  const calculatePractice = useCallback(async (spec: SimulationSpec, signal: AbortSignal): Promise<ServerSimulation> => {
+    if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
+    const item = catalog?.instruments.find(instrument => instrument.instrumentId === spec.instrumentId);
+    if (!item || item.dataStatus === "missing_history") throw new Error("History unavailable");
+    if (mode === "server") {
+      const response = await requestJson("/api/simulations", isSimulation, spec, signal);
+      if (response.instrumentId !== spec.instrumentId || response.timeline.length !== spec.periods + 1 || response.kind !== (item.dataStatus === "annual_history" ? "annual_history" : "fictional_monthly")) throw new Error("Unexpected simulation response");
+      return response;
+    }
+    const outcome = item.dataStatus === "annual_history"
+      ? (spec.periods === 5 ? replayAnnual(spec.initial, spec.recurringContribution) : null)
+      : item.returns ? simulate(spec.initial, spec.recurringContribution, spec.periods, item.returns) : null;
+    if (!outcome) throw new Error("Invalid simulation");
+    if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
+    return {...outcome, instrumentId:item.instrumentId, currency:"EUR", contributionTiming:item.dataStatus === "annual_history" ? "year_end_after_return" : "month_start", sources:item.sourceUrl ? [{label:language === "es" ? "Ficha oficial" : "Official product page",url:item.sourceUrl,checkedAt:item.sourceDate ?? undefined}] : [], assumptions:item.dataStatus === "annual_history" ? [language === "es" ? "Rentabilidades anuales publicadas y redondeadas; aportaciones al cierre." : "Published rounded annual returns; contributions at year end."] : [language === "es" ? "Serie ficticia repetida; aportaciones al inicio de cada mes." : "Repeated fictional series; contributions at the start of each month."]};
+  }, [catalog, mode, language]);
   const openAssistant = () => {
     setAssistantDecline(undefined);
     assistantTriggerRef.current = mobileNav
@@ -303,10 +330,15 @@ export default function App() {
   function selectInstrument(item: Instrument) { declineGeneration.current++; declineRequest.current?.abort(); setSelectedId(item.instrumentId); setError(null); void calculate(item); }
   function run(e: FormEvent) { e.preventDefault(); void calculate(selected); }
   const source = selected.sourceUrl ? [{label:language === "es" ? "Ficha oficial" : "Official product page",url:selected.sourceUrl,checkedAt:selected.sourceDate ?? undefined}] : [];
-  const validResult = page === "simulator" && result?.instrumentId === selected.instrumentId ? result : null;
+  const validResult = page === "simulator" && !practiceOpen && result?.instrumentId === selected.instrumentId ? result : null;
+  const practiceInstrument = practiceResult && instruments.find(item => item.instrumentId === practiceResult.spec.instrumentId);
+  const tutorInstrument = practiceOpen ? practiceInstrument || undefined : selected;
+  const tutorSource = tutorInstrument?.sourceUrl ? [{label: language === "es" ? "Ficha oficial" : "Official product page", url:tutorInstrument.sourceUrl, checkedAt:tutorInstrument.sourceDate ?? undefined}] : [];
+  const activeSpec = practiceOpen ? practiceResult?.spec : validResult ? {instrumentId:validResult.instrumentId,initial:validResult.initial,recurringContribution:validResult.kind === "annual_history" ? validResult.annual : validResult.monthly,periods:validResult.kind === "annual_history" ? 5 : validResult.months} : undefined;
+  const activeResult = practiceOpen ? practiceResult?.result : validResult;
   const tutorContext: TutorContext = {page,level,language,
-    ...(page === "simulator" ? {instrument:{id:selected.instrumentId,name:selected.name[language],currency:selected.currency,dataKind:selected.dataStatus === "annual_history" ? "annual_published_returns" : selected.dataStatus,sources:source}} : {}),
-    ...(validResult ? {simulation:{kind:validResult.kind,initial:validResult.initial,recurringContribution:validResult.kind === "annual_history" ? validResult.annual : validResult.monthly,contributionTiming:validResult.kind === "annual_history" ? "year_end_after_return" : "month_start",periods:validResult.kind === "annual_history" ? 5 : validResult.months,finalValue:validResult.value,totalContributed:validResult.contributed,profit:validResult.profit,simpleReturnPercent:validResult.simpleReturnPercent,instrumentReturnPercent:validResult.timeline[validResult.timeline.length-1].instrumentReturnPercent,...(validResult.kind === "annual_history" ? {periodStart:(catalog?.annualHistory ?? annualHistory).baseline,periodEnd:validResult.timeline[validResult.timeline.length-1].date ?? undefined,annualReturns:(catalog?.annualHistory ?? annualHistory).returns.map(row=>({year:row.year,ratePercent:row.rate*100}))} : {})}} : {}),
+    ...(page === "simulator" && tutorInstrument ? {instrument:{id:tutorInstrument.instrumentId,name:tutorInstrument.name[language],currency:tutorInstrument.currency,dataKind:tutorInstrument.dataStatus === "annual_history" ? "annual_published_returns" : tutorInstrument.dataStatus,sources:tutorSource}} : {}),
+    ...(page === "simulator" && activeResult && activeSpec ? {simulation:{kind:activeResult.kind,initial:activeSpec.initial,recurringContribution:activeSpec.recurringContribution,contributionTiming:activeResult.kind === "annual_history" ? "year_end_after_return" : "month_start",periods:activeSpec.periods,finalValue:activeResult.value,totalContributed:activeResult.contributed,profit:activeResult.profit,simpleReturnPercent:activeResult.simpleReturnPercent,instrumentReturnPercent:activeResult.timeline[activeResult.timeline.length-1].instrumentReturnPercent,...(activeResult.kind === "annual_history" ? {periodStart:(catalog?.annualHistory ?? annualHistory).baseline,periodEnd:activeResult.timeline[activeResult.timeline.length-1].date ?? undefined,annualReturns:(catalog?.annualHistory ?? annualHistory).returns.map(row=>({year:row.year,ratePercent:row.rate*100}))} : {})}} : {}),
     ...((page === "home" || page === "portfolio") ? {portfolio:{name:t.examplePortfolio,value:1093,initial:1000,dataKind:"fictional" as const}} : {}),
     ...(assistantDecline ? {decline:assistantDecline,decision} : {})};
   async function showDecline(spec: DeclineSpec, local: () => DeclineReport) {
@@ -328,7 +360,7 @@ export default function App() {
     intermediate: t.intermediateText,
     advanced: t.advancedText,
   }[level];
-  const serverContext = {page,level,language,...(page === "simulator" ? {instrumentId:selected.instrumentId} : {}),...(validResult ? {simulation:{instrumentId:validResult.instrumentId,initial:validResult.initial,recurringContribution:validResult.kind === "annual_history" ? validResult.annual : validResult.monthly,periods:validResult.kind === "annual_history" ? 5 : validResult.months}} : {}),...(assistantDecline && declineSpec ? {decline:{...declineSpec,language},decision} : {})};
+  const serverContext = {page,level,language,...(page === "simulator" && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline && declineSpec ? {decline:{...declineSpec,language},decision} : {})};
   const serverContextKey = JSON.stringify(serverContext);
   const provider = useMemo(() => serverTutorProvider(serverContext), [serverContextKey]);
   const modeControls = <div className="info-banner" role="status"><span>{mode === "server" ? (language === "es" ? "Servidor de demo" : "Demo server") : (language === "es" ? "Demo local" : "Local demo")}{(serverLoading || operationPending) ? (language === "es" ? " · Conectando…" : " · Connecting…") : serverError ? (language === "es" ? " · No se pudo completar la solicitud." : " · The request could not be completed.") : ""}</span>{mode === "server" && serverError && <button type="button" onClick={()=>{if (!catalog) setRetry(n=>n+1); else retryAction.current?.();}}>{language === "es" ? "Reintentar" : "Retry"}</button>}<button type="button" onClick={()=>{setCatalog(null);setResult(null);setMode(mode === "server" ? "local" : "server");}}>{mode === "server" ? (language === "es" ? "Usar demo local" : "Use local demo") : (language === "es" ? "Usar servidor de demo" : "Use demo server")}</button></div>;
@@ -427,7 +459,7 @@ export default function App() {
             <div className="preferences" aria-label={t.languageLabel}>
               <button
                 className={`preference-button ${language === "es" ? "selected" : ""}`}
-                onClick={() => setLanguage("es")}
+                onClick={() => { setPracticeResult(null); setLanguage("es"); }}
                 aria-pressed={language === "es"}
                 aria-label={t.switchSpanish}
               >
@@ -435,7 +467,7 @@ export default function App() {
               </button>
               <button
                 className={`preference-button ${language === "en" ? "selected" : ""}`}
-                onClick={() => setLanguage("en")}
+                onClick={() => { setPracticeResult(null); setLanguage("en"); }}
                 aria-pressed={language === "en"}
                 aria-label={t.switchEnglish}
               >
@@ -603,7 +635,7 @@ export default function App() {
                 </button>
                 <button
                   className="action-card"
-                  onClick={() => choose("simulator")}
+                  onClick={openPractice}
                 >
                   <div className="action-icon peach">
                     <FlaskConical size={21} />
@@ -754,6 +786,8 @@ export default function App() {
             </>
           )}
           {page === "simulator" && (
+            practiceOpen ? <Suspense fallback={<p role="status">{language === "es" ? "Cargando práctica…" : "Loading practice…"}</p>}><PracticeLab language={language} level={level} instruments={instruments} annualHistory={catalog.annualHistory} mode={mode} calculate={calculatePractice} onActiveResult={setPracticeResult} onExit={() => choose("simulator")} openAssistant={openAssistant} /></Suspense> : <>
+            <button type="button" className="text-link history-shortcut" onClick={openPractice}>{language === "es" ? "Abrir práctica guiada" : "Open guided practice"}<ArrowRight size={15}/></button>
             <Simulator
               {...{
                 t,
@@ -782,6 +816,7 @@ export default function App() {
                 openSimulationDecline,
               }}
             />
+            </>
           )}
           {page === "portfolio" && (
             <>
