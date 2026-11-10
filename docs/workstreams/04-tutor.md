@@ -35,3 +35,9 @@ En Node 25.9.0, la suite del tutor pasó 16 de 16 pruebas tanto desde la raíz c
 El alcance sigue limitado a patrones y ejemplos finitos: no es comprensión general del lenguaje ni interpreta nuevos parámetros u órdenes. No acredita un LLM futuro, cumplimiento legal ni aprendizaje. Los hashes usan texto UTF-8 sin BOM con saltos de línea LF canónicos.
 
 La primera comprobación `git diff --check` solo incluyó archivos ya seguidos, no los nuevos sin añadir. La comprobación posterior del contenido preparado detectó una línea en blanco extra al final del corpus; un comando encadenado continuó y creó el primer commit pese al aviso, por lo que se detuvo la publicación. La corrección elimina solo esa línea, verifica la equivalencia JSON con el corpus del primer commit y regenera el informe. Se comprueba de nuevo el contenido preparado antes del segundo commit.
+
+## Hallazgo de integración posterior a la publicación
+
+ROOT detectó en la integración que la pregunta «¿Cuál fue la rentabilidad de 2022?» se trataba como una consulta sobre otro instrumento y no llegaba a la tasa anual disponible. Las regresiones en español e inglés y para años sin tasa fallaron antes de la corrección y pasaron después. El guard admite ahora un año aislado de 1900 a 2299 únicamente cuando el contexto es de historial anual; los nombres que contienen años y los contextos sin historial anual siguen sujetos a abstención. Las reglas existentes comprueban la validez de los datos y la disponibilidad de la tasa. El corpus permanece idéntico; solo cambia el hash de la implementación en el informe regenerado.
+
+Las cuatro rondas de revisión ya se agotaron. ROOT verificará este cambio posterior bajo su propia responsabilidad; la nota histórica de R4 no lo cubre ni implica una quinta revisión. La ejecución integral de extremo a extremo en integración queda pendiente de repetición para este cambio.

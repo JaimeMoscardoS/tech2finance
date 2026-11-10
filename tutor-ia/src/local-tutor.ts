@@ -52,7 +52,8 @@ export function createLocalTutorProvider(): TutorProvider {
     const activeName = context?.instrument?.name?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const namedFull = named?.replace(/\s+(?:over this period|in this period|en este periodo|durante este periodo|in eur|en eur)$/, '').replace(/\s+(?:selected|seleccionada|seleccionado)$/, '').replace(/^(?:(?:the|this|selected|my|la|el|esta|este|mi|seleccionada|seleccionado)\s+)*/, '');
     const namedTarget = namedFull?.replace(/^(?:fund|fondo|instrument|instrumento)\s+/, '');
-    const foreign = !!namedTarget && !/^(?:simulation|simulacion|instrument|instrumento|fund|fondo|portfolio|cartera|account|cuenta|period|periodo)\s*$/.test(namedTarget) && !(activeName && (namedFull === activeName || namedTarget === activeName));
+    const annualYear = s?.kind === 'annual_history' && !!named && /^(?:19|20|21|22)\d{2}$/.test(named);
+    const foreign = !!namedTarget && !annualYear && !/^(?:simulation|simulacion|instrument|instrumento|fund|fondo|portfolio|cartera|account|cuenta|period|periodo)\s*$/.test(namedTarget) && !(activeName && (namedFull === activeName || namedTarget === activeName));
     const concepts: Record<string, [string, string]> = {
       fund: ['Un fondo reúne el dinero de varios partícipes e invierte según una estrategia; su valor puede bajar.', 'A fund pools investors’ money under a strategy; its value can fall.'],
       etf: ['Un ETF es un fondo que cotiza en bolsa. Su precio y los costes dependen del producto y de la operación.', 'An ETF is an exchange-traded fund. Its price and costs depend on the product and trade.'],

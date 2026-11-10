@@ -49,3 +49,19 @@ for (const [name, message] of [['Fund Alpha', 'What is the return of Fund Alpha?
     assert.match(reply.text, /900/);
   });
 }
+const annualContext: TutorContext = { ...context, instrument: { ...context.instrument!, dataKind: 'annual_published_returns' }, simulation: { ...context.simulation!, kind: 'annual_history', contributionTiming: 'year_end_after_return', annualReturns: [{ year: 2022, ratePercent: -0.67 }] } };
+for (const [language, message, expected] of [['es', '¿Cuál fue la rentabilidad de 2022?', /2022: -0,67%/], ['en', 'What was the return of 2022?', /2022: -0\.67%/], ['es', 'rentabilidad de 2029', /No hay tasa anual disponible para 2029/], ['en', 'return of 2020', /No annual rate is available for 2020/]] as const) {
+  test(`annual year query ${language}: ${message}`, async () => {
+    const reply = await createLocalTutorProvider().reply({ message, context: { ...annualContext, language } });
+    assert.match(reply.text, expected);
+  });
+}
+test('year-like names and a year without annual data do not use active figures', async () => {
+  const tutor = createLocalTutorProvider();
+  for (const message of ['return of 2022 Fund', 'return of 2022 Synthetic Beta', 'return of Fund2022', 'return of Fund 2022', 'rentabilidad de Fondo 2022']) {
+    const reply = await tutor.reply({ message, context: annualContext });
+    assert.doesNotMatch(reply.text, /900|Synthetic Alpha|2022: -0\.67%/);
+  }
+  const reply = await tutor.reply({ message: 'return of 2022', context });
+  assert.doesNotMatch(reply.text, /900|Synthetic Alpha/);
+});
