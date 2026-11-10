@@ -672,8 +672,8 @@
       "id": "02-platform",
       "branch": "director/02-platform",
       "head": "558365a669c20296591637c59bcebd1716b22610",
-      "status": "blocked_publication",
-      "pr": null,
+      "status": "pr_open",
+      "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/18",
       "human_roles": [
         "Persona 2: backend e integración"
       ],
@@ -705,7 +705,7 @@
         "score": 8.5,
         "critical_or_high": false,
         "findings": [
-          "Ejecución POSIX y CI remota pendientes."
+          "Ensayo completo del lanzador FastAPI+Vite en POSIX pendiente; CI Linux de push terminó correctamente para este commit."
         ],
         "prior_round": {
           "round": 1,
@@ -719,11 +719,25 @@
         }
       ],
       "evidence": [
-        "C:/proyectos/tech2finance-directors/20261110/02-platform/docs/workstreams/02-platform.md"
+        "https://github.com/JaimeMoscardoS/tech2finance/blob/558365a669c20296591637c59bcebd1716b22610/docs/workstreams/02-platform.md",
+        "https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42850404022"
       ],
-      "publish_blockers": [
-        "El token OAuth rechazó cambios de workflow; alternativas fallaron y la autorización del usuario permanece pendiente."
-      ]
+      "publish_blockers": [],
+      "remote_pr_head": "558365a669c20296591637c59bcebd1716b22610",
+      "publication_history": [
+        {
+          "date": "2026-11-10",
+          "status": "blocked_then_resolved",
+          "detail": "El token OAuth rechazó inicialmente cambios de workflow; el usuario completó la autorización y la rama se publicó después."
+        }
+      ],
+      "ci": {
+        "url": "https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42850404022",
+        "event": "push",
+        "head_sha": "558365a669c20296591637c59bcebd1716b22610",
+        "status": "completed",
+        "conclusion": "success"
+      }
     },
     {
       "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
@@ -884,8 +898,8 @@
       "id": "05-product",
       "branch": "director/05-product",
       "head": null,
-      "status": "review_ready",
-      "pr": null,
+      "status": "pr_open",
+      "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/17",
       "human_roles": [
         "Persona 5: datos, pruebas y presentación",
         "Producto y comercial: UNASSIGNED"
@@ -954,9 +968,9 @@
         "docs/planning/plan.md",
         "docs/pilot-kit/estudio.md"
       ],
-      "publish_blockers": [
-        "Publicación pendiente de autorización final de ROOT."
-      ]
+      "publish_blockers": [],
+      "last_published_head_snapshot": "de6aaf99b7e1def61c476e3d9a4480c7c88fc662",
+      "head_note": "Instantánea anterior a esta edición; consultar metadatos del PR para el HEAD publicado actual."
     }
   ],
   "integration": {
@@ -990,7 +1004,7 @@
       "05-product": "6dbecbbcfb1e1c284e333e5ccc456f6a6b5778d6",
       "04-tutor": "c9a3272f977de62685df3307aadde19b5608201a"
     },
-    "remaining": "CI remota y main no acreditados; derechos, asesoría y decisión empresarial pendientes.",
+    "remaining": "CI de la rama 02 superada para su propio HEAD; integración en main, derechos, asesoría y decisión empresarial pendientes.",
     "gate": "accepted_local",
     "runs": [
       {
