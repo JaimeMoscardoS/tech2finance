@@ -1,0 +1,27 @@
+COMMAND: npm.cmd run test:launcher
+CWD: C:\proyectos\tech2finance-directors\20261110\06-integration
+EXIT: 0
+
+> test:launcher
+> node --test tools/tests/dev*.test.mjs
+
+✔ occupied port is rejected without affecting its owner (68.1107ms)
+✔ readiness validates both JSON responses via frontend port (430.5952ms)
+✔ readiness timeout is bounded when no server exists (424.0868ms)
+✔ real child failure stops other service and frees both ports (875.8619ms)
+✔ child failure before readiness stops both without announcing ready (100.6022ms)
+✔ child failure after readiness stops both and reports error (124.8102ms)
+✔ SIGINT before readiness stops both (126.5855ms)
+✔ SIGINT after readiness stops both (126.5546ms)
+✔ spawn error does not expose executable path or secret (63.8792ms)
+✔ ports reject invalid and non-integer values (1.0584ms)
+✔ health contract is exact for demo mode (0.185ms)
+✔ catalog requires version and all collections (0.9456ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1073.5394
