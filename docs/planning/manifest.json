@@ -672,8 +672,8 @@
       "id": "02-platform",
       "branch": "director/02-platform",
       "head": "558365a669c20296591637c59bcebd1716b22610",
-      "status": "blocked_publication",
-      "pr": null,
+      "status": "pr_open",
+      "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/18",
       "human_roles": [
         "Persona 2: backend e integración"
       ],
@@ -705,7 +705,7 @@
         "score": 8.5,
         "critical_or_high": false,
         "findings": [
-          "Ejecución POSIX y CI remota pendientes."
+          "Ensayo completo del lanzador FastAPI+Vite en POSIX pendiente; CI Linux de push terminó correctamente para este commit."
         ],
         "prior_round": {
           "round": 1,
@@ -719,11 +719,25 @@
         }
       ],
       "evidence": [
-        "C:/proyectos/tech2finance-directors/20261110/02-platform/docs/workstreams/02-platform.md"
+        "https://github.com/JaimeMoscardoS/tech2finance/blob/558365a669c20296591637c59bcebd1716b22610/docs/workstreams/02-platform.md",
+        "https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42850404022"
       ],
-      "publish_blockers": [
-        "El token OAuth rechazó cambios de workflow; alternativas fallaron y la autorización del usuario permanece pendiente."
-      ]
+      "publish_blockers": [],
+      "remote_pr_head": "558365a669c20296591637c59bcebd1716b22610",
+      "publication_history": [
+        {
+          "date": "2026-11-10",
+          "status": "blocked_then_resolved",
+          "detail": "El token OAuth rechazó inicialmente cambios de workflow; el usuario completó la autorización y la rama se publicó después."
+        }
+      ],
+      "ci": {
+        "url": "https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42850404022",
+        "event": "push",
+        "head_sha": "558365a669c20296591637c59bcebd1716b22610",
+        "status": "completed",
+        "conclusion": "success"
+      }
     },
     {
       "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
@@ -798,7 +812,7 @@
       "dependencies": [],
       "id": "04-tutor",
       "branch": "director/04-tutor",
-      "head": "83249efb413645fe3a24a7c1e775f0e86b04ed4d",
+      "head": "c9a3272f977de62685df3307aadde19b5608201a",
       "status": "pr_open",
       "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/16",
       "human_roles": [
@@ -837,10 +851,24 @@
           "Tras R4 se eliminó línea final del corpus y se regeneró informe; ROOT verificó el diff."
         ],
         "post_r4_evidence": [
-          "4 pruebas de evaluación desde frontend y runner 94/0; 16 pruebas del tutor desde frontend, reportadas por director."
+          "4 pruebas de evaluación desde frontend y runner 94/0; 16 pruebas del tutor desde frontend, reportadas por director.",
+          "Corrección posterior c9a3272: guard de año anual y regresiones ES/EN, futuros y otros instrumentos; comprobaciones de coordinación, sin nueva ronda formal.",
+          "ROOT confirmó TestClient backend anual en integración: HTTP 200 y 2022: -0.67%; pruebas posteriores frontend 39/39 y navegador 51/51. No es una quinta revisión."
         ],
-        "physical_report_sha256_worktree_04": "2F73407BBE66DBDCF3517C132B720A1A88BAE8F59516B1B3FE62F03E681DC392",
-        "canonical_corpus_sha256": "eb86212f7daedf95fe336a708cada4490e1823033db633b3b1b5f72dcb706143"
+        "canonical_corpus_sha256": "eb86212f7daedf95fe336a708cada4490e1823033db633b3b1b5f72dcb706143",
+        "report_hashes": {
+          "historical_physical": {
+            "sha256": "2F73407BBE66DBDCF3517C132B720A1A88BAE8F59516B1B3FE62F03E681DC392",
+            "source_commit": "83249efb413645fe3a24a7c1e775f0e86b04ed4d",
+            "scope": "04 worktree physical bytes"
+          },
+          "current": {
+            "sha256_normalized_lf": "2be2de9e6ba5aa1ec617c880cdd40db2b89bddb60ee984b30ef5317dbfd55f2c",
+            "sha256_physical_worktree_04": "2be2de9e6ba5aa1ec617c880cdd40db2b89bddb60ee984b30ef5317dbfd55f2c",
+            "source_commit": "c9a3272f977de62685df3307aadde19b5608201a",
+            "scope": "04 worktree; CRLF normalized to LF for normalized hash"
+          }
+        }
       },
       "commands": [
         {
@@ -855,7 +883,9 @@
       "evidence": [
         "https://github.com/JaimeMoscardoS/tech2finance/blob/83249efb413645fe3a24a7c1e775f0e86b04ed4d/docs/workstreams/04-tutor.md"
       ],
-      "publish_blockers": []
+      "publish_blockers": [],
+      "remote_pr_head": "c9a3272f977de62685df3307aadde19b5608201a",
+      "push_count": 2
     },
     {
       "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
@@ -868,8 +898,8 @@
       "id": "05-product",
       "branch": "director/05-product",
       "head": null,
-      "status": "source_review_ready",
-      "pr": null,
+      "status": "pr_open",
+      "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/17",
       "human_roles": [
         "Persona 5: datos, pruebas y presentación",
         "Producto y comercial: UNASSIGNED"
@@ -887,7 +917,7 @@
           "role": "executor",
           "model": "gpt-6.1-terra",
           "effort": "high",
-          "status": "in_progress"
+          "status": "completed"
         },
         {
           "canonical_task": "/root/director_05_product/reviewer05",
@@ -895,17 +925,34 @@
           "model": "gpt-6.1-sol",
           "effort": "high",
           "status": "review_completed"
+        },
+        {
+          "canonical_task": "/root/director_05_product/reviewer05_final",
+          "role": "independent final reviewer, read-only",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "fork_turns": "none",
+          "status": "review_completed"
         }
       ],
       "review": {
-        "round": 1,
-        "score": 8.2,
+        "round": 2,
+        "score": 8.8,
         "critical_or_high": false,
-        "reviewed_source_commit": "1574fd1a4c94a24643a7b198678361514b802a17",
-        "corrected_source_commit": "9ad4c45fa79fc44a8932f274ca3cd0ddb07e4a64",
+        "reviewed_source_commit": "23ea3467b47c4c6027922e5fd5276e1b250bc84a",
+        "reviewer": "/root/director_05_product/reviewer05_final",
         "findings": [
-          "Preguntas abiertas y stack corregidos en commit posterior; revisión focal final pendiente tras cambios al manifiesto."
-        ]
+          "Sin hallazgos críticos ni altos; anotaciones administrativas posteriores corrigen procedimiento, orden del resultado y estado del PR."
+        ],
+        "prior_round": {
+          "round": 1,
+          "score": 8.2,
+          "reviewed_source_commit": "1574fd1a4c94a24643a7b198678361514b802a17",
+          "corrected_source_commit": "9ad4c45fa79fc44a8932f274ca3cd0ddb07e4a64",
+          "findings": [
+            "Dos hallazgos medios corregidos."
+          ]
+        }
       },
       "commands": [
         {
@@ -921,14 +968,14 @@
         "docs/planning/plan.md",
         "docs/pilot-kit/estudio.md"
       ],
-      "publish_blockers": [
-        "Esperar URL de 04 y autorización final de coordinación. HEAD final y PR se identifican con metadatos vivos al publicarse."
-      ]
+      "publish_blockers": [],
+      "last_published_head_snapshot": "de6aaf99b7e1def61c476e3d9a4480c7c88fc662",
+      "head_note": "Instantánea anterior a esta edición; consultar metadatos del PR para el HEAD publicado actual."
     }
   ],
   "integration": {
     "id": "integration-local",
-    "status": "blocked_regression",
+    "status": "accepted_local",
     "depends_on": [
       "01-experience",
       "02-platform",
@@ -939,21 +986,36 @@
     "plan": "docs/planning/integracion-local.md",
     "evidence": [
       "docs/planning/evidence/integration/resultado.md",
-      "docs/planning/evidence/integration/e2e.log"
+      "docs/planning/evidence/integration/e2e.log",
+      "docs/planning/evidence/integration/e2e-focal-final.log",
+      "docs/planning/evidence/integration/e2e-final.log",
+      "docs/planning/evidence/integration/frontend-unit-final.log",
+      "docs/planning/evidence/integration/frontend-build-final.log",
+      "docs/planning/evidence/integration/tutor-check-final.log"
     ],
     "head": null,
     "scratch_path": "C:/proyectos/tech2finance-directors/20261110/06-integration",
     "branch": "verification/directors-20261110",
-    "prepared_head": "cba2d989492315f4d1682d1b8f8e5bf43e46028d",
+    "prepared_head": "dbc7e61fa1f06af165666a8d1911afe188281d98",
     "included_refs": {
       "01-experience": "9bdc71d7f35f543162d81a32e4a50b5017659a1f",
       "02-platform": "558365a669c20296591637c59bcebd1716b22610",
       "03-data": "a4c122b2662e854e63f691e3e2a6e78c9fd7d814",
-      "05-product": "a747df61cb69a8a8d77e67a82cd4c17dfc77a4b8",
-      "04-tutor": "83249efb413645fe3a24a7c1e775f0e86b04ed4d"
+      "05-product": "6dbecbbcfb1e1c284e333e5ccc456f6a6b5778d6",
+      "04-tutor": "c9a3272f977de62685df3307aadde19b5608201a"
     },
-    "remaining": "Playwright 50/51: consulta de rentabilidad anual se clasifica como instrumento no disponible; corrección por 04 y verificación pendientes.",
-    "gate": "failed"
+    "remaining": "CI de la rama 02 superada para su propio HEAD; integración en main, derechos, asesoría y decisión empresarial pendientes.",
+    "gate": "accepted_local",
+    "runs": [
+      {
+        "head": "cba2d989492315f4d1682d1b8f8e5bf43e46028d",
+        "results": "launcher 12, frontend 34, backend 54, legacy 21, pip check y tutor 16 pasaron; Playwright 50/51, regresión anual."
+      },
+      {
+        "head": "dbc7e61fa1f06af165666a8d1911afe188281d98",
+        "results": "focal 1/1, Playwright 51/51, frontend 39/39, build y tutor check 94/0; otras suites corresponden a versión anterior."
+      }
+    ]
   },
   "orchestrator": {
     "canonical_task": "/root",

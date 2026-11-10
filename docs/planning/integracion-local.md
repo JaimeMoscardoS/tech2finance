@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Procedimiento propuesto, **pendiente de ejecución**, para comprobar la interacción entre las cinco ramas en una worktree temporal. La coordinación central asignará la ejecución y registrará el resultado. No acredita integración en `main`, publicación ni despliegue.
+Procedimiento ejecutado en una worktree aislada para comprobar las cinco ramas. La coordinación central aceptó la integración local tras las comprobaciones registradas en el [acta](evidence/integration/resultado.md). No acredita integración en `main`, CI remota ni despliegue.
 
 ## Preparación y límites
 
@@ -12,7 +12,9 @@ Procedimiento propuesto, **pendiente de ejecución**, para comprobar la interacc
 4. Para la prueba integrada, ejecutar `npm run dev:full` en primer plano con `T2F_PYTHON` apuntando al Python del `.venv` original, `T2F_BACKEND_PORT=8095` y `T2F_FRONTEND_PORT=5175`. Comprobar antes que ambos puertos están libres. Al finalizar detener solo los procesos de este ensayo y comprobar que 8095 y 5175 quedan libres y que los servicios originales en 8000 y 5173 siguen sanos.
 5. Crear únicamente en la worktree de integración `frontend/playwright.integration.config.ts`, temporal y sin commit, con `testDir: 'tests'`, canal Chrome, headless y `baseURL` en el puerto 5175, sin `webServer`. No reutilizar la configuración Playwright que apunta al backend original 8000: esa instancia no contiene los cambios de las líneas 03 y 04.
 
-## Comprobaciones pendientes
+## Comprobaciones previstas y ejecutadas
+
+El [acta](evidence/integration/resultado.md) distingue las comprobaciones realmente ejecutadas y sus límites de esta lista; no todas las verificaciones de accesibilidad o servicio están completas.
 
 - Ejecutar las 12 pruebas del lanzador, pruebas unitarias y build frontend, suite completa backend, simulador legacy, `pip check`, comprobación del tutor y `python -m backend.verify_data`; guardar comandos, salidas, conteos y revisión de fallos. Ejecutar una vez la suite Playwright en serie con `--workers=1` y la configuración temporal; no repetir el conjunto completo si pasa.
 - Comprobar el lanzador y proxy en puertos libres, carga y recuperación explícita del catálogo, cancelación por cambio de modo y respuestas tardías.
@@ -20,9 +22,9 @@ Procedimiento propuesto, **pendiente de ejecución**, para comprobar la interacc
 - Recorrer tutor y límites de alcance, respuestas de abstención y seguimiento, cifras y ausencia de presión a mantener. Verificar controles de teclado y registrar los lectores de pantalla realmente probados.
 - Copiar registros acotados y referencias reales al área de evidencia de 05; registrar hallazgos, severidad, responsables, capturas y resultado. Ante un fallo nuevo, diagnosticar y pedir al propietario que corrija su rama; no parchear la worktree de integración. Bloquear la aceptación con errores críticos o altos sin resolver. Un resultado local no sustituye CI remota, revisión financiera, jurídica, licencia ni ensayo con usuarios.
 
-## Acta pendiente
+## Acta de ejecución
 
-- Estado: `pending`; responsable nominal: `UNASSIGNED`; fecha y commit de integración: pendientes.
-- Ramas y HEAD utilizados: pendientes; conflictos y resolución: pendientes.
-- Comandos, salidas y pruebas no ejecutadas: pendientes.
-- Hallazgos, decisiones y evidencia: pendientes. No se han ejecutado estas comprobaciones de integración.
+- Estado: integración local aceptada por coordinación; persona nominal `UNASSIGNED`. Fecha: 10-11-2026.
+- Commit inicial `cba2d989492315f4d1682d1b8f8e5bf43e46028d`; final `dbc7e61fa1f06af165666a8d1911afe188281d98`.
+- Los merges locales no presentaron conflictos; el caso anual falló inicialmente y pasó después de la corrección de 04.
+- Comandos, versiones, resultados y límites constan en el [acta de evidencia](evidence/integration/resultado.md). CI remota y `main` siguen sin acreditar por este trabajo.
