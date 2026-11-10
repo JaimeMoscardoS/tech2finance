@@ -27,7 +27,7 @@ test('levels change appearance in both themes while chart meanings remain fixed'
   expect(new Set(accents).size).toBe(3);
  }
  await page.getByLabel('Entidad de la demo').selectOption('caixabank');
- await levels.getByRole('button',{name:'Principiante',exact:true}).click();
+ await levels.getByRole('button',{name:'Intermedio',exact:true}).click();
  await expect(page.locator('.annual-row .negative')).toHaveCount(2);
  await expect(page.locator('.annual-row .positive')).toHaveCount(3);
  await expect(page.locator('.annual-row').first()).toContainText('-0,53');

@@ -152,7 +152,7 @@ test('explore transfers the chosen fictional instrument', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button',{name:'Explorar',exact:true}).click();
- await page.getByRole('button',{name:/Fondo Horizonte/}).click();
+ await page.locator('.beginner-guide select').selectOption('demo-equity');
  await page.getByRole('button',{name:'Practicar con este fondo'}).click();
  await expect(page.getByLabel('Instrumento')).toHaveValue('demo-equity');
  await expect(page.locator('.sim-result')).toContainText('Fondo Horizonte');
