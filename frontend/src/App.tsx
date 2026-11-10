@@ -35,6 +35,7 @@ import { portfolioPoints } from "./portfolio-demo";
 import AssistantPanel from "./AssistantPanel";
 import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
+import Recovery from "./Recovery";
 const PracticeLab = lazy(() => import("./PracticeLab"));
 
 type Page = "home" | "explore" | "simulator" | "portfolio";
@@ -61,6 +62,10 @@ export default function App() {
   const [serverLoading, setServerLoading] = useState(false);
   const [operationPending, setOperationPending] = useState(false);
   const retryAction = useRef<(() => void) | null>(null);
+  const catalogRequest = useRef<AbortController | null>(null);
+  const recoveryRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const restoreRecoveryFocus = useRef(false);
   const [retry, setRetry] = useState(0);
   const simulationRequest = useRef<AbortController | null>(null);
   const simulationGeneration = useRef(0);
@@ -219,12 +224,14 @@ export default function App() {
     setResult(null); setPracticeResult(null); setPause(null); setAssistantDecline(undefined); setDeclineSpec(undefined); setServerError(false); setOperationPending(false); retryAction.current = null;
     catalogMode.current = mode === "local" ? "local" : null;
     if (mode === "local") { setCatalog({schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,annualHistory}); setServerLoading(false); return; }
-    setCatalog(null); setServerLoading(true); const controller = new AbortController();
-    requestJson("/api/catalog", isCatalog, undefined, controller.signal).then(data => { if (!controller.signal.aborted) {catalogMode.current = "server";setCatalog(data);setServerLoading(false);} }).catch(() => {if (!controller.signal.aborted) {setServerError(true);setServerLoading(false);}});
+    setCatalog(null); setServerLoading(true); const controller = new AbortController(); catalogRequest.current = controller;
+    requestJson("/api/catalog", isCatalog, undefined, controller.signal).then(data => { if (!controller.signal.aborted) {restoreRecoveryFocus.current ||= !!recoveryRef.current?.contains(document.activeElement); catalogMode.current = "server";setCatalog(data);setServerLoading(false);} }).catch(() => {if (!controller.signal.aborted) {setServerError(true);setServerLoading(false);}});
     return () => controller.abort();
   }, [mode, retry]);
   useEffect(() => () => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); }, []);
-  useEffect(() => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false); }, [initial, monthly, annual, months, mode, language]);
+  useEffect(() => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; if (catalogMode.current === mode) setServerError(false); setOperationPending(false); }, [initial, monthly, annual, months, mode, language]);
+  useEffect(() => { retryAction.current = null; if (catalogMode.current === mode) setServerError(false); }, [level, practiceOpen, decision]);
+  useEffect(() => { if (catalog && restoreRecoveryFocus.current) { restoreRecoveryFocus.current = false; mainRef.current?.focus(); } }, [catalog]);
   useEffect(() => { if (catalog && !practiceOpen && catalogMode.current === mode) { const item = catalog.instruments.find(i => i.instrumentId === selectedId) ?? catalog.instruments[0]; selectInstrument(item); } }, [catalog, mode, practiceOpen]);
   const points = portfolioPoints;
   const nav = [
@@ -257,6 +264,7 @@ export default function App() {
     },
   ];
   const choose = (p: Page) => {
+    retryAction.current = null; setServerError(false);
     setPracticeOpen(false); setPracticeResult(null); setAssistantDecline(undefined); setDeclineSpec(undefined);
     if (p !== "simulator") { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false); }
     setPage(p);
@@ -269,7 +277,7 @@ export default function App() {
   const openPractice = () => {
     simulationGeneration.current++; simulationRequest.current?.abort();
     declineGeneration.current++; declineRequest.current?.abort();
-    setOperationPending(false); setServerError(false); setResult(null);
+    retryAction.current = null; setOperationPending(false); setServerError(false); setResult(null);
     setPracticeResult(null); setAssistantDecline(undefined); setDeclineSpec(undefined);
     setPracticeOpen(true); setPage("simulator"); setNotice(null);
   };
@@ -363,8 +371,10 @@ export default function App() {
   const serverContext = {page,level,language,...(page === "simulator" && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline && declineSpec ? {decline:{...declineSpec,language},decision} : {})};
   const serverContextKey = JSON.stringify(serverContext);
   const provider = useMemo(() => serverTutorProvider(serverContext), [serverContextKey]);
-  const modeControls = <div className="info-banner" role="status"><span>{mode === "server" ? (language === "es" ? "Servidor de demo" : "Demo server") : (language === "es" ? "Demo local" : "Local demo")}{(serverLoading || operationPending) ? (language === "es" ? " · Conectando…" : " · Connecting…") : serverError ? (language === "es" ? " · No se pudo completar la solicitud." : " · The request could not be completed.") : ""}</span>{mode === "server" && serverError && <button type="button" onClick={()=>{if (!catalog) setRetry(n=>n+1); else retryAction.current?.();}}>{language === "es" ? "Reintentar" : "Retry"}</button>}<button type="button" onClick={()=>{setCatalog(null);setResult(null);setMode(mode === "server" ? "local" : "server");}}>{mode === "server" ? (language === "es" ? "Usar demo local" : "Use local demo") : (language === "es" ? "Usar servidor de demo" : "Use demo server")}</button></div>;
-  if (!catalog) return <main className="main"><div className="content">{modeControls}</div></main>;
+  const switchMode = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setCatalog(null); setResult(null); setMode(mode === "server" ? "local" : "server"); };
+  const retryCatalog = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); setServerError(false); setServerLoading(true); setRetry(n => n + 1); };
+  const modeControls = <div className="info-banner"><span role="status">{mode === "server" ? (language === "es" ? "Servidor de demo" : "Demo server") : (language === "es" ? "Demo local" : "Local demo")}{(serverLoading || operationPending) ? (language === "es" ? " · Conectando…" : " · Connecting…") : serverError ? (language === "es" ? " · No se pudo completar la solicitud." : " · The request could not be completed.") : ""}</span>{mode === "server" && serverError && retryAction.current && <button type="button" onClick={()=>retryAction.current?.()}>{language === "es" ? "Reintentar" : "Retry"}</button>}<button type="button" onClick={switchMode}>{mode === "server" ? (language === "es" ? "Usar demo local" : "Use local demo") : (language === "es" ? "Usar servidor de demo" : "Use demo server")}</button></div>;
+  if (!catalog) return <Recovery ref={recoveryRef} language={language} theme={theme} failed={serverError} onLanguage={setLanguage} onTheme={setTheme} onRetry={retryCatalog} onLocal={switchMode} />;
   return (
     <div className="app-shell">
       <aside
@@ -439,7 +449,7 @@ export default function App() {
           tabIndex={-1}
         />
       )}
-      <main className="main" inert={mobileNav || assistant || voiceAssistant || !!pause ? true : undefined}>
+      <main ref={mainRef} tabIndex={-1} className="main" inert={mobileNav || assistant || voiceAssistant || !!pause ? true : undefined}>
         <header className="topbar">
           <div className="top-left">
             <button
