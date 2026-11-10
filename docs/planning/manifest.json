@@ -1,0 +1,923 @@
+{
+  "schema_version": "2.0",
+  "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+  "source": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+  "states": [
+    "pending",
+    "in_progress",
+    "blocked_external",
+    "done"
+  ],
+  "tasks": [
+    {
+      "id": "B01",
+      "stream": "05-product",
+      "phase": "P0",
+      "owner": "Producto",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Responsables y capacidad",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Capacidad acordada"
+      ],
+      "stop": "Sin capacidad acordada no comprometer plazos",
+      "children": [
+        {
+          "id": "B01.1",
+          "description": "Preparar matriz de funciones",
+          "status": "done",
+          "estimate_minutes": "30-60",
+          "evidence": [
+            "docs/organizacion.md"
+          ],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B01.2",
+          "description": "Registrar personas y horas acordadas",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Producto",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B02",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Comercial",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Entrevistas a compradores",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Acceso a compradores"
+      ],
+      "stop": "Sin responsable revisar ICP",
+      "children": [
+        {
+          "id": "B02.1",
+          "description": "Adaptar guía de preguntas",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B02.2",
+          "description": "Registrar problema, alternativa, presupuesto y criterios",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Comercial",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B03",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Producto y pedagogía",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Prueba de aprendizaje",
+      "depends_on": [
+        "B04"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Participantes y contenido revisado"
+      ],
+      "stop": "Detener presión a mantener",
+      "children": [
+        {
+          "id": "B03.1",
+          "description": "Congelar rúbrica y comparador",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B03.2",
+          "description": "Registrar resultados y errores",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Producto y pedagogía",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B04",
+      "stream": "03-data",
+      "phase": "P0",
+      "owner": "Datos y jurídico",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Registro de derechos",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Derechos por escrito"
+      ],
+      "stop": "Excluir fuentes sin derechos resueltos",
+      "children": [
+        {
+          "id": "B04.1",
+          "description": "Inventariar fuente, clase y usos",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B04.2",
+          "description": "Asociar permiso escrito o excluir fuente",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Datos y jurídico",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B05",
+      "stream": "03-data",
+      "phase": "P0",
+      "owner": "Motor y revisor financiero",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Cálculo autoritativo",
+      "depends_on": [
+        "B04"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Revisión financiera independiente"
+      ],
+      "stop": "No usar cifras no reconciliadas",
+      "children": [
+        {
+          "id": "B05.1",
+          "description": "Preparar supuestos y fixtures independientes",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B05.2",
+          "description": "Reconciliar casos límite",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Motor y revisor financiero",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B06",
+      "stream": "03-data",
+      "phase": "P0",
+      "owner": "Backend",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Versionar datos y cálculos",
+      "depends_on": [
+        "B04",
+        "B05"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Procedencia verificable"
+      ],
+      "stop": "Parar sin procedencia",
+      "children": [
+        {
+          "id": "B06.1",
+          "description": "Definir identificadores de versiones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B06.2",
+          "description": "Reproducir resultado anterior",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "support_streams": [
+        "02-platform"
+      ],
+      "human_owner": {
+        "role": "Backend",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B07",
+      "stream": "04-tutor",
+      "phase": "P1",
+      "owner": "IA y cumplimiento",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Evaluar reglas frente a LLM",
+      "depends_on": [
+        "B03",
+        "B05"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Revisión de cumplimiento"
+      ],
+      "stop": "No incorporar LLM si empeora fidelidad",
+      "children": [
+        {
+          "id": "B07.1",
+          "description": "Congelar batería con fuentes y abstenciones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B07.2",
+          "description": "Comparar fidelidad y costes",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "IA y cumplimiento",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B08",
+      "stream": "01-experience",
+      "phase": "P1",
+      "owner": "Interfaz y especialista",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Accesibilidad del flujo",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Especialista de accesibilidad"
+      ],
+      "stop": "Bloquear piloto ante barreras críticas",
+      "children": [
+        {
+          "id": "B08.1",
+          "description": "Probar teclado y registrar barreras",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B08.2",
+          "description": "Probar lector y verificar correcciones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Interfaz y especialista",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B09",
+      "stream": "04-tutor",
+      "phase": "P0",
+      "owner": "Producto y abogado financiero",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Perímetro y conducta",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Revisión jurídica humana"
+      ],
+      "stop": "Detener recomendaciones personales no autorizadas",
+      "children": [
+        {
+          "id": "B09.1",
+          "description": "Reunir pantallas y respuestas",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B09.2",
+          "description": "Registrar revisión, prestador y exclusiones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Producto y abogado financiero",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B10",
+      "stream": "02-platform",
+      "phase": "P1",
+      "owner": "Servicio y seguridad",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Operación sintética",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Hosting y responsable de servicio"
+      ],
+      "stop": "No ofrecer SLA sin medir",
+      "children": [
+        {
+          "id": "B10.1",
+          "description": "Documentar despliegue y registros",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B10.2",
+          "description": "Ensayar alertas y restauración",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Servicio y seguridad",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B11",
+      "stream": "02-platform",
+      "phase": "P2",
+      "owner": "Privacidad y seguridad",
+      "assignee": "UNASSIGNED",
+      "status": "blocked_external",
+      "title": "Mapa de datos y proveedores",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Contrato de datos, DPA y decisión EIPD/DPO cuando proceda"
+      ],
+      "stop": "No introducir PII antes de cerrar condiciones",
+      "children": [
+        {
+          "id": "B11.1",
+          "description": "Validar flujos y roles",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B11.2",
+          "description": "Documentar acuerdos y decisión EIPD/DPO",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Privacidad y seguridad",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B12",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Comercial y jurídico",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Propuesta y contrato de piloto",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04",
+        "B09"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Sponsor, presupuesto y contrato"
+      ],
+      "stop": "No prometer producción",
+      "children": [
+        {
+          "id": "B12.1",
+          "description": "Fijar alcance y aceptación negociable",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B12.2",
+          "description": "Revisar pagos, soporte, IP, incidentes y salida",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Comercial y jurídico",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B13",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Finanzas y servicio",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Costes y caja",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Cotizaciones y capacidad"
+      ],
+      "stop": "No fijar margen con costes desconocidos",
+      "children": [
+        {
+          "id": "B13.1",
+          "description": "Inventariar costes y cotizaciones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B13.2",
+          "description": "Revisar presupuesto y sensibilidad",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Finanzas y servicio",
+        "person": "UNASSIGNED"
+      }
+    },
+    {
+      "id": "B14",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Producto y banco",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Decisión seguir, cambiar o parar",
+      "depends_on": [
+        "B02",
+        "B03"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Decisión del comprador"
+      ],
+      "stop": "No afirmar eficacia con muestra exploratoria",
+      "children": [
+        {
+          "id": "B14.1",
+          "description": "Reunir evidencia y fallos",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B14.2",
+          "description": "Documentar decisión del responsable",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B14.3",
+          "description": "Preparar guion de tres minutos, demo integrada verificada y plan ante fallos",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "human_owner": {
+            "role": "Persona 5: datos, pruebas y presentación",
+            "person": "UNASSIGNED"
+          },
+          "depends_on_execution": [
+            "integration-local"
+          ],
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "human_owner": {
+        "role": "Producto y banco",
+        "person": "UNASSIGNED"
+      }
+    }
+  ],
+  "human_backlog_note": "B01-B14: funciones y personas humanas no asignadas; avances de ramas no implican aceptación completa.",
+  "execution": [
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "01-experience",
+      "branch": "director/01-experience",
+      "head": "9bdc71d7f35f543162d81a32e4a50b5017659a1f",
+      "status": "pr_open",
+      "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/15",
+      "human_roles": [
+        "Persona 1: interfaz y experiencia"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_01_experience",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "orchestration_active"
+        },
+        {
+          "canonical_task": "/root/director_01_experience/executor",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high",
+          "status": "completed"
+        },
+        {
+          "canonical_task": "/root/director_01_experience/reviewer",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "review_completed"
+        }
+      ],
+      "review": {
+        "round": 1,
+        "score": 8.5,
+        "critical_or_high": false,
+        "findings": [
+          "Foco puede quedar en body tras fallo; pruebas NVDA y macOS pendientes.",
+          "Dos fallos paralelos sin causa determinada; pasaron en serie."
+        ]
+      },
+      "commands": [
+        {
+          "command": "npm test",
+          "result": "23/23"
+        },
+        {
+          "command": "npm run build",
+          "result": "salida 0, avisos Rolldown"
+        },
+        {
+          "command": "npx playwright test --workers=1",
+          "result": "51/51"
+        },
+        {
+          "command": "npx playwright test tests/recovery.spec.ts --workers=1",
+          "result": "8/8 tras refuerzo"
+        },
+        {
+          "command": "git diff --check",
+          "result": "sin errores"
+        }
+      ],
+      "evidence": [
+        "https://github.com/JaimeMoscardoS/tech2finance/blob/9bdc71d7f35f543162d81a32e4a50b5017659a1f/docs/workstreams/01-experience.md"
+      ],
+      "publish_blockers": []
+    },
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "02-platform",
+      "branch": "director/02-platform",
+      "head": "558365a669c20296591637c59bcebd1716b22610",
+      "status": "blocked_publication",
+      "pr": null,
+      "human_roles": [
+        "Persona 2: backend e integración"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_02_platform",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "orchestration_active"
+        },
+        {
+          "canonical_task": "/root/director_02_platform/executor02",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high",
+          "status": "completed"
+        },
+        {
+          "canonical_task": "/root/director_02_platform/reviewer02",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "review_completed"
+        }
+      ],
+      "review": {
+        "round": 2,
+        "score": 8.5,
+        "critical_or_high": false,
+        "findings": [
+          "Ejecución POSIX y CI remota pendientes."
+        ],
+        "prior_round": {
+          "round": 1,
+          "score": 7.8
+        }
+      },
+      "commands": [
+        {
+          "command": null,
+          "result": "12 pruebas lanzador, 23 frontend, 44 backend, 21 simulador, build y pip check; consultar evidencia de rama para contexto."
+        }
+      ],
+      "evidence": [
+        "C:/proyectos/tech2finance-directors/20261110/02-platform/docs/workstreams/02-platform.md"
+      ],
+      "publish_blockers": [
+        "El token OAuth rechazó cambios de workflow; alternativas fallaron y la autorización del usuario permanece pendiente."
+      ]
+    },
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "03-data",
+      "branch": "director/03-data",
+      "head": "a4c122b2662e854e63f691e3e2a6e78c9fd7d814",
+      "status": "pr_open",
+      "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/14",
+      "human_roles": [
+        "Persona 3: simulador y motor",
+        "Persona 5: datos, pruebas y presentación"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_03_data",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "orchestration_active"
+        },
+        {
+          "canonical_task": "/root/director_03_data/executor_03",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high",
+          "status": "completed"
+        },
+        {
+          "canonical_task": "/root/director_03_data/reviewer_03",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "review_completed"
+        }
+      ],
+      "review": {
+        "round": 1,
+        "score": 8.8,
+        "critical_or_high": false,
+        "findings": [
+          "Derechos desconocidos; TypeScript local sin versión; certificación financiera independiente pendiente."
+        ]
+      },
+      "commands": [
+        {
+          "command": "python -m backend.verify_data",
+          "result": "Comprobación documentada; consultar evidencia."
+        },
+        {
+          "command": null,
+          "result": "52 backend y 21 simulador reportados; 10 pruebas de procedencia por coordinación."
+        }
+      ],
+      "evidence": [
+        "https://github.com/JaimeMoscardoS/tech2finance/blob/a4c122b2662e854e63f691e3e2a6e78c9fd7d814/docs/workstreams/03-data.md"
+      ],
+      "publish_blockers": []
+    },
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "04-tutor",
+      "branch": "director/04-tutor",
+      "head": null,
+      "status": "in_progress",
+      "pr": null,
+      "human_roles": [
+        "Persona 4: IA, voz y antipánico"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_04_tutor",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "orchestration_active"
+        },
+        {
+          "canonical_task": "/root/director_04_tutor/tutor_executor",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high",
+          "status": "in_progress"
+        },
+        {
+          "canonical_task": "/root/director_04_tutor/tutor_reviewer",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "in_progress"
+        }
+      ],
+      "review": {
+        "round": 2,
+        "score": 7.8,
+        "critical_or_high": false,
+        "prior_round": {
+          "round": 1,
+          "score": 7.0,
+          "findings": [
+            "Seguimiento tras abstención: gravedad alta; otros dos medios."
+          ]
+        },
+        "findings": [
+          "Seguimiento y cifras corregidos; pendiente hallazgo medio de nombre exacto Fund/Fondo.",
+          "Ronda 3 en preparación."
+        ]
+      },
+      "commands": [],
+      "evidence": [],
+      "publish_blockers": [
+        "Commit final, revisión y URL de PR pendientes."
+      ]
+    },
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "05-product",
+      "branch": "director/05-product",
+      "head": null,
+      "status": "source_review_ready",
+      "pr": null,
+      "human_roles": [
+        "Persona 5: datos, pruebas y presentación",
+        "Producto y comercial: UNASSIGNED"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_05_product",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "orchestration_active"
+        },
+        {
+          "canonical_task": "/root/director_05_product/executor05",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high",
+          "status": "in_progress"
+        },
+        {
+          "canonical_task": "/root/director_05_product/reviewer05",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "status": "review_completed"
+        }
+      ],
+      "review": {
+        "round": 1,
+        "score": 8.2,
+        "critical_or_high": false,
+        "reviewed_source_commit": "1574fd1a4c94a24643a7b198678361514b802a17",
+        "corrected_source_commit": "9ad4c45fa79fc44a8932f274ca3cd0ddb07e4a64",
+        "findings": [
+          "Preguntas abiertas y stack corregidos en commit posterior; revisión focal final pendiente tras cambios al manifiesto."
+        ]
+      },
+      "commands": [
+        {
+          "command": "git diff --check",
+          "result": "Sin errores en revisión documental inicial."
+        },
+        {
+          "command": null,
+          "result": "JSON, dependencias, enlaces locales y UTF-8 verificados antes de esta actualización; repetir al cierre."
+        }
+      ],
+      "evidence": [
+        "docs/planning/plan.md",
+        "docs/pilot-kit/estudio.md"
+      ],
+      "publish_blockers": [
+        "Esperar URL de 04 y autorización final de coordinación. HEAD final y PR se identifican con metadatos vivos al publicarse."
+      ]
+    }
+  ],
+  "integration": {
+    "id": "integration-local",
+    "status": "pending",
+    "depends_on": [
+      "01-experience",
+      "02-platform",
+      "03-data",
+      "04-tutor",
+      "05-product"
+    ],
+    "plan": "docs/planning/integracion-local.md",
+    "evidence": [],
+    "head": null
+  },
+  "orchestrator": {
+    "canonical_task": "/root",
+    "role": "orchestration and read-only review",
+    "model": null,
+    "effort": null
+  }
+}
