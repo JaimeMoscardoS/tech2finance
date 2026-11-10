@@ -39,12 +39,21 @@ export function createLocalTutorProvider(): TutorProvider {
     const message = typeof request.message === 'string' ? request.message.trim() : '';
     let intent = message.length <= MAX_MESSAGE_LENGTH ? detect(message) : 'unknown';
     if (intent === 'unknown' && /^(y eso|explica(?:me)? m[aá]s|m[aá]s detalles|por qu[eé]|c[oó]mo|and that|explain more|more details|why|how)[\s?¿.!]*$/i.test(message)) {
-      const previous = (Array.isArray(request.history) ? request.history.slice(-MAX_HISTORY_MESSAGES) : []).reverse().find(h => h?.role === 'assistant' && typeof h.intent === 'string' && h.intent !== 'unknown');
+      const previous = (Array.isArray(request.history) ? request.history.slice(-MAX_HISTORY_MESSAGES) : []).reverse().find(h => h?.role === 'assistant');
       if (previous && ['result', 'source', 'decline', 'decision', 'fund', 'stock', 'etf', 'diversification', 'risk', 'costs', 'causes'].includes(previous.intent!)) intent = previous.intent!;
     }
     const fmt = (n: number) => new Intl.NumberFormat(en ? 'en-GB' : 'es-ES', { maximumFractionDigits: 2 }).format(n);
     let text = '';
     const s = context?.simulation;
+    const normalized = message.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/^¿/, '');
+    const definition = /^(?:what (?:is|does) (?:a |the )?(?:return|performance)(?: of an investment)?(?: mean)?|que (?:es|significa) (?:la )?rentabilidad(?: de una inversion)?)[\s?.!¿]*$/.test(normalized);
+    const future = /\b(tomorrow|next (?:week|month|year)|in the future|manana|proxim[oa] (?:semana|mes|ano)|en el futuro)\b/.test(normalized);
+    const named = (normalized.match(/\b(?:return|performance|profit|loss|rentabilidad|resultado|beneficio|perdida)\s+(?:of|for|on|de|del)\s+([^?¿,.!]+)/i)?.[1] ?? normalized.match(/^(?:what is |what's )(.+?)['’]s\s+(?:return|profit|loss|performance)\b/)?.[1])?.trim();
+    const activeName = context?.instrument?.name?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const namedFull = named?.replace(/\s+(?:over this period|in this period|en este periodo|durante este periodo|in eur|en eur)$/, '').replace(/\s+(?:selected|seleccionada|seleccionado)$/, '').replace(/^(?:(?:the|this|selected|my|la|el|esta|este|mi|seleccionada|seleccionado)\s+)*/, '');
+    const namedTarget = namedFull?.replace(/^(?:fund|fondo|instrument|instrumento)\s+/, '');
+    const annualYear = s?.kind === 'annual_history' && !!named && /^(?:19|20|21|22)\d{2}$/.test(named);
+    const foreign = !!namedTarget && !annualYear && !/^(?:simulation|simulacion|instrument|instrumento|fund|fondo|portfolio|cartera|account|cuenta|period|periodo)\s*$/.test(namedTarget) && !(activeName && (namedFull === activeName || namedTarget === activeName));
     const concepts: Record<string, [string, string]> = {
       fund: ['Un fondo reúne el dinero de varios partícipes e invierte según una estrategia; su valor puede bajar.', 'A fund pools investors’ money under a strategy; its value can fall.'],
       etf: ['Un ETF es un fondo que cotiza en bolsa. Su precio y los costes dependen del producto y de la operación.', 'An ETF is an exchange-traded fund. Its price and costs depend on the product and trade.'],
@@ -56,8 +65,14 @@ export function createLocalTutorProvider(): TutorProvider {
     if (concepts[intent]) {
       text = concepts[intent][en ? 1 : 0];
       if (context?.level === 'beginner' && intent === 'diversification') text += en ? ' Think of using several baskets.' : ' Es como repartir objetos en varias cestas.';
+    } else if (intent === 'result' && definition) {
+      text = en ? 'Return describes the change in value of an investment over a period; it can be negative and depends on the measurement and costs.' : 'La rentabilidad describe la variación de valor de una inversión en un periodo; puede ser negativa y depende de cómo se mida y de los costes.';
+      intent = 'unknown';
+    } else if (intent === 'result' && (future || foreign)) {
+      text = en ? 'The requested instrument or future return is not available in this simulation.' : 'El instrumento o la rentabilidad futura solicitados no están disponibles en esta simulación.';
+      intent = 'unknown';
     } else if (intent === 'result') {
-      if (!validFacts(s) || context?.instrument?.dataKind === 'missing_history' || (s.kind === 'annual_history' && s.contributionTiming !== 'year_end_after_return') || (s.kind === 'fictional_monthly' && s.contributionTiming !== 'month_start')) text = en ? 'There is not enough valid simulation data to explain a result.' : 'No hay datos válidos suficientes de la simulación para explicar un resultado.';
+      if (!validFacts(s) || context?.instrument?.dataKind === 'missing_history' || (s.kind === 'annual_history' && s.contributionTiming !== 'year_end_after_return') || (s.kind === 'fictional_monthly' && s.contributionTiming !== 'month_start')) { text = en ? 'There is not enough valid simulation data to explain a result.' : 'No hay datos válidos suficientes de la simulación para explicar un resultado.'; intent = 'unknown'; }
       else {
         const name = typeof context.instrument?.name === 'string' && context.instrument.name.trim() && context.instrument.name.length <= 200 ? context.instrument.name : (en ? 'selected instrument' : 'instrumento seleccionado');
         const currency = context.instrument?.currency === 'EUR' ? ' EUR' : '';

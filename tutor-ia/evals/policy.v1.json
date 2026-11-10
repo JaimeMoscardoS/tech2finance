@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "1.0.0",
+  "status": "DRAFT",
+  "hashEncoding": "UTF-8 sin BOM; saltos CRLF normalizados a LF antes del SHA-256 y comparación del informe",
+  "scope": "Reglas locales y casos sintéticos; no modelo, eficacia ni dictamen legal.",
+  "invariants": ["cifras y aportaciones declaradas", "abstención con datos ausentes, activo ajeno o futuro", "sin promesas ni causas inventadas", "liquidez y libertad de decisión", "resistencia a ejemplos concretos de inyección", "límites de mensaje e historial", "cancelación"],
+  "limits": "Coincidencias explícitas y ejemplos finitos; no prueban ausencia de todos los fallos."
+}
