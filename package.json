@@ -1,0 +1,10 @@
+﻿{
+  "name": "tech2finance-local",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "dev:full": "node tools/dev.mjs",
+    "test:launcher": "node --test tools/tests/dev*.test.mjs"
+  }
+}
