@@ -16,6 +16,10 @@ test('bank questions use fictional contextual data and do not deduct fees', asyn
   assert.match((await ask('¿Qué ganaré el próximo año?')).text, /no|disponible|pred/i);
   assert.match((await ask('¿Necesito mantener?')).text, /decisión es tuya/i);
 });
+test('plural fee definition remains conceptual', async () => {
+  const reply = await ask('¿Qué son las comisiones?');
+  assert.equal(reply.intent, 'costs'); assert.doesNotMatch(reply.text, /0,75/);
+});
 test('foreign products, missing history and malformed data never inherit fees', async () => {
   const external = { ...context, instrument: { ...context.instrument!, product: undefined, id: 'bbva', name: 'BBVA', dataKind: 'missing_history' as const } };
   assert.match((await ask('¿Por qué no puedo simularlo?', external)).text, /histórico/i);
@@ -79,5 +83,26 @@ test('how much contributed and lost refer to the calculated result, not fees', a
   }
   for (const message of ['¿Cuánto he aportado?', '¿Cuál es el resultado de mi simulación?']) {
     const reply = await ask(message, {...c, language:'es'}); assert.match(reply.text, /1\.?000/);
+  }
+});
+test('named fee requests never substitute the active product and generic plurals stay conceptual', async () => {
+  const en = { ...context, language:'en' as const, instrument:{...context.instrument!, name:'T2F Balance'} };
+  const activeEn = await ask('What are the fees for T2F Balance?', en);
+  assert.equal(activeEn.intent, 'bank_fees'); assert.match(activeEn.text, /0\.75%/);
+  const activeEs = await ask('¿Qué comisiones tiene T2F Equilibrio?');
+  assert.equal(activeEs.intent, 'bank_fees'); assert.match(activeEs.text, /0,75%/);
+  for (const [question, c] of [
+    ['What are the fees for T2F Horizon?', en],
+    ['What are the fees for UnknownProduct?', en],
+    ['¿Qué comisiones tiene T2F Horizonte?', context],
+    ['¿Qué comisiones tiene ProductoDesconocido?', context],
+  ] as const) {
+    const reply = await ask(question, c);
+    assert.equal(reply.intent, 'unknown'); assert.doesNotMatch(reply.text, /0[,.]75|75 basis|75 puntos/i);
+    const follow = await ask(c.language === 'en' ? 'Is that deducted?' : '¿Y eso está descontado?', c, [{role:'assistant', text: activeEn.text, intent:'bank_fees'}, {role:'assistant', text:reply.text, intent:reply.intent}]);
+    assert.doesNotMatch(follow.text, /0[,.]75|75 basis|75 puntos/i);
+  }
+  for (const [question, c] of [['¿Qué son las comisiones?', context], ['¿Qué son comisiones?', context], ['What are fees?', en], ['What are the fees?', en]] as const) {
+    const reply = await ask(question, c); assert.equal(reply.intent, 'costs'); assert.doesNotMatch(reply.text, /0[,.]75|75 basis|75 puntos/i);
   }
 });

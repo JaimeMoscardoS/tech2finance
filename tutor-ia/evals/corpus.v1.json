@@ -9002,6 +9002,1112 @@
           "EUR 0"
         ]
       }
+    },
+    {
+      "id": "review-r1-other-fees-en",
+      "request": {
+        "message": "What are the fees for T2F Horizon?",
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "en",
+          "bank": {
+            "bankId": "demo",
+            "profileVersion": "bank-demo-2026-11-10.1",
+            "classification": "synthetic_demo",
+            "name": {
+              "es": "BancoT2F",
+              "en": "BancoT2F"
+            },
+            "description": {
+              "es": "Entidad ficticia para una demostración educativa de inversión.",
+              "en": "Fictional institution for an educational investment demonstration."
+            },
+            "source": {
+              "kind": "synthetic_seed",
+              "asOf": "2026-11-10"
+            },
+            "services": [
+              {
+                "id": "catalogue",
+                "name": {
+                  "es": "Catálogo",
+                  "en": "Catalogue"
+                },
+                "description": {
+                  "es": "Consulta instrumentos de la demostración.",
+                  "en": "Browse demonstration instruments."
+                }
+              },
+              {
+                "id": "practice",
+                "name": {
+                  "es": "Práctica",
+                  "en": "Practice"
+                },
+                "description": {
+                  "es": "Practica con simulaciones educativas.",
+                  "en": "Practise with educational simulations."
+                }
+              },
+              {
+                "id": "tutor",
+                "name": {
+                  "es": "Tutor",
+                  "en": "Tutor"
+                },
+                "description": {
+                  "es": "Consulta explicaciones contextuales.",
+                  "en": "Ask for contextual explanations."
+                }
+              },
+              {
+                "id": "portfolio_pause",
+                "name": {
+                  "es": "Pausa de cartera",
+                  "en": "Portfolio pause"
+                },
+                "description": {
+                  "es": "Consulta información sobre una caída antes de vender.",
+                  "en": "Review information about a decline before selling."
+                }
+              }
+            ],
+            "conditions": {
+              "currency": "EUR",
+              "maintenanceMonthlyEur": 0,
+              "requiresRealAccount": false,
+              "realOrdersAvailable": false,
+              "externalConnections": false,
+              "text": {
+                "es": "Mantenimiento mensual ficticio de 0 EUR. Sin cuenta real, órdenes reales ni conexiones externas.",
+                "en": "Fictional monthly maintenance of EUR 0. No real account, real orders or external connections."
+              }
+            },
+            "products": [
+              {
+                "instrumentId": "demo-fixed",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 40,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-mixed",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 75,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-equity",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 110,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-etf",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 20,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 1,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-stock",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": null,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 1,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              }
+            ],
+            "faq": [
+              {
+                "id": "identity",
+                "question": {
+                  "es": "¿Qué es BancoT2F?",
+                  "en": "What is BancoT2F?"
+                },
+                "answer": {
+                  "es": "Una entidad ficticia creada para esta demostración.",
+                  "en": "A fictional institution created for this demonstration."
+                }
+              },
+              {
+                "id": "services",
+                "question": {
+                  "es": "¿Qué servicios ofrece?",
+                  "en": "What services does it offer?"
+                },
+                "answer": {
+                  "es": "Catálogo, práctica, tutor y pausa informativa de cartera.",
+                  "en": "Catalogue, practice, tutor and an informational portfolio pause."
+                }
+              },
+              {
+                "id": "conditions",
+                "question": {
+                  "es": "¿Cuáles son las condiciones?",
+                  "en": "What are the terms?"
+                },
+                "answer": {
+                  "es": "Euros, sin mantenimiento mensual y con mínimos ficticios de cero euros.",
+                  "en": "Euros, no monthly maintenance and fictional minimums of zero euros."
+                }
+              },
+              {
+                "id": "fees",
+                "question": {
+                  "es": "¿Se descuentan las comisiones?",
+                  "en": "Are fees deducted?"
+                },
+                "answer": {
+                  "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+                  "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+                }
+              },
+              {
+                "id": "real_money",
+                "question": {
+                  "es": "¿Se utiliza dinero real?",
+                  "en": "Is real money used?"
+                },
+                "answer": {
+                  "es": "No. No se requieren cuentas reales ni se tramitan órdenes reales.",
+                  "en": "No. No real account is required and no real orders are placed."
+                }
+              },
+              {
+                "id": "external_products",
+                "question": {
+                  "es": "¿Son de BancoT2F todos los productos?",
+                  "en": "Do all products belong to BancoT2F?"
+                },
+                "answer": {
+                  "es": "No. Los productos de otras entidades conservan su identificación y procedencia.",
+                  "en": "No. Products from other institutions retain their identity and provenance."
+                }
+              }
+            ],
+            "calculationNotice": {
+              "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+              "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+            }
+          },
+          "instrument": {
+            "id": "demo-mixed",
+            "name": "T2F Balance",
+            "currency": "EUR",
+            "dataKind": "fictional",
+            "sources": [],
+            "product": {
+              "instrumentId": "demo-mixed",
+              "minimumInitialEur": 0,
+              "minimumRecurringEur": 0,
+              "fees": {
+                "annualOngoingBps": 75,
+                "entryBps": 0,
+                "exitBps": 0,
+                "orderFixedEur": 0,
+                "custodyAnnualBps": 0,
+                "treatment": "illustrative_excluded"
+              },
+              "description": {
+                "es": "Producto ficticio con condiciones informativas para la demostración.",
+                "en": "Fictional product with informational terms for the demonstration."
+              }
+            }
+          }
+        }
+      },
+      "expect": {
+        "required": [
+          "not available"
+        ],
+        "forbidden": [
+          "0.75",
+          "75 basis"
+        ]
+      }
+    },
+    {
+      "id": "review-r1-other-fees-es",
+      "request": {
+        "message": "¿Qué comisiones tiene T2F Horizonte?",
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "es",
+          "bank": {
+            "bankId": "demo",
+            "profileVersion": "bank-demo-2026-11-10.1",
+            "classification": "synthetic_demo",
+            "name": {
+              "es": "BancoT2F",
+              "en": "BancoT2F"
+            },
+            "description": {
+              "es": "Entidad ficticia para una demostración educativa de inversión.",
+              "en": "Fictional institution for an educational investment demonstration."
+            },
+            "source": {
+              "kind": "synthetic_seed",
+              "asOf": "2026-11-10"
+            },
+            "services": [
+              {
+                "id": "catalogue",
+                "name": {
+                  "es": "Catálogo",
+                  "en": "Catalogue"
+                },
+                "description": {
+                  "es": "Consulta instrumentos de la demostración.",
+                  "en": "Browse demonstration instruments."
+                }
+              },
+              {
+                "id": "practice",
+                "name": {
+                  "es": "Práctica",
+                  "en": "Practice"
+                },
+                "description": {
+                  "es": "Practica con simulaciones educativas.",
+                  "en": "Practise with educational simulations."
+                }
+              },
+              {
+                "id": "tutor",
+                "name": {
+                  "es": "Tutor",
+                  "en": "Tutor"
+                },
+                "description": {
+                  "es": "Consulta explicaciones contextuales.",
+                  "en": "Ask for contextual explanations."
+                }
+              },
+              {
+                "id": "portfolio_pause",
+                "name": {
+                  "es": "Pausa de cartera",
+                  "en": "Portfolio pause"
+                },
+                "description": {
+                  "es": "Consulta información sobre una caída antes de vender.",
+                  "en": "Review information about a decline before selling."
+                }
+              }
+            ],
+            "conditions": {
+              "currency": "EUR",
+              "maintenanceMonthlyEur": 0,
+              "requiresRealAccount": false,
+              "realOrdersAvailable": false,
+              "externalConnections": false,
+              "text": {
+                "es": "Mantenimiento mensual ficticio de 0 EUR. Sin cuenta real, órdenes reales ni conexiones externas.",
+                "en": "Fictional monthly maintenance of EUR 0. No real account, real orders or external connections."
+              }
+            },
+            "products": [
+              {
+                "instrumentId": "demo-fixed",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 40,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-mixed",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 75,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-equity",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 110,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-etf",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 20,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 1,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-stock",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": null,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 1,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              }
+            ],
+            "faq": [
+              {
+                "id": "identity",
+                "question": {
+                  "es": "¿Qué es BancoT2F?",
+                  "en": "What is BancoT2F?"
+                },
+                "answer": {
+                  "es": "Una entidad ficticia creada para esta demostración.",
+                  "en": "A fictional institution created for this demonstration."
+                }
+              },
+              {
+                "id": "services",
+                "question": {
+                  "es": "¿Qué servicios ofrece?",
+                  "en": "What services does it offer?"
+                },
+                "answer": {
+                  "es": "Catálogo, práctica, tutor y pausa informativa de cartera.",
+                  "en": "Catalogue, practice, tutor and an informational portfolio pause."
+                }
+              },
+              {
+                "id": "conditions",
+                "question": {
+                  "es": "¿Cuáles son las condiciones?",
+                  "en": "What are the terms?"
+                },
+                "answer": {
+                  "es": "Euros, sin mantenimiento mensual y con mínimos ficticios de cero euros.",
+                  "en": "Euros, no monthly maintenance and fictional minimums of zero euros."
+                }
+              },
+              {
+                "id": "fees",
+                "question": {
+                  "es": "¿Se descuentan las comisiones?",
+                  "en": "Are fees deducted?"
+                },
+                "answer": {
+                  "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+                  "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+                }
+              },
+              {
+                "id": "real_money",
+                "question": {
+                  "es": "¿Se utiliza dinero real?",
+                  "en": "Is real money used?"
+                },
+                "answer": {
+                  "es": "No. No se requieren cuentas reales ni se tramitan órdenes reales.",
+                  "en": "No. No real account is required and no real orders are placed."
+                }
+              },
+              {
+                "id": "external_products",
+                "question": {
+                  "es": "¿Son de BancoT2F todos los productos?",
+                  "en": "Do all products belong to BancoT2F?"
+                },
+                "answer": {
+                  "es": "No. Los productos de otras entidades conservan su identificación y procedencia.",
+                  "en": "No. Products from other institutions retain their identity and provenance."
+                }
+              }
+            ],
+            "calculationNotice": {
+              "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+              "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+            }
+          },
+          "instrument": {
+            "id": "demo-mixed",
+            "name": "T2F Equilibrio",
+            "currency": "EUR",
+            "dataKind": "fictional",
+            "sources": [],
+            "product": {
+              "instrumentId": "demo-mixed",
+              "minimumInitialEur": 0,
+              "minimumRecurringEur": 0,
+              "fees": {
+                "annualOngoingBps": 75,
+                "entryBps": 0,
+                "exitBps": 0,
+                "orderFixedEur": 0,
+                "custodyAnnualBps": 0,
+                "treatment": "illustrative_excluded"
+              },
+              "description": {
+                "es": "Producto ficticio con condiciones informativas para la demostración.",
+                "en": "Fictional product with informational terms for the demonstration."
+              }
+            }
+          }
+        }
+      },
+      "expect": {
+        "required": [
+          "no hay información disponible"
+        ],
+        "forbidden": [
+          "0,75",
+          "75 puntos"
+        ]
+      }
+    },
+    {
+      "id": "review-r1-active-fees-en",
+      "request": {
+        "message": "What are the fees for T2F Balance?",
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "en",
+          "bank": {
+            "bankId": "demo",
+            "profileVersion": "bank-demo-2026-11-10.1",
+            "classification": "synthetic_demo",
+            "name": {
+              "es": "BancoT2F",
+              "en": "BancoT2F"
+            },
+            "description": {
+              "es": "Entidad ficticia para una demostración educativa de inversión.",
+              "en": "Fictional institution for an educational investment demonstration."
+            },
+            "source": {
+              "kind": "synthetic_seed",
+              "asOf": "2026-11-10"
+            },
+            "services": [
+              {
+                "id": "catalogue",
+                "name": {
+                  "es": "Catálogo",
+                  "en": "Catalogue"
+                },
+                "description": {
+                  "es": "Consulta instrumentos de la demostración.",
+                  "en": "Browse demonstration instruments."
+                }
+              },
+              {
+                "id": "practice",
+                "name": {
+                  "es": "Práctica",
+                  "en": "Practice"
+                },
+                "description": {
+                  "es": "Practica con simulaciones educativas.",
+                  "en": "Practise with educational simulations."
+                }
+              },
+              {
+                "id": "tutor",
+                "name": {
+                  "es": "Tutor",
+                  "en": "Tutor"
+                },
+                "description": {
+                  "es": "Consulta explicaciones contextuales.",
+                  "en": "Ask for contextual explanations."
+                }
+              },
+              {
+                "id": "portfolio_pause",
+                "name": {
+                  "es": "Pausa de cartera",
+                  "en": "Portfolio pause"
+                },
+                "description": {
+                  "es": "Consulta información sobre una caída antes de vender.",
+                  "en": "Review information about a decline before selling."
+                }
+              }
+            ],
+            "conditions": {
+              "currency": "EUR",
+              "maintenanceMonthlyEur": 0,
+              "requiresRealAccount": false,
+              "realOrdersAvailable": false,
+              "externalConnections": false,
+              "text": {
+                "es": "Mantenimiento mensual ficticio de 0 EUR. Sin cuenta real, órdenes reales ni conexiones externas.",
+                "en": "Fictional monthly maintenance of EUR 0. No real account, real orders or external connections."
+              }
+            },
+            "products": [
+              {
+                "instrumentId": "demo-fixed",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 40,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-mixed",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 75,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-equity",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 110,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-etf",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 20,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 1,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-stock",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": null,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 1,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              }
+            ],
+            "faq": [
+              {
+                "id": "identity",
+                "question": {
+                  "es": "¿Qué es BancoT2F?",
+                  "en": "What is BancoT2F?"
+                },
+                "answer": {
+                  "es": "Una entidad ficticia creada para esta demostración.",
+                  "en": "A fictional institution created for this demonstration."
+                }
+              },
+              {
+                "id": "services",
+                "question": {
+                  "es": "¿Qué servicios ofrece?",
+                  "en": "What services does it offer?"
+                },
+                "answer": {
+                  "es": "Catálogo, práctica, tutor y pausa informativa de cartera.",
+                  "en": "Catalogue, practice, tutor and an informational portfolio pause."
+                }
+              },
+              {
+                "id": "conditions",
+                "question": {
+                  "es": "¿Cuáles son las condiciones?",
+                  "en": "What are the terms?"
+                },
+                "answer": {
+                  "es": "Euros, sin mantenimiento mensual y con mínimos ficticios de cero euros.",
+                  "en": "Euros, no monthly maintenance and fictional minimums of zero euros."
+                }
+              },
+              {
+                "id": "fees",
+                "question": {
+                  "es": "¿Se descuentan las comisiones?",
+                  "en": "Are fees deducted?"
+                },
+                "answer": {
+                  "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+                  "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+                }
+              },
+              {
+                "id": "real_money",
+                "question": {
+                  "es": "¿Se utiliza dinero real?",
+                  "en": "Is real money used?"
+                },
+                "answer": {
+                  "es": "No. No se requieren cuentas reales ni se tramitan órdenes reales.",
+                  "en": "No. No real account is required and no real orders are placed."
+                }
+              },
+              {
+                "id": "external_products",
+                "question": {
+                  "es": "¿Son de BancoT2F todos los productos?",
+                  "en": "Do all products belong to BancoT2F?"
+                },
+                "answer": {
+                  "es": "No. Los productos de otras entidades conservan su identificación y procedencia.",
+                  "en": "No. Products from other institutions retain their identity and provenance."
+                }
+              }
+            ],
+            "calculationNotice": {
+              "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+              "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+            }
+          },
+          "instrument": {
+            "id": "demo-mixed",
+            "name": "T2F Balance",
+            "currency": "EUR",
+            "dataKind": "fictional",
+            "sources": [],
+            "product": {
+              "instrumentId": "demo-mixed",
+              "minimumInitialEur": 0,
+              "minimumRecurringEur": 0,
+              "fees": {
+                "annualOngoingBps": 75,
+                "entryBps": 0,
+                "exitBps": 0,
+                "orderFixedEur": 0,
+                "custodyAnnualBps": 0,
+                "treatment": "illustrative_excluded"
+              },
+              "description": {
+                "es": "Producto ficticio con condiciones informativas para la demostración.",
+                "en": "Fictional product with informational terms for the demonstration."
+              }
+            }
+          }
+        }
+      },
+      "expect": {
+        "required": [
+          "0.75%",
+          "not deducted"
+        ],
+        "forbidden": []
+      }
+    },
+    {
+      "id": "review-r1-generic-fees-es",
+      "request": {
+        "message": "¿Qué son las comisiones?",
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "es",
+          "bank": {
+            "bankId": "demo",
+            "profileVersion": "bank-demo-2026-11-10.1",
+            "classification": "synthetic_demo",
+            "name": {
+              "es": "BancoT2F",
+              "en": "BancoT2F"
+            },
+            "description": {
+              "es": "Entidad ficticia para una demostración educativa de inversión.",
+              "en": "Fictional institution for an educational investment demonstration."
+            },
+            "source": {
+              "kind": "synthetic_seed",
+              "asOf": "2026-11-10"
+            },
+            "services": [
+              {
+                "id": "catalogue",
+                "name": {
+                  "es": "Catálogo",
+                  "en": "Catalogue"
+                },
+                "description": {
+                  "es": "Consulta instrumentos de la demostración.",
+                  "en": "Browse demonstration instruments."
+                }
+              },
+              {
+                "id": "practice",
+                "name": {
+                  "es": "Práctica",
+                  "en": "Practice"
+                },
+                "description": {
+                  "es": "Practica con simulaciones educativas.",
+                  "en": "Practise with educational simulations."
+                }
+              },
+              {
+                "id": "tutor",
+                "name": {
+                  "es": "Tutor",
+                  "en": "Tutor"
+                },
+                "description": {
+                  "es": "Consulta explicaciones contextuales.",
+                  "en": "Ask for contextual explanations."
+                }
+              },
+              {
+                "id": "portfolio_pause",
+                "name": {
+                  "es": "Pausa de cartera",
+                  "en": "Portfolio pause"
+                },
+                "description": {
+                  "es": "Consulta información sobre una caída antes de vender.",
+                  "en": "Review information about a decline before selling."
+                }
+              }
+            ],
+            "conditions": {
+              "currency": "EUR",
+              "maintenanceMonthlyEur": 0,
+              "requiresRealAccount": false,
+              "realOrdersAvailable": false,
+              "externalConnections": false,
+              "text": {
+                "es": "Mantenimiento mensual ficticio de 0 EUR. Sin cuenta real, órdenes reales ni conexiones externas.",
+                "en": "Fictional monthly maintenance of EUR 0. No real account, real orders or external connections."
+              }
+            },
+            "products": [
+              {
+                "instrumentId": "demo-fixed",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 40,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-mixed",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 75,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-equity",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 110,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 0,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-etf",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": 20,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 1,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              },
+              {
+                "instrumentId": "demo-stock",
+                "minimumInitialEur": 0,
+                "minimumRecurringEur": 0,
+                "fees": {
+                  "annualOngoingBps": null,
+                  "entryBps": 0,
+                  "exitBps": 0,
+                  "orderFixedEur": 1,
+                  "custodyAnnualBps": 0,
+                  "treatment": "illustrative_excluded"
+                },
+                "description": {
+                  "es": "Producto ficticio con condiciones informativas para la demostración.",
+                  "en": "Fictional product with informational terms for the demonstration."
+                }
+              }
+            ],
+            "faq": [
+              {
+                "id": "identity",
+                "question": {
+                  "es": "¿Qué es BancoT2F?",
+                  "en": "What is BancoT2F?"
+                },
+                "answer": {
+                  "es": "Una entidad ficticia creada para esta demostración.",
+                  "en": "A fictional institution created for this demonstration."
+                }
+              },
+              {
+                "id": "services",
+                "question": {
+                  "es": "¿Qué servicios ofrece?",
+                  "en": "What services does it offer?"
+                },
+                "answer": {
+                  "es": "Catálogo, práctica, tutor y pausa informativa de cartera.",
+                  "en": "Catalogue, practice, tutor and an informational portfolio pause."
+                }
+              },
+              {
+                "id": "conditions",
+                "question": {
+                  "es": "¿Cuáles son las condiciones?",
+                  "en": "What are the terms?"
+                },
+                "answer": {
+                  "es": "Euros, sin mantenimiento mensual y con mínimos ficticios de cero euros.",
+                  "en": "Euros, no monthly maintenance and fictional minimums of zero euros."
+                }
+              },
+              {
+                "id": "fees",
+                "question": {
+                  "es": "¿Se descuentan las comisiones?",
+                  "en": "Are fees deducted?"
+                },
+                "answer": {
+                  "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+                  "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+                }
+              },
+              {
+                "id": "real_money",
+                "question": {
+                  "es": "¿Se utiliza dinero real?",
+                  "en": "Is real money used?"
+                },
+                "answer": {
+                  "es": "No. No se requieren cuentas reales ni se tramitan órdenes reales.",
+                  "en": "No. No real account is required and no real orders are placed."
+                }
+              },
+              {
+                "id": "external_products",
+                "question": {
+                  "es": "¿Son de BancoT2F todos los productos?",
+                  "en": "Do all products belong to BancoT2F?"
+                },
+                "answer": {
+                  "es": "No. Los productos de otras entidades conservan su identificación y procedencia.",
+                  "en": "No. Products from other institutions retain their identity and provenance."
+                }
+              }
+            ],
+            "calculationNotice": {
+              "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+              "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+            }
+          },
+          "instrument": {
+            "id": "demo-mixed",
+            "name": "T2F Equilibrio",
+            "currency": "EUR",
+            "dataKind": "fictional",
+            "sources": [],
+            "product": {
+              "instrumentId": "demo-mixed",
+              "minimumInitialEur": 0,
+              "minimumRecurringEur": 0,
+              "fees": {
+                "annualOngoingBps": 75,
+                "entryBps": 0,
+                "exitBps": 0,
+                "orderFixedEur": 0,
+                "custodyAnnualBps": 0,
+                "treatment": "illustrative_excluded"
+              },
+              "description": {
+                "es": "Producto ficticio con condiciones informativas para la demostración.",
+                "en": "Fictional product with informational terms for the demonstration."
+              }
+            }
+          }
+        }
+      },
+      "expect": {
+        "required": [
+          "comisiones"
+        ],
+        "forbidden": [
+          "0,75",
+          "75 puntos"
+        ]
+      }
     }
   ]
 }

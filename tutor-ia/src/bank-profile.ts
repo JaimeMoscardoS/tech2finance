@@ -19,12 +19,15 @@ export function bankAnswer(message: string, context: TutorContext, history: read
   const last = [...history].slice(-8).reverse().find(item => item?.role === 'assistant');
   const followFee = /^(?:y eso|and (?:is )?that|is (?:that|it)|se|esta|is it).*(?:descontad|deducted|included)/.test(m) && last?.intent === 'bank_fees';
   const feeQuery = /(?:cuanto (?:cuesta|cobran)|comision|coste|fees?|charg(?:e|es|ed)|costs?)/.test(m);
-  const genericFee = /^(?:¿?\s*)?(?:que es|que significa|what is|what are) (?:una |la |a |the )?(?:comision(?:es)?|costes?|fees?|charges?)[?¿.!\s]*$/.test(m);
+  const genericFee = /^(?:¿?\s*)?(?:que es|que son|que significa(?:n)?|what is|what are) (?:una |unas |un |unos |la |las |el |los |a |the )?(?:comision(?:es)?|costes?|fees?|charges?)[?¿.!\s]*$/.test(m);
   const foreign = /\b(bbva|santander|caixabank|tesla)\b/.test(m);
   const named = m.match(/(?:fondo|fund|etf|accion|stock|share)\s+(?:de\s+|of\s+)?(?!de\b|del\b|selected\b|seleccionad|este\b|this\b|cost\b|costs\b|charge\b)([a-z0-9][a-z0-9 ]*)/);
   const namedDirect = m.match(/(?:cuanto cuesta|how much does)\s+(?!(?:este|esta|el|la|this|the)\b)([a-z0-9 ]+?)(?:\s+cost)?[?!.]*$/)?.[1]?.trim();
+  const namedFee = m.match(/\b(?:fees?\s+(?:for|of)|comisiones?\s+(?:tiene|de|del))\s+([a-z0-9][a-z0-9 ]*)[?!.]*$/)?.[1]?.trim();
   const active = norm(context.instrument?.name ?? '');
-  const requested = named?.[1]?.trim() ?? namedDirect;
+  const feeTarget = namedFee?.replace(/^(?:the|el|la)\s+/, '');
+  const contextualTarget = feeTarget && /^(?:(?:this|selected)\s+(?:fund|etf|stock|share|instrument|product)|(?:este|esta|ese|esa)\s+(?:fondo|etf|accion|instrumento|producto)|(?:fund|fondo|product|producto|instrument|instrumento))$/.test(feeTarget);
+  const requested = named?.[1]?.trim() ?? namedDirect ?? (contextualTarget ? undefined : feeTarget);
   const foreignProduct = !!requested && (!active || (requested !== active && requested !== active.replace(/^(?:fondo|fund)\s+/, '')));
   const validBank = bank.bankId === 'demo' && bank.classification === 'synthetic_demo' && bank.profileVersion === 'bank-demo-2026-11-10.1' && bank.source?.kind === 'synthetic_seed' && bank.source.asOf === '2026-11-10' && !!localized(bank.name, lang) && !!localized(bank.description, lang) && Array.isArray(bank.services) && bank.services.length > 0 && bank.services.length <= 20 && Array.from(bank.services).every(s => s && text(s.id) && !!localized(s.name, lang) && !!localized(s.description, lang)) && Array.isArray(bank.products) && bank.products.length > 0 && bank.products.length <= 50 && Array.from(bank.products).every(p => p && text(p.instrumentId)) && Array.isArray(bank.faq) && bank.faq.length > 0 && bank.faq.length <= 30 && Array.from(bank.faq).every(f => f && text(f.id) && !!localized(f.question, lang) && !!localized(f.answer, lang));
   const identity = /bancot2f|banco t2f|(?:what|que).*(?:bank|banco).*(?:this|este|demo)/.test(m);

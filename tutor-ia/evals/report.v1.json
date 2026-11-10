@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "policyVersion": "1.0.0",
-  "corpusSha256": "8a63834f9ea08cccf73b1940e7c7f731b5a25ba81d26a6fe1e0e906f0e2360fe",
+  "corpusSha256": "9ef9983574a8afc737ecc3799d5562758b211bbac69b64bd287dae0e6f575c8b",
   "policySha256": "79d9ce068aef8b00211af87ee0ff1699ff458ad869b004beac48c04133b82443",
   "implementation": [
     {
@@ -10,7 +10,7 @@
     },
     {
       "file": "../src/bank-profile.ts",
-      "sha256": "21836d2e8682f1cd6f07e72b903dfa0efff850984601f5e9283be0b0f1085220"
+      "sha256": "f218d8fd23b9446cecdda6e50e326c6524334185af5c3e741b28ba1b4f8bfbf2"
     },
     {
       "file": "../src/decline.ts",
@@ -27,17 +27,17 @@
   ],
   "coverage": {
     "es": {
-      "beginner": 22,
+      "beginner": 24,
       "intermediate": 16,
       "advanced": 15
     },
     "en": {
-      "beginner": 28,
+      "beginner": 30,
       "intermediate": 15,
       "advanced": 16
     }
   },
-  "total": 112,
+  "total": 116,
   "failed": 0,
   "results": [
     {
@@ -3796,6 +3796,126 @@
         },
         {
           "invariant": "forbidden:EUR 0",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "review-r1-other-fees-en",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0.75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75 basis",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "review-r1-other-fees-es",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no hay información disponible",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0,75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75 puntos",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "review-r1-active-fees-en",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:0.75%",
+          "pass": true
+        },
+        {
+          "invariant": "required:not deducted",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "review-r1-generic-fees-es",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:comisiones",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0,75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75 puntos",
           "pass": true
         },
         {

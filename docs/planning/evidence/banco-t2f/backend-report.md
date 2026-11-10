@@ -20,3 +20,13 @@ Las pruebas de banco del tutor fallaron inicialmente al no existir las respuesta
 La prueba nueva reprodujo primero un fallo en la pregunta de comisión de mantenimiento; tras la corrección pasa en español e inglés, tanto en inicio como con un producto seleccionado. También se verificaron el FAQ de productos de otras entidades, el rechazo de `BancoFantasma`, `Banco Fantasma` y `ExampleBankOther`, la identificación del instrumento seleccionado solo en exploración o simulación, y las condiciones de moneda y mínimos. El reconocimiento de nombres usa patrones locales acotados y no constituye reconocimiento universal de entidades.
 
 Se reprodujo después la confusión de «How much did I contribute?» con costes y la atribución de condiciones a `OtherBank` y `BankOther`. Tras la corrección pasan las pruebas específicas, incluida la petición real al puente HTTP con la muestra anual de CaixaBank y 1.000 EUR aportados.
+
+## Correcciones tras revisión R1
+
+Las dos incidencias medias se reprodujeron con pruebas fallidas antes del cambio: nombres de producto ajeno en preguntas de comisiones y definición plural genérica. Las pruebas ahora comprueban productos nombrados distintos, desconocidos y seleccionados, el corte de seguimiento tras abstención y las definiciones en español e inglés. Los patrones de reconocimiento siguen siendo acotados.
+
+- Tutor: 29 pruebas superadas, incluidas copias LF y CRLF.
+- API: 35 pruebas superadas, con la advertencia de Starlette/httpx ya indicada.
+- Evaluación: 116 casos, cero fallos, comprobada desde raíz y `frontend`.
+
+La valoración formal de estas correcciones queda pendiente de la siguiente revisión.
