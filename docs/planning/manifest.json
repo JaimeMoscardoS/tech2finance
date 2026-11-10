@@ -261,7 +261,7 @@
       "phase": "P1",
       "owner": "IA y cumplimiento",
       "assignee": "UNASSIGNED",
-      "status": "pending",
+      "status": "in_progress",
       "title": "Evaluar reglas frente a LLM",
       "depends_on": [
         "B03",
@@ -276,10 +276,13 @@
         {
           "id": "B07.1",
           "description": "Congelar batería con fuentes y abstenciones",
-          "status": "pending",
+          "status": "in_progress",
           "estimate_minutes": "30-60",
-          "evidence": [],
-          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+          "evidence": [
+            "https://github.com/JaimeMoscardoS/tech2finance/blob/83249efb413645fe3a24a7c1e775f0e86b04ed4d/tutor-ia/evals/corpus.v1.json"
+          ],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas",
+          "remaining": "Batería sintética de reglas implementada; aprobación de política, comparación con LLM, costes y revisión de cumplimiento permanecen pendientes."
         },
         {
           "id": "B07.2",
@@ -795,9 +798,9 @@
       "dependencies": [],
       "id": "04-tutor",
       "branch": "director/04-tutor",
-      "head": null,
-      "status": "in_progress",
-      "pr": null,
+      "head": "83249efb413645fe3a24a7c1e775f0e86b04ed4d",
+      "status": "pr_open",
+      "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/16",
       "human_roles": [
         "Persona 4: IA, voz y antipánico"
       ],
@@ -814,37 +817,45 @@
           "role": "executor",
           "model": "gpt-6.1-terra",
           "effort": "high",
-          "status": "in_progress"
+          "status": "completed"
         },
         {
           "canonical_task": "/root/director_04_tutor/tutor_reviewer",
           "role": "independent reviewer",
           "model": "gpt-6.1-sol",
           "effort": "high",
-          "status": "in_progress"
+          "status": "review_completed"
         }
       ],
       "review": {
-        "round": 2,
-        "score": 7.8,
+        "round": 4,
+        "score": 8.8,
         "critical_or_high": false,
-        "prior_round": {
-          "round": 1,
-          "score": 7.0,
-          "findings": [
-            "Seguimiento tras abstención: gravedad alta; otros dos medios."
-          ]
-        },
         "findings": [
-          "Seguimiento y cifras corregidos; pendiente hallazgo medio de nombre exacto Fund/Fondo.",
-          "Ronda 3 en preparación."
-        ]
+          "Revisión R4 cubrió portabilidad LF y hallazgos anteriores.",
+          "Corrección posterior solo de rutas con import.meta.url fue inspeccionada por director y ROOT, no cubierta por R4.",
+          "Tras R4 se eliminó línea final del corpus y se regeneró informe; ROOT verificó el diff."
+        ],
+        "post_r4_evidence": [
+          "4 pruebas de evaluación desde frontend y runner 94/0; 16 pruebas del tutor desde frontend, reportadas por director."
+        ],
+        "physical_report_sha256_worktree_04": "2F73407BBE66DBDCF3517C132B720A1A88BAE8F59516B1B3FE62F03E681DC392",
+        "canonical_corpus_sha256": "eb86212f7daedf95fe336a708cada4490e1823033db633b3b1b5f72dcb706143"
       },
-      "commands": [],
-      "evidence": [],
-      "publish_blockers": [
-        "Commit final, revisión y URL de PR pendientes."
-      ]
+      "commands": [
+        {
+          "command": "node --experimental-strip-types --test tutor-ia/tests/*.test.ts",
+          "result": "16 pruebas del tutor; no son 16 pruebas del frontend."
+        },
+        {
+          "command": "node --experimental-strip-types tutor-ia/evals/run.ts --check",
+          "result": "94 casos, 0 fallos; patrones finitos, no validación de LLM."
+        }
+      ],
+      "evidence": [
+        "https://github.com/JaimeMoscardoS/tech2finance/blob/83249efb413645fe3a24a7c1e775f0e86b04ed4d/docs/workstreams/04-tutor.md"
+      ],
+      "publish_blockers": []
     },
     {
       "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
@@ -917,7 +928,7 @@
   ],
   "integration": {
     "id": "integration-local",
-    "status": "preparing",
+    "status": "blocked_regression",
     "depends_on": [
       "01-experience",
       "02-platform",
@@ -926,18 +937,23 @@
       "05-product"
     ],
     "plan": "docs/planning/integracion-local.md",
-    "evidence": [],
+    "evidence": [
+      "docs/planning/evidence/integration/resultado.md",
+      "docs/planning/evidence/integration/e2e.log"
+    ],
     "head": null,
     "scratch_path": "C:/proyectos/tech2finance-directors/20261110/06-integration",
     "branch": "verification/directors-20261110",
-    "prepared_head": "709a2ff9d7a0fdd5572e927613821d4ea7ef6c06",
+    "prepared_head": "cba2d989492315f4d1682d1b8f8e5bf43e46028d",
     "included_refs": {
       "01-experience": "9bdc71d7f35f543162d81a32e4a50b5017659a1f",
       "02-platform": "558365a669c20296591637c59bcebd1716b22610",
       "03-data": "a4c122b2662e854e63f691e3e2a6e78c9fd7d814",
-      "05-product": "2547c01116b0307fb64ba449dfc9cbdf1aef0106"
+      "05-product": "a747df61cb69a8a8d77e67a82cd4c17dfc77a4b8",
+      "04-tutor": "83249efb413645fe3a24a7c1e775f0e86b04ed4d"
     },
-    "remaining": "Faltan 04 revisada y actualización posterior de 05; no se han ejecutado pruebas integradas."
+    "remaining": "Playwright 50/51: consulta de rentabilidad anual se clasifica como instrumento no disponible; corrección por 04 y verificación pendientes.",
+    "gate": "failed"
   },
   "orchestrator": {
     "canonical_task": "/root",

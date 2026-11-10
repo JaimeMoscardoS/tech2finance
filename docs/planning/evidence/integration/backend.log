@@ -1,0 +1,17 @@
+COMMAND: C:\Users\JaimeMoscardó\Documents\tech2finance\.venv\Scripts\python.exe -m pytest backend/tests -q
+CWD: C:\proyectos\tech2finance-directors\20261110\06-integration
+EXIT: 0
+Capture note: two warning path lines were omitted because console decoding replaced characters; warning was StarletteDeprecationWarning about httpx and TestClient.
+......................................................                   [100%]
+
+============================== warnings summary ===============================
+
+
+
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+54 passed, 1 warning in 1.77s

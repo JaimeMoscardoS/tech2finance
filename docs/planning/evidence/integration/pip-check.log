@@ -1,0 +1,4 @@
+COMMAND: C:\Users\JaimeMoscardó\Documents\tech2finance\.venv\Scripts\python.exe -m pip check
+CWD: C:\proyectos\tech2finance-directors\20261110\06-integration
+EXIT: 0
+No broken requirements found.

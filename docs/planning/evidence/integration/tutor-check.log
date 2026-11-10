@@ -1,0 +1,4 @@
+COMMAND: node --experimental-strip-types tutor-ia/evals/run.ts --check
+CWD: C:\proyectos\tech2finance-directors\20261110\06-integration
+EXIT: 0
+94 cases; 0 failed

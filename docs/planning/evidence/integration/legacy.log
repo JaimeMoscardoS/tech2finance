@@ -1,0 +1,54 @@
+COMMAND: C:\Users\JaimeMoscardó\Documents\tech2finance\.venv\Scripts\python.exe -m unittest discover -s simulador/tests -v
+CWD: C:\proyectos\tech2finance-directors\20261110\06-integration
+EXIT: 0
+test_invalid_cli (test_cli.CLITests.test_invalid_cli) ... ok
+
+test_invalid_metadata_json_has_structured_error (test_cli.CLITests.test_invalid_metadata_json_has_structured_error) ... ok
+
+test_oversized_and_deep_json_are_structured_errors (test_cli.CLITests.test_oversized_and_deep_json_are_structured_errors) ... ok
+
+test_valid_cli (test_cli.CLITests.test_valid_cli) ... ok
+
+test_drawdown_recovered_and_open (test_engine.AnalysisTests.test_drawdown_recovered_and_open) ... ok
+
+test_scenarios_zero_and_loss (test_engine.AnalysisTests.test_scenarios_zero_and_loss) ... ok
+
+test_bad_series_values_and_dates (test_engine.HistoricalTests.test_bad_series_values_and_dates) ... ok
+
+test_csv_metadata (test_engine.HistoricalTests.test_csv_metadata) ... ok
+
+test_decimal_context_independence (test_engine.HistoricalTests.test_decimal_context_independence) ... ok
+
+test_delayed_multiple_contributions_and_final_gap (test_engine.HistoricalTests.test_delayed_multiple_contributions_and_final_gap) ... ok
+
+test_extreme_exponents_and_metadata_are_rejected (test_engine.HistoricalTests.test_extreme_exponents_and_metadata_are_rejected) ... ok
+
+test_fees (test_engine.HistoricalTests.test_fees) ... ok
+
+test_manual_cashflows (test_engine.HistoricalTests.test_manual_cashflows) ... ok
+
+test_sale_or_hold_can_win (test_engine.HistoricalTests.test_sale_or_hold_can_win) ... ok
+
+test_single_deposit_manual_oracle (test_engine.HistoricalTests.test_single_deposit_manual_oracle) ... ok
+
+test_weekend_and_no_coverage (test_engine.HistoricalTests.test_weekend_and_no_coverage) ... ok
+
+test_calendar_final_year (test_engine.ReliabilityTests.test_calendar_final_year) ... ok
+
+test_drawdown_threshold_exact_and_extremes (test_engine.ReliabilityTests.test_drawdown_threshold_exact_and_extremes) ... ok
+
+test_loader_rejects_large_integer_and_depth (test_engine.ReliabilityTests.test_loader_rejects_large_integer_and_depth) ... ok
+
+test_results_are_independent (test_engine.ReliabilityTests.test_results_are_independent) ... ok
+
+test_scenario_independent_oracles (test_engine.ReliabilityTests.test_scenario_independent_oracles) ... ok
+
+
+
+----------------------------------------------------------------------
+
+Ran 21 tests in 1.418s
+
+
+
+OK
