@@ -1,5 +1,33 @@
 import { test, expect } from '@playwright/test';
 
+for (const mode of ['local', 'server'] as const) for (const bank of ['bbva', 'caixabank']) {
+ test(`explore starts without an invisible ${bank} selection in ${mode}`, async ({page}) => {
+  await page.addInitScript((value) => localStorage.setItem('t2f-data-mode', value), mode);
+  const requests:any[] = [];
+  await page.route('**/api/tutor', async route => { requests.push(route.request().postDataJSON()); await route.continue(); });
+  await page.goto('/');
+  await page.getByRole('button',{name:'Simulador',exact:true}).click();
+  await page.getByLabel('Entidad').selectOption(bank);
+  await page.getByRole('button',{name:'Explorar',exact:true}).click();
+  await page.getByRole('button',{name:'Abrir asistente'}).click();
+  const dialog = page.getByRole('dialog',{name:'Tu asistente'});
+  await dialog.getByLabel('Tu pregunta').fill('¿Qué estoy viendo?');
+  await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
+  await expect(dialog.locator('.message.assistant[lang="es"]')).toHaveCount(1);
+  await expect(dialog.locator('.message.assistant[lang="es"]')).not.toContainText(/BBVA|CAIXABANK/i);
+  if (mode === 'server') expect(requests.at(-1).context.instrumentId).toBeUndefined();
+  await dialog.getByRole('button',{name:'Cerrar asistente'}).click();
+  const card=page.locator('.fund-card').filter({hasText:'T2F Equilibrio'});
+  await card.getByRole('button',{name:'Preguntar por este producto'}).click();
+  await dialog.getByLabel('Tu pregunta').fill('¿Cuánto cuesta este fondo?');
+  await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
+  await expect(dialog.locator('.message.assistant[lang="es"]').last()).toContainText('0,75');
+  if (mode === 'server') expect(requests.at(-1).context.instrumentId).toBe('demo-mixed');
+  await dialog.getByRole('button',{name:'Cerrar asistente'}).click();
+  await expect(card.getByText('Producto seleccionado para el asistente')).toBeVisible();
+ });
+}
+
 test('bank identity, product fees and contextual questions follow the selected instrument', async ({page}) => {
  const tutorRequests: any[] = [];
  await page.route('**/api/tutor', async route => { tutorRequests.push(route.request().postDataJSON()); await route.continue(); });

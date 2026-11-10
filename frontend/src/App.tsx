@@ -109,6 +109,7 @@ export default function App() {
     [error, setError] = useState<FieldError>(null),
     [notice, setNotice] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState("demo-mixed");
+  const [exploreSelectedId, setExploreSelectedId] = useState<string | null>(null);
   useEffect(() => {
     if (!levelOpen) return;
     const close = (e: KeyboardEvent) => {
@@ -265,6 +266,7 @@ export default function App() {
     },
   ];
   const choose = (p: Page) => {
+    if (p === "explore") setExploreSelectedId(null);
     retryAction.current = null; setServerError(false);
     setPracticeOpen(false); setPracticeResult(null); setAssistantDecline(undefined); setDeclineSpec(undefined);
     if (p !== "simulator") { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false); }
@@ -341,7 +343,9 @@ export default function App() {
   const source = selected.sourceUrl ? [{label:language === "es" ? "Ficha oficial" : "Official product page",url:selected.sourceUrl,checkedAt:selected.sourceDate ?? undefined}] : [];
   const validResult = page === "simulator" && !practiceOpen && result?.instrumentId === selected.instrumentId ? result : null;
   const practiceInstrument = practiceResult && instruments.find(item => item.instrumentId === practiceResult.spec.instrumentId);
-  const tutorInstrument = practiceOpen ? practiceInstrument || undefined : selected;
+  const tutorInstrument = page === "explore"
+    ? instruments.find(item => item.instrumentId === exploreSelectedId)
+    : page === "simulator" ? (practiceOpen ? practiceInstrument || undefined : selected) : undefined;
   const tutorSource = tutorInstrument?.sourceUrl ? [{label: language === "es" ? "Ficha oficial" : "Official product page", url:tutorInstrument.sourceUrl, checkedAt:tutorInstrument.sourceDate ?? undefined}] : [];
   const activeSpec = practiceOpen ? practiceResult?.spec : validResult ? {instrumentId:validResult.instrumentId,initial:validResult.initial,recurringContribution:validResult.kind === "annual_history" ? validResult.annual : validResult.monthly,periods:validResult.kind === "annual_history" ? 5 : validResult.months} : undefined;
   const activeResult = practiceOpen ? practiceResult?.result : validResult;
@@ -763,6 +767,7 @@ export default function App() {
                     <div className="fund-body">
                       <span className="kicker">{c.tag}</span>
                       <h3>{c.name}</h3>
+                      {exploreSelectedId === c.id && <p className="explore-selection" role="status">{language === "es" ? "Producto seleccionado para el asistente" : "Product selected for the assistant"}</p>}
                       <p>{c.desc}</p>
                       <div className="fund-meta">
                         <span>{t.exampleRisk}</span>
@@ -771,7 +776,7 @@ export default function App() {
                         </strong>
                       </div>
                       <ProductCosts product={catalog.bankProfile.products.find(p=>p.instrumentId === c.id)} profile={catalog.bankProfile} language={language} />
-                      <button type="button" onClick={() => { simulationGeneration.current++; simulationRequest.current?.abort(); setResult(null); setSelectedId(c.id); openAssistant(); }}>
+                      <button type="button" onClick={() => { setExploreSelectedId(c.id); openAssistant(); }}>
                         {language === "es" ? "Preguntar por este producto" : "Ask about this product"} <MessageCircle size={15} />
                       </button>
                       <button

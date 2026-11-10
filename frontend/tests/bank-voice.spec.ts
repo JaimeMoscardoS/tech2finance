@@ -40,9 +40,14 @@ test('voice keeps only the current open session history and does not restart lis
  await dictate('¿Qué producto veo?');
  expect(requests[2].history).toEqual([]);
  expect(requests[2].context.page).toBe('explore');
+ expect(requests[2].context.instrumentId).toBeUndefined();
  await dialog.getByRole('button',{name:'Cerrar asistente de voz'}).click();
+ const card=page.locator('.fund-card').filter({hasText:'T2F Equilibrio'});
+ await card.getByRole('button',{name:'Preguntar por este producto'}).click();
+ await page.getByRole('dialog',{name:'Tu asistente'}).getByRole('button',{name:'Cerrar asistente'}).click();
  await page.getByRole('button',{name:'Hablar con IA'}).click();
  await expect.poll(()=>page.evaluate(()=>(window as any).bankVoice.starts)).toBe(4);
  await dictate('Otra pregunta');
  expect(requests[3].history).toEqual([]);
+ expect(requests[3].context.instrumentId).toBe('demo-mixed');
 });
