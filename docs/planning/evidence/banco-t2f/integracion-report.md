@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Registro de la comprobación en Windows de la rama de trabajo, usando la API propia en 8097 y frontend en 5177. En `05bdc69`, la suite completa pasó 61/61, frontend/tutor 48/48, API 35/35 y corpus 116/116; el guion de 24 preguntas se ensayó en pantalla y por API. Las revisiones independientes R2 de núcleo e interfaz alcanzaron 8,8/10 cada una. No acredita despliegue, hardware de voz ni ejecución en Linux o Node 24. La CI aprobada de la base `6f56d5c` no prueba BancoT2F; su CI de funcionalidad sigue pendiente.
+Registro de la comprobación local en Windows, usando la API propia en 8097 y frontend en 5177. En `05bdc69`, la suite completa pasó 61/61, frontend/tutor 48/48, API 35/35 y corpus 116/116; el guion de 24 preguntas se ensayó en pantalla y por API. Las revisiones independientes R2 de núcleo e interfaz alcanzaron 8,8/10 cada una. No acredita despliegue ni hardware de voz. Las CI de [push](https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42876359255) y [PR](https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42876370241) pasaron para `6f783fb` en Linux con Node 24 y Python 3.14; la CI de la base `6f56d5c` no prueba BancoT2F. La CI de un commit documental posterior debe consultarse por separado.
 
 ## Comprobación posterior a las correcciones de revisión
 

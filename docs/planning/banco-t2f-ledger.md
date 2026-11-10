@@ -6,7 +6,7 @@ Registro de decisiones, comprobaciones y revisiones de la integración de BancoT
 
 - Base `integration/bank-demo-base`: `6f56d5c2eb022dd0d1bed1c75e1729d5d13ab628`, publicada en remoto y verificada en ese mismo hash. [CI de la base](https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42873962065) completada correctamente para ese hash; no prueba los cambios de BancoT2F.
 - Baseline en esta base: frontend 39/39 y build correcto con avisos Rolldown; backend 54/54 con advertencia Starlette; simulador 21/21.
-- Contrato y plan aprobados por coordinación antes de implementación. R2 del núcleo e interfaz superadas y pruebas locales finales ejecutadas; publicación de la rama y CI de la funcionalidad pendientes.
+- Contrato y plan aprobados por coordinación antes de implementación. R2 del núcleo e interfaz superadas y pruebas locales finales ejecutadas. El PR está abierto sin merge.
 - Revisiones: máximo cuatro rondas, mínimo 8/10 por revisor, sin críticos ni altos abiertos; no iniciar una quinta. Límite de seis agentes simultáneos; escritura Terra, revisión Sol en solo lectura.
 
 ## Responsables y estado
@@ -51,4 +51,4 @@ En `05bdc69d63ec2682a13e0e7a580909661927a77c` se repitieron la suite completa de
 - Núcleo R1: **7,5/10**, dos hallazgos medios sobre tarifas de producto ajeno nombrado y definición general de comisiones; corregidos y reexaminados. Núcleo R2: **8,8/10**, superada sobre `29ac1df`; 18 comprobaciones HTTP y corpus 116/116, sin hallazgos nuevos comunicados. Paquete revisado: `bank-review/core-r2.patch`.
 - Interfaz R1: **7,8/10**, un hallazgo medio relativo a selección de instrumento no visible en Explorar. Interfaz R2: **8,8/10**, superada sobre `05bdc69`; el revisor comprobó BBVA y CaixaBank en modos local y servidor, Horizonte y voz simulada, y los contextos de inicio, cartera y reentrada a Explorar. Sin críticos ni altos abiertos. Las notas no sustituyen las pruebas ni la decisión de integración.
 - Limitación menor diferida: la FAQ visible indica que no se emplea dinero real, pero algunas formulaciones literales sobre ello no activan todavía la respuesta correspondiente del tutor. Sus reglas reconocen plantillas limitadas; no presentar cobertura conversacional general como verificada.
-- La voz física, lectores de pantalla como NVDA y la CI de la rama completa de BancoT2F siguen pendientes. Las pruebas de voz descritas usan simulaciones; la CI de la base cubre únicamente la base anterior.
+- La voz física y lectores de pantalla como NVDA siguen pendientes; las pruebas de voz descritas usan simulaciones. Las CI de [push](https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42876359255) y [PR](https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42876370241) terminaron correctamente para `6f783fb1bf38909ab04322e85904394dea815f66` en Linux, Node 24 y Python 3.14. La CI de la base cubre únicamente la base anterior; una ejecución del commit documental posterior debe consultarse por separado.
