@@ -4,6 +4,8 @@
 
 Biblioteca educativa Python 3.11+ sin dependencias externas y CLI JSON para reproducir series importadas, comparar dos decisiones virtuales, calcular escenarios hipotéticos y describir caídas observadas. La muestra incluida es **ficticia**, no un histórico real. No hay servidor ni conexión al frontend.
 
+El servidor de la API usa `simulador.periodic.replay` como cálculo autoritativo de su demo periódica; el motor histórico y su CLI descritos abajo son independientes. El modo local TypeScript conserva su cálculo de demo sin versión asociada y no comparte la versión de cálculo del servidor. Las pruebas [golden](fixtures/golden-periodic-v1.json) añaden casos aritméticos independientes, pero no certifican todas las finanzas. La reproducción y los límites del conjunto congelado se documentan en [03-data](../docs/workstreams/03-data.md).
+
 ## Ejecución
 
 Desde la raíz, con Python disponible en PATH:
