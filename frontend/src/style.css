@@ -195,11 +195,35 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .history-table caption { text-align: left; font-weight: 700; margin-bottom: 8px; }
 .history-table th, .history-table td { text-align: left; padding: 8px 4px; border-bottom: 1px solid var(--border); }
 .history-table th:last-child, .history-table td:last-child { text-align: right; }
+.decline-trigger { margin: 12px 0 20px; }
+.decline-modal { width: min(600px, 100%); }
+.decline-modal > p { margin: 12px 0; color: var(--ink); overflow-wrap: anywhere; }
+.decline-modal a, .message-sources a { color: var(--accent); }
+.decline-summary { background: var(--surface-raised); color: var(--ink); border-radius: 12px; padding: 16px; margin: 18px 0; line-height: 1.5; }
+.decline-summary p + p, .decline-summary h3 { margin-top: 10px; }
+.decline-summary h3 { font-size: 15px; }
+.decline-summary ul { padding-left: 20px; margin: 8px 0 0; }
+.decline-summary li + li { margin-top: 8px; }
+.decision-fields { display: grid; gap: 12px; margin: 18px 0; }
+.decision-fields label { display: grid; gap: 5px; color: var(--ink); font-size: 13px; font-weight: 600; }
+.decision-fields input, .decision-fields select { width: 100%; min-height: 42px; border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: var(--surface-raised); color: var(--ink); }
+.decision-fields small { color: var(--muted); line-height: 1.5; }
+.message-sources { font-size: 12px; margin: 6px 0; color: var(--muted); }
+.message-sources a + a { margin-left: 8px; }
+.assistant-voice, .assistant-status { padding: 0 18px 10px; }
+.assistant-status { color: var(--ink); font-size: 13px; }
+.assistant-panel .messages { min-height: 0; }
+@media (max-height: 500px) {
+  .assistant-panel { overflow-y: auto; overscroll-behavior: contain; }
+  .assistant-panel > * { flex-shrink: 0; }
+  .assistant-panel .messages { flex: 0 0 auto; min-height: 90px; max-height: 40dvh; overflow-y: auto; }
+}
 
 /* Simulator layout: preserve space for the chart without stretching the form. */
 .sim-grid { grid-template-columns: minmax(280px, 340px) minmax(0, 1fr); align-items: start; }
 .portfolio-content { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 20px; }
 .portfolio-content > * { min-width: 0; width: 100%; }
+.portfolio-page-grid > * { min-width: 0; }
 .sim-grid > * { min-width: 0; }
 .sim-values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .sim-values strong { font-size: clamp(20px, 2vw, 24px); overflow-wrap: anywhere; }
@@ -216,6 +240,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   .top-actions { gap: 8px; margin-left: auto; }
 }
 @media (max-width: 520px) {
+  .portfolio-page-grid { grid-template-columns: minmax(0, 1fr); }
   .sim-values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sim-values > div:first-child { grid-column: 1 / -1; }
 }

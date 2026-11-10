@@ -5,6 +5,7 @@ import {
   CircleHelp,
   FlaskConical,
   MessageCircle,
+  TrendingDown,
 } from "lucide-react";
 import { annualHistory } from "./annual-history";
 import { banks, instruments, type Instrument } from "./catalog";
@@ -44,6 +45,7 @@ type Props = {
   selectInstrument: (item: Instrument) => void;
   run: (event: FormEvent) => void;
   openAssistant: () => void;
+  openSimulationDecline: () => void;
   euro: (value: number) => string;
 };
 export default function Simulator({
@@ -66,6 +68,7 @@ export default function Simulator({
   selectInstrument,
   run,
   openAssistant,
+  openSimulationDecline,
   euro,
 }: Props) {
   return (
@@ -418,6 +421,7 @@ export default function Simulator({
                   </tbody>
                 </table>
               )}
+              <button className="button outline decline-trigger" type="button" onClick={openSimulationDecline}><TrendingDown size={17}/>{language === "es" ? "Entender las caídas" : "Understand declines"}</button>
               <div className="assumption">
                 <CircleHelp size={16} />
                 <span>

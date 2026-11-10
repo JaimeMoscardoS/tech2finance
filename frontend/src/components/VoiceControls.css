@@ -1,0 +1,8 @@
+.voice-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; color: var(--ink); }
+.voice-controls__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.voice-controls button { min-height: 44px; min-width: 44px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-raised); color: var(--ink); font: inherit; font-size: .8rem; font-weight: 600; cursor: pointer; }
+.voice-controls button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
+.voice-controls button:disabled { opacity: .55; cursor: not-allowed; }
+.voice-controls button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.voice-controls__status { color: var(--muted); font-size: .78rem; line-height: 1.4; }
+@media (forced-colors: active) { .voice-controls button[aria-pressed='true'] { border: 2px solid Highlight; color: Highlight; } }
