@@ -589,19 +589,22 @@
           "canonical_task": "/root/director_01_experience",
           "role": "director: orchestration and review",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "orchestration_active"
         },
         {
           "canonical_task": "/root/director_01_experience/executor",
           "role": "executor",
           "model": "gpt-6.1-terra",
-          "effort": "high"
+          "effort": "high",
+          "status": "completed"
         },
         {
           "canonical_task": "/root/director_01_experience/reviewer",
           "role": "independent reviewer",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "review_completed"
         }
       ],
       "review": {
@@ -661,19 +664,22 @@
           "canonical_task": "/root/director_02_platform",
           "role": "director: orchestration and review",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "orchestration_active"
         },
         {
           "canonical_task": "/root/director_02_platform/executor02",
           "role": "executor",
           "model": "gpt-6.1-terra",
-          "effort": "high"
+          "effort": "high",
+          "status": "completed"
         },
         {
           "canonical_task": "/root/director_02_platform/reviewer02",
           "role": "independent reviewer",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "review_completed"
         }
       ],
       "review": {
@@ -723,19 +729,22 @@
           "canonical_task": "/root/director_03_data",
           "role": "director: orchestration and review",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "orchestration_active"
         },
         {
           "canonical_task": "/root/director_03_data/executor_03",
           "role": "executor",
           "model": "gpt-6.1-terra",
-          "effort": "high"
+          "effort": "high",
+          "status": "completed"
         },
         {
           "canonical_task": "/root/director_03_data/reviewer_03",
           "role": "independent reviewer",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "review_completed"
         }
       ],
       "review": {
@@ -782,19 +791,22 @@
           "canonical_task": "/root/director_04_tutor",
           "role": "director: orchestration and review",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "orchestration_active"
         },
         {
           "canonical_task": "/root/director_04_tutor/tutor_executor",
           "role": "executor",
           "model": "gpt-6.1-terra",
-          "effort": "high"
+          "effort": "high",
+          "status": "in_progress"
         },
         {
           "canonical_task": "/root/director_04_tutor/tutor_reviewer",
           "role": "independent reviewer",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "in_progress"
         }
       ],
       "review": {
@@ -841,19 +853,22 @@
           "canonical_task": "/root/director_05_product",
           "role": "director: orchestration and review",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "orchestration_active"
         },
         {
           "canonical_task": "/root/director_05_product/executor05",
           "role": "executor",
           "model": "gpt-6.1-terra",
-          "effort": "high"
+          "effort": "high",
+          "status": "in_progress"
         },
         {
           "canonical_task": "/root/director_05_product/reviewer05",
           "role": "independent reviewer",
           "model": "gpt-6.1-sol",
-          "effort": "high"
+          "effort": "high",
+          "status": "review_completed"
         }
       ],
       "review": {
