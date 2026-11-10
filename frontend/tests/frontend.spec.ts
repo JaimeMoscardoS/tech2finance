@@ -13,7 +13,7 @@ test('users can explore, change level and run a labelled simulation', async ({ p
   await page.getByRole('button', { name: 'Ver mi ejemplo' }).click();
   await expect(page.locator('.sim-values strong').filter({hasText:'100,00 €'})).toBeVisible();
   await page.getByRole('button', { name: 'Abrir asistente' }).click();
-  await expect(page.getByText(/IA Y VOZ PENDIENTES/)).toBeVisible();
+  await expect(page.getByText(/MODO LOCAL/)).toBeVisible();
 });
 
 test('pause dialog handles keyboard focus and escape', async ({ page }) => {
@@ -68,13 +68,13 @@ test('English navigation, assistant and simulated portfolio are translated', asy
   await expect(page.getByText('Fictional funds for learning. These are not recommendations.')).toBeVisible();
   await page.getByRole('button', { name: 'My portfolio', exact: true }).click();
   await page.getByRole('button', { name: 'Understand a decline' }).click();
-  await expect(page.getByText(/does not guarantee recovery/)).toBeVisible();
+  await expect(page.getByText(/past recovery does not guarantee another/)).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Open assistant' }).click();
-  await expect(page.getByText('SAMPLE RESPONSES · AI AND VOICE NOT CONNECTED')).toBeVisible();
+  await expect(page.getByText('LOCAL MODE · RULE-BASED RESPONSES')).toBeVisible();
   await page.getByRole('button', { name: 'What is a fund?' }).click();
   await page.getByRole('button', { name: 'Send question' }).click();
-  await expect(page.getByText(/A fund pools contributions/)).toBeVisible();
+  await expect(page.getByText(/A fund pools investors/ )).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: 'Open assistant' })).toBeFocused();
 });
@@ -183,7 +183,7 @@ test('annual history keeps fixed period and excludes monthly contributions', asy
  await page.getByRole('button',{name:'Abrir asistente'}).click();
  await page.getByRole('button',{name:'¿Cómo funciona la simulación?'}).click();
  await page.getByRole('button',{name:'Enviar pregunta'}).click();
- await expect(page.getByText(/reconstrucción con rentabilidades anuales publicadas/)).toBeVisible();
+ await expect(page.getByText(/rentabilidades anuales publicadas|al cierre de cada año/)).toBeVisible();
  await page.keyboard.press('Escape');
  await page.getByLabel('Aportación anual').fill('0');
  await page.getByLabel('Importe inicial').fill('1000');
@@ -224,8 +224,8 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await phone.getByRole('button',{name:'Entender una caída'}).click();
  const modal=phone.getByRole('dialog');
  expect(await modal.evaluate(el=>el.scrollHeight>el.clientHeight)).toBeTruthy();
- await modal.getByRole('button',{name:'Entendido'}).scrollIntoViewIfNeeded();
- await expect(modal.getByRole('button',{name:'Entendido'})).toBeInViewport();
+ await modal.getByRole('button',{name:'Continuar en la demo'}).scrollIntoViewIfNeeded();
+ await expect(modal.getByRole('button',{name:'Continuar en la demo'})).toBeInViewport();
  await phone.screenshot({path:'test-results/pause-landscape.png'});
  await mobile.close();
 });
@@ -292,6 +292,136 @@ test('home chart retains useful width on narrow screens', async ({browser}) => {
   await expect(plot).toBeVisible();
   expect((await plot.boundingBox())!.width).toBeGreaterThan(width===320?200:300);
   await page.screenshot({path:`test-results/home-${width}.png`,fullPage:true});
+  await context.close();
+ }
+});
+
+test('local tutor grounds results, keeps previous messages and excludes dirty results', async ({page}) => {
+ const providerRequests:string[]=[];
+ page.on('request',request=>{if (/anthropic|elevenlabs/i.test(request.url())) providerRequests.push(request.url());});
+ await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+ await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
+ await page.getByLabel('Aportación anual').fill('50'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
+ await page.getByRole('button',{name:'Abrir asistente'}).click();
+ const dialog=page.getByRole('dialog',{name:'Tu asistente'});
+ await dialog.getByLabel('Tu pregunta').fill('¿Cuál es el resultado?'); await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
+ await expect(dialog.getByText(/788,79/)).toBeVisible();
+ await expect(dialog.getByText(/750/)).toBeVisible();
+ await expect(dialog.getByRole('link',{name:'Ficha oficial'})).toBeVisible();
+ await dialog.getByLabel('Tu pregunta').fill('¿Cuál fue la rentabilidad de 2022?'); await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
+ await expect(dialog.getByText(/2022.*-0,67/)).toBeVisible();
+ const previous=await dialog.locator('.message.assistant p').last().textContent();
+ await page.keyboard.press('Escape'); await page.getByRole('button',{name:'English'}).click();
+ await page.getByRole('button',{name:'Open assistant'}).click();
+ await expect(page.locator('.message.assistant p').last()).toHaveText(previous!);
+ await expect(page.locator('.message.assistant[lang="es"]').last()).toBeVisible();
+ await expect(page.getByRole('button',{name:'Dictate'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Listen'})).toBeVisible();
+ await page.keyboard.press('Escape'); await page.getByLabel('Annual contribution').fill('75');
+ await page.getByRole('button',{name:'Open assistant'}).click();
+ const english=page.getByRole('dialog',{name:'Your assistant'});
+ await english.getByLabel('Your question').fill('What is the result?'); await english.getByRole('button',{name:'Send question'}).click();
+ await expect(english.getByText(/not enough valid simulation data/i)).toBeVisible();
+ expect(providerRequests).toEqual([]);
+});
+
+test('assistant remains scrollable and voice controls reachable in short landscape', async ({browser}) => {
+ const context=await browser.newContext({viewport:{width:568,height:320}}); const page=await context.newPage();
+ await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
+ const dialog=page.getByRole('dialog',{name:'Tu asistente'});
+ await dialog.getByLabel('Tu pregunta').fill('¿Qué es un fondo?');
+ await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
+ await expect(dialog.locator('.message.assistant[lang="es"]')).toBeVisible();
+ const listen=dialog.getByRole('button',{name:'Escuchar'}); await listen.focus();
+ await expect(listen).toBeInViewport();
+ const dictate=dialog.getByRole('button',{name:'Dictar'}); await dictate.focus();
+ await expect(dictate).toBeInViewport();
+ expect(await dialog.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);
+ expect(await page.evaluate(()=>window.scrollY)).toBe(0);
+ await page.screenshot({path:'test-results/local-assistant-landscape.png'});
+ await context.close();
+});
+
+test('decline explanations use observed series without inventing a current crisis', async ({page}) => {
+ await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+ await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
+ await page.getByRole('button',{name:'Entender las caídas'}).click();
+ let dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});
+ await expect(dialog.getByText(/última observación no hay caída/)).toBeVisible();
+ await expect(dialog.getByText(/2021.*2022/)).toBeVisible();
+ await expect(dialog.getByText(/causa es desconocida/i)).toBeVisible();
+ await dialog.getByLabel('Objetivo (opcional)').fill('Ejemplo educativo');
+ await dialog.getByLabel('¿Necesitas liquidez pronto? (opcional)').selectOption('yes');
+ await dialog.getByRole('button',{name:'Preguntar al asistente'}).click();
+ await expect(page.getByRole('dialog',{name:'Tu asistente'})).toBeVisible();
+ await page.keyboard.press('Escape'); await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
+ await page.getByRole('button',{name:'Entender una caída'}).click();
+ dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});
+ await expect(dialog.getByText(/Punto 14/)).toBeVisible();
+ await expect(dialog.getByText(/Serie ficticia de ejemplo/)).toBeVisible();
+ await dialog.getByRole('button',{name:'Continuar en la demo'}).click();
+ await expect(dialog).toBeHidden();
+});
+
+test('dictation remains editable and never submits automatically', async ({page}) => {
+ await page.addInitScript(()=>{
+  class LocalRecognition {
+   static available=async()=> 'available'; processLocally=false; lang=''; continuous=false; interimResults=false;
+   onstart:(()=>void)|null=null; onend:(()=>void)|null=null; onerror=null; onresult:((event:unknown)=>void)|null=null;
+   start(){this.onstart?.();this.onresult?.({resultIndex:0,results:[{isFinal:true,0:{transcript:'Quiero revisar el riesgo'}}]});}
+   stop(){this.onend?.();} abort(){}
+  }
+  Object.defineProperty(window,'SpeechRecognition',{value:LocalRecognition,configurable:true});
+ });
+ await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
+ const dialog=page.getByRole('dialog',{name:'Tu asistente'});
+ await dialog.getByRole('button',{name:'Dictar'}).click();
+ await expect(dialog.getByLabel('Tu pregunta')).toHaveValue('Quiero revisar el riesgo');
+ await expect(dialog.locator('.message.user')).toHaveCount(0);
+ await dialog.getByLabel('Tu pregunta').fill('Quiero revisar el riesgo y los costes');
+ await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
+ await expect(dialog.locator('.message.user')).toHaveCount(1);
+});
+
+test('saved Spanish answer reads in Spanish while dictation follows English UI', async ({page}) => {
+ await page.addInitScript(()=>{
+  const state={spoken:'',dictated:''}; Object.assign(window,{voiceTestState:state});
+  class Utterance { text:string; lang=''; voice:unknown; onstart:(()=>void)|null=null; onend:(()=>void)|null=null; constructor(text:string){this.text=text;} }
+  const synth={paused:false,cancel(){},resume(){},getVoices(){return [{localService:true,lang:'es-ES'},{localService:true,lang:'en-US'}];},addEventListener(){},removeEventListener(){},speak(item:Utterance){state.spoken=item.lang;item.onstart?.();}};
+  class Recognition { static available=async()=> 'available'; processLocally=false; lang=''; continuous=false; interimResults=false; onstart:(()=>void)|null=null; onend=null; onerror=null; onresult=null; start(){state.dictated=this.lang;this.onstart?.();} abort(){} stop(){} }
+  Object.defineProperty(window,'speechSynthesis',{value:synth,configurable:true});
+  Object.defineProperty(window,'SpeechSynthesisUtterance',{value:Utterance,configurable:true});
+  Object.defineProperty(window,'SpeechRecognition',{value:Recognition,configurable:true});
+ });
+ await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
+ await page.getByLabel('Tu pregunta').fill('¿Qué es un fondo?'); await page.getByRole('button',{name:'Enviar pregunta'}).click();
+ await expect(page.locator('.message.assistant[lang="es"]')).toBeVisible();
+ await page.keyboard.press('Escape'); await page.getByRole('button',{name:'English'}).click();
+ await page.getByRole('button',{name:'Open assistant'}).click();
+ await page.getByRole('button',{name:'Listen'}).click();
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as {voiceTestState:{spoken:string}}).voiceTestState.spoken)).toBe('es-ES');
+ await page.getByRole('button',{name:'Dictate'}).click();
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as {voiceTestState:{dictated:string}}).voiceTestState.dictated)).toBe('en-US');
+});
+
+test('local panels fit desktop and mobile in both themes', async ({browser}) => {
+ for (const width of [320,768,1280]) {
+  const context=await browser.newContext({viewport:{width,height:800}}); const page=await context.newPage();
+  await page.goto('/');
+  if(width===320){await page.getByRole('button',{name:'English'}).click();await page.getByRole('button',{name:'Dark theme'}).click();}
+  await page.getByRole('button',{name:width===320?'Open assistant':'Abrir asistente'}).click();
+  const assistant=page.getByRole('dialog',{name:width===320?'Your assistant':'Tu asistente'});
+  await expect(assistant).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+  await page.screenshot({path:`test-results/local-assistant-${width}.png`});
+  await page.keyboard.press('Escape');
+  if(width===320){await page.getByRole('button',{name:'Open menu'}).click();await page.getByRole('button',{name:'My portfolio',exact:true}).click();}
+  else await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
+  await page.getByRole('button',{name:width===320?'Understand a decline':'Entender una caída'}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  const overflow = await page.evaluate(()=>({screen:window.innerWidth,document:document.documentElement.scrollWidth,items:[...document.querySelectorAll('body *')].filter(el=>el.getBoundingClientRect().right>innerWidth+1).map(el=>`${el.tagName}.${el.className}`)}));
+  await page.screenshot({path:`test-results/local-decline-${width}.png`});
+  expect(overflow.document,JSON.stringify(overflow)).toBeLessThanOrEqual(overflow.screen);
   await context.close();
  }
 });

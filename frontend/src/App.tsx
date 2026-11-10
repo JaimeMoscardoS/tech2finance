@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   ArrowRight,
-  AudioLines,
   BarChart3,
   BookOpen,
   Check,
@@ -14,8 +13,6 @@ import {
   Menu,
   MessageCircle,
   Moon,
-  Pause,
-  Send,
   ShieldCheck,
   Sparkles,
   Sun,
@@ -25,18 +22,19 @@ import {
 } from "lucide-react";
 import CountUp from "./CountUp";
 import { simulate } from "./demo";
-import { replayAnnual } from "./annual-history";
+import { annualHistory, replayAnnual } from "./annual-history";
 import { instruments, type Instrument } from "./catalog";
 import InvestmentChart from "./LazyInvestmentChart";
 import Simulator, { type FieldError } from "./Simulator";
 import { MAX_SIMULATION_AMOUNT } from "./simulation-types";
 import { copy, type Language } from "./copy";
+import { analyzeDecline, type DeclineReport, type DecisionContext, type TutorContext } from "../../tutor-ia/src/index";
+import { portfolioPoints } from "./portfolio-demo";
+import AssistantPanel from "./AssistantPanel";
+import AntiPanicPanel from "./AntiPanicPanel";
 
 type Page = "home" | "explore" | "simulator" | "portfolio";
 type Level = "beginner" | "intermediate" | "advanced";
-type Message =
-  | { from: "user"; text: string }
-  | { from: "assistant"; kind: "fall" | "fund" | "sim"; level: Level };
 function saved(key: string, options: string[], fallback: string) {
   try {
     const value = localStorage.getItem(key);
@@ -57,10 +55,10 @@ export default function App() {
     [levelOpen, setLevelOpen] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [assistant, setAssistant] = useState(false),
-    [pause, setPause] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]),
-    [input, setInput] = useState(""),
-    [initial, setInitial] = useState("500"),
+    [pause, setPause] = useState<DeclineReport | null>(null);
+  const [decision,setDecision]=useState<DecisionContext>({needsLiquidity:"unknown"});
+  const [assistantDecline,setAssistantDecline]=useState<DeclineReport | undefined>();
+  const [initial, setInitial] = useState("500"),
     [monthly, setMonthly] = useState("50"),
     [annual, setAnnual] = useState("0"),
     [months, setMonths] = useState("12"),
@@ -99,7 +97,8 @@ export default function App() {
     assistantRef = useRef<HTMLElement>(null),
     navRef = useRef<HTMLElement>(null),
     menuButtonRef = useRef<HTMLButtonElement>(null),
-    assistantTriggerRef = useRef<HTMLElement | null>(null);
+    assistantTriggerRef = useRef<HTMLElement | null>(null),
+    pauseTriggerRef = useRef<HTMLElement | null>(null);
   const t = copy[language];
   const names = {
     home: t.home,
@@ -142,7 +141,7 @@ export default function App() {
     items()[0]?.focus();
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        pause ? setPause(false) : setAssistant(false);
+        pause ? setPause(null) : setAssistant(false);
         return;
       }
       if (e.key !== "Tab") return;
@@ -194,13 +193,7 @@ export default function App() {
       menuButtonRef.current?.focus();
     };
   }, [mobileNav]);
-  const points = useMemo(
-    () => [
-      1000, 1032, 1010, 1040, 1026, 1060, 1045, 1088, 1072, 1103, 1084, 1110,
-      1080, 1093,
-    ],
-    [],
-  );
+  const points = portfolioPoints;
   const nav = [
     { key: "home" as const, icon: Grid2X2 },
     { key: "explore" as const, icon: Compass },
@@ -239,6 +232,7 @@ export default function App() {
     setNotice(null);
   };
   const openAssistant = () => {
+    setAssistantDecline(undefined);
     assistantTriggerRef.current = mobileNav
       ? menuButtonRef.current
       : document.activeElement instanceof HTMLElement
@@ -322,23 +316,16 @@ export default function App() {
       setError("general");
     }
   }
-  function send(e: FormEvent) {
-    e.preventDefault();
-    const q = input.trim();
-    if (!q) return;
-    const low = q.toLowerCase();
-    const kind = /fondo|fund|etf/.test(low)
-      ? "fund"
-      : /simula|aport|contrib/.test(low)
-        ? "sim"
-        : "fall";
-    setMessages((m) => [
-      ...m,
-      { from: "user", text: q },
-      { from: "assistant", kind, level },
-    ]);
-    setInput("");
-  }
+  const source = selected.sourceUrl ? [{label:language === "es" ? "Ficha oficial" : "Official product page",url:selected.sourceUrl,checkedAt:selected.sourceDate ?? undefined}] : [];
+  const validResult = page === "simulator" && result?.instrumentId === selected.instrumentId ? result : null;
+  const tutorContext: TutorContext = {page,level,language,
+    ...(page === "simulator" ? {instrument:{id:selected.instrumentId,name:selected.name[language],currency:selected.currency,dataKind:selected.dataStatus === "annual_history" ? "annual_published_returns" : selected.dataStatus,sources:source}} : {}),
+    ...(validResult ? {simulation:{kind:validResult.kind,initial:validResult.initial,recurringContribution:validResult.kind === "annual_history" ? validResult.annual : validResult.monthly,contributionTiming:validResult.kind === "annual_history" ? "year_end_after_return" : "month_start",periods:validResult.kind === "annual_history" ? 5 : validResult.months,finalValue:validResult.value,totalContributed:validResult.contributed,profit:validResult.profit,simpleReturnPercent:validResult.simpleReturnPercent,instrumentReturnPercent:validResult.timeline[validResult.timeline.length-1].instrumentReturnPercent,...(validResult.kind === "annual_history" ? {periodStart:annualHistory.baseline,periodEnd:validResult.timeline[validResult.timeline.length-1].date ?? undefined,annualReturns:annualHistory.returns.map(row=>({year:row.year,ratePercent:row.rate*100}))} : {})}} : {}),
+    ...((page === "home" || page === "portfolio") ? {portfolio:{name:t.examplePortfolio,value:1093,initial:1000,dataKind:"fictional" as const}} : {}),
+    ...(assistantDecline ? {decline:assistantDecline,decision} : {})};
+  function openPortfolioDecline(){pauseTriggerRef.current=document.activeElement instanceof HTMLElement?document.activeElement:null;setPause(analyzeDecline({name:t.examplePortfolio,dataKind:"fictional",sources:[],observations:points.map((value,index)=>({label:`${t.pointLabel} ${index+1}`,value}))}));}
+  function openSimulationDecline(){if(!validResult)return;pauseTriggerRef.current=document.activeElement instanceof HTMLElement?document.activeElement:null;setPause(analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}));}
+  function askDecline(){if(!pause)return;setAssistantDecline(pause);setPause(null);assistantTriggerRef.current=pauseTriggerRef.current;setAssistant(true);}
   const levelTitle = {
     beginner: t.beginnerView,
     intermediate: t.intermediateView,
@@ -354,6 +341,7 @@ export default function App() {
       <aside
         ref={navRef}
         className={`sidebar ${mobileNav ? "open" : ""}`}
+        inert={assistant || !!pause ? true : undefined}
         role={mobileNav ? "dialog" : undefined}
         aria-modal={mobileNav ? true : undefined}
         aria-label={t.space}
@@ -422,7 +410,7 @@ export default function App() {
           tabIndex={-1}
         />
       )}
-      <main className="main" inert={mobileNav ? true : undefined}>
+      <main className="main" inert={mobileNav || assistant || !!pause ? true : undefined}>
         <header className="topbar">
           <div className="top-left">
             <button
@@ -787,6 +775,7 @@ export default function App() {
                 run,
                 openAssistant,
                 euro,
+                openSimulationDecline,
               }}
             />
           )}
@@ -841,7 +830,7 @@ export default function App() {
                   </div>
                   <button
                     className="button outline full"
-                    onClick={() => setPause(true)}
+                    onClick={openPortfolioDecline}
                   >
                     <TrendingDown size={17} />
                     {t.understandFall}
@@ -881,138 +870,9 @@ export default function App() {
           </footer>
         </div>
       </main>
-      {assistant && (
-        <>
-          <button
-            className="drawer-overlay"
-            onClick={() => setAssistant(false)}
-            aria-label={t.closeAssistant}
-          />
-          <aside
-            ref={assistantRef}
-            className="assistant-panel"
-            role="dialog"
-            aria-modal="true"
-            aria-label={t.assistantTitle}
-          >
-            <div className="assistant-head">
-              <div className="assistant-avatar">
-                <Sparkles size={20} />
-              </div>
-              <div>
-                <strong>{t.assistantTitle}</strong>
-                <span>{t.assistantSubtitle}</span>
-              </div>
-              <button
-                className="icon-button"
-                onClick={() => setAssistant(false)}
-                aria-label={t.closeAssistant}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="assistant-banner">{t.assistantNotice}</div>
-            <div className="messages" aria-live="polite">
-              <div className="message assistant">
-                <p>{t.assistantHello}</p>
-              </div>
-              {messages.map((m, i) => (
-                <div className={`message ${m.from}`} key={i}>
-                  <p>
-                    {m.from === "user"
-                      ? m.text
-                      : (m.kind === "fund"
-                          ? t.replyFund
-                          : m.kind === "sim"
-                            ? t.replySim
-                            : t.replyFall) +
-                        (m.level === "intermediate"
-                          ? t.replyMid
-                          : m.level === "advanced"
-                            ? t.replyAdvanced
-                            : "")}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="suggestions">
-              <button onClick={() => setInput(t.askFund)}>{t.askFund}</button>
-              <button onClick={() => setInput(t.askSimulation)}>
-                {t.askSimulation}
-              </button>
-            </div>
-            <form className="chat-form" onSubmit={send}>
-              <label className="sr-only" htmlFor="chat-input">
-                {t.inputLabel}
-              </label>
-              <input
-                id="chat-input"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={t.inputPlaceholder}
-              />
-              <button type="submit" aria-label={t.send}>
-                <Send size={17} />
-              </button>
-            </form>
-            <p className="assistant-foot">
-              <AudioLines size={14} />
-              {t.voicePending}
-            </p>
-          </aside>
-        </>
-      )}
-      {pause && (
-        <div className="modal-backdrop" onClick={() => setPause(false)}>
-          <section
-            ref={modalRef}
-            className="pause-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="pause-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="icon-button modal-close"
-              onClick={() => setPause(false)}
-              aria-label={t.close}
-            >
-              <X size={20} />
-            </button>
-            <div className="pause-icon">
-              <Pause size={22} />
-            </div>
-            <span className="kicker">{t.pauseLabel}</span>
-            <h2 id="pause-title">{t.pauseTitle}</h2>
-            <p>{t.pauseText}</p>
-            <div className="pause-note">
-              <TrendingDown size={18} />
-              <div>
-                <strong>{t.whyDown}</strong>
-                <p>{t.pauseUnavailable}</p>
-              </div>
-            </div>
-            <p className="pause-disclaimer">{t.pauseRisk}</p>
-            <button
-              className="button dark full"
-              onClick={() => setPause(false)}
-            >
-              {t.understood}
-              <Check size={17} />
-            </button>
-            <button
-              className="plain-link"
-              onClick={() => {
-                setPause(false);
-                setTimeout(openAssistant, 0);
-              }}
-            >
-              {t.askAssistant}
-              <ArrowRight size={15} />
-            </button>
-          </section>
-        </div>
-      )}
+      <AssistantPanel open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
+      {pause && <AntiPanicPanel report={pause} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
+
     </div>
   );
 }

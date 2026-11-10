@@ -77,7 +77,7 @@ Un horizonte largo puede ayudar a contextualizar la volatilidad y disponer de m�
 
 La persona 5 identifica y verifica fuentes y licencias; la 3 define las reglas de comparación y realiza los cálculos; la 2 conecta datos y resultados; la 4 prepara la explicación y la voz; y la 1 presenta los resultados y sus limitaciones. Cada responsable participa en las pruebas de su componente y la persona 5 coordina las pruebas del flujo completo.
 
-En esta rama existe un análisis cuantitativo básico de caídas observadas, aislado y con datos sintéticos. La búsqueda y comparación justificadas siguen pendientes. Para el hackathon puede demostrarse primero con un conjunto pequeño de episodios preparados y verificados; la búsqueda automática de noticias y comparables dependerá de las fuentes, licencias y tiempo disponibles. Si no hay datos suficientes, la interfaz debe mostrarlo.
+En esta rama la pausa muestra un análisis local de las observaciones del instrumento seleccionado o de la cartera ficticia, con episodios y recuperación solo cuando se observa. No atribuye causas y no busca noticias ni comparables. El motor Python permanece aislado; si faltan datos suficientes, la interfaz lo indica.
 ## Noticias y explicación de movimientos
 
 La intención del equipo es poder contrastar las explicaciones con noticias reales y actuales de fuentes fiables. Para ello habría que conectar una fuente, conservar título, enlace y fechas relevantes y comprobar que la información corresponde a la cartera y al periodo. Esa conexión todavía no existe ni se ha elegido un proveedor.
@@ -85,6 +85,8 @@ La intención del equipo es poder contrastar las explicaciones con noticias real
 Una noticia que coincide con una caída no demuestra por sí misma que la haya causado. El tutor debe separar el cambio observado, los hechos respaldados por fuentes y las posibles interpretaciones. Si no hay información suficiente o las noticias no están disponibles, debe decirlo en vez de inventar una explicación.
 
 ## Conversación y voz
+
+En esta rama el tutor funciona mediante reglas locales y contexto explícito, no un LLM. La lectura de voz utiliza voces locales del dispositivo cuando están disponibles; el dictado solo se habilita con procesamiento local y modelo instalado. El texto sigue disponible y el dictado se revisa antes de enviarse. La arquitectura siguiente es futura:
 
 La arquitectura propuesta es:
 
