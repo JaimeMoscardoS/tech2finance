@@ -26,3 +26,19 @@ El frontend de integración usó la configuración temporal sin `webServer`, bas
 Al finalizar se detuvo el lanzador propio: no había procesos escuchando en 8095 o 5175 y los servicios originales de 8000 y 5173 respondían HTTP 200, igual que antes. La captura de dos rutas de la advertencia de backend perdió caracteres al decodificar la salida de consola; se omitieron esas líneas sin reconstruirlas, conservando la advertencia y el resultado. Un error de codificación en el recopilador después del primer test y una ruta mal transmitida antes de arrancar backend se corrigieron sin repetir suites que ya habían pasado.
 
 La CI remota, Linux nativo, los derechos de datos, la revisión jurídica y el aprendizaje con participantes permanecen pendientes. Este resultado no prueba disponibilidad de producción ni revisión financiera independiente.
+
+## Comprobación posterior de la corrección local
+
+La worktree de integración avanzó al commit `dbc7e61fa1f06af165666a8d1911afe188281d98` al incorporar 04 local `c9a3272f977de62685df3307aadde19b5608201a` y 05 `6dbecbbcfb1e1c284e333e5ccc456f6a6b5778d6`. La corrección del tutor identifica años de la serie anual dentro de su alcance; los controles de otros activos y futuro se conservan. El PR 16 remoto seguía en `83249efb413645fe3a24a7c1e775f0e86b04ed4d` en el momento de esta comprobación: el commit corrector aún estaba solo en local.
+
+| Comprobación posterior | Resultado | Evidencia |
+| --- | --- | --- |
+| Playwright focal con `--grep 'local tutor grounds results'` | 1/1 | [caso focal](e2e-focal-final.log) |
+| Playwright completo, configuración temporal, `--workers=1` | 51/51 | [suite final](e2e-final.log) |
+| `npm test` en frontend | 39/39 | [frontend final](frontend-unit-final.log) |
+| `npm run build` en frontend | Salida 0; avisos Rolldown repetidos acotados | [build final](frontend-build-final.log) |
+| `node --experimental-strip-types tutor-ia/evals/run.ts --check` | 94 casos, 0 fallos | [evaluación final](tutor-check-final.log) |
+
+Se conservan arriba el fallo 50/51 y su evidencia: no son el resultado final de esta segunda versión. Launcher, backend, simulador legacy y `pip check` no se repitieron porque no cambiaron entre las dos versiones; sus resultados corresponden al commit de integración anterior. El entorno de integración se inició de nuevo en 8095/5175 con el mismo Python y la misma configuración temporal; tras Ctrl+C no había procesos escuchando en esos puertos y los servicios originales 8000/5173 respondían HTTP 200.
+
+La revisión formal del tutor fue R4 con 8,8/10; la corrección posterior de rutas y la corrección anual fueron comprobadas por coordinación, no cubiertas por una quinta revisión formal. La comprobación local está pendiente de aceptación de coordinación y no acredita CI remota, incorporación a `main` ni publicación del commit corrector.
