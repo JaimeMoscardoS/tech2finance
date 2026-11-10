@@ -1,0 +1,23 @@
+{
+  "name": "IA, voz y conducta",
+  "assessment": {
+    "observed_status": "Tutor por reglas; voz local condicionada al dispositivo; proveedores remotos propuestos.",
+    "demand": "Beneficio de LLM y voz no demostrado.",
+    "evidence": "tutor-ia/src/local-tutor.ts; frontend/src/voice/browser-voice.ts",
+    "stage_gap": "Evaluación comparativa, límites de conducta y gestión de proveedores antes de integrarlos."
+  },
+  "execution": {
+    "actions": "Evaluación comparativa, límites de conducta y gestión de proveedores antes de integrarlos.",
+    "owner": "Persona 4; responsable técnico aprueba.",
+    "acceptance": "Pruebas de cifras, fuentes, abstención, liquidez y caída; alternativa escrita.",
+    "dependencies": "Contenido aprobado y corpus de evaluación.",
+    "costs": "Consumo hipotético en modelo_costes.py; contrato empresarial desconocido.",
+    "sources": [
+      "tutor-ia/src/local-tutor.ts"
+    ]
+  },
+  "uncertain": [
+    "Demanda y presupuesto: responsable comercial; validar con compradores.",
+    "Coste y capacidad: dirección y responsable de servicio; validar mediante cotizaciones y planificación."
+  ]
+}

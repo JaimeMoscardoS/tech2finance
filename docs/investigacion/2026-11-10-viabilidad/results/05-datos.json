@@ -1,0 +1,23 @@
+{
+  "name": "Datos, calidad y presentación",
+  "assessment": {
+    "observed_status": "Datos ficticios y cinco tasas publicadas de una clase; derechos comerciales no verificados.",
+    "demand": "Cobertura exacta y precio de los datos sin verificar.",
+    "evidence": "shared/demo-data.json; docs/contratos.md",
+    "stage_gap": "Registro por fuente y uso, control de versiones y trazabilidad."
+  },
+  "execution": {
+    "actions": "Registro por fuente y uso, control de versiones y trazabilidad.",
+    "owner": "Persona 5; producto aprueba con apoyo jurídico.",
+    "acceptance": "Derechos o fundamento documentado por fuente; correcciones y datos insuficientes gestionados.",
+    "dependencies": "Proveedor y universo.",
+    "costs": "Licencias y aseguramiento de calidad por cotizar.",
+    "sources": [
+      "shared/demo-data.json"
+    ]
+  },
+  "uncertain": [
+    "Demanda y presupuesto: responsable comercial; validar con compradores.",
+    "Coste y capacidad: dirección y responsable de servicio; validar mediante cotizaciones y planificación."
+  ]
+}
