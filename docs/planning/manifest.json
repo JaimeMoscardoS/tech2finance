@@ -799,7 +799,7 @@
       "id": "04-tutor",
       "branch": "director/04-tutor",
       "head": "c9a3272f977de62685df3307aadde19b5608201a",
-      "status": "local_fix_pending_publication",
+      "status": "pr_open",
       "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/16",
       "human_roles": [
         "Persona 4: IA, voz y antipánico"
@@ -838,7 +838,8 @@
         ],
         "post_r4_evidence": [
           "4 pruebas de evaluación desde frontend y runner 94/0; 16 pruebas del tutor desde frontend, reportadas por director.",
-          "Corrección posterior c9a3272: guard de año anual y regresiones ES/EN, futuros y otros instrumentos; comprobaciones de coordinación, sin nueva ronda formal."
+          "Corrección posterior c9a3272: guard de año anual y regresiones ES/EN, futuros y otros instrumentos; comprobaciones de coordinación, sin nueva ronda formal.",
+          "ROOT confirmó TestClient backend anual en integración: HTTP 200 y 2022: -0.67%; pruebas posteriores frontend 39/39 y navegador 51/51. No es una quinta revisión."
         ],
         "physical_report_sha256_worktree_04": "2F73407BBE66DBDCF3517C132B720A1A88BAE8F59516B1B3FE62F03E681DC392",
         "canonical_corpus_sha256": "eb86212f7daedf95fe336a708cada4490e1823033db633b3b1b5f72dcb706143"
@@ -856,10 +857,9 @@
       "evidence": [
         "https://github.com/JaimeMoscardoS/tech2finance/blob/83249efb413645fe3a24a7c1e775f0e86b04ed4d/docs/workstreams/04-tutor.md"
       ],
-      "publish_blockers": [
-        "Corrección local de la regresión anual pendiente de publicación; requiere aceptación de coordinación."
-      ],
-      "remote_pr_head": "83249efb413645fe3a24a7c1e775f0e86b04ed4d"
+      "publish_blockers": [],
+      "remote_pr_head": "c9a3272f977de62685df3307aadde19b5608201a",
+      "push_count": 2
     },
     {
       "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
@@ -872,7 +872,7 @@
       "id": "05-product",
       "branch": "director/05-product",
       "head": null,
-      "status": "source_review_ready",
+      "status": "review_ready",
       "pr": null,
       "human_roles": [
         "Persona 5: datos, pruebas y presentación",
@@ -891,7 +891,7 @@
           "role": "executor",
           "model": "gpt-6.1-terra",
           "effort": "high",
-          "status": "in_progress"
+          "status": "completed"
         },
         {
           "canonical_task": "/root/director_05_product/reviewer05",
@@ -899,17 +899,34 @@
           "model": "gpt-6.1-sol",
           "effort": "high",
           "status": "review_completed"
+        },
+        {
+          "canonical_task": "/root/director_05_product/reviewer05_final",
+          "role": "independent final reviewer, read-only",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "fork_turns": "none",
+          "status": "review_completed"
         }
       ],
       "review": {
-        "round": 1,
-        "score": 8.2,
+        "round": 2,
+        "score": 8.8,
         "critical_or_high": false,
-        "reviewed_source_commit": "1574fd1a4c94a24643a7b198678361514b802a17",
-        "corrected_source_commit": "9ad4c45fa79fc44a8932f274ca3cd0ddb07e4a64",
+        "reviewed_source_commit": "23ea3467b47c4c6027922e5fd5276e1b250bc84a",
+        "reviewer": "/root/director_05_product/reviewer05_final",
         "findings": [
-          "Preguntas abiertas y stack corregidos en commit posterior; revisión focal final pendiente tras cambios al manifiesto."
-        ]
+          "Sin hallazgos críticos ni altos; anotaciones administrativas posteriores corrigen procedimiento, orden del resultado y estado del PR."
+        ],
+        "prior_round": {
+          "round": 1,
+          "score": 8.2,
+          "reviewed_source_commit": "1574fd1a4c94a24643a7b198678361514b802a17",
+          "corrected_source_commit": "9ad4c45fa79fc44a8932f274ca3cd0ddb07e4a64",
+          "findings": [
+            "Dos hallazgos medios corregidos."
+          ]
+        }
       },
       "commands": [
         {
@@ -926,13 +943,13 @@
         "docs/pilot-kit/estudio.md"
       ],
       "publish_blockers": [
-        "Esperar URL de 04 y autorización final de coordinación. HEAD final y PR se identifican con metadatos vivos al publicarse."
+        "Publicación pendiente de autorización final de ROOT."
       ]
     }
   ],
   "integration": {
     "id": "integration-local",
-    "status": "passed_local_pending_acceptance",
+    "status": "accepted_local",
     "depends_on": [
       "01-experience",
       "02-platform",
@@ -961,8 +978,8 @@
       "05-product": "6dbecbbcfb1e1c284e333e5ccc456f6a6b5778d6",
       "04-tutor": "c9a3272f977de62685df3307aadde19b5608201a"
     },
-    "remaining": "Aceptación de coordinación, publicación del fix 04 y CI remota pendientes; resultado no integrado en main.",
-    "gate": "local_pass",
+    "remaining": "CI remota y main no acreditados; derechos, asesoría y decisión empresarial pendientes.",
+    "gate": "accepted_local",
     "runs": [
       {
         "head": "cba2d989492315f4d1682d1b8f8e5bf43e46028d",
