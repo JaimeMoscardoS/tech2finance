@@ -20,6 +20,8 @@ La práctica guiada permite comparar aportaciones, plazos o activos ficticios me
 
 Consulta [organización](docs/organizacion.md), [contratos](docs/contratos.md) y [agentes](docs/agentes.md). El repositorio contiene una demo implementada y documentación de las funcionalidades propuestas y pendientes.
 
+La [investigación de viabilidad empresarial](docs/investigacion/2026-11-10-viabilidad/informe.md) presenta evidencias, incertidumbres y recomendaciones pendientes de decisión; no acredita que exista un servicio bancario listo para producción.
+
 ## Colaborar
 
 El propietario invita en GitHub desde Settings → Collaborators. Cada persona acepta, clona el repositorio y trabaja en una rama propia:

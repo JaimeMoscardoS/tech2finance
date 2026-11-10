@@ -1,0 +1,10 @@
+{
+  "description": "Escenarios hipotéticos mensuales; no representan uso observado ni precio de venta.",
+  "prices_usd": {"input_per_million_tokens": "3", "output_per_million_tokens": "15", "tts_per_thousand_characters": "0.04", "asr_batch_per_hour": "0.22", "asr_realtime_per_hour": "0.39"},
+  "alternative_model_prices_usd": {"input_per_million_tokens": "2", "output_per_million_tokens": "10"},
+  "scenarios": [
+    {"name": "A", "users": 100, "questions_per_user": 10, "input_tokens": 2500, "output_tokens": 500, "voice_share": "0.1", "tts_characters": 1500, "asr_minutes": "0.5"},
+    {"name": "B", "users": 1000, "questions_per_user": 20, "input_tokens": 4000, "output_tokens": 700, "voice_share": "0.25", "tts_characters": 2200, "asr_minutes": "0.75"},
+    {"name": "C", "users": 10000, "questions_per_user": 40, "input_tokens": 6000, "output_tokens": 1000, "voice_share": "0.5", "tts_characters": 3500, "asr_minutes": "1"}
+  ]
+}

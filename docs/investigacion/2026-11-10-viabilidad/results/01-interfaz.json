@@ -1,0 +1,23 @@
+{
+  "name": "Interfaz y experiencia",
+  "assessment": {
+    "observed_status": "Tres experimentos y ejemplos ficticios; sin auditoría de accesibilidad acreditada.",
+    "demand": "Comprensión incremental y disposición a pagar desconocidas.",
+    "evidence": "frontend/src/PracticeLab.tsx; frontend/src/practice-domain.ts",
+    "stage_gap": "Piloto sintético: pruebas con usuarios, accesibilidad y contenido aprobado."
+  },
+  "execution": {
+    "actions": "Piloto sintético: pruebas con usuarios, accesibilidad y contenido aprobado.",
+    "owner": "Persona 1; responsable de producto aprueba.",
+    "acceptance": "Teclado y lector probados; rúbrica y errores críticos resueltos.",
+    "dependencies": "Cohorte y contenido.",
+    "costs": "Horas UX y auditoría externa por cotizar.",
+    "sources": [
+      "frontend/src/PracticeLab.tsx"
+    ]
+  },
+  "uncertain": [
+    "Demanda y presupuesto: responsable comercial; validar con compradores.",
+    "Coste y capacidad: dirección y responsable de servicio; validar mediante cotizaciones y planificación."
+  ]
+}
