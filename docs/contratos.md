@@ -17,7 +17,7 @@ El juego histórico no es una previsión: documentar qué activo representa cada
 
 En esta rama hay una alternativa local implementada: [`TutorProvider` y los tipos](../tutor-ia/src/types.ts) reciben pregunta limitada, historial acotado y contexto explícito, y devuelven texto por reglas, intención y fuentes. La interfaz conserva texto y contexto de cada respuesta; no invoca un modelo. La pausa usa `analyzeDecline` sobre observaciones del instrumento sin flujos o sobre la cartera ficticia. El informe incluye caída observada, episodios y fuentes; causas y comparables no están disponibles.
 
-La voz opcional usa capacidades locales del dispositivo: lectura solo con voces marcadas como locales; dictado solo cuando el navegador confirma procesamiento local y modelo ya disponible. Si no están disponibles queda el texto; el dictado se revisa y no se envía automáticamente. No se descargan modelos desde la aplicación ni se llama a proveedores. Las claves de futuras integraciones quedarían en un servidor, nunca en el cliente.
+La voz opcional usa capacidades locales del dispositivo: lectura solo con voces marcadas como locales; dictado solo cuando el navegador confirma procesamiento local y modelo ya disponible. Si no están disponibles queda el texto. El micrófono de la barra solicita de inmediato el reconocimiento local y envía la pregunta final cuando termina; desde la pausa la escucha se inicia manualmente. En el chat escrito el dictado se revisa y no se envía automáticamente. No se descargan modelos desde la aplicación ni se llama a proveedores. Las claves de futuras integraciones quedarían en un servidor, nunca en el cliente.
 
 La siguiente arquitectura sigue siendo una propuesta futura, no el modo local actual:
 

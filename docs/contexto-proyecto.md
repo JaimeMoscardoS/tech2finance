@@ -52,6 +52,12 @@ Pueden añadirse escenarios futuros si hay tiempo y el equipo define un modelo v
 
 La [propuesta técnica del simulador histórico](simulador-historico.md) describe el motor, las fuentes candidatas y los permisos pendientes; la referencia del módulo precisa la implementación local.
 
+### Mejora pendiente: practicar con dinero ficticio
+
+**Qué es:** desarrollar una experiencia práctica con capital virtual más interactiva y útil, con menos dependencia de un recorrido estático. El simulador actual ya permite editar parámetros; esta mejora plantea ampliar la experiencia y todavía está pendiente de definir y desarrollar.
+
+Como ideas iniciales, explorar experimentos comparables, decisiones y objetivos guiados, y comentarios de aprendizaje adaptados al contexto a partir de resultados calculados. Son propuestas por concretar, no funcionalidades implementadas. La práctica no empleará dinero real ni presentará los resultados como predicciones o garantías.
+
 ## Pausa antes de vender
 
 Esta función busca dar contexto cuando el usuario ve una caída o inicia una venta dentro de la demo. Puede mostrar cuánto ha cambiado la cartera ficticia, qué objetivo y horizonte se habían indicado, y la información disponible para entender el movimiento. También puede preguntar si el usuario necesita el dinero pronto.
@@ -86,7 +92,7 @@ Una noticia que coincide con una caída no demuestra por sí misma que la haya c
 
 ## Conversación y voz
 
-En esta rama el tutor funciona mediante reglas locales y contexto explícito, no un LLM. La lectura de voz utiliza voces locales del dispositivo cuando están disponibles; el dictado solo se habilita con procesamiento local y modelo instalado. El texto sigue disponible y el dictado se revisa antes de enviarse. La arquitectura siguiente es futura:
+En esta rama el tutor funciona mediante reglas locales y contexto explícito, no un LLM. La lectura de voz utiliza voces locales del dispositivo cuando están disponibles; el dictado solo se habilita con procesamiento local y modelo instalado. El micrófono de la barra abre el panel y solicita el reconocimiento local de inmediato; el dictado final se procesa al terminar, sin reactivar el micrófono tras la respuesta. Desde la pausa el inicio es manual. En el chat escrito el dictado se revisa antes de enviarse. La arquitectura siguiente es futura:
 
 La arquitectura propuesta es:
 
