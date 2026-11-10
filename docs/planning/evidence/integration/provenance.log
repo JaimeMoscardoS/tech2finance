@@ -1,0 +1,4 @@
+COMMAND: C:\Users\JaimeMoscardó\Documents\tech2finance\.venv\Scripts\python.exe -m backend.verify_data
+CWD: C:\proyectos\tech2finance-directors\20261110\06-integration
+EXIT: 0
+{"calculationVersion": "demo-calculations-1.0.0", "datasetSha256": "8a0f06c8b95182bde24f9834763c3b39c194e7500b40ac83662c9b7e7f08fb45", "datasetVersion": "demo-2026-11-09.1"}

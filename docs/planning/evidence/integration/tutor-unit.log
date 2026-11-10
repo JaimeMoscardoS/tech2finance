@@ -1,0 +1,27 @@
+COMMAND: node --experimental-strip-types --test tutor-ia/tests/*.test.ts
+CWD: C:\proyectos\tech2finance-directors\20261110\06-integration
+EXIT: 0
+✔ invariants detect false numbers, promises and pressure (1.5899ms)
+✔ the real open-decline corpus expectations reject corrupted and extra percentages (2.7591ms)
+✔ check detects frozen report and corpus drift without writing (627.6295ms)
+✔ CLI check is portable across LF and CRLF without modifying the report (640.3558ms)
+✔ observed recovered and open episodes (1.6459ms)
+✔ invalid and insufficient observations (0.4961ms)
+✔ annual published index recovers in 2023 (0.1785ms)
+✔ tutor uses supplied results across levels and languages (14.7034ms)
+✔ missing facts, causes, decisions, injection and bounded followups (7.4639ms)
+✔ does not substitute active simulation for another asset or a future request (2.9529ms)
+✔ message limit accepts 1500 characters and rejects 1501 (0.3357ms)
+✔ keeps active simulation and generic concept questions useful (13.6839ms)
+✔ followups stop at the most recent abstention or unknown answer (0.626ms)
+✔ limited qualifiers and generic investment definitions remain useful (0.7214ms)
+✔ recognizes active instrument Fund Alpha (0.2342ms)
+✔ recognizes active instrument Fondo Equilibrio (0.3125ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1433.6818

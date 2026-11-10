@@ -1,0 +1,54 @@
+COMMAND: npm.cmd test
+CWD: C:\proyectos\tech2finance-directors\20261110\06-integration\frontend
+EXIT: 0
+
+> tech2finance-frontend@0.1.0 test
+> node --experimental-strip-types --test src/*.test.ts src/components/*.test.ts src/voice/*.test.ts ../tutor-ia/tests/*.test.ts
+
+✔ invariants detect false numbers, promises and pressure (1.6769ms)
+✔ the real open-decline corpus expectations reject corrupted and extra percentages (3.644ms)
+✔ check detects frozen report and corpus drift without writing (716.5073ms)
+✔ CLI check is portable across LF and CRLF without modifying the report (635.8606ms)
+✔ observed recovered and open episodes (1.6439ms)
+✔ invalid and insufficient observations (0.3442ms)
+✔ annual published index recovers in 2023 (0.1848ms)
+✔ tutor uses supplied results across levels and languages (14.6406ms)
+✔ missing facts, causes, decisions, injection and bounded followups (9.0174ms)
+✔ does not substitute active simulation for another asset or a future request (2.8096ms)
+✔ message limit accepts 1500 characters and rejects 1501 (0.3425ms)
+✔ keeps active simulation and generic concept questions useful (13.4748ms)
+✔ followups stop at the most recent abstention or unknown answer (0.492ms)
+✔ limited qualifiers and generic investment definitions remain useful (0.7006ms)
+✔ recognizes active instrument Fund Alpha (0.2561ms)
+✔ recognizes active instrument Fondo Equilibrio (0.1846ms)
+✔ annual year query es: ¿Cuál fue la rentabilidad de 2022? (0.4394ms)
+✔ annual year query en: What was the return of 2022? (0.8375ms)
+✔ annual year query es: rentabilidad de 2029 (0.5761ms)
+✔ annual year query en: return of 2020 (0.4452ms)
+✔ year-like names and a year without annual data do not use active figures (0.4672ms)
+✔ the illustrative simulator accounts for all contributions (0.8455ms)
+✔ invalid values are rejected (0.2677ms)
+✔ fictional instruments have distinct sequences and real funds have no series (0.245ms)
+✔ annual published returns reconstruct the fixed historical period (0.9068ms)
+✔ annual published series applies contributions at each closing (2.3106ms)
+✔ monthly is fictional, repeats the sequence and contributes before return (0.5633ms)
+✔ validation and independent result objects (1.0874ms)
+✔ contributions compare the same instrument and periods and separate cash from gains (14.4221ms)
+✔ annual history has five closing contributions and fixed dates (0.9086ms)
+✔ horizon and asset comparisons hold other controls constant (0.6022ms)
+✔ zero investment has undefined percentage and loss remains a loss (0.4647ms)
+✔ invalid settings and non-comparable instruments are rejected (0.3212ms)
+✔ rejects mixed results, malformed totals, non-finite data and changed controls (0.2554ms)
+✔ rejects altered trajectory, rate and instrument return for both contribution timings (0.5273ms)
+✔ selects only a local compatible voice, preferring the exact locale (0.7109ms)
+✔ speech discovery, cancellation, errors and stale events are truthful (0.5756ms)
+✔ dictation requires verified on-device availability and ignores cancelled checks (1.2125ms)
+✔ unsupported recognition and network errors never fall back to remote recognition (0.2889ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1559.4505
