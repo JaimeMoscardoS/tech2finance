@@ -1,4 +1,5 @@
 import json
+import hashlib
 import shutil
 import subprocess
 import sys
@@ -51,6 +52,7 @@ def test_snapshot_reproduces_authoritative_replay(tmp_path):
     shutil.copytree(ROOT, tmp_path / 'shared')
     root = tmp_path / 'shared'
     snapshot = read_json(root / 'snapshots/demo-2026-11-09.1/demo-data.json')
+    assert hashlib.sha256((root / 'snapshots/demo-2026-11-09.1/demo-data.json').read_bytes()).hexdigest() == 'c83dbcba95f30de7e7359b251b4aceeaf37865e1f2b51f6333660a299b0517f3'
     rates = snapshot['instruments'][0]['returns'][:1]
     result = replay(500, 50, rates, [None, None], 'fictional_monthly')
     assert result['value'] == 558.25
@@ -78,7 +80,7 @@ def test_metadata_stable_isolated_and_legacy_fields():
     assert 'provenance' not in context and 'provenance' not in context['simulation']
 
 
-@pytest.mark.parametrize('path', ['demo-data.json', 'snapshots/demo-2026-11-09.1/demo-data.json', 'data-manifest.json'])
+@pytest.mark.parametrize('path', ['demo-data.json', 'snapshots/demo-2026-11-10.1/demo-data.json', 'data-manifest.json'])
 def test_integrity_detects_drift(tmp_path, path):
     shutil.copytree(ROOT, tmp_path / 'shared')
     root = tmp_path / 'shared'
@@ -99,6 +101,21 @@ def test_canonicalization_and_invalid_json(tmp_path):
         path.write_text(text, encoding='utf-8')
         with pytest.raises(ValueError):
             read_json(path)
+
+
+def test_bank_demo_profile_version_and_fees():
+    data, metadata = load_verified_dataset()
+    profile = data['bankProfile']
+    assert metadata['datasetVersion'] == 'demo-2026-11-10.1'
+    assert metadata['calculationVersion'] == 'demo-calculations-1.0.0'
+    assert profile['bankId'] == 'demo'
+    assert profile['profileVersion'] == 'bank-demo-2026-11-10.1'
+    fees = {product['instrumentId']: product['fees'] for product in profile['products']}
+    assert {key: value['annualOngoingBps'] for key, value in fees.items()} == {
+        'demo-fixed': 40, 'demo-mixed': 75, 'demo-equity': 110,
+        'demo-etf': 20, 'demo-stock': None,
+    }
+    assert all(value['treatment'] == 'illustrative_excluded' for value in fees.values())
 
 
 def test_decline_episodes_and_tutor_contract(monkeypatch):
