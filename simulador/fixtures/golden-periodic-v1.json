@@ -1,0 +1,8 @@
+{
+  "derivation": "Monthly: (100+10)*1.1=121, then (121+10)*0.9=117.9. Annual: 100*1.1+10=120, then 120*0.9+10=118. Zero stays zero. No rounding per step.",
+  "cases": [
+    {"kind":"fictional_monthly","initial":100,"contribution":10,"rates":[0.1,-0.1],"points":[100,121,117.9],"contributed":120,"profit":-2.1,"simpleReturnPercent":-1.75},
+    {"kind":"annual_history","initial":100,"contribution":10,"rates":[0.1,-0.1],"points":[100,120,118],"contributed":120,"profit":-2,"simpleReturnPercent":-1.6666666666666667},
+    {"kind":"fictional_monthly","initial":0,"contribution":0,"rates":[-0.1,0.1],"points":[0,0,0],"contributed":0,"profit":0,"simpleReturnPercent":null}
+  ]
+}

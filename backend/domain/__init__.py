@@ -1,12 +1,11 @@
 """Demo-domain functions. No provider calls or client-supplied facts."""
 from copy import deepcopy
-import json
 import math
-from pathlib import Path
 
 from simulador.periodic import replay
+from .provenance import load_verified_dataset
 
-_DATA = json.loads((Path(__file__).resolve().parents[2] / 'shared' / 'demo-data.json').read_text(encoding='utf-8'))
+_DATA, _PROVENANCE = load_verified_dataset()
 
 
 class DomainError(ValueError):
@@ -17,7 +16,7 @@ class DomainError(ValueError):
 
 
 def get_catalog():
-    return deepcopy({key: _DATA[key] for key in ('schemaVersion', 'banks', 'instruments', 'annualHistory')})
+    return deepcopy({**{key: _DATA[key] for key in ('schemaVersion', 'banks', 'instruments', 'annualHistory')}, 'provenance': _PROVENANCE})
 
 
 def _instrument(identifier):
@@ -62,6 +61,7 @@ def run_simulation(spec):
     result.update(instrumentId=instrument['instrumentId'], currency='EUR', sources=_source(instrument),
                   contributionTiming='month_start' if kind == 'fictional_monthly' else 'year_end_after_return',
                   assumptions=(['Fictional monthly returns repeat; outcomes do not predict future returns.'] if kind == 'fictional_monthly' else ['Published annual returns are rounded; contributions occur after each annual return.']))
+    result['provenance'] = deepcopy(_PROVENANCE)
     return result
 
 
