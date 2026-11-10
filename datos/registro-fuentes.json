@@ -1,0 +1,183 @@
+{
+  "description": "Inventario interno; no acredita permisos ni aprueba usos.",
+  "instruments": [
+    {
+      "instrumentId": "demo-mixed",
+      "classification": "synthetic_demo",
+      "identifier": null,
+      "sourceUrl": null,
+      "sourceConsultation": null,
+      "lastObservation": null,
+      "currency": "EUR",
+      "shareClass": null,
+      "methodology": "Rentabilidades mensuales ficticias que se repiten.",
+      "costs": "unknown",
+      "distributions": "unknown",
+      "rights": {
+        "access": "unknown",
+        "internalUse": "pending",
+        "commercialUse": "unverified",
+        "redistribution": "unverified",
+        "derivatives": "pending"
+      }
+    },
+    {
+      "instrumentId": "demo-equity",
+      "classification": "synthetic_demo",
+      "identifier": null,
+      "sourceUrl": null,
+      "sourceConsultation": null,
+      "lastObservation": null,
+      "currency": "EUR",
+      "shareClass": null,
+      "methodology": "Rentabilidades mensuales ficticias que se repiten.",
+      "costs": "unknown",
+      "distributions": "unknown",
+      "rights": {
+        "access": "unknown",
+        "internalUse": "pending",
+        "commercialUse": "unverified",
+        "redistribution": "unverified",
+        "derivatives": "pending"
+      }
+    },
+    {
+      "instrumentId": "demo-fixed",
+      "classification": "synthetic_demo",
+      "identifier": null,
+      "sourceUrl": null,
+      "sourceConsultation": null,
+      "lastObservation": null,
+      "currency": "EUR",
+      "shareClass": null,
+      "methodology": "Rentabilidades mensuales ficticias que se repiten.",
+      "costs": "unknown",
+      "distributions": "unknown",
+      "rights": {
+        "access": "unknown",
+        "internalUse": "pending",
+        "commercialUse": "unverified",
+        "redistribution": "unverified",
+        "derivatives": "pending"
+      }
+    },
+    {
+      "instrumentId": "demo-etf",
+      "classification": "synthetic_demo",
+      "identifier": null,
+      "sourceUrl": null,
+      "sourceConsultation": null,
+      "lastObservation": null,
+      "currency": "EUR",
+      "shareClass": null,
+      "methodology": "Rentabilidades mensuales ficticias que se repiten.",
+      "costs": "unknown",
+      "distributions": "unknown",
+      "rights": {
+        "access": "unknown",
+        "internalUse": "pending",
+        "commercialUse": "unverified",
+        "redistribution": "unverified",
+        "derivatives": "pending"
+      }
+    },
+    {
+      "instrumentId": "demo-stock",
+      "classification": "synthetic_demo",
+      "identifier": null,
+      "sourceUrl": null,
+      "sourceConsultation": null,
+      "lastObservation": null,
+      "currency": "EUR",
+      "shareClass": null,
+      "methodology": "Rentabilidades mensuales ficticias que se repiten.",
+      "costs": "unknown",
+      "distributions": "unknown",
+      "rights": {
+        "access": "unknown",
+        "internalUse": "pending",
+        "commercialUse": "unverified",
+        "redistribution": "unverified",
+        "derivatives": "pending"
+      }
+    },
+    {
+      "instrumentId": "bbva-mi-inversion-bolsa",
+      "classification": "missing_history",
+      "identifier": "ES0119178004",
+      "sourceUrl": "https://www.cnmv.es/Portal/consultas/iic/fondo?nif=V86954104",
+      "sourceConsultation": "2026-11-09",
+      "lastObservation": null,
+      "currency": null,
+      "shareClass": null,
+      "methodology": "Historial no disponible.",
+      "costs": "unknown",
+      "distributions": "unknown",
+      "rights": {
+        "access": "unknown",
+        "internalUse": "pending",
+        "commercialUse": "unverified",
+        "redistribution": "unverified",
+        "derivatives": "pending"
+      }
+    },
+    {
+      "instrumentId": "santander-rf-ahorro",
+      "classification": "missing_history",
+      "identifier": "ES0112793007",
+      "sourceUrl": "https://www.santanderassetmanagement.es/fondos-de-inversion/fondos-de-inversion-renta-fija",
+      "sourceConsultation": "2026-11-09",
+      "lastObservation": null,
+      "currency": null,
+      "shareClass": null,
+      "methodology": "Historial no disponible.",
+      "costs": "unknown",
+      "distributions": "unknown",
+      "rights": {
+        "access": "unknown",
+        "internalUse": "pending",
+        "commercialUse": "unverified",
+        "redistribution": "unverified",
+        "derivatives": "pending"
+      }
+    },
+    {
+      "instrumentId": "caixabank-monetario-estandar",
+      "classification": "public_source_unverified",
+      "identifier": "ES0138045002",
+      "sourceUrl": "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
+      "sourceConsultation": "2026-11-09",
+      "lastObservation": "2025-12-31",
+      "currency": "EUR",
+      "shareClass": "Estándar",
+      "methodology": "Rentabilidades anuales publicadas y redondeadas de 2021 a 2025; no son valores liquidativos diarios.",
+      "costs": "Según la ficha consultada el 2026-11-09, los gastos corrientes están deducidos de las rentabilidades; su importe y otros costes son desconocidos.",
+      "distributions": "unknown",
+      "rights": {
+        "access": "unknown",
+        "internalUse": "pending",
+        "commercialUse": "unverified",
+        "redistribution": "unverified",
+        "derivatives": "pending"
+      }
+    }
+  ],
+  "portfolioSample": {
+    "classification": "synthetic_demo",
+    "sourceUrl": null,
+    "sourceConsultation": null,
+    "lastObservation": null,
+    "currency": null,
+    "shareClass": null,
+    "methodology": "Puntos ficticios sin fechas.",
+    "costs": "unknown",
+    "distributions": "unknown",
+    "rights": {
+      "access": "unknown",
+      "internalUse": "pending",
+      "commercialUse": "unverified",
+      "redistribution": "unverified",
+      "derivatives": "pending"
+    }
+  }
+}
