@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Guion de tres minutos para presentar una entidad ficticia con Tech2Finance integrado. Las 24 preguntas literales se han ensayado en navegador y contrastado por API local, en ambos idiomas: [español](../docs/planning/evidence/banco-t2f/gui-rehearsal-es.json), [inglés](../docs/planning/evidence/banco-t2f/gui-rehearsal-en.json) y [matriz API](../docs/planning/evidence/banco-t2f/api-matrix.json). La revisión independiente sigue pendiente. El tutor es por reglas y reconoce formulaciones limitadas.
+Guion de tres minutos para presentar una entidad ficticia con Tech2Finance integrado. Las 24 preguntas literales se han ensayado en navegador y contrastado por API local, en ambos idiomas: [español](../docs/planning/evidence/banco-t2f/gui-rehearsal-es.json), [inglés](../docs/planning/evidence/banco-t2f/gui-rehearsal-en.json) y [matriz API](../docs/planning/evidence/banco-t2f/api-matrix.json). Las revisiones independientes R2 de núcleo e interfaz se superaron con 8,8/10 cada una; véase el [registro](../docs/planning/banco-t2f-ledger.md). El tutor es por reglas y reconoce formulaciones limitadas.
 
 ## Recorrido propuesto: tres minutos
 

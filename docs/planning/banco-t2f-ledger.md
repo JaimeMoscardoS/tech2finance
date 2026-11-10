@@ -42,7 +42,7 @@ Registro de decisiones, comprobaciones y revisiones de la integración de BancoT
 
 ## Integración local
 
-En la instantánea `2aeb6a0`, tras una primera ejecución con cuatro fallos y sus correcciones, la segunda ejecución completa pasó 55/55 en Chrome headless. También pasaron 81 pruebas backend/simulador, 46 del frontend y 112 casos del corpus del tutor. La [evidencia](evidence/banco-t2f/integracion-report.md) conserva los fallos iniciales y las limitaciones. Las dos pruebas adicionales de ensayo recorrieron las 24 preguntas en pantalla, 12 por idioma. No se atribuyen automáticamente esos resultados al código posterior; los gates finales deben repetirse tras la corrección de interfaz.
+En la instantánea `2aeb6a0`, tras una primera ejecución con cuatro fallos y sus correcciones, la segunda ejecución completa pasó 55/55 en Chrome headless. También pasaron 81 pruebas backend/simulador, 46 del frontend y 112 casos del corpus del tutor. La [evidencia](evidence/banco-t2f/integracion-report.md) conserva los fallos iniciales y las limitaciones. Las dos pruebas adicionales de ensayo recorrieron las 24 preguntas en pantalla, 12 por idioma. Tras la corrección posterior de interfaz se repitieron los gates indicados en el párrafo siguiente.
 
 En `05bdc69d63ec2682a13e0e7a580909661927a77c` se repitieron la suite completa de navegador (**61/61**, incluyendo ambos ensayos), frontend/tutor (**48/48** y build), API (**35/35**) y corpus (**116/116**); las 24 respuestas de la matriz API también se revisaron de nuevo. Se conservaron como evidencia anterior las pruebas de componentes sin cambios que no se repitieron. Los detalles y advertencias constan en el [informe](evidence/banco-t2f/integracion-report.md).
 
