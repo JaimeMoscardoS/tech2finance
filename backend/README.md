@@ -26,6 +26,38 @@ python3 -m venv .venv
 
 El servidor se inicia en la interfaz local `127.0.0.1`; este comando no publica la demo en la red. Para la instalación y el funcionamiento del frontend, consulta su [README](../frontend/README.md). El modo backend y la alternativa local de la interfaz son elecciones explícitas; el fallo del servidor no cambia silenciosamente al modo local.
 
+### Arranque conjunto de la demo
+
+Con Python 3.14 y Node.js 22.12 o posterior instalados, prepara el entorno desde la raíz. En Windows PowerShell:
+
+```powershell
+py -3.14 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+npm --prefix frontend ci
+npm run dev:full
+```
+
+En macOS/Linux:
+
+```sh
+python3.14 -m venv .venv
+.venv/bin/python -m pip install -r backend/requirements.txt
+npm --prefix frontend ci
+npm run dev:full
+```
+
+La interfaz abre en `http://127.0.0.1:5173` y el backend en `127.0.0.1:8000`. El mensaje «Listo» aparece tras validar `health` y `catalog` tanto directamente como mediante el proxy. Ctrl+C detiene ambos procesos iniciados. Si un puerto está ocupado, el comando falla sin reutilizar el servidor: detén el proceso correspondiente o elige otros puertos. Por ejemplo:
+
+```powershell
+$env:T2F_BACKEND_PORT="8092"; $env:T2F_FRONTEND_PORT="5192"; npm run dev:full
+```
+
+```sh
+T2F_BACKEND_PORT=8092 T2F_FRONTEND_PORT=5192 npm run dev:full
+```
+
+`T2F_PYTHON` permite elegir la ruta completa a otro intérprete con las dependencias instaladas. Si falla un proceso, se detiene el otro; revisa los mensajes y vuelve a ejecutar el comando. `npm run dev:full -- --help` muestra los requisitos. Es un arranque local de demostración, no una preparación para producción.
+
 ## Rutas HTTP
 
 Todas las peticiones y respuestas con cuerpo usan JSON. Los campos desconocidos se rechazan; no se aceptan precios, observaciones, resultados o fuentes proporcionados por el cliente.
