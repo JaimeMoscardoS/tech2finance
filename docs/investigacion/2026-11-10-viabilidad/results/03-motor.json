@@ -1,0 +1,23 @@
+{
+  "name": "Simulador y motor",
+  "assessment": {
+    "observed_status": "La API usa cálculo periódico Python; motor histórico independiente aislado.",
+    "demand": "Valor incremental y universo de instrumentos sin validar.",
+    "evidence": "backend/domain/__init__.py; simulador/periodic.py",
+    "stage_gap": "Autoridad de cálculo, validación independiente y versiones reproducibles."
+  },
+  "execution": {
+    "actions": "Autoridad de cálculo, validación independiente y versiones reproducibles.",
+    "owner": "Persona 3; responsable técnico aprueba con revisión independiente.",
+    "acceptance": "Casos límite y muestras reconciliadas; reproducción histórica.",
+    "dependencies": "Derechos de datos y especificación financiera.",
+    "costs": "Revisión cuantitativa y derechos sin cotización.",
+    "sources": [
+      "simulador/periodic.py"
+    ]
+  },
+  "uncertain": [
+    "Demanda y presupuesto: responsable comercial; validar con compradores.",
+    "Coste y capacidad: dirección y responsable de servicio; validar mediante cotizaciones y planificación."
+  ]
+}

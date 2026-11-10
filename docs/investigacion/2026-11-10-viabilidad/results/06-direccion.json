@@ -1,0 +1,23 @@
+{
+  "name": "Dirección empresarial integrada",
+  "assessment": {
+    "observed_status": "Cinco responsabilidades técnicas; sin banco conectado ni acuerdo comercial confirmado.",
+    "demand": "Comprador, presupuesto, ACV y disposición a pagar no verificados.",
+    "evidence": "README.md; docs/contexto-proyecto.md",
+    "stage_gap": "Asignar comercial, producto, operación y apoyos externos sin presumir capacidad adicional."
+  },
+  "execution": {
+    "actions": "Asignar comercial, producto, operación y apoyos externos sin presumir capacidad adicional.",
+    "owner": "Fundador comercial; producto/dirección decide.",
+    "acceptance": "Problema recurrente, sponsor, condiciones de piloto y decisión verificables.",
+    "dependencies": "Descubrimiento, acceso a usuarios, revisión jurídica.",
+    "costs": "Caja, integración, atención y licencias sin cuantificar.",
+    "sources": [
+      "docs/contexto-proyecto.md"
+    ]
+  },
+  "uncertain": [
+    "Demanda y presupuesto: responsable comercial; validar con compradores.",
+    "Coste y capacidad: dirección y responsable de servicio; validar mediante cotizaciones y planificación."
+  ]
+}

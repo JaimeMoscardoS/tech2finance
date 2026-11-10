@@ -1,0 +1,23 @@
+{
+  "name": "Backend e integración",
+  "assessment": {
+    "observed_status": "API FastAPI local y puente Node; sin conexión bancaria ni identidad de usuario documentada.",
+    "demand": "Necesidad y método de integración por banco sin validar.",
+    "evidence": "backend/app.py; backend/tutor_bridge.py",
+    "stage_gap": "Alojamiento sintético con controles proporcionales; identidad y aislamiento antes de datos reales."
+  },
+  "execution": {
+    "actions": "Alojamiento sintético con controles proporcionales; identidad y aislamiento antes de datos reales.",
+    "owner": "Persona 2; responsable de servicio aprueba.",
+    "acceptance": "Restauración y controles probados; autorización por recurso y ausencia de accesos cruzados cuando aplique.",
+    "dependencies": "Arquitectura, contrato y datos.",
+    "costs": "Hosting, soporte y seguridad por cotizar.",
+    "sources": [
+      "backend/app.py"
+    ]
+  },
+  "uncertain": [
+    "Demanda y presupuesto: responsable comercial; validar con compradores.",
+    "Coste y capacidad: dirección y responsable de servicio; validar mediante cotizaciones y planificación."
+  ]
+}
