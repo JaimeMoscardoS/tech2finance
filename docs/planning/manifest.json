@@ -841,8 +841,20 @@
           "Corrección posterior c9a3272: guard de año anual y regresiones ES/EN, futuros y otros instrumentos; comprobaciones de coordinación, sin nueva ronda formal.",
           "ROOT confirmó TestClient backend anual en integración: HTTP 200 y 2022: -0.67%; pruebas posteriores frontend 39/39 y navegador 51/51. No es una quinta revisión."
         ],
-        "physical_report_sha256_worktree_04": "2F73407BBE66DBDCF3517C132B720A1A88BAE8F59516B1B3FE62F03E681DC392",
-        "canonical_corpus_sha256": "eb86212f7daedf95fe336a708cada4490e1823033db633b3b1b5f72dcb706143"
+        "canonical_corpus_sha256": "eb86212f7daedf95fe336a708cada4490e1823033db633b3b1b5f72dcb706143",
+        "report_hashes": {
+          "historical_physical": {
+            "sha256": "2F73407BBE66DBDCF3517C132B720A1A88BAE8F59516B1B3FE62F03E681DC392",
+            "source_commit": "83249efb413645fe3a24a7c1e775f0e86b04ed4d",
+            "scope": "04 worktree physical bytes"
+          },
+          "current": {
+            "sha256_normalized_lf": "2be2de9e6ba5aa1ec617c880cdd40db2b89bddb60ee984b30ef5317dbfd55f2c",
+            "sha256_physical_worktree_04": "2be2de9e6ba5aa1ec617c880cdd40db2b89bddb60ee984b30ef5317dbfd55f2c",
+            "source_commit": "c9a3272f977de62685df3307aadde19b5608201a",
+            "scope": "04 worktree; CRLF normalized to LF for normalized hash"
+          }
+        }
       },
       "commands": [
         {
