@@ -1,0 +1,191 @@
+[
+  {
+    "case": 1,
+    "language": "en",
+    "status": "PASS",
+    "question": "What is BancoT2F?",
+    "context": {
+      "page": "home",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo"
+    },
+    "answer": "BancoT2F: Fictional institution for an educational investment demonstration. Synthetic source: bank-demo-2026-11-10.1, 2026-11-10."
+  },
+  {
+    "case": 2,
+    "language": "en",
+    "status": "PASS",
+    "question": "What are the demo account terms?",
+    "context": {
+      "page": "home",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo"
+    },
+    "answer": "Fictional monthly maintenance of EUR 0. No real account, real orders or external connections. Euros, no monthly maintenance and fictional minimums of zero euros."
+  },
+  {
+    "case": 3,
+    "language": "en",
+    "status": "PASS",
+    "question": "How much does this fund cost?",
+    "context": {
+      "page": "explore",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed"
+    },
+    "answer": "T2F Balance: Annual ongoing fee: 75 basis points (0.75%). Entry 0%, exit 0%, annual custody 0%, order 0 EUR. Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+  },
+  {
+    "case": 4,
+    "language": "en",
+    "status": "PASS",
+    "question": "Is that deducted?",
+    "context": {
+      "page": "explore",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed"
+    },
+    "answer": "T2F Balance: Annual ongoing fee: 75 basis points (0.75%). Entry 0%, exit 0%, annual custody 0%, order 0 EUR. Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+  },
+  {
+    "case": 5,
+    "language": "en",
+    "status": "PASS",
+    "question": "What loss does the result show?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed",
+      "simulation": {
+        "instrumentId": "demo-mixed",
+        "initial": 1000,
+        "recurringContribution": 0,
+        "periods": 6
+      }
+    },
+    "answer": "T2F Balance (6 monthly periods): final value 892.64 EUR; total contributed 1,000 EUR; profit or loss -107.36 EUR. Cumulative instrument return over this period: -10.74%, not an annual rate. Contributions enter at the start of each month. Past or simulated outcomes do not guarantee future results."
+  },
+  {
+    "case": 6,
+    "language": "en",
+    "status": "PASS",
+    "question": "Why did it fall?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed",
+      "simulation": {
+        "instrumentId": "demo-mixed",
+        "initial": 1000,
+        "recurringContribution": 0,
+        "periods": 6
+      }
+    },
+    "answer": "The cause is unknown from the available data. There are no verified news or comparable cases here."
+  },
+  {
+    "case": 7,
+    "language": "en",
+    "status": "PASS",
+    "question": "What was the return of 2022?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo",
+      "instrumentId": "caixabank-monetario-estandar",
+      "simulation": {
+        "instrumentId": "caixabank-monetario-estandar",
+        "initial": 1000,
+        "recurringContribution": 0,
+        "periods": 5
+      }
+    },
+    "answer": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR (5 annual periods, 2020-12-31 – 2025-12-31): final value 1,058.05 EUR; total contributed 1,000 EUR; profit or loss 58.05 EUR. Cumulative instrument return over this period: 5.8%, not an annual rate. Published return for 2022: -0.67%. Contributions enter at year end after that year’s return. Past or simulated outcomes do not guarantee future results."
+  },
+  {
+    "case": 8,
+    "language": "en",
+    "status": "PASS",
+    "question": "Why can't I simulate it?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo",
+      "instrumentId": "bbva-mi-inversion-bolsa"
+    },
+    "answer": "The selected instrument has no available history, so it cannot be simulated."
+  },
+  {
+    "case": 9,
+    "language": "en",
+    "status": "PASS",
+    "question": "What will I earn next year?",
+    "context": {
+      "page": "home",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo"
+    },
+    "answer": "Future returns are not available or predictable from this demonstration."
+  },
+  {
+    "case": 10,
+    "language": "en",
+    "status": "PASS",
+    "question": "I need liquidity; should I hold?",
+    "context": {
+      "page": "portfolio",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo",
+      "decline": {
+        "basis": "portfolio_demo",
+        "language": "en"
+      },
+      "decision": {
+        "needsLiquidity": "yes"
+      }
+    },
+    "answer": "You indicated that you need liquidity. Consider your goal, time horizon and whether you need liquidity. A long horizon does not guarantee recovery. You can sell, hold or seek professional advice; the decision is yours."
+  },
+  {
+    "case": 11,
+    "language": "en",
+    "status": "PASS",
+    "question": "What am I seeing?",
+    "context": {
+      "page": "explore",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed"
+    },
+    "answer": "BancoT2F: catalogue. Fictional institution for an educational investment demonstration. Selected instrument: T2F Balance."
+  },
+  {
+    "case": 12,
+    "language": "en",
+    "status": "PASS",
+    "question": "Are all products from BancoT2F?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "en",
+      "bankId": "demo",
+      "instrumentId": "bbva-mi-inversion-bolsa"
+    },
+    "answer": "No. Products from other institutions retain their identity and provenance."
+  }
+]

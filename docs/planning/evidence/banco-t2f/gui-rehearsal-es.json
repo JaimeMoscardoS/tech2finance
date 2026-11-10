@@ -1,0 +1,191 @@
+[
+  {
+    "case": 1,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Qué es BancoT2F?",
+    "context": {
+      "page": "home",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo"
+    },
+    "answer": "BancoT2F: Entidad ficticia para una demostración educativa de inversión. Fuente sintética: bank-demo-2026-11-10.1, 2026-11-10."
+  },
+  {
+    "case": 2,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Qué condiciones tiene la cuenta de demo?",
+    "context": {
+      "page": "home",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo"
+    },
+    "answer": "Mantenimiento mensual ficticio de 0 EUR. Sin cuenta real, órdenes reales ni conexiones externas. Euros, sin mantenimiento mensual y con mínimos ficticios de cero euros."
+  },
+  {
+    "case": 3,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Cuánto cuesta este fondo?",
+    "context": {
+      "page": "explore",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed"
+    },
+    "answer": "T2F Equilibrio: Comisión anual corriente: 75 puntos básicos (0,75%). Entrada 0%, salida 0%, custodia anual 0%, orden 0 EUR. Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador."
+  },
+  {
+    "case": 4,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Y eso está descontado?",
+    "context": {
+      "page": "explore",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed"
+    },
+    "answer": "T2F Equilibrio: Comisión anual corriente: 75 puntos básicos (0,75%). Entrada 0%, salida 0%, custodia anual 0%, orden 0 EUR. Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador."
+  },
+  {
+    "case": 5,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Qué pérdida muestra el resultado?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed",
+      "simulation": {
+        "instrumentId": "demo-mixed",
+        "initial": 1000,
+        "recurringContribution": 0,
+        "periods": 6
+      }
+    },
+    "answer": "T2F Equilibrio (6 periodos mensuales): valor final 892,64 EUR; aportado en total 1000 EUR; beneficio o pérdida -107,36 EUR. Rentabilidad acumulada del instrumento durante ese periodo: -10,74%, no es una tasa anual. Las aportaciones entran al inicio de cada mes. Los resultados pasados o simulados no garantizan resultados futuros."
+  },
+  {
+    "case": 6,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Por qué ha caído?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed",
+      "simulation": {
+        "instrumentId": "demo-mixed",
+        "initial": 1000,
+        "recurringContribution": 0,
+        "periods": 6
+      }
+    },
+    "answer": "La causa es desconocida con los datos disponibles. Aquí no hay noticias verificadas ni casos comparables."
+  },
+  {
+    "case": 7,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Cuál fue la rentabilidad de 2022?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo",
+      "instrumentId": "caixabank-monetario-estandar",
+      "simulation": {
+        "instrumentId": "caixabank-monetario-estandar",
+        "initial": 1000,
+        "recurringContribution": 0,
+        "periods": 5
+      }
+    },
+    "answer": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR (5 periodos anuales, 2020-12-31 – 2025-12-31): valor final 1058,05 EUR; aportado en total 1000 EUR; beneficio o pérdida 58,05 EUR. Rentabilidad acumulada del instrumento durante ese periodo: 5,8%, no es una tasa anual. Rentabilidad publicada de 2022: -0,67%. Las aportaciones entran al cierre de cada año, después de su rentabilidad. Los resultados pasados o simulados no garantizan resultados futuros."
+  },
+  {
+    "case": 8,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Por qué no puedo simularlo?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo",
+      "instrumentId": "bbva-mi-inversion-bolsa"
+    },
+    "answer": "El instrumento seleccionado no tiene histórico disponible, por lo que no se puede simular."
+  },
+  {
+    "case": 9,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Qué ganaré el próximo año?",
+    "context": {
+      "page": "home",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo"
+    },
+    "answer": "La rentabilidad futura no está disponible y esta demostración no permite predecirla."
+  },
+  {
+    "case": 10,
+    "language": "es",
+    "status": "PASS",
+    "question": "Necesito liquidez, ¿debo mantener?",
+    "context": {
+      "page": "portfolio",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo",
+      "decline": {
+        "basis": "portfolio_demo",
+        "language": "es"
+      },
+      "decision": {
+        "needsLiquidity": "yes"
+      }
+    },
+    "answer": "Has indicado que necesitas liquidez. Ten en cuenta tu objetivo, horizonte y necesidad de liquidez. Un plazo largo no garantiza la recuperación. Puedes vender, mantener o consultar a un profesional; la decisión es tuya."
+  },
+  {
+    "case": 11,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Qué estoy viendo?",
+    "context": {
+      "page": "explore",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo",
+      "instrumentId": "demo-mixed"
+    },
+    "answer": "BancoT2F: catálogo. Entidad ficticia para una demostración educativa de inversión. Instrumento seleccionado: T2F Equilibrio."
+  },
+  {
+    "case": 12,
+    "language": "es",
+    "status": "PASS",
+    "question": "¿Todos los productos son de BancoT2F?",
+    "context": {
+      "page": "simulator",
+      "level": "beginner",
+      "language": "es",
+      "bankId": "demo",
+      "instrumentId": "bbva-mi-inversion-bolsa"
+    },
+    "answer": "No. Los productos de otras entidades conservan su identificación y procedencia."
+  }
+]

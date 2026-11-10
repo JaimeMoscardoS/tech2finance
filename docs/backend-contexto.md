@@ -2,6 +2,10 @@
 
 ## Qué es
 
+La integración del perfil ficticio BancoT2F en esta rama se describe en [BancoT2F](banco-t2f.md). La fuente compartida es `shared/demo-data.json:bankProfile`; la versión de datos cambia sin cambiar la versión del cálculo. Las comisiones son informativas y no se descuentan. La comprobación de rutas y contexto del tutor corresponde a la integración final.
+
+En el contrato acordado el cliente solo identifica el banco mediante `bankId` opcional; el servidor resuelve el perfil y rechaza campos extra como `bank`, `bankProfile` o `product` con 422. El contexto interno utiliza `bank?: BankProfile` e `instrument.product?: BankProduct`, sin `product` al nivel superior. Las adaptaciones están en curso y requieren verificación integrada.
+
 La rama integra una API local FastAPI de demostración y el frontend React/TypeScript. Por defecto el frontend solicita catálogo y cálculos al servidor; un fallo se muestra y permite reintento o selección explícita de demo local. No existe autenticación, base de datos, conexión bancaria, despliegue ni proveedor externo. El tutor usa reglas mediante un proceso Node local, no un LLM.
 
 ## Contrato y funcionamiento

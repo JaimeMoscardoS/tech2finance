@@ -1,0 +1,908 @@
+{
+  "note": "Muestra sint?tica; respuestas revisadas manualmente frente a expectativas. Alcance API; no sustituye E2E.",
+  "results": [
+    {
+      "case": 1,
+      "language": "es",
+      "request": {
+        "message": "¿Qué es BancoT2F?",
+        "history": [],
+        "context": {
+          "page": "home",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "BancoT2F: Entidad ficticia para una demostración educativa de inversión. Fuente sintética: bank-demo-2026-11-10.1, 2026-11-10.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_identity",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Entidad ficticia / fictional institution",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 2,
+      "language": "es",
+      "request": {
+        "message": "¿Qué condiciones tiene la cuenta de demo?",
+        "history": [],
+        "context": {
+          "page": "home",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "Mantenimiento mensual ficticio de 0 EUR. Sin cuenta real, órdenes reales ni conexiones externas. Euros, sin mantenimiento mensual y con mínimos ficticios de cero euros.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_conditions",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "0 EUR mantenimiento, m?nimos 0, sin cuenta u ?rdenes reales",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 3,
+      "language": "es",
+      "request": {
+        "message": "¿Cuánto cuesta este fondo?",
+        "history": [],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "T2F Equilibrio: Comisión anual corriente: 75 puntos básicos (0,75%). Entrada 0%, salida 0%, custodia anual 0%, orden 0 EUR. Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_fees",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "75 pb = 0,75 % anual, condiciones informativas",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 4,
+      "language": "es",
+      "request": {
+        "message": "¿Y eso está descontado?",
+        "history": [
+          {
+            "role": "user",
+            "text": "¿Cuánto cuesta este fondo?"
+          },
+          {
+            "role": "assistant",
+            "text": "T2F Equilibrio: Comisión anual corriente: 75 puntos básicos (0,75%). Entrada 0%, salida 0%, custodia anual 0%, orden 0 EUR. Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+            "intent": "bank_fees"
+          }
+        ],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "T2F Equilibrio: Comisión anual corriente: 75 puntos básicos (0,75%). Entrada 0%, salida 0%, custodia anual 0%, orden 0 EUR. Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_fees",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Comisiones no descontadas, seguimiento de caso 3",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 5,
+      "language": "es",
+      "request": {
+        "message": "¿Qué pérdida muestra el resultado?",
+        "history": [],
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed",
+          "simulation": {
+            "instrumentId": "demo-mixed",
+            "initial": 1000,
+            "recurringContribution": 0,
+            "periods": 6
+          }
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "T2F Equilibrio (6 periodos mensuales): valor final 892,64 EUR; aportado en total 1000 EUR; beneficio o pérdida -107,36 EUR. Rentabilidad acumulada del instrumento durante ese periodo: -10,74%, no es una tasa anual. Las aportaciones entran al inicio de cada mes. Los resultados pasados o simulados no garantizan resultados futuros.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "result",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "892,64 EUR; ?107,36 EUR; ?10,74 % acumulado",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 6,
+      "language": "es",
+      "request": {
+        "message": "¿Por qué ha caído?",
+        "history": [],
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed",
+          "simulation": {
+            "instrumentId": "demo-mixed",
+            "initial": 1000,
+            "recurringContribution": 0,
+            "periods": 6
+          }
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "La causa es desconocida con los datos disponibles. Aquí no hay noticias verificadas ni casos comparables.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "causes",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Causa desconocida, sin noticias verificadas",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 7,
+      "language": "es",
+      "request": {
+        "message": "¿Cuál fue la rentabilidad de 2022?",
+        "history": [],
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo",
+          "instrumentId": "caixabank-monetario-estandar",
+          "simulation": {
+            "instrumentId": "caixabank-monetario-estandar",
+            "initial": 1000,
+            "recurringContribution": 0,
+            "periods": 5
+          }
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR (5 periodos anuales, 2020-12-31 – 2025-12-31): valor final 1058,05 EUR; aportado en total 1000 EUR; beneficio o pérdida 58,05 EUR. Rentabilidad acumulada del instrumento durante ese periodo: 5,8%, no es una tasa anual. Rentabilidad publicada de 2022: -0,67%. Las aportaciones entran al cierre de cada año, después de su rentabilidad. Los resultados pasados o simulados no garantizan resultados futuros.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "result",
+        "sources": [
+          {
+            "label": "Ficha oficial",
+            "url": "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
+            "checkedAt": "2026-11-09"
+          }
+        ]
+      },
+      "assessment": "PASS",
+      "expected": "Rentabilidad publicada de 2022 ?0,67 %",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 8,
+      "language": "es",
+      "request": {
+        "message": "¿Por qué no puedo simularlo?",
+        "history": [],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo",
+          "instrumentId": "bbva-mi-inversion-bolsa"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "El instrumento seleccionado no tiene histórico disponible, por lo que no se puede simular.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_missing_history",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Hist?rico ausente, sin simular",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 9,
+      "language": "es",
+      "request": {
+        "message": "¿Qué ganaré el próximo año?",
+        "history": [],
+        "context": {
+          "page": "home",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "La rentabilidad futura no está disponible y esta demostración no permite predecirla.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "unknown",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Sin previsi?n ni garant?a futura",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 10,
+      "language": "es",
+      "request": {
+        "message": "Necesito liquidez, ¿debo mantener?",
+        "history": [],
+        "context": {
+          "page": "portfolio",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo",
+          "decision": {
+            "needsLiquidity": "yes"
+          },
+          "decline": {
+            "basis": "portfolio_demo",
+            "language": "es"
+          }
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "Has indicado que necesitas liquidez. Ten en cuenta tu objetivo, horizonte y necesidad de liquidez. Un plazo largo no garantiza la recuperación. Puedes vender, mantener o consultar a un profesional; la decisión es tuya.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "decision",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Liquidez, alternativas y decisi?n del usuario sin garant?a",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 11,
+      "language": "es",
+      "request": {
+        "message": "¿Qué estoy viendo?",
+        "history": [],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "BancoT2F: catálogo. Entidad ficticia para una demostración educativa de inversión. Instrumento seleccionado: T2F Equilibrio.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_page",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Cat?logo e instrumento seleccionado",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 12,
+      "language": "es",
+      "request": {
+        "message": "¿Todos los productos son de BancoT2F?",
+        "history": [],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "es",
+          "bankId": "demo",
+          "instrumentId": "bbva-mi-inversion-bolsa"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "No. Los productos de otras entidades conservan su identificación y procedencia.",
+        "language": "es",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_external_products",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Productos externos conservan identidad y procedencia",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 1,
+      "language": "en",
+      "request": {
+        "message": "What is BancoT2F?",
+        "history": [],
+        "context": {
+          "page": "home",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "BancoT2F: Fictional institution for an educational investment demonstration. Synthetic source: bank-demo-2026-11-10.1, 2026-11-10.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_identity",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Entidad ficticia / fictional institution",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 2,
+      "language": "en",
+      "request": {
+        "message": "What are the demo account terms?",
+        "history": [],
+        "context": {
+          "page": "home",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "Fictional monthly maintenance of EUR 0. No real account, real orders or external connections. Euros, no monthly maintenance and fictional minimums of zero euros.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_conditions",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "0 EUR mantenimiento, m?nimos 0, sin cuenta u ?rdenes reales",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 3,
+      "language": "en",
+      "request": {
+        "message": "How much does this fund cost?",
+        "history": [],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "T2F Balance: Annual ongoing fee: 75 basis points (0.75%). Entry 0%, exit 0%, annual custody 0%, order 0 EUR. Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_fees",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "75 pb = 0,75 % anual, condiciones informativas",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 4,
+      "language": "en",
+      "request": {
+        "message": "Is that deducted?",
+        "history": [
+          {
+            "role": "user",
+            "text": "How much does this fund cost?"
+          },
+          {
+            "role": "assistant",
+            "text": "T2F Balance: Annual ongoing fee: 75 basis points (0.75%). Entry 0%, exit 0%, annual custody 0%, order 0 EUR. Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results.",
+            "intent": "bank_fees"
+          }
+        ],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "T2F Balance: Annual ongoing fee: 75 basis points (0.75%). Entry 0%, exit 0%, annual custody 0%, order 0 EUR. Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_fees",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Comisiones no descontadas, seguimiento de caso 3",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 5,
+      "language": "en",
+      "request": {
+        "message": "What loss does the result show?",
+        "history": [],
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed",
+          "simulation": {
+            "instrumentId": "demo-mixed",
+            "initial": 1000,
+            "recurringContribution": 0,
+            "periods": 6
+          }
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "T2F Balance (6 monthly periods): final value 892.64 EUR; total contributed 1,000 EUR; profit or loss -107.36 EUR. Cumulative instrument return over this period: -10.74%, not an annual rate. Contributions enter at the start of each month. Past or simulated outcomes do not guarantee future results.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "result",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "892,64 EUR; ?107,36 EUR; ?10,74 % acumulado",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 6,
+      "language": "en",
+      "request": {
+        "message": "Why did it fall?",
+        "history": [],
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed",
+          "simulation": {
+            "instrumentId": "demo-mixed",
+            "initial": 1000,
+            "recurringContribution": 0,
+            "periods": 6
+          }
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "The cause is unknown from the available data. There are no verified news or comparable cases here.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "causes",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Causa desconocida, sin noticias verificadas",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 7,
+      "language": "en",
+      "request": {
+        "message": "What was the return of 2022?",
+        "history": [],
+        "context": {
+          "page": "simulator",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo",
+          "instrumentId": "caixabank-monetario-estandar",
+          "simulation": {
+            "instrumentId": "caixabank-monetario-estandar",
+            "initial": 1000,
+            "recurringContribution": 0,
+            "periods": 5
+          }
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR (5 annual periods, 2020-12-31 – 2025-12-31): final value 1,058.05 EUR; total contributed 1,000 EUR; profit or loss 58.05 EUR. Cumulative instrument return over this period: 5.8%, not an annual rate. Published return for 2022: -0.67%. Contributions enter at year end after that year’s return. Past or simulated outcomes do not guarantee future results.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "result",
+        "sources": [
+          {
+            "label": "Official product page",
+            "url": "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
+            "checkedAt": "2026-11-09"
+          }
+        ]
+      },
+      "assessment": "PASS",
+      "expected": "Rentabilidad publicada de 2022 ?0,67 %",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 8,
+      "language": "en",
+      "request": {
+        "message": "Why can't I simulate it?",
+        "history": [],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo",
+          "instrumentId": "bbva-mi-inversion-bolsa"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "The selected instrument has no available history, so it cannot be simulated.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_missing_history",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Hist?rico ausente, sin simular",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 9,
+      "language": "en",
+      "request": {
+        "message": "What will I earn next year?",
+        "history": [],
+        "context": {
+          "page": "home",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "Future returns are not available or predictable from this demonstration.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "unknown",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Sin previsi?n ni garant?a futura",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 10,
+      "language": "en",
+      "request": {
+        "message": "I need liquidity; should I hold?",
+        "history": [],
+        "context": {
+          "page": "portfolio",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo",
+          "decision": {
+            "needsLiquidity": "yes"
+          },
+          "decline": {
+            "basis": "portfolio_demo",
+            "language": "en"
+          }
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "You indicated that you need liquidity. Consider your goal, time horizon and whether you need liquidity. A long horizon does not guarantee recovery. You can sell, hold or seek professional advice; the decision is yours.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "decision",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Liquidez, alternativas y decisi?n del usuario sin garant?a",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 11,
+      "language": "en",
+      "request": {
+        "message": "What am I seeing?",
+        "history": [],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo",
+          "instrumentId": "demo-mixed"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "BancoT2F: catalogue. Fictional institution for an educational investment demonstration. Selected instrument: T2F Balance.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_page",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Cat?logo e instrumento seleccionado",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    },
+    {
+      "case": 12,
+      "language": "en",
+      "request": {
+        "message": "Are all products from BancoT2F?",
+        "history": [],
+        "context": {
+          "page": "explore",
+          "level": "beginner",
+          "language": "en",
+          "bankId": "demo",
+          "instrumentId": "bbva-mi-inversion-bolsa"
+        }
+      },
+      "httpStatus": 200,
+      "response": {
+        "text": "No. Products from other institutions retain their identity and provenance.",
+        "language": "en",
+        "mode": "api",
+        "provider": "server_rules",
+        "intent": "bank_external_products",
+        "sources": []
+      },
+      "assessment": "PASS",
+      "expected": "Productos externos conservan identidad y procedencia",
+      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+    }
+  ],
+  "simulation": {
+    "status": 200,
+    "body": {
+      "kind": "fictional_monthly",
+      "points": [
+        1000,
+        1015,
+        1027.18,
+        1001.5005,
+        1021.53051,
+        934.70041665,
+        892.63889790075
+      ],
+      "timeline": [
+        {
+          "period": 0,
+          "date": null,
+          "valueBeforeContribution": 0,
+          "contribution": 1000,
+          "contributed": 1000,
+          "value": 1000,
+          "profit": 0,
+          "instrumentReturnPercent": 0,
+          "periodReturn": null
+        },
+        {
+          "period": 1,
+          "date": null,
+          "valueBeforeContribution": 1000,
+          "contribution": 0,
+          "contributed": 1000,
+          "value": 1015,
+          "profit": 15,
+          "instrumentReturnPercent": 1.5,
+          "periodReturn": 0.015
+        },
+        {
+          "period": 2,
+          "date": null,
+          "valueBeforeContribution": 1015,
+          "contribution": 0,
+          "contributed": 1000,
+          "value": 1027.18,
+          "profit": 27.18,
+          "instrumentReturnPercent": 2.718,
+          "periodReturn": 0.012
+        },
+        {
+          "period": 3,
+          "date": null,
+          "valueBeforeContribution": 1027.18,
+          "contribution": 0,
+          "contributed": 1000,
+          "value": 1001.5005,
+          "profit": 1.5005,
+          "instrumentReturnPercent": 0.15005,
+          "periodReturn": -0.025
+        },
+        {
+          "period": 4,
+          "date": null,
+          "valueBeforeContribution": 1001.5005,
+          "contribution": 0,
+          "contributed": 1000,
+          "value": 1021.53051,
+          "profit": 21.53051,
+          "instrumentReturnPercent": 2.153051,
+          "periodReturn": 0.02
+        },
+        {
+          "period": 5,
+          "date": null,
+          "valueBeforeContribution": 1021.53051,
+          "contribution": 0,
+          "contributed": 1000,
+          "value": 934.70041665,
+          "profit": -65.29958335,
+          "instrumentReturnPercent": -6.529958335,
+          "periodReturn": -0.085
+        },
+        {
+          "period": 6,
+          "date": null,
+          "valueBeforeContribution": 934.70041665,
+          "contribution": 0,
+          "contributed": 1000,
+          "value": 892.63889790075,
+          "profit": -107.36110209925,
+          "instrumentReturnPercent": -10.736110209925,
+          "periodReturn": -0.045
+        }
+      ],
+      "value": 892.63889790075,
+      "contributed": 1000,
+      "profit": -107.36110209925,
+      "simpleReturnPercent": -10.736110209925,
+      "instrumentId": "demo-mixed",
+      "currency": "EUR",
+      "sources": [],
+      "contributionTiming": "month_start",
+      "assumptions": [
+        "Fictional monthly returns repeat; outcomes do not predict future returns."
+      ],
+      "provenance": {
+        "datasetVersion": "demo-2026-11-10.1",
+        "calculationVersion": "demo-calculations-1.0.0",
+        "datasetSha256": "70d234a224a2dc3f08d8e3f92cd4bfad3456ebb3cbcd9bb8db208940dafed0a4"
+      }
+    }
+  },
+  "portfolioDecline": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "basisName": "Cartera de ejemplo",
+      "dataKind": "fictional",
+      "observationCount": 14,
+      "latestLabel": "Punto 14",
+      "latestValue": 1093,
+      "peakValue": 1110,
+      "currentDrawdownPercent": 1.531531531531527,
+      "maxDrawdownPercent": 2.7027027027026973,
+      "episodes": [
+        {
+          "peakLabel": "Punto 2",
+          "troughLabel": "Punto 3",
+          "recoveryLabel": "Punto 4",
+          "drawdownPercent": 2.131782945736438,
+          "observationsToTrough": 1,
+          "observationsToRecovery": 2
+        },
+        {
+          "peakLabel": "Punto 4",
+          "troughLabel": "Punto 5",
+          "recoveryLabel": "Punto 6",
+          "drawdownPercent": 1.3461538461538414,
+          "observationsToTrough": 1,
+          "observationsToRecovery": 2
+        },
+        {
+          "peakLabel": "Punto 6",
+          "troughLabel": "Punto 7",
+          "recoveryLabel": "Punto 8",
+          "drawdownPercent": 1.4150943396226467,
+          "observationsToTrough": 1,
+          "observationsToRecovery": 2
+        },
+        {
+          "peakLabel": "Punto 8",
+          "troughLabel": "Punto 9",
+          "recoveryLabel": "Punto 10",
+          "drawdownPercent": 1.4705882352941124,
+          "observationsToTrough": 1,
+          "observationsToRecovery": 2
+        },
+        {
+          "peakLabel": "Punto 10",
+          "troughLabel": "Punto 11",
+          "recoveryLabel": "Punto 12",
+          "drawdownPercent": 1.7225747960108784,
+          "observationsToTrough": 1,
+          "observationsToRecovery": 2
+        },
+        {
+          "peakLabel": "Punto 12",
+          "troughLabel": "Punto 13",
+          "recoveryLabel": null,
+          "drawdownPercent": 2.7027027027026973,
+          "observationsToTrough": 1,
+          "observationsToRecovery": null
+        }
+      ],
+      "sources": [],
+      "causesStatus": "unknown",
+      "comparablesStatus": "not_available",
+      "limitations": [
+        "Solo se analizan las observaciones facilitadas; no se conocen las causas ni hay comparables.",
+        "La recuperación observada no garantiza una recuperación futura."
+      ]
+    }
+  }
+}

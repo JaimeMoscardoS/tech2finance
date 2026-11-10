@@ -2,6 +2,10 @@
 
 ## Qué es
 
+El perfil tipado de BancoT2F se define en [`shared/bank-profile.ts`](../shared/bank-profile.ts) y los datos en `shared/demo-data.json:bankProfile`. Véanse [condiciones y versiones](banco-t2f.md). Las tarifas del perfil son informativas y se excluyen del cálculo; un coste anual `null` significa no definido. La integración HTTP y del tutor debe verificarse en la versión final de esta rama.
+
+Contrato acordado para esta integración: en el contexto interno del tutor, `bank?: BankProfile` y `instrument.product?: BankProduct` anidado; no hay `product` superior. El cliente puede indicar `bankId` opcional, que el servidor resuelve; los campos extra, incluidos `bank`, `bankProfile` y `product` inyectados, deben recibir 422. La adaptación y sus pruebas integradas están en curso.
+
 Acuerdos entre áreas y contrato de la API local de demostración. El motor Python histórico independiente conserva su propio contrato.
 
 - **1 → 2:** pantalla, nivel, parámetros del juego o pregunta; recibe resultados y errores.
