@@ -4,7 +4,7 @@
 
 **Objetivo:** preparar una demo educativa y una propuesta exploratoria de piloto sintético con barreras explícitas para datos personales y servicio bancario.
 **Arquitectura:** cinco líneas coordinan experiencia, plataforma, datos/motor, tutor y producto sin cambiar la numeración humana. Véase [manifiesto](manifest.json).
-**Stack:** React/TypeScript, FastAPI/Python y tutor local Node por reglas. Laravel, Livewire y FluxUI no figuran en la especificación de este proyecto.
+**Stack:** React/TypeScript, FastAPI/Python y tutor local Node por reglas.
 **Fuente:** [investigación de viabilidad, PR 13](https://github.com/JaimeMoscardoS/tech2finance/pull/13), aún no integrada en esta base.
 
 ## Restricciones y revisión
