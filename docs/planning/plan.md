@@ -158,6 +158,7 @@ Cada tarea deriva del «Backlog prioritario» del informe; las funciones indicad
 
 - [ ] B14.1: Reunir evidencia y fallos (30–60 min).
 - [ ] B14.2: Documentar decisión del responsable (30–60 min).
+- [ ] B14.3: Preparar guion de presentación de tres minutos con demo verificada y plan ante fallos (30–60 min), después de integrar y revisar los hallazgos.
 
 ## Puertas de decisión
 
@@ -197,3 +198,4 @@ Cada archivo propuesto se crea o completa por la línea propietaria; no se presu
 | B13.2 | Presupuesto y sensibilidad | Hipótesis, costes, caja y sensibilidad revisados; no calcular margen cerrando desconocidos como cero. |
 | B14.1 | Expediente de decisión | Reúne resultados, riesgos y fallos, fuente y versión sin presentar muestra como eficacia general. |
 | B14.2 | Acta de decisión | Responsable designado registra fecha, evidencia y decisión seguir, cambiar o parar. |
+| B14.3 | Guion en `presentacion/` | Persona 5, titular UNASSIGNED, prepara un pitch de tres minutos basado en la demo integrada y comprobada, con alternativa ante fallo; registra versión y límites sin inventar clientes, resultados o contratos. Depende de la integración local y revisión de hallazgos. No hay presentación implementada aún. |

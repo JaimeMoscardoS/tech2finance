@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
   "source": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
   "states": [
@@ -42,7 +42,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Producto",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B02",
@@ -75,7 +79,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Comercial",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B03",
@@ -110,7 +118,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Producto y pedagogía",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B04",
@@ -143,7 +155,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Datos y jurídico",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B05",
@@ -178,7 +194,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Motor y revisor financiero",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B06",
@@ -217,7 +237,11 @@
       ],
       "support_streams": [
         "02-platform"
-      ]
+      ],
+      "human_owner": {
+        "role": "Backend",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B07",
@@ -253,7 +277,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "IA y cumplimiento",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B08",
@@ -286,7 +314,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Interfaz y especialista",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B09",
@@ -319,7 +351,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Producto y abogado financiero",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B10",
@@ -352,7 +388,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Servicio y seguridad",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B11",
@@ -385,7 +425,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Privacidad y seguridad",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B12",
@@ -423,7 +467,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Comercial y jurídico",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B13",
@@ -456,7 +504,11 @@
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
-      ]
+      ],
+      "human_owner": {
+        "role": "Finanzas y servicio",
+        "person": "UNASSIGNED"
+      }
     },
     {
       "id": "B14",
@@ -491,8 +543,366 @@
           "estimate_minutes": "30-60",
           "evidence": [],
           "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B14.3",
+          "description": "Preparar guion de tres minutos, demo integrada verificada y plan ante fallos",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "human_owner": {
+            "role": "Persona 5: datos, pruebas y presentación",
+            "person": "UNASSIGNED"
+          },
+          "depends_on_execution": [
+            "integration-local"
+          ],
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
         }
+      ],
+      "human_owner": {
+        "role": "Producto y banco",
+        "person": "UNASSIGNED"
+      }
+    }
+  ],
+  "human_backlog_note": "B01-B14: funciones y personas humanas no asignadas; avances de ramas no implican aceptación completa.",
+  "execution": [
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "01-experience",
+      "branch": "director/01-experience",
+      "head": "9bdc71d7f35f543162d81a32e4a50b5017659a1f",
+      "status": "pr_open",
+      "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/15",
+      "human_roles": [
+        "Persona 1: interfaz y experiencia"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_01_experience",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_01_experience/executor",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_01_experience/reviewer",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "review": {
+        "round": 1,
+        "score": 8.5,
+        "critical_or_high": false,
+        "findings": [
+          "Foco puede quedar en body tras fallo; pruebas NVDA y macOS pendientes.",
+          "Dos fallos paralelos sin causa determinada; pasaron en serie."
+        ]
+      },
+      "commands": [
+        {
+          "command": "npm test",
+          "result": "23/23"
+        },
+        {
+          "command": "npm run build",
+          "result": "salida 0, avisos Rolldown"
+        },
+        {
+          "command": "npx playwright test --workers=1",
+          "result": "51/51"
+        },
+        {
+          "command": "npx playwright test tests/recovery.spec.ts --workers=1",
+          "result": "8/8 tras refuerzo"
+        },
+        {
+          "command": "git diff --check",
+          "result": "sin errores"
+        }
+      ],
+      "evidence": [
+        "https://github.com/JaimeMoscardoS/tech2finance/blob/9bdc71d7f35f543162d81a32e4a50b5017659a1f/docs/workstreams/01-experience.md"
+      ],
+      "publish_blockers": []
+    },
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "02-platform",
+      "branch": "director/02-platform",
+      "head": "558365a669c20296591637c59bcebd1716b22610",
+      "status": "blocked_publication",
+      "pr": null,
+      "human_roles": [
+        "Persona 2: backend e integración"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_02_platform",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_02_platform/executor02",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_02_platform/reviewer02",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "review": {
+        "round": 2,
+        "score": 8.5,
+        "critical_or_high": false,
+        "findings": [
+          "Ejecución POSIX y CI remota pendientes."
+        ],
+        "prior_round": {
+          "round": 1,
+          "score": 7.8
+        }
+      },
+      "commands": [
+        {
+          "command": null,
+          "result": "12 pruebas lanzador, 23 frontend, 44 backend, 21 simulador, build y pip check; consultar evidencia de rama para contexto."
+        }
+      ],
+      "evidence": [
+        "C:/proyectos/tech2finance-directors/20261110/02-platform/docs/workstreams/02-platform.md"
+      ],
+      "publish_blockers": [
+        "El token OAuth rechazó cambios de workflow; alternativas fallaron y la autorización del usuario permanece pendiente."
+      ]
+    },
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "03-data",
+      "branch": "director/03-data",
+      "head": "a4c122b2662e854e63f691e3e2a6e78c9fd7d814",
+      "status": "pr_open",
+      "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/14",
+      "human_roles": [
+        "Persona 3: simulador y motor",
+        "Persona 5: datos, pruebas y presentación"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_03_data",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_03_data/executor_03",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_03_data/reviewer_03",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "review": {
+        "round": 1,
+        "score": 8.8,
+        "critical_or_high": false,
+        "findings": [
+          "Derechos desconocidos; TypeScript local sin versión; certificación financiera independiente pendiente."
+        ]
+      },
+      "commands": [
+        {
+          "command": "python -m backend.verify_data",
+          "result": "Comprobación documentada; consultar evidencia."
+        },
+        {
+          "command": null,
+          "result": "52 backend y 21 simulador reportados; 10 pruebas de procedencia por coordinación."
+        }
+      ],
+      "evidence": [
+        "https://github.com/JaimeMoscardoS/tech2finance/blob/a4c122b2662e854e63f691e3e2a6e78c9fd7d814/docs/workstreams/03-data.md"
+      ],
+      "publish_blockers": []
+    },
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "04-tutor",
+      "branch": "director/04-tutor",
+      "head": null,
+      "status": "in_progress",
+      "pr": null,
+      "human_roles": [
+        "Persona 4: IA, voz y antipánico"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_04_tutor",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_04_tutor/tutor_executor",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_04_tutor/tutor_reviewer",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "review": {
+        "round": 2,
+        "score": 7.8,
+        "critical_or_high": false,
+        "prior_round": {
+          "round": 1,
+          "score": 7.0,
+          "findings": [
+            "Seguimiento tras abstención: gravedad alta; otros dos medios."
+          ]
+        },
+        "findings": [
+          "Seguimiento y cifras corregidos; pendiente hallazgo medio de nombre exacto Fund/Fondo.",
+          "Ronda 3 en preparación."
+        ]
+      },
+      "commands": [],
+      "evidence": [],
+      "publish_blockers": [
+        "Commit final, revisión y URL de PR pendientes."
+      ]
+    },
+    {
+      "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+      "source_research": {
+        "pr": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+        "integrated_in_base": false
+      },
+      "human_owner": "UNASSIGNED",
+      "dependencies": [],
+      "id": "05-product",
+      "branch": "director/05-product",
+      "head": null,
+      "status": "source_review_ready",
+      "pr": null,
+      "human_roles": [
+        "Persona 5: datos, pruebas y presentación",
+        "Producto y comercial: UNASSIGNED"
+      ],
+      "agents": [
+        {
+          "canonical_task": "/root/director_05_product",
+          "role": "director: orchestration and review",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_05_product/executor05",
+          "role": "executor",
+          "model": "gpt-6.1-terra",
+          "effort": "high"
+        },
+        {
+          "canonical_task": "/root/director_05_product/reviewer05",
+          "role": "independent reviewer",
+          "model": "gpt-6.1-sol",
+          "effort": "high"
+        }
+      ],
+      "review": {
+        "round": 1,
+        "score": 8.2,
+        "critical_or_high": false,
+        "reviewed_source_commit": "1574fd1a4c94a24643a7b198678361514b802a17",
+        "corrected_source_commit": "9ad4c45fa79fc44a8932f274ca3cd0ddb07e4a64",
+        "findings": [
+          "Preguntas abiertas y stack corregidos en commit posterior; revisión focal final pendiente tras cambios al manifiesto."
+        ]
+      },
+      "commands": [
+        {
+          "command": "git diff --check",
+          "result": "Sin errores en revisión documental inicial."
+        },
+        {
+          "command": null,
+          "result": "JSON, dependencias, enlaces locales y UTF-8 verificados antes de esta actualización; repetir al cierre."
+        }
+      ],
+      "evidence": [
+        "docs/planning/plan.md",
+        "docs/pilot-kit/estudio.md"
+      ],
+      "publish_blockers": [
+        "Esperar URL de 04 y autorización final de coordinación. HEAD final y PR se identifican con metadatos vivos al publicarse."
       ]
     }
-  ]
+  ],
+  "integration": {
+    "id": "integration-local",
+    "status": "pending",
+    "depends_on": [
+      "01-experience",
+      "02-platform",
+      "03-data",
+      "04-tutor",
+      "05-product"
+    ],
+    "plan": "docs/planning/integracion-local.md",
+    "evidence": [],
+    "head": null
+  },
+  "orchestrator": {
+    "canonical_task": "/root",
+    "role": "orchestration and read-only review",
+    "model": null,
+    "effort": null
+  }
 }
