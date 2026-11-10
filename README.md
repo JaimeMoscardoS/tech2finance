@@ -33,3 +33,6 @@ Abrir un pull request y pedir revisión antes de integrar. No subir claves ni da
 ## Backend local de demostración
 
 La rama incluye una API FastAPI local para catálogo, simulación, caídas y tutor por reglas. El frontend utiliza el servidor por defecto y permite elegir demo local explícitamente. No conecta bancos ni proveedores externos. Véanse [backend-contexto](docs/backend-contexto.md) y [frontend/README](frontend/README.md) para contratos y ejecución.
+
+
+Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](docs/planning/plan.md).

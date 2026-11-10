@@ -28,4 +28,33 @@ La conversación de perfil y el filtrado de opciones son propuestas futuras suje
 
 ## Trabajo conjunto y tecnología
 
-Acordar primero `docs/contratos.md`. La persona 5 prepara muestras ficticias mientras se verifican fuentes reales. Trabajar en ramas separadas y revisar cambios compartidos. El frontend React/TypeScript existe en main; Python/FastAPI, Claude y ElevenLabs siguen como propuesta para las áreas pendientes. La propuesta anterior de Next.js permanece en el historial. En esta rama el motor Python está aislado y no está conectado a la demo.
+Acordar primero `docs/contratos.md`. La persona 5 prepara muestras ficticias mientras se verifican fuentes reales. Trabajar en ramas separadas y revisar cambios compartidos. La demo usa React/TypeScript y una API local Python/FastAPI para catálogo, simulación periódica, caídas y tutor por reglas mediante Node. El motor histórico independiente permanece aislado; Claude y ElevenLabs siguen como propuestas no conectadas. La propuesta anterior de Next.js permanece en el historial.
+
+
+## Líneas de ejecución y funciones de empresa
+
+Las cinco ramas parten de `main` en `42d523316872d469ec9bcdb8ba25b436408b37cc`; son líneas de trabajo, no personas nuevas ni reasignaciones del cuadro anterior. Su estado y tareas están en el [plan](planning/plan.md) y el [manifiesto](planning/manifest.json).
+
+| Línea / rama | Enfoque | Coordinación humana existente |
+| --- | --- | --- |
+| `director/01-experience` | Experiencia y accesibilidad | Persona 1 |
+| `director/02-platform` | Plataforma, operación y privacidad | Persona 2 |
+| `director/03-data` | Datos, derechos y motor | Personas 3 y 5 según responsabilidad |
+| `director/04-tutor` | Tutor y conducta | Persona 4, producto y jurídico |
+| `director/05-product` | Producto, estudio y oferta | Persona 5 y funciones por asignar; no cambia su responsabilidad original |
+
+### RACI propuesto, sin nombramientos
+
+Todas las personas nominales y horas semanales: **UNASSIGNED**; no se ha acordado capacidad. R ejecuta, A responde por la decisión, C se consulta e I se informa. La función puede recaer en una de las cinco personas al acordarse; asesoría jurídica y CISO fraccionales se consultan cuando proceda y no se presumen contratados.
+
+| Actividad | R | A | C | I |
+| --- | --- | --- | --- | --- |
+| Comprador, presupuesto y contrato | Comercial UNASSIGNED | Producto UNASSIGNED | Banco y asesoría jurídica | Equipo |
+| Experiencia y accesibilidad | Persona 1 (función; titular UNASSIGNED) | Producto UNASSIGNED | Persona 5 y especialista | Equipo |
+| API y operación | Persona 2 (función; titular UNASSIGNED) | Servicio UNASSIGNED | CISO fraccional y banco | Equipo |
+| Cálculo y supuestos | Persona 3 (función; titular UNASSIGNED) | Responsable técnico UNASSIGNED | Revisor financiero y persona 5 | Equipo |
+| Tutor, voz y conducta | Persona 4 (función; titular UNASSIGNED) | Producto UNASSIGNED | Jurídico financiero | Equipo |
+| Fuentes, pruebas y presentación | Persona 5 (función; titular UNASSIGNED) | Producto UNASSIGNED | Personas 1–4, pedagogía | Equipo |
+| Privacidad y proveedores | Privacidad UNASSIGNED | Servicio UNASSIGNED | Jurídico, CISO fraccional, banco | Equipo |
+
+No existe compromiso de entrevistas, POC ni contratación. Al asignar dirección comercial, retirar trabajo equivalente o registrar capacidad adicional real.

@@ -1,0 +1,498 @@
+{
+  "schema_version": "1.0",
+  "base_sha": "42d523316872d469ec9bcdb8ba25b436408b37cc",
+  "source": "https://github.com/JaimeMoscardoS/tech2finance/pull/13",
+  "states": [
+    "pending",
+    "in_progress",
+    "blocked_external",
+    "done"
+  ],
+  "tasks": [
+    {
+      "id": "B01",
+      "stream": "05-product",
+      "phase": "P0",
+      "owner": "Producto",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Responsables y capacidad",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Capacidad acordada"
+      ],
+      "stop": "Sin capacidad acordada no comprometer plazos",
+      "children": [
+        {
+          "id": "B01.1",
+          "description": "Preparar matriz de funciones",
+          "status": "done",
+          "estimate_minutes": "30-60",
+          "evidence": [
+            "docs/organizacion.md"
+          ],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B01.2",
+          "description": "Registrar personas y horas acordadas",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B02",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Comercial",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Entrevistas a compradores",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Acceso a compradores"
+      ],
+      "stop": "Sin responsable revisar ICP",
+      "children": [
+        {
+          "id": "B02.1",
+          "description": "Adaptar guía de preguntas",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B02.2",
+          "description": "Registrar problema, alternativa, presupuesto y criterios",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B03",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Producto y pedagogía",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Prueba de aprendizaje",
+      "depends_on": [
+        "B04"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Participantes y contenido revisado"
+      ],
+      "stop": "Detener presión a mantener",
+      "children": [
+        {
+          "id": "B03.1",
+          "description": "Congelar rúbrica y comparador",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B03.2",
+          "description": "Registrar resultados y errores",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B04",
+      "stream": "03-data",
+      "phase": "P0",
+      "owner": "Datos y jurídico",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Registro de derechos",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Derechos por escrito"
+      ],
+      "stop": "Excluir fuentes sin derechos resueltos",
+      "children": [
+        {
+          "id": "B04.1",
+          "description": "Inventariar fuente, clase y usos",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B04.2",
+          "description": "Asociar permiso escrito o excluir fuente",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B05",
+      "stream": "03-data",
+      "phase": "P0",
+      "owner": "Motor y revisor financiero",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Cálculo autoritativo",
+      "depends_on": [
+        "B04"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Revisión financiera independiente"
+      ],
+      "stop": "No usar cifras no reconciliadas",
+      "children": [
+        {
+          "id": "B05.1",
+          "description": "Preparar supuestos y fixtures independientes",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B05.2",
+          "description": "Reconciliar casos límite",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B06",
+      "stream": "03-data",
+      "phase": "P0",
+      "owner": "Backend",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Versionar datos y cálculos",
+      "depends_on": [
+        "B04",
+        "B05"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Procedencia verificable"
+      ],
+      "stop": "Parar sin procedencia",
+      "children": [
+        {
+          "id": "B06.1",
+          "description": "Definir identificadores de versiones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B06.2",
+          "description": "Reproducir resultado anterior",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ],
+      "support_streams": [
+        "02-platform"
+      ]
+    },
+    {
+      "id": "B07",
+      "stream": "04-tutor",
+      "phase": "P1",
+      "owner": "IA y cumplimiento",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Evaluar reglas frente a LLM",
+      "depends_on": [
+        "B03",
+        "B05"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Revisión de cumplimiento"
+      ],
+      "stop": "No incorporar LLM si empeora fidelidad",
+      "children": [
+        {
+          "id": "B07.1",
+          "description": "Congelar batería con fuentes y abstenciones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B07.2",
+          "description": "Comparar fidelidad y costes",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B08",
+      "stream": "01-experience",
+      "phase": "P1",
+      "owner": "Interfaz y especialista",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Accesibilidad del flujo",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Especialista de accesibilidad"
+      ],
+      "stop": "Bloquear piloto ante barreras críticas",
+      "children": [
+        {
+          "id": "B08.1",
+          "description": "Probar teclado y registrar barreras",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B08.2",
+          "description": "Probar lector y verificar correcciones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B09",
+      "stream": "04-tutor",
+      "phase": "P0",
+      "owner": "Producto y abogado financiero",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Perímetro y conducta",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Revisión jurídica humana"
+      ],
+      "stop": "Detener recomendaciones personales no autorizadas",
+      "children": [
+        {
+          "id": "B09.1",
+          "description": "Reunir pantallas y respuestas",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B09.2",
+          "description": "Registrar revisión, prestador y exclusiones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B10",
+      "stream": "02-platform",
+      "phase": "P1",
+      "owner": "Servicio y seguridad",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Operación sintética",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Hosting y responsable de servicio"
+      ],
+      "stop": "No ofrecer SLA sin medir",
+      "children": [
+        {
+          "id": "B10.1",
+          "description": "Documentar despliegue y registros",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B10.2",
+          "description": "Ensayar alertas y restauración",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B11",
+      "stream": "02-platform",
+      "phase": "P2",
+      "owner": "Privacidad y seguridad",
+      "assignee": "UNASSIGNED",
+      "status": "blocked_external",
+      "title": "Mapa de datos y proveedores",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Contrato de datos, DPA y decisión EIPD/DPO cuando proceda"
+      ],
+      "stop": "No introducir PII antes de cerrar condiciones",
+      "children": [
+        {
+          "id": "B11.1",
+          "description": "Validar flujos y roles",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B11.2",
+          "description": "Documentar acuerdos y decisión EIPD/DPO",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B12",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Comercial y jurídico",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Propuesta y contrato de piloto",
+      "depends_on": [
+        "B02",
+        "B03",
+        "B04",
+        "B09"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Sponsor, presupuesto y contrato"
+      ],
+      "stop": "No prometer producción",
+      "children": [
+        {
+          "id": "B12.1",
+          "description": "Fijar alcance y aceptación negociable",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B12.2",
+          "description": "Revisar pagos, soporte, IP, incidentes y salida",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B13",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Finanzas y servicio",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Costes y caja",
+      "depends_on": [],
+      "evidence": [],
+      "pending_external": [
+        "Cotizaciones y capacidad"
+      ],
+      "stop": "No fijar margen con costes desconocidos",
+      "children": [
+        {
+          "id": "B13.1",
+          "description": "Inventariar costes y cotizaciones",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B13.2",
+          "description": "Revisar presupuesto y sensibilidad",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    },
+    {
+      "id": "B14",
+      "stream": "05-product",
+      "phase": "P1",
+      "owner": "Producto y banco",
+      "assignee": "UNASSIGNED",
+      "status": "pending",
+      "title": "Decisión seguir, cambiar o parar",
+      "depends_on": [
+        "B02",
+        "B03"
+      ],
+      "evidence": [],
+      "pending_external": [
+        "Decisión del comprador"
+      ],
+      "stop": "No afirmar eficacia con muestra exploratoria",
+      "children": [
+        {
+          "id": "B14.1",
+          "description": "Reunir evidencia y fallos",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        },
+        {
+          "id": "B14.2",
+          "description": "Documentar decisión del responsable",
+          "status": "pending",
+          "estimate_minutes": "30-60",
+          "evidence": [],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+        }
+      ]
+    }
+  ]
+}

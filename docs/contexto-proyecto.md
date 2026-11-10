@@ -127,3 +127,6 @@ La rama de trabajo incorpora ejemplos ficticios y una reconstrucción de cinco r
 ## Integración local de demostración
 
 En esta rama, el frontend utiliza por defecto la API FastAPI local de catálogo, simulación, caídas y tutor por reglas. Ofrece demo local explícita ante fallo y comparte los ejemplos mediante `shared/demo-data.json`. El tutor se ejecuta mediante Node local; no usa LLM ni servicios externos. Véase [backend-contexto](backend-contexto.md) para contrato, ejecución y límites. Esta integración no implica despliegue ni conexión bancaria.
+
+
+Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](planning/plan.md).
