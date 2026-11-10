@@ -1,0 +1,3222 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "1.0.0",
+  "corpusSha256": "eb86212f7daedf95fe336a708cada4490e1823033db633b3b1b5f72dcb706143",
+  "policySha256": "79d9ce068aef8b00211af87ee0ff1699ff458ad869b004beac48c04133b82443",
+  "implementation": [
+    {
+      "file": "../src/local-tutor.ts",
+      "sha256": "c3b9565b3b65e2ee8b37f6aed9912021d0db7bb2dc5910e9176dbe6e91edfa97"
+    },
+    {
+      "file": "../src/decline.ts",
+      "sha256": "f6425564485a6cfefab7c60a7bb6787efa3f3424f39932f127269e7d0971d3bc"
+    },
+    {
+      "file": "./evaluate.ts",
+      "sha256": "b10bbea13726b6e9ea168cd1e5c9f41e619fc49a57412cce9f7cffe9236948aa"
+    },
+    {
+      "file": "./run.ts",
+      "sha256": "1c4cc89349c26c09a50cbca4a28083f43c7144851cd032380fff6b4ac79846bc"
+    }
+  ],
+  "coverage": {
+    "es": {
+      "beginner": 16,
+      "intermediate": 16,
+      "advanced": 15
+    },
+    "en": {
+      "beginner": 16,
+      "intermediate": 15,
+      "advanced": 16
+    }
+  },
+  "total": 94,
+  "failed": 0,
+  "results": [
+    {
+      "id": "es-beginner-loss",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:valor final 900",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado en total 1000",
+          "pass": true
+        },
+        {
+          "invariant": "required:beneficio o pérdida -100",
+          "pass": true
+        },
+        {
+          "invariant": "required:-10%",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado",
+          "pass": true
+        },
+        {
+          "invariant": "required:no garantizan",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:901",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:900",
+          "pass": true
+        },
+        {
+          "invariant": "number:1000",
+          "pass": true
+        },
+        {
+          "invariant": "number:-100",
+          "pass": true
+        },
+        {
+          "invariant": "number:-10",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-contributions",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:valor final 650",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado en total 700",
+          "pass": true
+        },
+        {
+          "invariant": "required:beneficio o pérdida -50",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportaciones",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:profit 150",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:650",
+          "pass": true
+        },
+        {
+          "invariant": "number:700",
+          "pass": true
+        },
+        {
+          "invariant": "number:-50",
+          "pass": true
+        },
+        {
+          "invariant": "number:-8",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-missing",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:No hay datos",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-foreign",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no están disponibles",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-future",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no están disponibles",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-decision",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:liquidez",
+          "pass": true
+        },
+        {
+          "invariant": "required:vender, mantener",
+          "pass": true
+        },
+        {
+          "invariant": "required:decisión es tuya",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:debes mantener",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:must hold",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-cause",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:desconocida",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:caused by",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:causada por",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-injection",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefinidas",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-fund",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:fondo",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-costs",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:costes",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-definition",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:rentabilidad",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-follow",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:900",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-old-history",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefinidas",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-overlong",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefinidas",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-beginner-abort",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-loss",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:valor final 900",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado en total 1000",
+          "pass": true
+        },
+        {
+          "invariant": "required:beneficio o pérdida -100",
+          "pass": true
+        },
+        {
+          "invariant": "required:-10%",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado",
+          "pass": true
+        },
+        {
+          "invariant": "required:no garantizan",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:901",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:900",
+          "pass": true
+        },
+        {
+          "invariant": "number:1000",
+          "pass": true
+        },
+        {
+          "invariant": "number:-100",
+          "pass": true
+        },
+        {
+          "invariant": "number:-10",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-contributions",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:valor final 650",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado en total 700",
+          "pass": true
+        },
+        {
+          "invariant": "required:beneficio o pérdida -50",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportaciones",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:profit 150",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:650",
+          "pass": true
+        },
+        {
+          "invariant": "number:700",
+          "pass": true
+        },
+        {
+          "invariant": "number:-50",
+          "pass": true
+        },
+        {
+          "invariant": "number:-8",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-missing",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:No hay datos",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-foreign",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no están disponibles",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-future",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no están disponibles",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-decision",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:liquidez",
+          "pass": true
+        },
+        {
+          "invariant": "required:vender, mantener",
+          "pass": true
+        },
+        {
+          "invariant": "required:decisión es tuya",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:debes mantener",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:must hold",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-cause",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:desconocida",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:caused by",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:causada por",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-injection",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefinidas",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-fund",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:fondo",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-costs",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:costes",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-definition",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:rentabilidad",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-follow",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:900",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-old-history",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefinidas",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-overlong",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefinidas",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-intermediate-abort",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-loss",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:valor final 900",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado en total 1000",
+          "pass": true
+        },
+        {
+          "invariant": "required:beneficio o pérdida -100",
+          "pass": true
+        },
+        {
+          "invariant": "required:-10%",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado",
+          "pass": true
+        },
+        {
+          "invariant": "required:no garantizan",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:901",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:900",
+          "pass": true
+        },
+        {
+          "invariant": "number:1000",
+          "pass": true
+        },
+        {
+          "invariant": "number:-100",
+          "pass": true
+        },
+        {
+          "invariant": "number:-10",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-contributions",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:valor final 650",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado en total 700",
+          "pass": true
+        },
+        {
+          "invariant": "required:beneficio o pérdida -50",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportaciones",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:profit 150",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:650",
+          "pass": true
+        },
+        {
+          "invariant": "number:700",
+          "pass": true
+        },
+        {
+          "invariant": "number:-50",
+          "pass": true
+        },
+        {
+          "invariant": "number:-8",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-missing",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:No hay datos",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-foreign",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no están disponibles",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-future",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no están disponibles",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-decision",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:liquidez",
+          "pass": true
+        },
+        {
+          "invariant": "required:vender, mantener",
+          "pass": true
+        },
+        {
+          "invariant": "required:decisión es tuya",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:debes mantener",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:must hold",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-cause",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:desconocida",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:caused by",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:causada por",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-injection",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefinidas",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-fund",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:fondo",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-costs",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:costes",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-definition",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:rentabilidad",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-follow",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:900",
+          "pass": true
+        },
+        {
+          "invariant": "required:aportado",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-old-history",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefinidas",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-overlong",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefinidas",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-advanced-abort",
+      "language": "es",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-loss",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:final value 900",
+          "pass": true
+        },
+        {
+          "invariant": "required:total contributed 1,000",
+          "pass": true
+        },
+        {
+          "invariant": "required:profit or loss -100",
+          "pass": true
+        },
+        {
+          "invariant": "required:-10%",
+          "pass": true
+        },
+        {
+          "invariant": "required:contributed",
+          "pass": true
+        },
+        {
+          "invariant": "required:do not guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:901",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:900",
+          "pass": true
+        },
+        {
+          "invariant": "number:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "number:-100",
+          "pass": true
+        },
+        {
+          "invariant": "number:-10",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-contributions",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:final value 650",
+          "pass": true
+        },
+        {
+          "invariant": "required:total contributed 700",
+          "pass": true
+        },
+        {
+          "invariant": "required:profit or loss -50",
+          "pass": true
+        },
+        {
+          "invariant": "required:contributions",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:profit 150",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:650",
+          "pass": true
+        },
+        {
+          "invariant": "number:700",
+          "pass": true
+        },
+        {
+          "invariant": "number:-50",
+          "pass": true
+        },
+        {
+          "invariant": "number:-8",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-missing",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not enough valid",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-foreign",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-future",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-decision",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:liquidity",
+          "pass": true
+        },
+        {
+          "invariant": "required:sell, hold",
+          "pass": true
+        },
+        {
+          "invariant": "required:decision is yours",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:debes mantener",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:must hold",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-cause",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:unknown",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:caused by",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:causada por",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-injection",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefined",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-fund",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:fund",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-costs",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:costs",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-definition",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:return",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-follow",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:900",
+          "pass": true
+        },
+        {
+          "invariant": "required:contributed",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-old-history",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefined",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-overlong",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefined",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-beginner-abort",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-loss",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:final value 900",
+          "pass": true
+        },
+        {
+          "invariant": "required:total contributed 1,000",
+          "pass": true
+        },
+        {
+          "invariant": "required:profit or loss -100",
+          "pass": true
+        },
+        {
+          "invariant": "required:-10%",
+          "pass": true
+        },
+        {
+          "invariant": "required:contributed",
+          "pass": true
+        },
+        {
+          "invariant": "required:do not guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:901",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:900",
+          "pass": true
+        },
+        {
+          "invariant": "number:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "number:-100",
+          "pass": true
+        },
+        {
+          "invariant": "number:-10",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-contributions",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:final value 650",
+          "pass": true
+        },
+        {
+          "invariant": "required:total contributed 700",
+          "pass": true
+        },
+        {
+          "invariant": "required:profit or loss -50",
+          "pass": true
+        },
+        {
+          "invariant": "required:contributions",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:profit 150",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:650",
+          "pass": true
+        },
+        {
+          "invariant": "number:700",
+          "pass": true
+        },
+        {
+          "invariant": "number:-50",
+          "pass": true
+        },
+        {
+          "invariant": "number:-8",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-missing",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not enough valid",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-foreign",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-future",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-decision",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:liquidity",
+          "pass": true
+        },
+        {
+          "invariant": "required:sell, hold",
+          "pass": true
+        },
+        {
+          "invariant": "required:decision is yours",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:debes mantener",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:must hold",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-cause",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:unknown",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:caused by",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:causada por",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-injection",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefined",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-fund",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:fund",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-costs",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:costs",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-definition",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:return",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-follow",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:900",
+          "pass": true
+        },
+        {
+          "invariant": "required:contributed",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-old-history",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefined",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-overlong",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefined",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-intermediate-abort",
+      "language": "en",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-loss",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:final value 900",
+          "pass": true
+        },
+        {
+          "invariant": "required:total contributed 1,000",
+          "pass": true
+        },
+        {
+          "invariant": "required:profit or loss -100",
+          "pass": true
+        },
+        {
+          "invariant": "required:-10%",
+          "pass": true
+        },
+        {
+          "invariant": "required:contributed",
+          "pass": true
+        },
+        {
+          "invariant": "required:do not guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:901",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:900",
+          "pass": true
+        },
+        {
+          "invariant": "number:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "number:-100",
+          "pass": true
+        },
+        {
+          "invariant": "number:-10",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-contributions",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:final value 650",
+          "pass": true
+        },
+        {
+          "invariant": "required:total contributed 700",
+          "pass": true
+        },
+        {
+          "invariant": "required:profit or loss -50",
+          "pass": true
+        },
+        {
+          "invariant": "required:contributions",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:profit 150",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:650",
+          "pass": true
+        },
+        {
+          "invariant": "number:700",
+          "pass": true
+        },
+        {
+          "invariant": "number:-50",
+          "pass": true
+        },
+        {
+          "invariant": "number:-8",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-missing",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not enough valid",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-foreign",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-future",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:Synthetic Alpha",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-decision",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:liquidity",
+          "pass": true
+        },
+        {
+          "invariant": "required:sell, hold",
+          "pass": true
+        },
+        {
+          "invariant": "required:decision is yours",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:debes mantener",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:must hold",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-cause",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:unknown",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:caused by",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:causada por",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-injection",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefined",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-fund",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:fund",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-costs",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:costs",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-definition",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:return",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-follow",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:900",
+          "pass": true
+        },
+        {
+          "invariant": "required:contributed",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-old-history",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefined",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-overlong",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:predefined",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:900",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-advanced-abort",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-open-decline",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:10%",
+          "pass": true
+        },
+        {
+          "invariant": "required:20%",
+          "pass": true
+        },
+        {
+          "invariant": "required:no garantiza",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:recuperación garantizada",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:se recuperará",
+          "pass": true
+        },
+        {
+          "invariant": "number:10",
+          "pass": true
+        },
+        {
+          "invariant": "number:20",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-open-decline",
+      "language": "en",
+      "level": "advanced",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:10%",
+          "pass": true
+        },
+        {
+          "invariant": "required:20%",
+          "pass": true
+        },
+        {
+          "invariant": "required:does not guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:guaranteed recovery",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:will recover",
+          "pass": true
+        },
+        {
+          "invariant": "number:10",
+          "pass": true
+        },
+        {
+          "invariant": "number:20",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "es-annual-missing-year",
+      "language": "es",
+      "level": "intermediate",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:2020-12-31",
+          "pass": true
+        },
+        {
+          "invariant": "required:2021-12-31",
+          "pass": true
+        },
+        {
+          "invariant": "required:No hay tasa anual disponible para 2029",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:2029: ",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "en-real-purchase",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:share",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:purchased",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:buy now",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:order placed",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:you should buy",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    }
+  ]
+}
