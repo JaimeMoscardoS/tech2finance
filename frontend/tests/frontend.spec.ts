@@ -71,7 +71,7 @@ test('English navigation, assistant and simulated portfolio are translated', asy
   await page.goto('/');
   await page.getByRole('button', { name: 'English' }).click();
   await page.getByRole('button', { name: 'Explore', exact: true }).click();
-  await expect(page.getByText('Fictional funds for learning. These are not recommendations.')).toBeVisible();
+  await expect(page.getByText('Explore the available information and its limits. These are not recommendations.')).toBeVisible();
   await page.getByRole('button', { name: 'My portfolio', exact: true }).click();
   await page.getByRole('button', { name: 'Understand a decline' }).click();
   await expect(page.getByText(/past recovery does not guarantee another/)).toBeVisible();
@@ -152,7 +152,8 @@ test('explore transfers the chosen fictional instrument', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button',{name:'Explorar',exact:true}).click();
- await page.locator('.fund-card').nth(1).getByRole('button',{name:'Practicar con este ejemplo'}).click();
+ await page.getByRole('button',{name:/Fondo Horizonte/}).click();
+ await page.getByRole('button',{name:'Practicar con este fondo'}).click();
  await expect(page.getByLabel('Instrumento')).toHaveValue('demo-equity');
  await expect(page.locator('.sim-result')).toContainText('Fondo Horizonte');
 });

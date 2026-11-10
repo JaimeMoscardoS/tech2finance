@@ -59,6 +59,10 @@ def test_context_recomputes_and_has_no_unrelated_page_facts():
     assert 'portfolio' not in context
     selected = build_tutor_context({'page':'simulator', 'level':'beginner', 'language':'es', 'instrumentId':'bbva-mi-inversion-bolsa'})
     assert 'simulation' not in selected and selected['instrument']['dataKind'] == 'missing_history'
+    explore = build_tutor_context({'page':'explore', 'level':'advanced', 'language':'es', 'instrumentId':'caixabank-monetario-estandar'})
+    assert explore['instrument']['id'] == 'caixabank-monetario-estandar'
+    assert explore['instrument']['dataKind'] == 'annual_published_returns'
+    assert explore['instrument']['sources'] and 'simulation' not in explore
     with pytest.raises(DomainError):
         build_tutor_context({'page':'home', 'level':'beginner', 'language':'es', 'simulation':spec()})
     with pytest.raises(DomainError):

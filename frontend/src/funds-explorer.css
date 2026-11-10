@@ -1,0 +1,25 @@
+.funds-controls { display:flex; align-items:end; gap:20px; padding:18px; margin-bottom:20px; background:var(--surface-tint); border:1px solid var(--border); border-radius:14px; }
+.funds-controls label { display:grid; gap:7px; font-size:13px; font-weight:700; min-width:220px; }
+.funds-controls select { min-height:44px; padding:8px 12px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--ink); }
+.funds-controls p,.fund-intro,.fund-voice-note { color:var(--muted); font-size:13px; line-height:1.5; }
+.funds-layout { display:grid; grid-template-columns:minmax(220px, 300px) minmax(0,1fr); gap:16px; align-items:start; }
+.fund-list { display:grid; gap:8px; }
+.fund-list button { text-align:left; display:grid; gap:7px; padding:16px; background:var(--surface); color:var(--ink); border:1px solid var(--border); border-radius:10px; line-height:1.4; }
+.fund-list button.selected { border:2px solid var(--accent); background:var(--surface-tint); }
+.fund-list button span { font-size:12px; color:var(--muted); }
+.fund-detail { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; min-width:0; }
+.fund-detail h2 { font-size:27px; margin:10px 0; overflow-wrap:anywhere; }
+.fund-facts,.fund-identity { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:20px 0; }
+.fund-facts div,.fund-identity div { background:var(--surface-raised); border-radius:8px; padding:12px; overflow-wrap:anywhere; }
+.fund-facts dt,.fund-identity dt { font-size:12px; color:var(--muted); }
+.fund-facts dd,.fund-identity dd { margin:5px 0 0; font-weight:700; font-size:14px; }
+.fund-learning { border-top:1px solid var(--border); padding-top:18px; line-height:1.55; font-size:14px; }
+.fund-learning h3 { margin:0 0 8px; font-size:16px; }.fund-learning p { margin:8px 0; }.fund-learning h3:not(:first-child) { margin-top:20px; }
+.fund-table-wrap { overflow-x:auto; }.fund-learning table { border-collapse:collapse; width:100%; margin:12px 0; text-align:left; font-size:13px; }.fund-learning th,.fund-learning td { border-bottom:1px solid var(--border); padding:10px 8px; vertical-align:top; }
+.fund-source { margin:18px 0; font-size:13px; overflow-wrap:anywhere; }.fund-source a { color:var(--accent); }
+.fund-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }.fund-voice { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:10px 14px; border:1px solid var(--border); border-radius:8px; color:var(--ink); background:var(--surface); font-weight:700; }.fund-voice-note { margin-top:8px; }
+@media(max-width:760px) { .funds-controls { align-items:stretch; flex-direction:column; gap:8px; }.funds-controls label { min-width:0; }.funds-layout { grid-template-columns:1fr; }.fund-detail { padding:18px; }.fund-facts,.fund-identity { grid-template-columns:1fr 1fr; } }
+
+.fund-level { display:flex; align-items:center; flex-wrap:wrap; gap:10px 16px; margin-bottom:16px; font-size:13px; }.fund-level > span { font-weight:700; }.fund-level > div { display:flex; flex-wrap:wrap; gap:6px; }.fund-level button { min-height:44px; padding:8px 12px; border:1px solid var(--border); background:var(--surface); color:var(--ink); border-radius:8px; }.fund-level button[aria-pressed="true"] { background:var(--accent); color:var(--action-ink); border-color:var(--accent); font-weight:700; }.fund-level p { flex-basis:100%; color:var(--muted); line-height:1.4; }
+
+.annual-overview { border-top:1px solid var(--border); padding:18px 0; }.annual-overview h3 { font-size:16px; }.annual-overview p { font-size:13px; line-height:1.5; margin:8px 0; color:var(--muted); }.annual-bars { display:grid; gap:7px; margin:14px 0; }.annual-row { display:grid; grid-template-columns:42px minmax(80px,1fr) 65px; gap:8px; align-items:center; font-size:12px; }.annual-row strong { text-align:right; }.annual-track { display:block; position:relative; height:14px; background:linear-gradient(to right,transparent 49.8%,var(--border) 49.8%,var(--border) 50.2%,transparent 50.2%); }.annual-track span { display:block; height:100%; position:absolute; background:var(--accent); }.annual-track .positive { left:50%; }.annual-track .negative { right:50%; background:#bb765e; }

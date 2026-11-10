@@ -66,3 +66,8 @@ Este ejemplo es local y manual: no hay histórico diario, proveedor conectado ni
 El contrato operativo, validaciones y errores están en [backend-contexto](backend-contexto.md). El cliente no envía al tutor resultados, fuentes ni saldos calculados; envía especificaciones y el servidor recalcula. `GET /api/catalog` devuelve `schemaVersion: "1.0"`, `banks`, `instruments` y `annualHistory`. `POST /api/simulations` devuelve el resultado temporal, identificador, moneda, momento de aportación, fuentes y supuestos; `POST /api/declines` devuelve el informe y `POST /api/tutor` devuelve `TutorReply` por reglas del servidor. No hay integración con proveedores externos ni datos reales de clientes.
 
 La práctica guiada utiliza dos solicitudes de simulación independientes. La interfaz compara los resultados de aportaciones, plazo o activos bajo las condiciones indicadas en [contexto](contexto-proyecto.md#práctica-guiada-con-dinero-ficticio). Solo la especificación de la opción A o B seleccionada se transmite al tutor; el servidor vuelve a calcular sus hechos. Los resultados obsoletos se invalidan y un error no activa el modo local automáticamente. No se crea una nueva ruta ni una cartera a partir de la comparación.
+
+
+### Contexto del fondo en Explorar
+
+En esta rama, el cliente envía el identificador del fondo seleccionado al tutor por reglas en la pantalla `explore`. El servidor reconstruye identidad y fuentes desde el catálogo, sin aceptar cifras del cliente; no añade una simulación. Las vistas de detalle comparten esa selección y los mismos datos. Esta capacidad no conecta un LLM ni un proveedor de voz.

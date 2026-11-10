@@ -133,7 +133,7 @@ def build_tutor_context(context):
         if len(set(ids)) > 1 or decline and decline.get('language') != language:
             raise ValueError
         result = {'page': page, 'level': level, 'language': language}
-        if page == 'simulator' and ids:
+        if page in ('explore', 'simulator') and ids:
             inst = _instrument(ids[0])
             result['instrument'] = {'id': ids[0], 'name': inst['name'][language], 'currency': inst['currency'],
                                     'dataKind': 'annual_published_returns' if inst['dataStatus'] == 'annual_history' else inst['dataStatus'], 'sources': _source(inst, language)}

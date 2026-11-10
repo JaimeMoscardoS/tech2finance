@@ -175,3 +175,17 @@ def test_bridge_rejects_excess_concurrency():
 
 def test_unknown_host_is_rejected():
     assert client.get("/api/health", headers={"host": "attacker.example"}).status_code == 400
+
+
+def test_explore_tutor_receives_selected_catalog_fund(monkeypatch):
+    seen = {}
+    def capture(payload):
+        seen.update(payload['context'])
+        return {'text': 'Respuesta de prueba', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'fund', 'sources': []}
+    monkeypatch.setattr('backend.app.reply', capture)
+    response = client.post('/api/tutor', json={'message': '¿Qué es este fondo?', 'context': {'page': 'explore', 'level': 'advanced', 'language': 'es', 'instrumentId': 'caixabank-monetario-estandar'}})
+    assert response.status_code == 200
+    assert seen['instrument']['id'] == 'caixabank-monetario-estandar'
+    assert seen['instrument']['dataKind'] == 'annual_published_returns'
+    assert seen['instrument']['sources'][0]['url'].startswith('https://www.caixabankassetmanagement.com/')
+    assert 'simulation' not in seen
