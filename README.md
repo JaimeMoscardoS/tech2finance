@@ -8,6 +8,8 @@ La experiencia busca que una persona entienda productos y riesgos, practique con
 
 La demo no usa dinero ni cuentas reales. Los datos históricos deben ser verificables; los escenarios futuros no son predicciones. La pausa no bloquea al usuario ni promete recuperación. Lee el [contexto completo](docs/contexto-proyecto.md) para conocer la idea, el recorrido y sus límites.
 
+La práctica guiada permite comparar aportaciones, plazos o activos ficticios mediante dos ejemplos calculados. El histórico anual publicado se limita a sus cinco años disponibles; las comparaciones no son recomendaciones ni garantizan resultados. El [frontend](frontend/README.md#práctica-guiada) explica cómo recorrerla.
+
 | Número | Área | Carpetas |
 | --- | --- | --- |
 | 1 | Interfaz y experiencia | [frontend](frontend/) |

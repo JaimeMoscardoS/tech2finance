@@ -33,6 +33,12 @@ Abre el chat desde la navegación o el botón de la barra superior. El micrófon
 
 En la cartera ficticia, **Entender una caída** analiza los puntos de ejemplo; en un resultado válido del simulador, **Entender las caídas** analiza la evolución del instrumento sin las aportaciones. Se muestran los episodios observados y sus límites, no causas ni noticias inventadas. El objetivo, horizonte y necesidad de liquidez son opcionales y no constituyen una evaluación de idoneidad. La persona puede cerrar y continuar en la demo en cualquier momento.
 
+## Práctica guiada
+
+Desde la tarjeta de práctica de inicio o el enlace del simulador se pueden comparar dos ejemplos: cambiar las aportaciones de un mismo instrumento, comparar plazos de una serie ficticia sin aportaciones o comparar dos activos ficticios con condiciones iguales. Los importes, periodos e instrumentos son editables. El ejemplo histórico anual mantiene cinco años y las aportaciones se suman al cierre; los fondos sin histórico no están disponibles. Las comparaciones muestran capital, aportaciones, ganancia o pérdida, procedencia y límites, sin predecir resultados ni demostrar diversificación.
+
+Cada pareja se calcula en el modo seleccionado. Al editar una entrada, cambiar de lección o de modo se descartan los resultados anteriores; si falla el servidor se muestra el error y no se calcula silenciosamente en local. Se puede seleccionar A o B para preguntar al tutor sobre ese ejemplo. La prueba conceptual es opcional y no puntúa por obtener ganancias. El laboratorio no compra ni vende activos y no utiliza dinero real.
+
 El modo local funciona sin backend; el modo servidor usa las mismas reglas del tutor mediante un proceso Node local. Ninguno es un LLM ni conecta Claude, ElevenLabs o un banco. Los contratos para futuras integraciones están en [contratos](../docs/contratos.md#conversación-y-voz-propuesta); cualquier clave futura debe permanecer en el servidor, fuera del navegador y de Git.
 
 ## Componentes y fuentes

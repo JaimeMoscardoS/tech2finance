@@ -10,6 +10,8 @@ La rama integra una API local FastAPI de demostración y el frontend React/TypeS
 
 `POST /api/declines` acepta base `instrument` con identificador, periodos e idioma, o `portfolio_demo` con idioma. La caída del instrumento usa su rendimiento sin aportaciones. `POST /api/tutor` recibe pregunta, historial acotado y pantalla, nivel, idioma, parámetros opcionales de simulación y caída y decisión opcional. El servidor reconstruye hechos y fuentes: el cliente no aporta saldos ni resultados. El tutor devuelve `mode: api` y `provider: server_rules`; requiere Node >= 22.12 con soporte de `--experimental-strip-types`.
 
+La práctica guiada usa dos llamadas a `/api/simulations` con especificaciones independientes; no añade una ruta ni envía al servidor la comparación calculada en el navegador. Solo la opción activa A o B se incluye como especificación en el contexto del tutor. El modo local utiliza los mismos datos de ejemplo y respeta la elección explícita de modo.
+
 Los errores se devuelven como `{error:{code,message}}`; hay 404 para instrumento desconocido, 409 para histórico ausente, 422 para validación y 503 si falla el tutor. El cliente aplica límite de 10 segundos, cancelación y validación de respuesta. `shared/demo-data.json` es la fuente común para modo local y servidor. Las muestras ficticias no son predicciones, y la fuente publicada anual conserva sus restricciones de licencia y redondeo en [contratos](contratos.md).
 
 ## Ejecución y estado

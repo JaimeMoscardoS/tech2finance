@@ -52,11 +52,13 @@ Pueden añadirse escenarios futuros si hay tiempo y el equipo define un modelo v
 
 La [propuesta técnica del simulador histórico](simulador-historico.md) describe el motor, las fuentes candidatas y los permisos pendientes; la referencia del módulo precisa la implementación local.
 
-### Mejora pendiente: practicar con dinero ficticio
+### Práctica guiada con dinero ficticio
 
-**Qué es:** desarrollar una experiencia práctica con capital virtual más interactiva y útil, con menos dependencia de un recorrido estático. El simulador actual ya permite editar parámetros; esta mejora plantea ampliar la experiencia y todavía está pendiente de definir y desarrollar.
+**Qué es:** una experiencia de tres experimentos guiados con capital ficticio, accesible desde inicio y el simulador. Permite editar los valores, comparar dos resultados calculados y comprobar una idea sin puntuar en función del beneficio.
 
-Como ideas iniciales, explorar experimentos comparables, decisiones y objetivos guiados, y comentarios de aprendizaje adaptados al contexto a partir de resultados calculados. Son propuestas por concretar, no funcionalidades implementadas. La práctica no empleará dinero real ni presentará los resultados como predicciones o garantías.
+En aportaciones se contrasta el mismo instrumento y plazo con y sin flujo periódico; la aportación de B debe ser positiva para que exista una diferencia, y el ejemplo anual mantiene sus cinco cierres publicados. En horizonte se comparan plazos de una misma serie mensual ficticia sin aportaciones. En activos se comparan dos series mensuales ficticias bajo los mismos importes y plazo; esto no demuestra diversificación. El capital inicial puede ser cero, como también la aportación en activos. El asistente recibe la opción A o B seleccionada, no una cartera inventada a partir de ambas. El modo servidor utiliza las rutas de simulación existentes y el local sus funciones equivalentes; no hay cambio automático de modo ante errores.
+
+Cada resultado presenta su procedencia y condiciones. Estas comparaciones no usan dinero real, no son recomendaciones ni predicen o garantizan resultados. La evolución de un juego completo con decisiones de compra y venta sigue siendo una propuesta, no una funcionalidad de esta práctica.
 
 ## Pausa antes de vender
 
