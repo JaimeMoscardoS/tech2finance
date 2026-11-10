@@ -2,7 +2,15 @@
 
 ## Qué es
 
-Registro de la comprobación en Windows de la rama de trabajo, usando la API propia en 8097 y frontend en 5177. No acredita despliegue, funcionamiento de hardware de voz ni ejecución en Linux o Node 24. La demo anterior en 5175/8095 no se ha detenido. Las comprobaciones locales indicadas pasaron tras corregir los cuatro fallos iniciales; la revisión independiente sigue pendiente.
+Registro de la comprobación en Windows de la rama de trabajo, usando la API propia en 8097 y frontend en 5177. En `05bdc69`, la suite completa pasó 61/61, frontend/tutor 48/48, API 35/35 y corpus 116/116; el guion de 24 preguntas se ensayó en pantalla y por API. Las revisiones independientes R2 de núcleo e interfaz alcanzaron 8,8/10 cada una. No acredita despliegue, hardware de voz ni ejecución en Linux o Node 24. La CI aprobada de la base `6f56d5c` no prueba BancoT2F; su CI de funcionalidad sigue pendiente.
+
+## Comprobación posterior a las correcciones de revisión
+
+Sobre `05bdc69d63ec2682a13e0e7a580909661927a77c`, una ejecución completa y serial de Playwright pasó **61/61**, incluidas las dos pruebas de ensayo de 24 preguntas y cuatro casos nuevos de selección en Explorar, en modo local y servidor. En la misma versión pasaron **48/48** pruebas de frontend/tutor y su compilación, **35/35** de API y **116/116** casos del corpus. La matriz de 24 preguntas por API se repitió y revisó. La compilación conserva avisos Rolldown y API una advertencia Starlette. Esta ejecución no repitió las 81 pruebas Python combinadas, `pip check`, la procedencia ni el lanzador de la ejecución anterior; esas cifras se mantienen como evidencia de la instantánea previa.
+
+Las revisiones R2 de núcleo e interfaz están superadas sin hallazgos críticos o altos abiertos. Una FAQ visible explica que no se utiliza dinero real; el tutor por reglas no reconoce todas las formulaciones sobre ello. La voz física y el uso con lectores de pantalla siguen sin comprobarse.
+
+## Comprobaciones de la instantánea anterior `2aeb6a0`
 
 | Comprobación | Resultado observado |
 | --- | --- |
@@ -26,7 +34,7 @@ La API calculó 892,63889790075 EUR, pérdida −107,36110209925 EUR y −10,736
 3. `frontend.spec.ts:424`: tras cambiar idioma no encuentra `Listen` para leer la respuesta guardada. [Contexto](frontend-saved-Spanish-ans-0da55-ictation-follows-English-UI.md).
 4. `server.spec.ts:23`: «How much did I contribute?» devuelve indisponibilidad para banco o producto en lugar del importe esperado. [Contexto](server-real-server-calcula-2a880-ecline-and-contextual-tutor.md).
 
-La segunda ejecución completa pasó las cuatro pruebas y las otras 51. Los contextos anteriores se conservan como evidencia de la primera ejecución; la revisión independiente sigue pendiente.
+La segunda ejecución completa pasó las cuatro pruebas y las otras 51. Los contextos anteriores se conservan como evidencia de la primera ejecución.
 
 ## Capturas
 

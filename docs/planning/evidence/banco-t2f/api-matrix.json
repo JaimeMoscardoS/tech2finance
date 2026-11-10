@@ -25,7 +25,7 @@
       },
       "assessment": "PASS",
       "expected": "Entidad ficticia / fictional institution",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 2,
@@ -51,7 +51,7 @@
       },
       "assessment": "PASS",
       "expected": "0 EUR mantenimiento, m?nimos 0, sin cuenta u ?rdenes reales",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 3,
@@ -78,7 +78,7 @@
       },
       "assessment": "PASS",
       "expected": "75 pb = 0,75 % anual, condiciones informativas",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 4,
@@ -115,7 +115,7 @@
       },
       "assessment": "PASS",
       "expected": "Comisiones no descontadas, seguimiento de caso 3",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 5,
@@ -148,7 +148,7 @@
       },
       "assessment": "PASS",
       "expected": "892,64 EUR; ?107,36 EUR; ?10,74 % acumulado",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 6,
@@ -181,7 +181,7 @@
       },
       "assessment": "PASS",
       "expected": "Causa desconocida, sin noticias verificadas",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 7,
@@ -220,7 +220,7 @@
       },
       "assessment": "PASS",
       "expected": "Rentabilidad publicada de 2022 ?0,67 %",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 8,
@@ -247,7 +247,7 @@
       },
       "assessment": "PASS",
       "expected": "Hist?rico ausente, sin simular",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 9,
@@ -273,7 +273,7 @@
       },
       "assessment": "PASS",
       "expected": "Sin previsi?n ni garant?a futura",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 10,
@@ -306,7 +306,7 @@
       },
       "assessment": "PASS",
       "expected": "Liquidez, alternativas y decisi?n del usuario sin garant?a",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 11,
@@ -333,7 +333,7 @@
       },
       "assessment": "PASS",
       "expected": "Cat?logo e instrumento seleccionado",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 12,
@@ -360,7 +360,7 @@
       },
       "assessment": "PASS",
       "expected": "Productos externos conservan identidad y procedencia",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 1,
@@ -386,7 +386,7 @@
       },
       "assessment": "PASS",
       "expected": "Entidad ficticia / fictional institution",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 2,
@@ -412,7 +412,7 @@
       },
       "assessment": "PASS",
       "expected": "0 EUR mantenimiento, m?nimos 0, sin cuenta u ?rdenes reales",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 3,
@@ -439,7 +439,7 @@
       },
       "assessment": "PASS",
       "expected": "75 pb = 0,75 % anual, condiciones informativas",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 4,
@@ -476,7 +476,7 @@
       },
       "assessment": "PASS",
       "expected": "Comisiones no descontadas, seguimiento de caso 3",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 5,
@@ -509,7 +509,7 @@
       },
       "assessment": "PASS",
       "expected": "892,64 EUR; ?107,36 EUR; ?10,74 % acumulado",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 6,
@@ -542,7 +542,7 @@
       },
       "assessment": "PASS",
       "expected": "Causa desconocida, sin noticias verificadas",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 7,
@@ -581,7 +581,7 @@
       },
       "assessment": "PASS",
       "expected": "Rentabilidad publicada de 2022 ?0,67 %",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 8,
@@ -608,7 +608,7 @@
       },
       "assessment": "PASS",
       "expected": "Hist?rico ausente, sin simular",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 9,
@@ -634,7 +634,7 @@
       },
       "assessment": "PASS",
       "expected": "Sin previsi?n ni garant?a futura",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 10,
@@ -667,7 +667,7 @@
       },
       "assessment": "PASS",
       "expected": "Liquidez, alternativas y decisi?n del usuario sin garant?a",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 11,
@@ -694,7 +694,7 @@
       },
       "assessment": "PASS",
       "expected": "Cat?logo e instrumento seleccionado",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     },
     {
       "case": 12,
@@ -721,7 +721,7 @@
       },
       "assessment": "PASS",
       "expected": "Productos externos conservan identidad y procedencia",
-      "assessmentScope": "Respuesta textual HTTP observada; no acredita interfaz ni hardware."
+      "assessmentScope": "Respuesta textual HTTP observada y revisada; no acredita interfaz ni hardware."
     }
   ],
   "simulation": {
