@@ -1,0 +1,295 @@
+{
+  "schemaVersion": "1.0",
+  "banks": [
+    {
+      "id": "demo",
+      "name": {
+        "es": "Entidad ficticia",
+        "en": "Fictional institution"
+      }
+    },
+    {
+      "id": "bbva",
+      "name": {
+        "es": "BBVA",
+        "en": "BBVA"
+      }
+    },
+    {
+      "id": "santander",
+      "name": {
+        "es": "Santander",
+        "en": "Santander"
+      }
+    },
+    {
+      "id": "caixabank",
+      "name": {
+        "es": "CaixaBank",
+        "en": "CaixaBank"
+      }
+    }
+  ],
+  "instruments": [
+    {
+      "instrumentId": "demo-mixed",
+      "assetType": "fund",
+      "assetClass": "mixed",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "Fondo Equilibrio",
+        "en": "Balance Fund"
+      },
+      "returns": [
+        0.015,
+        0.012,
+        -0.025,
+        0.02,
+        -0.085,
+        -0.045,
+        0.03,
+        0.025,
+        0.01,
+        0.02,
+        -0.012,
+        0.018
+      ]
+    },
+    {
+      "instrumentId": "demo-equity",
+      "assetType": "fund",
+      "assetClass": "equity",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "Fondo Horizonte",
+        "en": "Horizon Fund"
+      },
+      "returns": [
+        0.03,
+        -0.04,
+        0.045,
+        -0.08,
+        0.06,
+        0.01,
+        -0.03,
+        0.05,
+        -0.02,
+        0.04,
+        0.025,
+        -0.015
+      ]
+    },
+    {
+      "instrumentId": "demo-fixed",
+      "assetType": "fund",
+      "assetClass": "fixed",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "Fondo Estabilidad",
+        "en": "Stability Fund"
+      },
+      "returns": [
+        0.003,
+        0.004,
+        -0.006,
+        0.005,
+        -0.008,
+        0.002,
+        0.004,
+        0.003,
+        -0.002,
+        0.004,
+        0.003,
+        0.002
+      ]
+    },
+    {
+      "instrumentId": "demo-etf",
+      "assetType": "etf",
+      "assetClass": "equity",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "ETF Mercado ficticio",
+        "en": "Fictional Market ETF"
+      },
+      "returns": [
+        0.02,
+        -0.03,
+        0.04,
+        -0.05,
+        0.03,
+        0.02,
+        -0.01,
+        0.03,
+        -0.02,
+        0.02,
+        0.01,
+        0.005
+      ]
+    },
+    {
+      "instrumentId": "demo-stock",
+      "assetType": "stock",
+      "assetClass": "equity",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "Acción Empresa ficticia",
+        "en": "Fictional Company share"
+      },
+      "returns": [
+        0.05,
+        -0.08,
+        0.06,
+        -0.04,
+        0.03,
+        -0.02,
+        0.07,
+        -0.05,
+        0.02,
+        0.04,
+        -0.03,
+        0.01
+      ]
+    },
+    {
+      "instrumentId": "bbva-mi-inversion-bolsa",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "bbva",
+      "manager": "BBVA ASSET MANAGEMENT SGIIC",
+      "relationship": "own",
+      "identifier": "ES0119178004",
+      "shareClass": null,
+      "currency": null,
+      "sourceUrl": "https://www.cnmv.es/Portal/consultas/iic/fondo?nif=V86954104",
+      "sourceDate": "2026-11-09",
+      "dataStatus": "missing_history",
+      "name": {
+        "es": "BBVA MI INVERSION BOLSA, FI",
+        "en": "BBVA MI INVERSION BOLSA, FI"
+      }
+    },
+    {
+      "instrumentId": "santander-rf-ahorro",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "santander",
+      "manager": "Santander Asset Management",
+      "relationship": "own",
+      "identifier": "ES0112793007",
+      "shareClass": null,
+      "currency": null,
+      "sourceUrl": "https://www.santanderassetmanagement.es/fondos-de-inversion/fondos-de-inversion-renta-fija",
+      "sourceDate": "2026-11-09",
+      "dataStatus": "missing_history",
+      "name": {
+        "es": "Santander RF Ahorro",
+        "en": "Santander RF Ahorro"
+      }
+    },
+    {
+      "instrumentId": "caixabank-monetario-estandar",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "caixabank",
+      "manager": "CaixaBank Asset Management",
+      "relationship": "own",
+      "identifier": "ES0138045002",
+      "shareClass": "Estándar",
+      "currency": "EUR",
+      "sourceUrl": "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
+      "sourceDate": "2026-11-09",
+      "dataStatus": "annual_history",
+      "name": {
+        "es": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR",
+        "en": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR"
+      }
+    }
+  ],
+  "annualHistory": {
+    "instrumentId": "caixabank-monetario-estandar",
+    "kind": "annual_published_returns",
+    "sourceUrl": "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
+    "sourceDate": "2026-11-09",
+    "baseline": "2020-12-31",
+    "currency": "EUR",
+    "returns": [
+      {
+        "year": 2021,
+        "rate": -0.0053
+      },
+      {
+        "year": 2022,
+        "rate": -0.0067
+      },
+      {
+        "year": 2023,
+        "rate": 0.0243
+      },
+      {
+        "year": 2024,
+        "rate": 0.0297
+      },
+      {
+        "year": 2025,
+        "rate": 0.0153
+      }
+    ]
+  },
+  "portfolioPoints": [
+    1000,
+    1032,
+    1010,
+    1040,
+    1026,
+    1060,
+    1045,
+    1088,
+    1072,
+    1103,
+    1084,
+    1110,
+    1080,
+    1093
+  ]
+}

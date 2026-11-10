@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -11,6 +11,7 @@ import {
   Leaf,
   LockKeyhole,
   Menu,
+  Mic,
   MessageCircle,
   Moon,
   ShieldCheck,
@@ -23,7 +24,8 @@ import {
 import CountUp from "./CountUp";
 import { simulate } from "./demo";
 import { annualHistory, replayAnnual } from "./annual-history";
-import { instruments, type Instrument } from "./catalog";
+import { banks as localBanks, instruments as localInstruments, type Instrument } from "./catalog";
+import { requestJson, isCatalog, isSimulation, isDecline, serverTutorProvider, type Catalog, type SimulationSpec, type DeclineSpec } from "./server-api";
 import InvestmentChart from "./LazyInvestmentChart";
 import Simulator, { type FieldError } from "./Simulator";
 import { MAX_SIMULATION_AMOUNT } from "./simulation-types";
@@ -31,6 +33,7 @@ import { copy, type Language } from "./copy";
 import { analyzeDecline, type DeclineReport, type DecisionContext, type TutorContext } from "../../tutor-ia/src/index";
 import { portfolioPoints } from "./portfolio-demo";
 import AssistantPanel from "./AssistantPanel";
+import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
 
 type Page = "home" | "explore" | "simulator" | "portfolio";
@@ -50,11 +53,25 @@ export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(
     () => saved("t2f-theme", ["light", "dark"], "light") as "light" | "dark",
   );
+  const [mode, setMode] = useState<"server" | "local">(() => saved("t2f-data-mode", ["server", "local"], "server") as "server" | "local");
+  const [catalog, setCatalog] = useState<Catalog | null>(() => saved("t2f-data-mode", ["server", "local"], "server") === "local" ? {schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,annualHistory} : null);
+  const catalogMode = useRef<"server" | "local" | null>(saved("t2f-data-mode", ["server", "local"], "server") === "local" ? "local" : null);
+  const [serverError, setServerError] = useState(false);
+  const [serverLoading, setServerLoading] = useState(false);
+  const [operationPending, setOperationPending] = useState(false);
+  const retryAction = useRef<(() => void) | null>(null);
+  const [retry, setRetry] = useState(0);
+  const simulationRequest = useRef<AbortController | null>(null);
+  const simulationGeneration = useRef(0);
+  const declineRequest = useRef<AbortController | null>(null);
+  const declineGeneration = useRef(0);
+  const [declineSpec, setDeclineSpec] = useState<DeclineSpec | undefined>();
   const [page, setPage] = useState<Page>("home"),
     [level, setLevel] = useState<Level>("beginner"),
     [levelOpen, setLevelOpen] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [assistant, setAssistant] = useState(false),
+    [voiceAssistant, setVoiceAssistant] = useState(false),
     [pause, setPause] = useState<DeclineReport | null>(null);
   const [decision,setDecision]=useState<DecisionContext>({needsLiquidity:"unknown"});
   const [assistantDecline,setAssistantDecline]=useState<DeclineReport | undefined>();
@@ -71,14 +88,14 @@ export default function App() {
           annual: number;
         })
       | null
-    >(() => ({
+    >(() => saved("t2f-data-mode", ["server", "local"], "server") === "local" ? ({
       ...simulate(500, 50, 12),
       instrumentId: "demo-mixed",
       initial: 500,
       monthly: 50,
       months: 12,
       annual: 0,
-    })),
+    }) : null),
     [error, setError] = useState<FieldError>(null),
     [notice, setNotice] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState("demo-mixed");
@@ -90,11 +107,14 @@ export default function App() {
     document.addEventListener("keydown", close);
     return () => document.removeEventListener("keydown", close);
   }, [levelOpen]);
+  const instruments = catalog?.instruments ?? [];
   const selected = instruments.find(
     (item) => item.instrumentId === selectedId,
-  )!;
+  ) ?? localInstruments[0];
   const modalRef = useRef<HTMLElement>(null),
     assistantRef = useRef<HTMLElement>(null),
+    voiceRef = useRef<HTMLElement>(null),
+    voiceTriggerRef = useRef<HTMLElement | null>(null),
     navRef = useRef<HTMLElement>(null),
     menuButtonRef = useRef<HTMLButtonElement>(null),
     assistantTriggerRef = useRef<HTMLElement | null>(null),
@@ -125,13 +145,9 @@ export default function App() {
     } catch {}
   }, [language, theme]);
   useEffect(() => {
-    if (!pause && !assistant) return;
-    const panel = pause ? modalRef.current : assistantRef.current;
-    const previous = pause
-      ? document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null
-      : assistantTriggerRef.current;
+    if (!pause && !assistant && !voiceAssistant) return;
+    const panel = pause ? modalRef.current : voiceAssistant ? voiceRef.current : assistantRef.current;
+    const previous = pause ? pauseTriggerRef.current : voiceAssistant ? voiceTriggerRef.current : assistantTriggerRef.current;
     const items = () =>
       Array.from(
         panel?.querySelectorAll<HTMLElement>(
@@ -141,7 +157,7 @@ export default function App() {
     items()[0]?.focus();
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        pause ? setPause(null) : setAssistant(false);
+        pause ? setPause(null) : voiceAssistant ? setVoiceAssistant(false) : setAssistant(false);
         return;
       }
       if (e.key !== "Tab") return;
@@ -160,7 +176,7 @@ export default function App() {
       document.removeEventListener("keydown", key);
       previous?.focus();
     };
-  }, [pause, assistant]);
+  }, [pause, assistant, voiceAssistant]);
   useEffect(() => {
     if (!mobileNav) return;
     const items = () =>
@@ -193,6 +209,19 @@ export default function App() {
       menuButtonRef.current?.focus();
     };
   }, [mobileNav]);
+  useEffect(() => {
+    try { localStorage.setItem("t2f-data-mode", mode); } catch {}
+    simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort();
+    setResult(null); setPause(null); setAssistantDecline(undefined); setDeclineSpec(undefined); setServerError(false); setOperationPending(false); retryAction.current = null;
+    catalogMode.current = mode === "local" ? "local" : null;
+    if (mode === "local") { setCatalog({schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,annualHistory}); setServerLoading(false); return; }
+    setCatalog(null); setServerLoading(true); const controller = new AbortController();
+    requestJson("/api/catalog", isCatalog, undefined, controller.signal).then(data => { if (!controller.signal.aborted) {catalogMode.current = "server";setCatalog(data);setServerLoading(false);} }).catch(() => {if (!controller.signal.aborted) {setServerError(true);setServerLoading(false);}});
+    return () => controller.abort();
+  }, [mode, retry]);
+  useEffect(() => () => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); }, []);
+  useEffect(() => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false); }, [initial, monthly, annual, months, mode, language]);
+  useEffect(() => { if (catalog && catalogMode.current === mode) { const item = catalog.instruments.find(i => i.instrumentId === selectedId) ?? catalog.instruments[0]; selectInstrument(item); } }, [catalog, mode]);
   const points = portfolioPoints;
   const nav = [
     { key: "home" as const, icon: Grid2X2 },
@@ -224,6 +253,7 @@ export default function App() {
     },
   ];
   const choose = (p: Page) => {
+    if (p !== "simulator") { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false); }
     setPage(p);
     if (mobileNav) {
       setMobileNav(false);
@@ -241,6 +271,12 @@ export default function App() {
     if (mobileNav) setMobileNav(false);
     setAssistant(true);
   };
+  const openVoice = () => {
+    setAssistantDecline(undefined);
+    voiceTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setVoiceAssistant(true);
+  };
+  const talkDecline = () => { if (!pause) return; setAssistantDecline(pause); setPause(null); voiceTriggerRef.current=pauseTriggerRef.current; setVoiceAssistant(true); };
   const closeMenu = () => {
     setMobileNav(false);
     menuButtonRef.current?.focus();
@@ -252,79 +288,33 @@ export default function App() {
     if (item.dataStatus === "fictional" && !valid(monthly, false)) return "monthly";
     return null;
   }
-  function selectInstrument(item: Instrument) {
-    setSelectedId(item.instrumentId);
-    setResult(null);
-    setError(null);
-    const invalid = validateInputs(item);
-    if (invalid) { setError(invalid); return; }
-    try {
-      const outcome =
-        item.dataStatus === "annual_history"
-          ? replayAnnual(Number(initial), Number(annual))
-          : item.dataStatus === "fictional" && item.returns && months.trim()
-            ? simulate(
-                Number(initial),
-                Number(monthly),
-                Number(months),
-                item.returns,
-              )
-            : null;
-      if (outcome)
-        setResult({
-          ...outcome,
-          instrumentId: item.instrumentId,
-          initial: Number(initial),
-          monthly: Number(monthly),
-          annual: Number(annual),
-          months: Number(months),
-        });
-    } catch {
-      setError("general");
-    }
+  function specFor(item: Instrument): SimulationSpec { return {instrumentId:item.instrumentId, initial:Number(initial), recurringContribution:Number(item.dataStatus === "annual_history" ? annual : monthly), periods:item.dataStatus === "annual_history" ? 5 : Number(months)}; }
+  async function calculate(item: Instrument) {
+    simulationRequest.current?.abort(); const controller = new AbortController(); simulationRequest.current=controller; const id=++simulationGeneration.current;
+    setResult(null); setServerError(false); setOperationPending(mode === "server"); retryAction.current = () => { void calculate(item); }; const invalid = validateInputs(item); if (invalid) {setError(invalid);setOperationPending(false);return;} setError(null); if (item.dataStatus === "missing_history") {setOperationPending(false);return;}
+    const spec=specFor(item);
+    try {const outcome = mode === "server" ? await requestJson("/api/simulations", isSimulation, spec, controller.signal) : item.dataStatus === "annual_history" ? replayAnnual(spec.initial,spec.recurringContribution) : item.returns ? simulate(spec.initial,spec.recurringContribution,spec.periods,item.returns) : null;
+      if (!outcome || ("instrumentId" in outcome && outcome.instrumentId !== item.instrumentId)) throw new Error("Invalid simulation");
+      if (id === simulationGeneration.current && !controller.signal.aborted) setResult({...outcome,instrumentId:item.instrumentId,initial:spec.initial,monthly:Number(monthly),annual:Number(annual),months:Number(months)});
+    } catch { if (id === simulationGeneration.current && !controller.signal.aborted) { if(mode === "server") setServerError(true); else setError("general"); } } finally {if(id === simulationGeneration.current) setOperationPending(false);}
   }
-  function run(e: FormEvent) {
-    e.preventDefault();
-    const invalid = validateInputs(selected);
-    if (invalid) { setResult(null); setError(invalid); return; }
-    try {
-      const outcome =
-        selected.dataStatus === "annual_history"
-          ? replayAnnual(Number(initial), Number(annual))
-          : selected.dataStatus === "fictional" &&
-              selected.returns &&
-              months.trim()
-            ? simulate(
-                Number(initial),
-                Number(monthly),
-                Number(months),
-                selected.returns,
-              )
-            : null;
-      if (!outcome) throw Error();
-      setResult({
-        ...outcome,
-        instrumentId: selected.instrumentId,
-        initial: Number(initial),
-        monthly: Number(monthly),
-        annual: Number(annual),
-        months: Number(months),
-      });
-      setError(null);
-    } catch {
-      setResult(null);
-      setError("general");
-    }
-  }
+  function selectInstrument(item: Instrument) { declineGeneration.current++; declineRequest.current?.abort(); setSelectedId(item.instrumentId); setError(null); void calculate(item); }
+  function run(e: FormEvent) { e.preventDefault(); void calculate(selected); }
   const source = selected.sourceUrl ? [{label:language === "es" ? "Ficha oficial" : "Official product page",url:selected.sourceUrl,checkedAt:selected.sourceDate ?? undefined}] : [];
   const validResult = page === "simulator" && result?.instrumentId === selected.instrumentId ? result : null;
   const tutorContext: TutorContext = {page,level,language,
     ...(page === "simulator" ? {instrument:{id:selected.instrumentId,name:selected.name[language],currency:selected.currency,dataKind:selected.dataStatus === "annual_history" ? "annual_published_returns" : selected.dataStatus,sources:source}} : {}),
-    ...(validResult ? {simulation:{kind:validResult.kind,initial:validResult.initial,recurringContribution:validResult.kind === "annual_history" ? validResult.annual : validResult.monthly,contributionTiming:validResult.kind === "annual_history" ? "year_end_after_return" : "month_start",periods:validResult.kind === "annual_history" ? 5 : validResult.months,finalValue:validResult.value,totalContributed:validResult.contributed,profit:validResult.profit,simpleReturnPercent:validResult.simpleReturnPercent,instrumentReturnPercent:validResult.timeline[validResult.timeline.length-1].instrumentReturnPercent,...(validResult.kind === "annual_history" ? {periodStart:annualHistory.baseline,periodEnd:validResult.timeline[validResult.timeline.length-1].date ?? undefined,annualReturns:annualHistory.returns.map(row=>({year:row.year,ratePercent:row.rate*100}))} : {})}} : {}),
+    ...(validResult ? {simulation:{kind:validResult.kind,initial:validResult.initial,recurringContribution:validResult.kind === "annual_history" ? validResult.annual : validResult.monthly,contributionTiming:validResult.kind === "annual_history" ? "year_end_after_return" : "month_start",periods:validResult.kind === "annual_history" ? 5 : validResult.months,finalValue:validResult.value,totalContributed:validResult.contributed,profit:validResult.profit,simpleReturnPercent:validResult.simpleReturnPercent,instrumentReturnPercent:validResult.timeline[validResult.timeline.length-1].instrumentReturnPercent,...(validResult.kind === "annual_history" ? {periodStart:(catalog?.annualHistory ?? annualHistory).baseline,periodEnd:validResult.timeline[validResult.timeline.length-1].date ?? undefined,annualReturns:(catalog?.annualHistory ?? annualHistory).returns.map(row=>({year:row.year,ratePercent:row.rate*100}))} : {})}} : {}),
     ...((page === "home" || page === "portfolio") ? {portfolio:{name:t.examplePortfolio,value:1093,initial:1000,dataKind:"fictional" as const}} : {}),
     ...(assistantDecline ? {decline:assistantDecline,decision} : {})};
-  function openPortfolioDecline(){pauseTriggerRef.current=document.activeElement instanceof HTMLElement?document.activeElement:null;setPause(analyzeDecline({name:t.examplePortfolio,dataKind:"fictional",sources:[],observations:points.map((value,index)=>({label:`${t.pointLabel} ${index+1}`,value}))}));}
-  function openSimulationDecline(){if(!validResult)return;pauseTriggerRef.current=document.activeElement instanceof HTMLElement?document.activeElement:null;setPause(analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}));}
+  async function showDecline(spec: DeclineSpec, local: () => DeclineReport) {
+    pauseTriggerRef.current=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    declineRequest.current?.abort(); const controller=new AbortController(); declineRequest.current=controller; const id=++declineGeneration.current; setServerError(false); setOperationPending(mode === "server"); retryAction.current = () => {void showDecline(spec,local);};
+    try {const report=mode === "server" ? await requestJson("/api/declines",isDecline,spec,controller.signal) : local(); if(id===declineGeneration.current && !controller.signal.aborted){setDeclineSpec(spec);setPause(report);}}
+    catch {if(id===declineGeneration.current && !controller.signal.aborted)setServerError(true);} finally {if(id===declineGeneration.current)setOperationPending(false);}
+  }
+  function openPortfolioDecline(){void showDecline({basis:"portfolio_demo",language},()=>analyzeDecline({name:t.examplePortfolio,dataKind:"fictional",sources:[],observations:points.map((value,index)=>({label:`${t.pointLabel} ${index+1}`,value}))}));}
+  function openSimulationDecline(){if(!validResult)return;void showDecline({basis:"instrument",language,instrumentId:selected.instrumentId,periods:validResult.kind === "annual_history" ? 5 : validResult.months},()=>analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}));}
   function askDecline(){if(!pause)return;setAssistantDecline(pause);setPause(null);assistantTriggerRef.current=pauseTriggerRef.current;setAssistant(true);}
   const levelTitle = {
     beginner: t.beginnerView,
@@ -336,12 +326,17 @@ export default function App() {
     intermediate: t.intermediateText,
     advanced: t.advancedText,
   }[level];
+  const serverContext = {page,level,language,...(page === "simulator" ? {instrumentId:selected.instrumentId} : {}),...(validResult ? {simulation:{instrumentId:validResult.instrumentId,initial:validResult.initial,recurringContribution:validResult.kind === "annual_history" ? validResult.annual : validResult.monthly,periods:validResult.kind === "annual_history" ? 5 : validResult.months}} : {}),...(assistantDecline && declineSpec ? {decline:{...declineSpec,language},decision} : {})};
+  const serverContextKey = JSON.stringify(serverContext);
+  const provider = useMemo(() => serverTutorProvider(serverContext), [serverContextKey]);
+  const modeControls = <div className="info-banner" role="status"><span>{mode === "server" ? (language === "es" ? "Servidor de demo" : "Demo server") : (language === "es" ? "Demo local" : "Local demo")}{(serverLoading || operationPending) ? (language === "es" ? " · Conectando…" : " · Connecting…") : serverError ? (language === "es" ? " · No se pudo completar la solicitud." : " · The request could not be completed.") : ""}</span>{mode === "server" && serverError && <button type="button" onClick={()=>{if (!catalog) setRetry(n=>n+1); else retryAction.current?.();}}>{language === "es" ? "Reintentar" : "Retry"}</button>}<button type="button" onClick={()=>{setCatalog(null);setResult(null);setMode(mode === "server" ? "local" : "server");}}>{mode === "server" ? (language === "es" ? "Usar demo local" : "Use local demo") : (language === "es" ? "Usar servidor de demo" : "Use demo server")}</button></div>;
+  if (!catalog) return <main className="main"><div className="content">{modeControls}</div></main>;
   return (
     <div className="app-shell">
       <aside
         ref={navRef}
         className={`sidebar ${mobileNav ? "open" : ""}`}
-        inert={assistant || !!pause ? true : undefined}
+        inert={assistant || voiceAssistant || !!pause ? true : undefined}
         role={mobileNav ? "dialog" : undefined}
         aria-modal={mobileNav ? true : undefined}
         aria-label={t.space}
@@ -410,7 +405,7 @@ export default function App() {
           tabIndex={-1}
         />
       )}
-      <main className="main" inert={mobileNav || assistant || !!pause ? true : undefined}>
+      <main className="main" inert={mobileNav || assistant || voiceAssistant || !!pause ? true : undefined}>
         <header className="topbar">
           <div className="top-left">
             <button
@@ -452,6 +447,9 @@ export default function App() {
             >
               {theme === "light" ? <Moon size={19} /> : <Sun size={19} />}
             </button>
+            <button className="icon-button theme-button" onClick={openVoice} aria-label={language === "es" ? "Hablar con IA" : "Talk to AI"}>
+              <Mic size={19} />
+            </button>
             <button className="icon-button theme-button" onClick={openAssistant} aria-label={t.openAssistant}>
               <Sparkles size={19} />
             </button>
@@ -489,6 +487,7 @@ export default function App() {
           </div>
         </header>
         <div className="content">
+          {modeControls}
           {page === "home" && (
             <>
               <div className="page-heading">
@@ -759,6 +758,9 @@ export default function App() {
                 language,
                 level,
                 selected,
+                banks: catalog.banks,
+                instruments,
+                history: catalog.annualHistory,
                 result,
                 error,
                 initial,
@@ -870,8 +872,9 @@ export default function App() {
           </footer>
         </div>
       </main>
-      <AssistantPanel open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
-      {pause && <AntiPanicPanel report={pause} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
+      <AssistantPanel provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
+      <VoiceAssistantPanel open={voiceAssistant} onClose={()=>setVoiceAssistant(false)} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined}/>
+      {pause && <AntiPanicPanel onTalk={talkDecline} report={pause} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
 
     </div>
   );
