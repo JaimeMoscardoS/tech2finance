@@ -130,7 +130,7 @@
       "phase": "P0",
       "owner": "Datos y jurídico",
       "assignee": "UNASSIGNED",
-      "status": "pending",
+      "status": "in_progress",
       "title": "Registro de derechos",
       "depends_on": [],
       "evidence": [],
@@ -142,10 +142,13 @@
         {
           "id": "B04.1",
           "description": "Inventariar fuente, clase y usos",
-          "status": "pending",
+          "status": "in_progress",
           "estimate_minutes": "30-60",
-          "evidence": [],
-          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+          "evidence": [
+            "https://github.com/JaimeMoscardoS/tech2finance/blob/a4c122b2662e854e63f691e3e2a6e78c9fd7d814/datos/registro-fuentes.json"
+          ],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas",
+          "remaining": "Inventario de fuentes y clases en rama 03; no acredita permisos ni habilita usos."
         },
         {
           "id": "B04.2",
@@ -167,7 +170,7 @@
       "phase": "P0",
       "owner": "Motor y revisor financiero",
       "assignee": "UNASSIGNED",
-      "status": "pending",
+      "status": "in_progress",
       "title": "Cálculo autoritativo",
       "depends_on": [
         "B04"
@@ -181,10 +184,13 @@
         {
           "id": "B05.1",
           "description": "Preparar supuestos y fixtures independientes",
-          "status": "pending",
+          "status": "in_progress",
           "estimate_minutes": "30-60",
-          "evidence": [],
-          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+          "evidence": [
+            "https://github.com/JaimeMoscardoS/tech2finance/blob/a4c122b2662e854e63f691e3e2a6e78c9fd7d814/simulador/fixtures/golden-periodic-v1.json"
+          ],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas",
+          "remaining": "Fixtures aritméticos de la rama 03; revisión financiera independiente y cobertura completa pendientes."
         },
         {
           "id": "B05.2",
@@ -206,7 +212,7 @@
       "phase": "P0",
       "owner": "Backend",
       "assignee": "UNASSIGNED",
-      "status": "pending",
+      "status": "in_progress",
       "title": "Versionar datos y cálculos",
       "depends_on": [
         "B04",
@@ -221,18 +227,24 @@
         {
           "id": "B06.1",
           "description": "Definir identificadores de versiones",
-          "status": "pending",
+          "status": "in_progress",
           "estimate_minutes": "30-60",
-          "evidence": [],
-          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+          "evidence": [
+            "https://github.com/JaimeMoscardoS/tech2finance/blob/a4c122b2662e854e63f691e3e2a6e78c9fd7d814/shared/data-manifest.json"
+          ],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas",
+          "remaining": "Versión y hash del servidor en rama 03; algoritmo TypeScript local sin versión y gobierno de fuentes externas pendiente."
         },
         {
           "id": "B06.2",
           "description": "Reproducir resultado anterior",
-          "status": "pending",
+          "status": "in_progress",
           "estimate_minutes": "30-60",
-          "evidence": [],
-          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+          "evidence": [
+            "https://github.com/JaimeMoscardoS/tech2finance/blob/a4c122b2662e854e63f691e3e2a6e78c9fd7d814/backend/tests/test_provenance.py"
+          ],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas",
+          "remaining": "Pruebas de procedencia y reproducción de la muestra retenida con el código de la rama 03; gobierno y fuente externa pendientes."
         }
       ],
       "support_streams": [
@@ -289,7 +301,7 @@
       "phase": "P1",
       "owner": "Interfaz y especialista",
       "assignee": "UNASSIGNED",
-      "status": "pending",
+      "status": "in_progress",
       "title": "Accesibilidad del flujo",
       "depends_on": [],
       "evidence": [],
@@ -301,10 +313,13 @@
         {
           "id": "B08.1",
           "description": "Probar teclado y registrar barreras",
-          "status": "pending",
+          "status": "in_progress",
           "estimate_minutes": "30-60",
-          "evidence": [],
-          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas"
+          "evidence": [
+            "https://github.com/JaimeMoscardoS/tech2finance/blob/9bdc71d7f35f543162d81a32e4a50b5017659a1f/docs/workstreams/01-experience.md"
+          ],
+          "acceptance_reference": "docs/planning/plan.md#artefactos-y-comprobaciones-de-las-hijas",
+          "remaining": "Pruebas de teclado limitadas a recuperación; auditoría integral y barrera de foco pendiente."
         },
         {
           "id": "B08.2",
@@ -902,7 +917,7 @@
   ],
   "integration": {
     "id": "integration-local",
-    "status": "pending",
+    "status": "preparing",
     "depends_on": [
       "01-experience",
       "02-platform",
@@ -912,7 +927,17 @@
     ],
     "plan": "docs/planning/integracion-local.md",
     "evidence": [],
-    "head": null
+    "head": null,
+    "scratch_path": "C:/proyectos/tech2finance-directors/20261110/06-integration",
+    "branch": "verification/directors-20261110",
+    "prepared_head": "709a2ff9d7a0fdd5572e927613821d4ea7ef6c06",
+    "included_refs": {
+      "01-experience": "9bdc71d7f35f543162d81a32e4a50b5017659a1f",
+      "02-platform": "558365a669c20296591637c59bcebd1716b22610",
+      "03-data": "a4c122b2662e854e63f691e3e2a6e78c9fd7d814",
+      "05-product": "2547c01116b0307fb64ba449dfc9cbdf1aef0106"
+    },
+    "remaining": "Faltan 04 revisada y actualización posterior de 05; no se han ejecutado pruebas integradas."
   },
   "orchestrator": {
     "canonical_task": "/root",

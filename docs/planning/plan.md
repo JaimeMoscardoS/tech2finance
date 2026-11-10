@@ -168,6 +168,8 @@ P0 no autoriza exposición externa. P1 requiere sponsor, presupuesto, participan
 
 Cada archivo propuesto se crea o completa por la línea propietaria; no se presupone que exista. Las revisiones externas y pruebas se registran con fecha, responsable y enlace verificable. Los tiempos excluyen esperas externas. La matriz RACI inicial ya existe en [organización](../organizacion.md), pero sus nombramientos y horas no están acordados.
 
+El manifiesto registra avances parciales de 01 y 03 con enlaces a sus commits. Estos artefactos no cierran la revisión financiera independiente, los derechos, la gobernanza de fuentes externas ni la auditoría completa de accesibilidad.
+
 | Hija | Artefacto esperado | Comprobación de aceptación |
 | --- | --- | --- |
 | B01.1 | `docs/organizacion.md` | Matriz cubre cinco funciones existentes y producto, comercial, servicio, asesoría y seguridad sin nombramientos ficticios. **Hecho como borrador.** |
