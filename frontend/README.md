@@ -45,7 +45,7 @@ El modo local funciona sin backend; el modo servidor usa las mismas reglas del t
 
 `src/CountUp.tsx` procede de [React Bits](https://github.com/DavidHDev/react-bits), componente CountUp. Su licencia se conserva en `REACT-BITS-LICENSE.md`. La animación respeta la preferencia de movimiento reducido definida por el navegador cuando la gestiona el componente; la interfaz también incluye reglas de movimiento reducido.
 
-El gráfico usa Recharts 3 y ofrece vistas de capital y variación del instrumento, navegación interactiva y una tabla de datos alternativa. Las cifras de la cartera de ejemplo son ficticias y no dependen del resultado del simulador.
+Cada nivel tiene una paleta distinta en temas claro y oscuro; el nivel no indica riesgo. El gráfico usa Recharts 3 y ofrece vistas de capital y variación del instrumento, navegación interactiva y una tabla alternativa. Los segmentos verdes, rojos y grises indican si la serie mostrada sube, baja o no cambia respecto al punto anterior; el capital incluye aportaciones y no representa por sí solo el rendimiento del mercado. En las barras anuales el color indica el signo de la rentabilidad de ese año. Las etiquetas y la tabla también expresan los cambios sin depender del color. Las cifras de la cartera de ejemplo son ficticias y no dependen del resultado del simulador.
 
 Consulta las [instrucciones del área](AGENTS.md), el [contexto](../docs/contexto-proyecto.md) y los [contratos](../docs/contratos.md).
 

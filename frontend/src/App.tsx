@@ -144,12 +144,13 @@ export default function App() {
     }).format(n);
   useEffect(() => {
     document.documentElement.lang = language;
+    document.documentElement.dataset.level = level;
     document.documentElement.dataset.theme = theme;
     try {
       localStorage.setItem("t2f-language", language);
       localStorage.setItem("t2f-theme", theme);
     } catch {}
-  }, [language, theme]);
+  }, [language, theme, level]);
   useEffect(() => {
     if (!pause && !assistant && !voiceAssistant) return;
     const panel = pause ? modalRef.current : voiceAssistant ? voiceRef.current : assistantRef.current;

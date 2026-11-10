@@ -25,3 +25,5 @@
 .investment-chart th:first-child { text-align: left; }
 @media (max-width: 600px) { .investment-chart__plot, .investment-chart--compact .investment-chart__plot { height: 240px; } .investment-chart__switch { width: 100%; } .investment-chart__switch button { flex: 1; } }
 @media (forced-colors: active) { .investment-chart__line { border-color: CanvasText; } .investment-chart__switch button[aria-pressed='true'] { border: 2px solid Highlight; color: Highlight; } .investment-chart .recharts-line-curve { stroke: CanvasText; } .investment-chart .recharts-cartesian-grid line { stroke: GrayText; } .investment-chart .recharts-text { fill: CanvasText; } .investment-chart__tooltip { border: 1px solid CanvasText; } }
+
+.investment-chart__line--rise { border-color: var(--chart-rise); }.investment-chart__line--fall { border-color: var(--chart-fall); }.investment-chart__line--flat { border-color: var(--chart-flat); }.investment-chart__meaning { color:var(--muted); font-size:.78rem; line-height:1.45; margin:8px 0; }
