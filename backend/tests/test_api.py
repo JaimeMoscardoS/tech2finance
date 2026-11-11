@@ -39,7 +39,7 @@ def test_bank_context_and_untrusted_fields(monkeypatch):
         return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
     monkeypatch.setattr('backend.app.reply', capture)
     assert client.get('/api/catalog').json()['bankProfile']['bankId'] == 'demo'
-    for page in ('home', 'explore', 'simulator', 'portfolio'):
+    for page in ('home', 'explore', 'simulator', 'portfolio', 'learn', 'game'):
         result = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': page, 'instrumentId': 'bbva-mi-inversion-bolsa-acumulacion'}})
         assert result.status_code == 200
         assert captured['bank']['bankId'] == 'demo'
@@ -348,3 +348,16 @@ def test_cnmv_portfolio_decline_endpoint():
     body = response.json()
     assert body["basisName"] == "My portfolio (CNMV NAVs; DEMO holdings)"
     assert body["maxDrawdownPercent"] == pytest.approx(8.7857, abs=1e-3)
+
+
+def test_tutor_accepts_learn_and_game_pages(monkeypatch):
+    captured = {}
+    def capture(payload):
+        captured.update(payload['context'])
+        return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
+    monkeypatch.setattr('backend.app.reply', capture)
+    for page in ('learn', 'game'):
+        captured.clear()
+        assert client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': page}}).status_code == 200
+        assert captured['page'] == page
+    assert client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': 'other'}}).status_code == 422
