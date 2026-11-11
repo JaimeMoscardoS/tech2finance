@@ -12,7 +12,7 @@ test('three distinct layouts retain the selected fund and show truthful chart da
  await expect(page.locator('.dashboard-card')).toHaveCount(3); await expect(page.locator('.dashboard-card .mini-bars')).toHaveCount(3);
  await expect(page.locator('.technical-inspector h2')).toHaveText('BBVA MI INVERSION BOLSA ACUMULACION, FI');
  await expect(page.locator('.fund-chart[data-instrument="bbva-mi-inversion-bolsa-acumulacion"]')).toContainText('cierres mensuales');
- await page.getByRole('button',{name:'Preguntar por voz',exact:true}).click(); await expect(page.getByRole('dialog',{name:'Habla con tu asistente'})).toBeVisible(); await page.keyboard.press('Escape');
+ await page.getByRole('button',{name:'Preguntar por voz',exact:true}).click(); await expect(page.getByRole('region',{name:'Habla con tu asistente'})).toBeVisible(); await page.keyboard.press('Escape');
 });
 
 test('server tutor receives the selected fund across detail modes', async ({page}) => {

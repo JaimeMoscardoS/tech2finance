@@ -24,12 +24,15 @@ test.beforeEach(async ({ page }) => {
  });
 });
 
-test('unavailable local dictation explains how to reach the written assistant', async ({ page }) => {
+test('unavailable local dictation offers writing in the same conversation', async ({ page }) => {
  await page.goto('/');
  await page.evaluate(() => { (window as any).voiceTest.availability = 'unavailable'; });
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
- const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
- await expect(dialog.getByRole('status')).toContainText('Para escribir, cierra esta ventana y abre Tu asistente.');
+ const dialog = page.getByRole('region', { name: 'Habla con tu asistente' });
+ await expect(dialog.getByRole('status')).toContainText('puedes escribir');
+ await expect(dialog.getByLabel('Escribe tu pregunta')).toHaveCount(0);
+ await dialog.getByRole('button', { name: 'Escribir' }).click();
+ await expect(dialog.getByLabel('Escribe tu pregunta')).toBeVisible();
  expect(await page.evaluate(() => (window as any).voiceTest.starts)).toBe(0);
  expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
  await page.evaluate(() => { (window as any).voiceTest.availability = 'available'; });
@@ -41,7 +44,7 @@ test('voice question is submitted once after dictation ends, without starting an
  await page.goto('/');
  expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(0);
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
- const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
+ const dialog = page.getByRole('region', { name: 'Habla con tu asistente' });
  await expect(dialog).toBeVisible();
  await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
  expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
@@ -51,6 +54,7 @@ test('voice question is submitted once after dictation ends, without starting an
  });
  await expect(dialog.getByText('Tu pregunta', { exact: true })).toHaveCount(0);
  await page.evaluate(() => (window as any).voiceTest.recognition.onend());
+ await dialog.getByRole('button', { name: 'Ver respuesta' }).click();
  await expect(dialog.getByText('Qué es un fondo', { exact: true })).toBeVisible();
  await expect(dialog.getByText('Respuesta', { exact: true })).toBeVisible();
  await expect.poll(() => page.evaluate(() => (window as any).voiceTest.spoken)).toBe(1);
@@ -60,7 +64,7 @@ test('voice question is submitted once after dictation ends, without starting an
 test('cancelled recognition cannot submit a late final result', async ({ page }) => {
  await page.goto('/');
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
- const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
+ const dialog = page.getByRole('region', { name: 'Habla con tu asistente' });
  await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
  await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
  await page.evaluate(() => {
@@ -76,7 +80,7 @@ test('reopening the toolbar microphone starts a fresh session once', async ({ pa
  await page.goto('/');
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
  await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
- await page.getByRole('dialog', { name: 'Habla con tu asistente' }).getByRole('button', { name: 'Cerrar asistente de voz' }).click();
+ await page.getByRole('region', { name: 'Habla con tu asistente' }).getByRole('button', { name: 'Cerrar asistente de voz' }).click();
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
  await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(2);
  expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(2);
@@ -87,11 +91,11 @@ test('opening voice from the pause leaves the microphone off until requested', a
  await page.goto('/');
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
  await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
- await page.getByRole('dialog', { name: 'Habla con tu asistente' }).getByRole('button', { name: 'Cerrar asistente de voz' }).click();
+ await page.getByRole('region', { name: 'Habla con tu asistente' }).getByRole('button', { name: 'Cerrar asistente de voz' }).click();
  await page.getByRole('button', { name: 'Mi cartera', exact: true }).click();
  await page.getByRole('button', { name: '¿Te preocupa la caída?' }).click();
  await page.getByRole('dialog', { name: 'Tomemos un momento' }).getByRole('button', { name: 'Hablar con el asistente' }).click();
- const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
+ const dialog = page.getByRole('region', { name: 'Habla con tu asistente' });
  await expect(dialog.getByRole('button', { name: 'Hablar', exact: true })).toBeVisible();
  expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
  await dialog.getByRole('button', { name: 'Cerrar asistente de voz' }).click();
@@ -106,9 +110,9 @@ test('a language change cancels pending local availability without restarting', 
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
  await expect.poll(() => page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
  await page.locator('.preference-button').filter({ hasText: 'EN' }).evaluate((button: HTMLElement) => button.click());
- await expect(page.getByRole('dialog', { name: 'Talk to your assistant' })).toBeVisible();
+ await expect(page.getByRole('region', { name: 'Talk to your assistant' })).toBeVisible();
  await page.evaluate(() => (window as any).voiceTest.resolveCheck('available'));
- await expect(page.getByRole('dialog', { name: 'Talk to your assistant' }).getByRole('button', { name: 'Talk', exact: true })).toBeVisible();
+ await expect(page.getByRole('region', { name: 'Talk to your assistant' }).getByRole('button', { name: 'Talk', exact: true })).toBeVisible();
  expect(await page.evaluate(() => (window as any).voiceTest.starts)).toBe(0);
  expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
 });

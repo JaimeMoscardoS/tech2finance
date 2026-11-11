@@ -6,6 +6,10 @@ Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, 
 
 La tarjeta «¿Te preocupa la caída?» abre un análisis detallado de seis apartados junto a los datos y fuentes observados. En modo local se identifica como demostración por reglas; en modo servidor solo se identifica como IA cuando el proveedor y modelo están confirmados por la respuesta. Al fallar muestra el error y permite reintentar sin ocultar las observaciones. El contexto editable se aplica al análisis con un botón explícito, no al escribir. El tutor escrito y de voz sigue accesible. La configuración y la prueba real del proveedor son independientes de esta interfaz.
 
+El selector de detalle de la cabecera se expande con Motion; permite volver, elegir un nivel o cerrarlo con Escape o pulsando fuera. Respeta la preferencia de movimiento reducido y mantiene el nivel global durante la sesión. Para comprobarlo: `npx playwright test -c playwright.level.config.ts`.
+
+El botón «Hablar con IA» inicia el dictado local y muestra una barra no modal. La respuesta se lee con voz local disponible; «Ver respuesta» y «Escribir» se abren solo al solicitarlos. El componente y su comprobación se describen en [componentes de interfaz](../docs/ui-components.md).
+
 ## Datos y simulación
 
 El catálogo identifica cinco casos de estudio por gestora e ISIN. BancoT2F es el anfitrión simulado; sus condiciones no se atribuyen a esos fondos. Los riesgos, plazos, mínimos y costes adicionales desconocidos se presentan como tales. El modo local usa `shared/demo-data.json`, `shared/nav-history.json` y `shared/data-manifest.json`; el modo servidor obtiene el catálogo v2 y cálculos desde FastAPI. No cambia automáticamente de modo ante errores. Una respuesta de catálogo o simulación incompatible activa la recuperación explícita.

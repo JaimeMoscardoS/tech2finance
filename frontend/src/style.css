@@ -89,6 +89,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .level-menu { box-shadow: 0 10px 30px var(--shadow); }
 .level-menu button { min-height: 44px; color: var(--ink); font-size: 14px; }
 .level-menu button:hover, .suggestions button:hover { background: var(--surface-tint); }
+.level-menu { top: 0; width: max-content; max-width: min(430px, calc(100vw - 24px)); display: flex; flex-wrap: wrap; gap: 3px; padding: 4px; transform-origin: right center; }
+.level-button { transform-origin: right center; }
+.level-menu button { width: auto; justify-content: center; align-items: center; padding: 8px 11px; font-size: 12px; font-weight: 600; }
+.level-menu .level-back { min-width: 44px; padding: 8px; }
+.level-menu button[aria-pressed="true"] { background: var(--surface-tint); color: var(--ink); box-shadow: inset 0 0 0 1px var(--border); }
+.level-menu button:focus-visible, .level-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 520px) { .level-menu { max-width: calc((100vw - 24px) * .75); } }
 .button.dark, .floating-assistant, .chat-form button { background: var(--accent); color: var(--action-ink); }
 .button.dark:hover { background: var(--accent-hover); }
 .button, .floating-assistant, .plain-link, .text-link, .mini-link, .fund-body button, .side-card button, .insight-card button, .suggestions button { min-height: 44px; font-size: 14px; }
@@ -155,6 +162,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .icon-button, .help-btn, .theme-button { min-height: 44px; min-width: 44px; }
 .theme-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 22px; font-size: 13px; font-weight: 600; }
 .theme-button:hover { background: var(--surface-tint); }
+.top-actions .top-voice-button { min-height: 44px; padding: 8px 14px; font-size: 13px; white-space: nowrap; }
 .level-beginner .view-summary { border-left: 4px solid var(--accent); }
 .level-intermediate .view-summary { border-left: 4px solid var(--accent); }
 .level-advanced .view-summary { border-left: 4px solid var(--accent); }
@@ -172,7 +180,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   .top-actions .level-button { width: 100%; justify-content: space-between; }
 }
 
-@media (max-width: 760px) { .sidebar { transition: transform .25s; } }
+@media (max-width: 760px) { .sidebar { transition: transform .25s; overflow-y: auto; } }
 .view-summary > span, .view-summary > strong, .view-summary > small { display: block; }
 .view-summary > strong { margin-top: 8px; font-size: 25px; color: var(--ink); }
 .view-summary > small { margin-top: 4px; color: var(--muted); }
