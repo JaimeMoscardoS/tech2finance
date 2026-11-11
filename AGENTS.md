@@ -6,6 +6,7 @@ Copiloto de inversión para una aplicación bancaria simulada: interfaz adaptabl
 
 ## Reglas comunes
 
+- Antes de cualquier trabajo de interfaz, leer y aplicar [frontend-design](.agents/skills/frontend-design/SKILL.md), adaptada a Tech2Finance.
 - Leer `docs/contexto-proyecto.md`, `docs/organizacion.md` y `docs/contratos.md`. Hay cinco responsabilidades en un solo repositorio y una aplicación compartida.
 - El nivel cambia la explicación, no determina el perfil de riesgo. Ninguna operación real, conexión bancaria, custodia ni datos reales de clientes en la demo.
 - No presentar series, precios o causas inventados como hechos. Los escenarios narrativos ficticios autorizados para la demo deben identificarse como tales y separarse de los datos reales o calculados. Identificar fuentes, fechas, condiciones y costes. Las simulaciones futuras no predicen ni garantizan rendimientos.
