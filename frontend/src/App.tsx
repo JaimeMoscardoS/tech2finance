@@ -2,7 +2,7 @@ import { BrandMark } from "./components/BrandMark";
 import { animate } from "motion/react";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
-  ArrowRight,
+  Presentation,
   Compass,
   FlaskConical,
   GraduationCap,
@@ -50,6 +50,10 @@ import SimulatorPage from "./views/simulator/SimulatorPage.tsx";
 import { AgentPanelSection } from "./components/dashboard/AgentPanel.tsx";
 import { LEVELS, type Level, type Theme } from "./types/level";
 import { readStoredLevel, writeStoredLevel } from "./preferences";
+import { demoFundProfiles } from "../../shared/mock/demo-fund-profiles.ts";
+import WelcomeDialog, { markWelcomeDone, shouldShowWelcome } from "./views/onboarding/WelcomeDialog.tsx";
+import PresentationTour, { type TourPage } from "./views/onboarding/PresentationTour.tsx";
+import { insightProvider } from "./insights.ts";
 const PracticeLab = lazy(() => import("./PracticeLab"));
 
 type Page = "home" | "explore" | "simulator" | "portfolio" | "learn";
@@ -94,6 +98,8 @@ export default function App() {
   const [journeyFund, setJourneyFund] = useState<false | "fund" | "example">(false);
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [practiceResult, setPracticeResult] = useState<{spec: SimulationSpec; result: ServerSimulation} | null>(null);
+  const [welcome, setWelcome] = useState(() => shouldShowWelcome());
+  const [tour, setTour] = useState(() => { try { return new URLSearchParams(window.location.search).get("demo") === "1"; } catch { return false; } });
   const [page, setPage] = useState<Page>("home"),
     [level, setLevel] = useState<Level>(() => readStoredLevel("beginner")),
     [mobileNav, setMobileNav] = useState(false),
@@ -279,8 +285,8 @@ export default function App() {
   // no constan y se muestran como «No disponible».
   const realPortfolio = useMemo(() => {
     const all = rawCatalog ? displayCatalog(rawCatalog.instruments) : [];
-    const info: Record<string, {manager?: string; name?: string}> = {};
-    for (const i of all) if (i.identifier && i.dataStatus === "historical_nav" && !info[i.identifier]) info[i.identifier] = {manager: i.manager || undefined, name: i.name[language]};
+    const info: Record<string, {manager?: string; name?: string; profile?: (typeof demoFundProfiles)[string]}> = {};
+    for (const i of all) if (i.identifier && i.dataStatus === "historical_nav" && !info[i.identifier]) info[i.identifier] = {manager: i.manager || undefined, name: i.name[language], profile: demoFundProfiles[i.instrumentId]};
     return buildRealPortfolio(catalog?.navHistory, info);
   }, [catalog?.navHistory, rawCatalog, language]);
   const shownPortfolio = realPortfolio ?? demoPortfolio;
@@ -290,6 +296,7 @@ export default function App() {
   const portfolioRows = catalog?.navHistory.instruments.find(i => i.isin === portfolioInstrument?.identifier && i.eligible)?.monthly;
   const portfolioResult = (() => { try { return portfolioRows && portfolioSpec ? simulateNav(portfolioRows, portfolioSpec.initial, portfolioSpec.recurringContribution, portfolioSpec.periods, portfolioSpec.startDate, portfolioSpec.contributionFrequency) : null; } catch { return null; } })();
   const points = portfolioResult?.timeline ?? [];
+  const insights = useMemo(() => insightProvider(mode), [mode]);
   const declineEvent = useDeclineEvent(!!portfolioResult, mode, language, JSON.stringify({portfolioSpec, portfolioRows}));
   const nav = [
     { key: "home" as const, icon: Grid2X2 },
@@ -310,6 +317,11 @@ export default function App() {
       menuButtonRef.current?.focus();
     }
   };
+  const chooseRef = useRef(choose); chooseRef.current = choose;
+  const pageRef = useRef(page); pageRef.current = page;
+  const tourNavigate = useCallback((target: TourPage) => { if (pageRef.current !== target) chooseRef.current(target); }, []);
+  const closeTour = useCallback(() => setTour(false), []);
+  const finishWelcome = useCallback((chosen?: Level) => { if (chosen) setLevel(chosen); markWelcomeDone(); setWelcome(false); }, []);
   const openPractice = () => {
     simulationGeneration.current++; simulationRequest.current?.abort();
     declineGeneration.current++; declineRequest.current?.abort();
@@ -446,11 +458,11 @@ export default function App() {
   const switchMode = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setCatalog(null); setResult(null); setMode(mode === "server" ? "local" : "server"); };
   const retryCatalog = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); setServerError(false); setServerLoading(true); setRetry(n => n + 1); };
   const modeControls = <div className="connection-area">
-    <details className="connection-settings">
+    {import.meta.env.DEV && <details className="connection-settings">
       <summary>{language === "es" ? "Conexión" : "Connection"} · {mode === "server" ? (language === "es" ? "Servidor de demo" : "Demo server") : (language === "es" ? "Demo local" : "Local demo")}</summary>
       <p>{language === "es" ? "Elige dónde se ejecuta la demo. Cambiar de modo descarta los resultados actuales." : "Choose where the demo runs. Switching modes clears current results."}</p>
       <button type="button" onClick={switchMode}>{mode === "server" ? (language === "es" ? "Usar demo local" : "Use local demo") : (language === "es" ? "Usar servidor de demo" : "Use demo server")}</button>
-    </details>
+    </details>}
     <div role="status" className="connection-status">{(serverLoading || operationPending) ? (language === "es" ? "Conectando…" : "Connecting…") : serverError ? (language === "es" ? "No se pudo completar la solicitud." : "The request could not be completed.") : ""}</div>
     {mode === "server" && serverError && retryAction.current && <button type="button" className="connection-retry" onClick={()=>retryAction.current?.()}>{language === "es" ? "Reintentar" : "Retry"}</button>}
   </div>;
@@ -571,21 +583,23 @@ export default function App() {
             <button className="icon-button theme-button" onClick={() => openAssistant()} aria-label={t.assistant}>
               <Sparkles size={19} aria-hidden="true" />
             </button>
+            <button type="button" className="present-button" onClick={() => setTour(true)} aria-label={language === "es" ? "Modo presentación: recorrido guiado" : "Presentation mode: guided tour"}><Presentation size={17} aria-hidden="true" /><span>{language === "es" ? "Presentar" : "Present"}</span></button>
             <LevelSelector level={level} onChange={setLevel} names={levelNames} label={t.detailLevel} backLabel={language === "es" ? "Volver" : "Back"} />
           </div>
         </header>
         <div className="content">
           {modeControls}
           {page === "home" && <>
-            {configuredBank === "demo" && <BankInfo profile={catalog.bankProfile} language={language} />}
-            <HomeDashboard language={language} level={level} onNavigate={choose} onAskAssistant={() => openAssistant()} portfolio={realPortfolio ?? undefined} events={catalog.navHistory.events} />
-            <div className="welcome-actions home-extra-actions">
-              <button type="button" className="text-link" onClick={openPractice}>{t.practice}<small> · {t.practiceDesc}</small><ArrowRight size={15} /></button>
-              <button type="button" className="text-link calm-link" onClick={openPortfolioDecline}>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}<small> · {language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options."}</small><Pause size={15} aria-hidden="true" /></button>
-              {configuredBank === "demo" && <button type="button" className="text-link" onClick={launchDeclineDemo}>{language === "es" ? "Probar una caída" : "Try a decline"}<small> · {declineEvent.event?.status === "triggered" ? `${language === "es" ? "Caída detectada en el ejemplo histórico" : "Decline detected in the historical example"}: ${declineEvent.event.news.periodStart} – ${declineEvent.event.news.periodEnd} · ${declineEvent.event.news.items.length} ${language === "es" ? "fuentes de contexto BCE" : "ECB context sources"}` : (language === "es" ? "Ejemplo histórico de estudio con datos reales." : "Historical study example with real data.")}</small><ArrowRight size={15} /></button>}
-              {configuredBank === "demo" && <div role="status" className="decline-event-status">{declineEvent.state === "error" ? (language === "es" ? "No se pudo comprobar la caída y el contexto del BCE." : "The decline and ECB context could not be checked.") : ""}</div>}
-              {configuredBank === "demo" && <button type="button" className="text-link" hidden={!declineEvent.hasError} onClick={declineEvent.retry}>{declineEvent.state === "ready" ? (language === "es" ? "Actualizar contexto" : "Refresh context") : (language === "es" ? "Reintentar" : "Retry")}</button>}
-            </div>
+            <HomeDashboard language={language} level={level} onNavigate={choose} onUnderstandFall={openPortfolioDecline} onAskAssistant={() => openAssistant()} portfolio={shownPortfolio} events={catalog.navHistory.events} insights={insights}
+              actions={<>
+                {configuredBank === "demo" && <button type="button" className="home__action" data-tour="decline" onClick={launchDeclineDemo}><TrendingDown size={17} aria-hidden="true" /><span>{language === "es" ? "Probar una caída" : "Try a decline"}{declineEvent.event?.status === "triggered" && <small className="home__action-sub">{language === "es" ? "Caída detectada en el ejemplo histórico" : "Decline detected in the historical example"}: {declineEvent.event.news.periodStart} – {declineEvent.event.news.periodEnd}</small>}</span></button>}
+                <button type="button" className="home__action" onClick={openPractice}><FlaskConical size={17} aria-hidden="true" />{t.practice}</button>
+              </>}
+              status={configuredBank === "demo" ? <>
+                <div role="status" className="decline-event-status">{declineEvent.state === "error" ? (language === "es" ? "No se pudo comprobar la caída y el contexto del BCE." : "The decline and ECB context could not be checked.") : ""}</div>
+                <button type="button" className="text-link" hidden={!declineEvent.hasError} onClick={declineEvent.retry}>{declineEvent.state === "ready" ? (language === "es" ? "Actualizar contexto" : "Refresh context") : (language === "es" ? "Reintentar" : "Retry")}</button>
+              </> : undefined} />
+            {configuredBank === "demo" && <details className="home__bank"><summary>{language === "es" ? "Conoce BancoT2F" : "About BancoT2F"}</summary><BankInfo profile={catalog.bankProfile} language={language} /></details>}
           </>}
           {page === "explore" && <FundsExplorer hostBankId={configuredBank} navHistory={catalog.navHistory} language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { if (item.dataStatus !== "historical_nav") return; selectInstrument(item); setJourneyFund("fund"); choose("simulator"); }} onVoice={openVoice} onText={() => openAssistant(language === "es" ? "Explícame este fondo." : "Explain this fund to me.")} />}
           {page === "simulator" && (
@@ -629,11 +643,11 @@ export default function App() {
           )
           )}
           {page === "portfolio" && <>
-            <div className="info-banner"><LockKeyhole size={19} /><span>{t.portfolioWarning}</span><button type="button" className="button outline" onClick={openPortfolioDecline}><TrendingDown size={17} />{t.understandFall}</button></div>
-            <FundsDashboard language={language} level={level} theme={theme} portfolio={realPortfolio ?? undefined} onExplore={()=>choose("explore")} onSimulate={()=>choose("simulator")} onSell={openPortfolioDecline} />
-            <AgentPanelSection level={level} language={language} portfolio={realPortfolio ?? undefined} />
+            <div className="info-banner"><LockKeyhole size={19} /><span>{t.portfolioWarning}</span></div>
+            <FundsDashboard language={language} level={level} theme={theme} portfolio={shownPortfolio} onExplore={()=>choose("explore")} onSimulate={()=>choose("simulator")} onSell={openPortfolioDecline} onUnderstandFall={openPortfolioDecline} />
+            <AgentPanelSection level={level} language={language} portfolio={shownPortfolio} insights={insights} />
           </>}
-          {page === "learn" && <EducationDashboard language={language} level={level} theme={theme} onGoSimulation={()=>choose("simulator")} />}
+          {page === "learn" && <EducationDashboard language={language} level={level} theme={theme} portfolio={shownPortfolio} onGoSimulation={()=>choose("simulator")} />}
           <footer>
             <span>© Tech2Finance · {t.footer}</span>
           </footer>
@@ -641,6 +655,8 @@ export default function App() {
       </main>
       <AssistantPanel dataMode={mode} onUseServer={switchMode} prefillRequest={prefillRequest} provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
       <VoiceAssistantPanel dataMode={mode} onUseServer={() => { setVoiceAssistant(false); switchMode(); }} open={voiceAssistant} onClose={() => { if (voiceRef.current?.contains(document.activeElement)) voiceTriggerRef.current?.focus(); setVoiceAssistant(false); }} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
+      {welcome && !tour && <WelcomeDialog language={language} onChoose={finishWelcome} onSkip={() => finishWelcome()} />}
+      {tour && !pause && !assistant && <PresentationTour language={language} onNavigate={tourNavigate} onClose={closeTour} />}
       {pause && <AntiPanicPanel level={level} sellOption={pauseSell} onTalk={talkDecline} report={pause} spec={declineSpec} initialNews={declineSpec?.basis === "portfolio_demo" && declineEvent.event?.status === "triggered" ? declineEvent.event.news : null} mode={mode} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
 
     </div>

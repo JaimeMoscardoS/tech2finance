@@ -16,9 +16,10 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.domain import DomainError, analyze_decline, build_tutor_context, get_catalog, run_simulation
 from backend.domain.game import run_game
-from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest, SpeechTokenRequest, SpeechSynthesisRequest
+from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest, SpeechTokenRequest, SpeechSynthesisRequest, InsightRequest
 from backend.decline_explanations import AnalysisUnavailable, explain, provider
 from backend.news import get_news
+from backend.insights import narrate
 from backend.tutor_bridge import TutorUnavailable, reply
 from backend.providers import ProviderError, speech_provider, tutor_provider, speech_token, tutor_reply
 from backend.speech_playback import tts_provider, synthesize
@@ -238,3 +239,9 @@ async def decline_explanation(request: DeclineExplanationRequest):
             return await explain(payload)
     except TimeoutError:
         raise AnalysisUnavailable('analysis_unavailable') from None
+
+
+@app.post("/api/insights")
+async def insight(request: InsightRequest):
+    """Observaciones educativas redactadas por el modelo; 503 sin modelo configurado (el cliente usa su plantilla)."""
+    return await narrate(request.model_dump(mode="json", exclude_none=True))

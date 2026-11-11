@@ -10,8 +10,7 @@ export const demoHome = {
     name: { es: "Entrada para una vivienda", en: "Home deposit" },
     /** Importe objetivo ficticio en euros. */
     targetEur: 40000,
-    /** Meses transcurridos desde el inicio del plan ficticio y duración total prevista. */
-    monthsElapsed: 18,
-    monthsTotal: 60,
+    /** Duración total del plan ficticio (10 años). Empieza con la serie de la cartera: los meses transcurridos se calculan con su longitud (72 con los datos CNMV 2019-12 a 2025-12). */
+    monthsTotal: 120,
   },
 } as const;

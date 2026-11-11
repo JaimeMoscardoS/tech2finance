@@ -8,7 +8,7 @@ test('three distinct layouts retain the selected fund and show truthful chart da
  await expect(page.locator('.beginner-card h2')).toHaveText('Fondo bolsa 2'); await expect(page.locator('.beginner-guide details')).toHaveCount(2);
  const levels = page.getByRole('group',{name:'Nivel de detalle'}); await levels.getByRole('button',{name:'Intermedio'}).click();
  await expect(page.locator('[data-layout="intermediate"]')).toBeVisible(); await expect(page.locator('.compare-selected h2')).toHaveText('Fondo bolsa 2');
- await expect(page.locator('.fund-chart[data-instrument="bbva-mi-inversion-bolsa-acumulacion"] .annual-row')).toHaveCount(72);
+ await expect(page.locator('.fund-chart[data-instrument="bbva-mi-inversion-bolsa-acumulacion"] .mini-values tbody tr')).toHaveCount(72); await expect(page.locator('.fund-chart[data-instrument="bbva-mi-inversion-bolsa-acumulacion"] .nav-line')).toBeVisible();
  await levels.getByRole('button',{name:'Avanzado'}).click(); await expect(page.locator('[data-layout="advanced"]')).toBeVisible();
  await expect(page.locator('.dashboard-card')).toHaveCount(3); await expect(page.locator('.dashboard-card .mini-bars')).toHaveCount(3);
  await expect(page.locator('.technical-inspector h2')).toHaveText('Fondo bolsa 2');

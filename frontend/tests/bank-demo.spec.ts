@@ -33,6 +33,7 @@ test('bank identity and product costs follow the selected fund across views', as
  await page.route('**/api/tutor', async route => { tutorRequests.push(route.request().postDataJSON()); await route.continue(); });
  await page.goto('/');
  await expect(page.locator('.bank-info__maintenance dd')).toContainText('0,00');
+ await page.getByText('Conoce BancoT2F').click();
  await page.getByText('Preguntas frecuentes').click();
  await page.getByText('¿Qué es BancoT2F?').click();
  await expect(page.getByText('BancoT2F es el banco de este entorno de demostración.')).toBeVisible();

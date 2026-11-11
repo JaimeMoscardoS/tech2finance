@@ -117,3 +117,37 @@ class DeclineExplanationRequest(RequestModel):
 
 class DeclineEventRequest(RequestModel):
     decline: DeclineSpec
+
+
+Pct = Annotated[float, Field(ge=-1000, le=1000)]
+
+
+class InsightWeight(RequestModel):
+    name: Annotated[str, Field(min_length=1, max_length=80)]
+    weightPct: Annotated[float, Field(ge=0, le=100)]
+
+
+class InsightFacts(RequestModel):
+    """Cifras ya calculadas por el código del cliente: contexto para redactar (el modelo no las repite)."""
+    dataKind: Literal["historical_nav", "fictional"]
+    months: Annotated[int, Field(ge=1, le=600)]
+    valueEur: Annotated[float, Field(ge=0, le=1e9)]
+    contributedEur: Annotated[float, Field(ge=0, le=1e9)]
+    resultPct: Pct
+    lastMonthPct: Pct | None = None
+    volatilityPct: Pct | None = None
+    maxDrawdownPct: Pct | None = None
+    sharpe: Annotated[float, Field(ge=-100, le=100)] | None = None
+    equityExposurePct: Annotated[float, Field(ge=0, le=100)] | None = None
+    averageRisk: Annotated[float, Field(ge=1, le=7)] | None = None
+    goalProgressPct: Pct | None = None
+    planExpectedPct: Pct | None = None
+    weights: Annotated[list[InsightWeight], Field(max_length=8)] = []
+
+
+class InsightRequest(RequestModel):
+    kind: Literal["agent", "what", "how"]
+    page: Literal["home", "portfolio"]
+    level: Literal["beginner", "intermediate", "advanced"]
+    language: Literal["es", "en"]
+    facts: InsightFacts

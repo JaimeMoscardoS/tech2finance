@@ -4,8 +4,8 @@ import { BBVA, CAIXA, pickFund, reveal, startJourney } from './journey';
 test('users can explore, change level and run a labelled simulation', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: /Invertir empieza/ })).toBeVisible();
-  await page.getByRole('button', { name: /Detalle: Básico/ }).click();
+  await expect(page.getByRole('heading', { name: /Resumen de tu cartera/ })).toBeVisible();
+  await page.getByRole('button', { name: /Nivel: Básico/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
   await page.locator('aside').first().getByRole('button', { name: 'Simulador', exact: true }).click();
   await expect(page.getByText(/Cierres mensuales históricos de la CNMV/)).toBeVisible();
@@ -51,11 +51,11 @@ test('language and theme switches apply across the interface and persist', async
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await page.getByRole('button', { name: 'English' }).click();
-  await expect(page.getByRole('heading', { name: /Investing starts/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Summary of your sample portfolio/ })).toBeVisible();
   await page.getByRole('button', { name: 'Dark theme' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.reload();
-  await expect(page.getByRole('heading', { name: /Investing starts/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Summary of your sample portfolio/ })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 });
 
@@ -63,11 +63,11 @@ test('experience levels show distinct views without changing the selected risk',
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('data-level', 'beginner');
-  await page.getByRole('button', { name: /Detalle: Básico/ }).click();
+  await page.getByRole('button', { name: /Nivel: Básico/ }).click();
   await page.getByRole('button', { name: 'Intermedio' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-level', 'intermediate');
   await expect(page.getByText('Progreso al objetivo').first()).toBeVisible(); // Inicio intermedio: indicadores de la cartera DEMO (antes «Disponible» de la cabecera de main)
-  await page.getByRole('button', { name: /Detalle: Intermedio/ }).click();
+  await page.getByRole('button', { name: /Nivel: Intermedio/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-level', 'advanced');
   await expect(page.getByText('Volatilidad').first()).toBeVisible();
@@ -108,7 +108,7 @@ test('English intermediate view fits a 320px screen', async ({ browser }) => {
  const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button', { name: 'English' }).click();
- await page.getByRole('button', { name: 'Detail: Basic' }).click();
+ await page.getByRole('button', { name: 'Level: Basic' }).click();
  await page.getByRole('button', { name: 'Intermediate', exact: true }).click();
  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
  await context.close();
@@ -141,7 +141,7 @@ test('catalogue selection changes the example and preserves the selected real fu
  await expect(page.locator('input[name="jr-fund"]:checked')).toHaveValue(BBVA);
  await expect(panel.locator('.sim-values strong').first()).not.toHaveText(original!);
  const newValue=await panel.locator('.sim-values strong').first().textContent();
- await page.getByRole('button', {name:/Detalle: Básico/}).click();
+ await page.getByRole('button', {name:/Nivel: Básico/}).click();
  await page.getByRole('button', {name:'Avanzado', exact:true}).click();
  await expect(panel.locator('.sim-values strong').first()).toHaveText(newValue!);
  await expect(page.getByLabel('Entidad',{exact:true})).toHaveCount(0);
@@ -194,7 +194,7 @@ test('monthly NAV simulation preserves contributions and values across preferenc
  await page.getByLabel('Importe inicial').fill('1000');
  await expect(panel.getByText(/Has cambiado los datos/)).toBeVisible();
  await expect(panel.locator('.sim-values strong').filter({hasText:'999,70 €'})).toBeVisible();
- await page.getByRole('button',{name:/Detalle: Básico/}).click();
+ await page.getByRole('button',{name:/Nivel: Básico/}).click();
  await page.getByRole('button',{name:'Avanzado',exact:true}).click();
  await expect(panel.locator('.sim-values strong').filter({hasText:'999,70 €'})).toBeVisible();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
@@ -212,9 +212,9 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await page.getByRole('button',{name:'Simulator',exact:true}).click();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
  await page.screenshot({path:'test-results/simulator-tablet.png',fullPage:true});
- await page.getByRole('button',{name:'Detail: Basic'}).click();
+ await page.getByRole('button',{name:'Level: Basic'}).click();
  await page.keyboard.press('Escape');
- await expect(page.getByRole('button',{name:'Detail: Basic'})).toHaveAttribute('aria-expanded','false');
+ await expect(page.getByRole('button',{name:'Level: Basic'})).toHaveAttribute('aria-expanded','false');
  await tablet.close();
  const mobile=await browser.newContext({viewport:{width:568,height:320}});
  const phone=await mobile.newPage(); await phone.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local')); await phone.goto('/');
@@ -252,7 +252,7 @@ test('monthly deposits, table and percentage view stay consistent across prefere
  await expect(rows.last()).toContainText('2020-12-31');
  await panel.getByRole('button',{name:'Evolución del instrumento (%)'}).click();
  await expect(rows.last()).toContainText('2020-12-31');
- await page.getByRole('button',{name:/Detalle: Básico/}).click();
+ await page.getByRole('button',{name:/Nivel: Básico/}).click();
  await page.getByRole('button',{name:'Intermedio',exact:true}).click();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
  await page.getByRole('button',{name:'English'}).click();

@@ -130,3 +130,17 @@ html[data-level='advanced'] .dash-funds th, html[data-level='advanced'] .dash-fu
 
 @media (prefers-reduced-motion: reduce) { .dash-card, .dash-period button { transition: none !important; } }
 @media (prefers-reduced-motion: no-preference) { .dash-card, .dash-period button { transition: background-color .2s ease, box-shadow .2s ease; } }
+
+/* Bloque plegable único «Origen de los datos» por página. */
+.dash-origin { border-top: 1px solid var(--card-border); padding-top: .5rem; color: var(--muted); font-size: .85rem; }
+.dash-origin > summary { cursor: pointer; font-weight: 600; color: var(--ink); min-height: 44px; display: flex; align-items: center; }
+.dash-origin > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.dash-origin p { margin: .35rem 0; max-width: 75ch; line-height: 1.5; }
+/* KPIs de la misma altura y más aire entre bloques. */
+.dash-kpis { align-items: stretch; }
+.dash-kpi { height: 100%; }
+.dash-section { margin-block-end: .5rem; }
+.dash-section__head h2, .dash-section__head h3 { font-size: 1.15rem; letter-spacing: -.01em; }
+.dash-agent__ai { display: grid; gap: .4rem; padding: .75rem .9rem; border-left: 3px solid var(--accent); background: var(--surface-tint); border-radius: 0 10px 10px 0; }
+.dash-agent__lead { font-weight: 600; }
+@media (max-width: 640px) { .dash-period button { min-height: 44px; min-width: 44px; } }
