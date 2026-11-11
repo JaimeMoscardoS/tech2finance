@@ -149,3 +149,5 @@ En la rama de interfaz, Explorar ofrece guía inicial, comparación de hasta tre
 
 
 La entidad visible se fija mediante `VITE_BANK_ID` al iniciar o compilar (por defecto `demo`); el filtrado es de interfaz y no sustituye la autorización del servidor. La guía de objetivos usa plantillas locales editables según objetivo y preferencia de fluctuación, con condiciones explícitas de liquidez, reserva y deuda; no es una evaluación de idoneidad y sus respuestas no se envían al tutor. La comparación avanzada permite seleccionar hasta tres series compatibles por frecuencia, periodo y procedencia en gráficos separados con escala común. El simulador ofrece ayuda destacada junto al resultado válido.
+
+La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inversión». La cabecera identifica el modo demo sin dinero real; las fuentes, limitaciones y costes siguen visibles donde aportan contexto.

@@ -259,3 +259,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 
 .result-help { display:flex; gap:14px; align-items:center; padding:18px; margin:22px 0; border:1px solid var(--border); border-radius:14px; background:var(--surface-tint); color:var(--ink); }.result-help > svg { color:var(--accent); flex-shrink:0; }.result-help > div { flex:1; }.result-help strong { font-size:16px; }.result-help p { color:var(--muted); font-size:13px; line-height:1.45; margin-top:5px; }.result-help .button { min-height:56px; font-size:15px; }
 @media(max-width:760px) { .result-help { align-items:flex-start; flex-wrap:wrap; }.result-help > div { flex:1 1 calc(100% - 44px); }.result-help .button { width:100%; } }
+.topbar { position: relative; }
+@media (max-width: 1100px) {
+  .topbar .demo-badge { display: block; position: absolute; top: 100%; left: 0; width: 100%; text-align: center; padding: 5px 12px; background: var(--surface, #fbfcf8); z-index: 1; }
+  .content { padding-top: 60px; }
+}

@@ -30,7 +30,7 @@ test('bank identity and product costs follow the selected fund across views', as
  await expect(page.locator('.bank-info__maintenance dd')).toContainText('0,00');
  await page.getByText('Preguntas frecuentes').click();
  await page.getByText('¿Qué es BancoT2F?').click();
- await expect(page.getByText('Una entidad ficticia creada para esta demostración.')).toBeVisible();
+ await expect(page.getByText('BancoT2F es el banco de este entorno de demostración.')).toBeVisible();
  await page.getByRole('button',{name:'Explorar',exact:true}).click();
  const beginner = page.locator('.beginner-card');
  await expect(beginner.locator('.bank-costs')).toContainText('0,75 %');
