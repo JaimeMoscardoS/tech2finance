@@ -187,6 +187,7 @@ test('a delayed response never renders after the user edits a field', async ({ p
   await game.getByLabel('Importe inicial (€)').fill('900');
   await page.waitForTimeout(2200);
   await expect(game.locator('.hsg-card')).toHaveCount(0);
+  await expect(game.getByRole('alert')).toHaveCount(0);
   await expect(game.getByRole('button', { name: 'Comparar mantener y vender' })).toBeEnabled();
 });
 
@@ -199,6 +200,7 @@ test('a delayed response never renders after switching language', async ({ page 
   await page.getByRole('button', { name: 'English' }).click();
   await page.waitForTimeout(2200);
   await expect(game.locator('.hsg-card')).toHaveCount(0);
+  await expect(game.getByRole('alert')).toHaveCount(0);
   await expect(game.getByRole('button', { name: 'Compare holding and selling' })).toBeEnabled();
 });
 
@@ -227,7 +229,7 @@ test('invalid amounts are announced through both fields and the CNMV reuse link 
   await compareButton(game).click();
   await expect(game.getByLabel('Importe inicial (€)')).toHaveAttribute('aria-describedby', /hsg-form-error/);
   await expect(game.getByLabel('Aportación mensual (€)')).toHaveAttribute('aria-describedby', /hsg-form-error/);
-  await expect(game.getByText(/siempre empieza en el primer cierre observado/)).toBeVisible();
+  await expect(game.getByText(/empieza en el primer cierre observado/)).toBeVisible();
   await game.getByLabel('Aportación mensual (€)').fill('50');
   await compareButton(game).click();
   await expect(game.getByRole('link', { name: 'Condiciones de reutilización de la CNMV' })).toHaveAttribute('href', /^https:\/\//);
