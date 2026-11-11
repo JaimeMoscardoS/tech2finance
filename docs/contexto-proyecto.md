@@ -2,7 +2,7 @@
 
 ## Qué es
 
-La configuración local opcional del servidor usa `.env` privado en la raíz, copiado de `.env.example`; contiene claves de Anthropic y ElevenLabs, selección de análisis y voces de respuesta en español e inglés. Se carga al arrancar y requiere reinicio tras cambios. Disponibilidad de voz y proveedores con credenciales reales pendiente de comprobación. Véase [backend](../backend/README.md#configuración-privada-local).
+La configuración local opcional del servidor usa `.env` privado en la raíz, copiado de `.env.example`; contiene claves de Anthropic y ElevenLabs, selección de análisis y voces de respuesta en español e inglés. Se carga al arrancar y requiere reinicio tras cambios. La síntesis real devolvió MP3 para ambos idiomas; audición, micrófono y Sonnet actual siguen pendientes de comprobación. Véase [backend](../backend/README.md#configuración-privada-local).
 
 En la rama de trabajo, **BancoT2F** es la entidad ficticia anfitriona de la experiencia y Tech2Finance su tutor. Las condiciones del anfitrión, los costes de productos no disponibles y los límites se detallan en [BancoT2F](banco-t2f.md); el [guion de demo](../presentacion/demo-banco-t2f.md) recoge el recorrido histórico propuesto.
 
@@ -156,7 +156,7 @@ La elegibilidad se basa en informes semestrales que cubren 2020–2025, sin dist
 
 ## Integración local de demostración
 
-En esta rama, el frontend usa la API FastAPI local para catálogo, simulación, caídas y tutor; ofrece también demo local explícita. El servidor selecciona Anthropic y ElevenLabs automáticamente cuando sus claves respectivas están disponibles, salvo overrides; el análisis detallado se configura por separado. Las integraciones de esta rama se han probado con proveedores simulados y falta comprobarlas con credenciales reales. Véase [backend-contexto](backend-contexto.md) para contrato y límites. Esta integración no implica despliegue ni conexión bancaria.
+En esta rama, el frontend usa la API FastAPI local para catálogo, simulación, caídas y tutor; ofrece también demo local explícita. El servidor selecciona Anthropic y ElevenLabs automáticamente cuando sus claves respectivas están disponibles, salvo overrides; el análisis detallado se configura por separado. Además de pruebas simuladas, se han recibido archivos MP3 reales para ambos idiomas; las demás conexiones reales siguen pendientes. Véase [backend-contexto](backend-contexto.md) para contrato y límites. Esta integración no implica despliegue ni conexión bancaria.
 
 
 Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](planning/plan.md).

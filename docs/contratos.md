@@ -43,9 +43,9 @@ El juego histórico no es una previsión: documentar qué activo representa cada
 
 ## Conversación, voz y análisis
 
-El servidor carga opcionalmente `.env` desde la raíz al iniciarse, sin sustituir variables de entorno preexistentes. La plantilla permite configurar las claves privadas, el proveedor de análisis y las voces de respuesta en español e inglés; las pruebas omiten el archivo. Cambiarlo exige reiniciar el servidor. La selección de voces no acredita que estén disponibles en una cuenta ni que se haya probado la conexión real.
+El servidor carga opcionalmente `.env` desde la raíz al iniciarse, sin sustituir variables de entorno preexistentes. La plantilla permite configurar las claves privadas, el proveedor de análisis y las voces de respuesta en español e inglés; las pruebas omiten el archivo. Cambiarlo exige reiniciar el servidor. La disponibilidad de voces depende de la cuenta.
 
-La lectura de respuestas permite síntesis local o ElevenLabs según `ttsProvider` en `GET /api/health`. `POST /api/speech/synthesize` recibe únicamente `{text, language}` con texto de 1 a 3000 caracteres e idioma `es` o `en`, y devuelve `audio/mpeg` sin caché. Las voces predeterminadas son David Martin en castellano y Elara en inglés; el modelo por defecto es `eleven_flash_v2_5`. La operación tiene un plazo de 25 s, límite de 2 MiB, cuatro solicitudes simultáneas y 30 por minuto por proceso. Un fallo de ElevenLabs no cambia silenciosamente a voz local. La conexión real y la calidad de las voces siguen pendientes de comprobación.
+La lectura de respuestas permite síntesis local o ElevenLabs según `ttsProvider` en `GET /api/health`. `POST /api/speech/synthesize` recibe únicamente `{text, language}` con texto de 1 a 3000 caracteres e idioma `es` o `en`, y devuelve `audio/mpeg` sin caché. Las voces predeterminadas son David Martin en castellano y Elara en inglés; el modelo por defecto es `eleven_flash_v2_5`. La operación tiene un plazo de 25 s, límite de 2 MiB, cuatro solicitudes simultáneas y 30 por minuto por proceso. Un fallo de ElevenLabs no cambia silenciosamente a voz local. Una prueba real recibió MP3 en ambos idiomas; no se ha comprobado la reproducción audible ni la calidad de las voces.
 
 ### Análisis detallado de caídas
 
@@ -69,7 +69,7 @@ La implementación anterior del PR 36 permanece en `backend.tutor_bridge.reply()
 
 Los accesos contextuales preparan una pregunta localizada y editable sobre el resultado, ejemplo, caída o fondo seleccionado; no la envían automáticamente. El acceso genérico abre el chat vacío. La etiqueta del proveedor procede de la respuesta recibida.
 
-`GET /api/health` indica `speechProvider`, `speechKeyConfigured`, `tutorProvider`, `newsProvider` y `externalProviders`; refleja configuración, no prueba credenciales ni conectividad. Configurar claves como variables del entorno del servidor y reiniciarlo, sin subirlas a Git. Con claves presentes se activan automáticamente transcripción y chat salvo override; el análisis detallado requiere además `T2F_ANALYSIS_PROVIDER=anthropic`. Se han implementado adaptadores y pruebas simuladas; la conexión real a ElevenLabs y Anthropic y la calidad de sus respuestas están pendientes de comprobación con credenciales reales.
+`GET /api/health` indica `speechProvider`, `speechKeyConfigured`, `tutorProvider`, `newsProvider` y `externalProviders`; refleja configuración, no prueba credenciales ni conectividad. Configurar claves como variables del entorno del servidor y reiniciarlo, sin subirlas a Git. Con claves presentes se activan automáticamente transcripción y chat salvo override; el análisis detallado requiere además `T2F_ANALYSIS_PROVIDER=anthropic`. Se han implementado adaptadores y pruebas simuladas. La síntesis ElevenLabs ha devuelto MP3 reales; el dictado con micrófono, el adaptador actual de Sonnet y la reproducción audible siguen pendientes de comprobación.
 
 ## Motor de análisis de caídas
 

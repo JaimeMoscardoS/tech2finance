@@ -18,7 +18,7 @@ Tutor del chat con Claude: con `ANTHROPIC_API_KEY` se selecciona automáticament
 
 Copia `.env.example` de la raíz a `.env` y añade las claves `ANTHROPIC_API_KEY` y `ELEVENLABS_API_KEY`. El servidor carga `.env` al arrancar, sin reemplazar variables ya definidas en su entorno; después de guardar cambios hay que reiniciarlo. No compartas ni subas `.env`. La plantilla selecciona el análisis Anthropic y el modelo `claude-sonnet-5-5` por defecto; sin una clave válida el análisis configurado no está disponible. El dictado y el tutor conservan la selección automática de proveedor según las claves.
 
-Para la lectura de respuestas se seleccionan David Martin para español castellano y Elara para inglés, con `eleven_flash_v2_5`. La disponibilidad de ambas voces depende de la cuenta y sus límites; no se ha verificado con credenciales reales ni escuchado el resultado. Las pruebas automatizadas omiten `.env` para evitar llamadas con claves personales.
+Para la lectura de respuestas se seleccionan David Martin para español castellano y Elara para inglés, con `eleven_flash_v2_5`. Se han recibido archivos MP3 reales de ambas voces con la cuenta configurada. La reproducción audible, el dictado con micrófono y el adaptador actual de Sonnet no se han comprobado. La disponibilidad depende de la cuenta y sus límites. Las pruebas automatizadas omiten `.env` para evitar llamadas con claves personales.
 
 Se ha utilizado Python 3.14.4 y se necesita Node.js **22.12 o posterior** en `PATH` para ejecutar el tutor. La prueba local del puente se ha realizado con Node 25.9.0. Instala las dependencias fijadas en un entorno virtual, desde la raíz del repositorio:
 
