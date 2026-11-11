@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from backend import tutor_bridge
 from backend.app import app
+from backend.domain import build_tutor_context
 
 client = TestClient(app, raise_server_exceptions=False)
 SPEC = {"instrumentId": "bbva-mi-inversion-bolsa-acumulacion", "initial": 500, "recurringContribution": 50, "periods": 1}
@@ -185,12 +186,17 @@ HOME = {"page": "home", "level": "beginner", "language": "es"}
 
 
 def test_amounts_are_rounded_before_sending_and_filter_uses_rounded(anthropic, monkeypatch):
+    value = build_tutor_context(dict(HOME))["portfolio"]["value"]
+    rounded = round(value, 2)
+    assert repr(value) != str(rounded) and len(repr(value).split(".")[1]) > 2
+    comma = str(rounded).replace(".", ",")
     body = {"message": "Que son los bonos?", "history": [], "context": HOME}
-    seen = use(monkeypatch, lambda r: httpx.Response(200, json=claude_body("Tu cartera vale 744,62 euros.")))
+    seen = use(monkeypatch, lambda r: httpx.Response(200, json=claude_body(f"Tu cartera vale {comma} euros.")))
     assert client.post("/api/tutor", json=body).json()["provider"] == "anthropic"
     sent = seen[0].content.decode()
-    assert "744.62" in sent and "744.6177" not in sent
-    use(monkeypatch, lambda r: httpx.Response(200, json=claude_body("Tu cartera vale 744,6177685950413 euros.")))
+    assert str(rounded) in sent and repr(value) not in sent
+    full = repr(value).replace(".", ",")
+    use(monkeypatch, lambda r: httpx.Response(200, json=claude_body(f"Tu cartera vale {full} euros.")))
     assert client.post("/api/tutor", json=body).json()["provider"] == "server_rules"
 
 
