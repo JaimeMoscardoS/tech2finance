@@ -2,6 +2,8 @@
 
 ## Qué es
 
+El perfil de la entidad ficticia y sus tarifas informativas se documenta en [BancoT2F](../docs/banco-t2f.md); la [batería de demo](../presentacion/demo-banco-t2f.md) debe verificarse sobre la integración final.
+
 API de demostración con FastAPI para el catálogo de práctica, las simulaciones, el análisis de caídas y el tutor contextual. Usa los datos locales de `shared/demo-data.json` y el motor Python del repositorio. El tutor aplica las reglas TypeScript existentes mediante un proceso Node local: no es un modelo de lenguaje.
 
 La demo no utiliza proveedores externos, claves, base de datos ni autenticación. No conecta cuentas ni realiza operaciones. Las series ficticias están identificadas como tales; la muestra anual publicada conserva su fuente y sus límites. La recuperación histórica no garantiza una recuperación futura y el usuario conserva la decisión.

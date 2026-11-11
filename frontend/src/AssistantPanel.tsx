@@ -23,7 +23,7 @@ export default function AssistantPanel({ open, onClose, context, panelRef, provi
  const generation=useRef(0);
  const contextKey=JSON.stringify(context) + provider.id;
  const cancel=()=>{generation.current++;request.current?.abort();request.current=null;setPending(false);};
- useEffect(()=>{cancel();stopBrowserVoice();return ()=>{generation.current++;request.current?.abort();stopBrowserVoice();};},[open,contextKey]);
+ useEffect(()=>{cancel();setInput("");setError(false);stopBrowserVoice();return ()=>{generation.current++;request.current?.abort();stopBrowserVoice();};},[open,contextKey]);
  async function send(e:FormEvent){
   e.preventDefault(); const text=input.trim();
   if(!text || text.length>MAX_MESSAGE_LENGTH || pending)return;

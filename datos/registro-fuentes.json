@@ -11,7 +11,7 @@
       "currency": "EUR",
       "shareClass": null,
       "methodology": "Rentabilidades mensuales ficticias que se repiten.",
-      "costs": "unknown",
+      "costs": "Comisiones sintéticas en bankProfile.products[].fees; informativas y no aplicadas a los resultados del simulador.",
       "distributions": "unknown",
       "rights": {
         "access": "unknown",
@@ -31,7 +31,7 @@
       "currency": "EUR",
       "shareClass": null,
       "methodology": "Rentabilidades mensuales ficticias que se repiten.",
-      "costs": "unknown",
+      "costs": "Comisiones sintéticas en bankProfile.products[].fees; informativas y no aplicadas a los resultados del simulador.",
       "distributions": "unknown",
       "rights": {
         "access": "unknown",
@@ -51,7 +51,7 @@
       "currency": "EUR",
       "shareClass": null,
       "methodology": "Rentabilidades mensuales ficticias que se repiten.",
-      "costs": "unknown",
+      "costs": "Comisiones sintéticas en bankProfile.products[].fees; informativas y no aplicadas a los resultados del simulador.",
       "distributions": "unknown",
       "rights": {
         "access": "unknown",
@@ -71,7 +71,7 @@
       "currency": "EUR",
       "shareClass": null,
       "methodology": "Rentabilidades mensuales ficticias que se repiten.",
-      "costs": "unknown",
+      "costs": "Comisiones sintéticas en bankProfile.products[].fees; informativas y no aplicadas a los resultados del simulador.",
       "distributions": "unknown",
       "rights": {
         "access": "unknown",
@@ -91,7 +91,7 @@
       "currency": "EUR",
       "shareClass": null,
       "methodology": "Rentabilidades mensuales ficticias que se repiten.",
-      "costs": "unknown",
+      "costs": "Comisiones sintéticas en bankProfile.products[].fees; informativas y no aplicadas a los resultados del simulador.",
       "distributions": "unknown",
       "rights": {
         "access": "unknown",

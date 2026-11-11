@@ -1,5 +1,6 @@
 import type { TutorProvider, TutorRequest, TutorReply, SimulationFacts } from './types.ts';
 import { safeSources } from './decline.ts';
+import { bankAnswer } from './bank-profile.ts';
 
 export const MAX_MESSAGE_LENGTH = 1500;
 export const MAX_HISTORY_MESSAGES = 8;
@@ -20,7 +21,7 @@ function detect(message: string): string {
   if (/liquid|horizon|horizonte|plazo|vender|sell|mantener|hold/.test(m)) return 'decision';
   if (/drawdown|caida|caido|bajada|recuper|recovery|drop/.test(m)) return 'decline';
   if (/fuente|source|histor|nav|publicad/.test(m)) return 'source';
-  if (/resultado|beneficio|perdida|ganancia|rentabilidad|result|profit|return|aport|contribut|p&l|balance|simulacion|simulation/.test(m)) return 'result';
+  if (/resultado|beneficio|perdida|ganancia|rentabilidad|result|profit|return|aport|contribut|\b(?:lose|lost|loss)\b|p&l|balance|simulacion|simulation/.test(m)) return 'result';
   if (/diversif/.test(m)) return 'diversification';
   if (/cost|comision|fee/.test(m)) return 'costs';
   if (/riesgo|risk|volatil/.test(m)) return 'risk';
@@ -37,6 +38,8 @@ export function createLocalTutorProvider(): TutorProvider {
     const en = context?.language === 'en';
     const lang = en ? 'en' : 'es';
     const message = typeof request.message === 'string' ? request.message.trim() : '';
+    const bankResponse = message.length <= MAX_MESSAGE_LENGTH ? bankAnswer(message, context, Array.isArray(request.history) ? request.history : []) : undefined;
+    if (bankResponse) return { ...bankResponse, text: bankResponse.text.slice(0, 3000), language: lang, mode: 'local', provider: 'local', sources: [] };
     let intent = message.length <= MAX_MESSAGE_LENGTH ? detect(message) : 'unknown';
     if (intent === 'unknown' && /^(y eso|explica(?:me)? m[aá]s|m[aá]s detalles|por qu[eé]|c[oó]mo|and that|explain more|more details|why|how)[\s?¿.!]*$/i.test(message)) {
       const previous = (Array.isArray(request.history) ? request.history.slice(-MAX_HISTORY_MESSAGES) : []).reverse().find(h => h?.role === 'assistant');

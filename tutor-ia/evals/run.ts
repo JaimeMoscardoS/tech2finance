@@ -19,7 +19,7 @@ if (corpus.schemaVersion !== 1 || !Array.isArray(corpus.cases) || !corpus.cases.
 const results = []; for (const item of corpus.cases) results.push(await evaluateCase(item));
 const failed = results.filter(r => r.checks.some(c => !c.pass));
 const coverage = Object.fromEntries(['es', 'en'].map(language => [language, Object.fromEntries(['beginner', 'intermediate', 'advanced'].map(level => [level, results.filter(r => r.language === language && r.level === level).length]))]));
-const implementation = ['../src/local-tutor.ts', '../src/decline.ts', './evaluate.ts', './run.ts'].map(file => ({ file, sha256: hash(readFileSync(join(dir, file))) }));
+const implementation = ['../src/local-tutor.ts', '../src/bank-profile.ts', '../src/decline.ts', './evaluate.ts', './run.ts'].map(file => ({ file, sha256: hash(readFileSync(join(dir, file))) }));
 const report = JSON.stringify({ schemaVersion: 1, policyVersion: JSON.parse(policyData.toString('utf8')).policyVersion, corpusSha256: hash(corpusData), policySha256: hash(policyData), implementation, coverage, total: results.length, failed: failed.length, results }, null, 2) + '\n';
 if (args.includes('--write')) writeFileSync(reportPath, report, 'utf8');
 else if (canonicalText(readFileSync(reportPath, 'utf8')) !== report) { console.error('Report drift detected'); process.exitCode = 1; }

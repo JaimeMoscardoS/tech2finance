@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2] / 'shared'
-DATASET_VERSION = 'demo-2026-11-09.1'
+DATASET_VERSION = 'demo-2026-11-10.1'
 CALCULATION_VERSION = 'demo-calculations-1.0.0'
-DATASET_SHA256 = '8a0f06c8b95182bde24f9834763c3b39c194e7500b40ac83662c9b7e7f08fb45'
+DATASET_SHA256 = '70d234a224a2dc3f08d8e3f92cd4bfad3456ebb3cbcd9bb8db208940dafed0a4'
 CANONICAL_DESCRIPTION = "json.dumps(data, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode('utf-8'); complete parsed document, duplicate keys and nonfinite numbers rejected"
 
 

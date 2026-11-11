@@ -13,7 +13,7 @@ const Recovery = forwardRef<HTMLDivElement, Props>(function Recovery({language, 
   const es = language === "es";
   return <div className="recovery" ref={ref}>
     <header className="recovery-header">
-      <div className="brand"><div className="brand-mark" aria-hidden="true"><span>t</span><span>2</span></div><div><strong>tech<span>2</span>finance</strong><small>{es ? "Tu espacio de inversión" : "Your investment space"}</small></div></div>
+      <div className="brand"><div className="brand-mark" aria-hidden="true"><span>t</span><span>2</span></div><div><strong>BancoT2F</strong><small>{es ? "Demo ficticia · tecnología Tech2Finance" : "Fictional demo · powered by Tech2Finance"}</small></div></div>
       <div className="recovery-preferences" aria-label={es ? "Preferencias" : "Preferences"}>
         <button type="button" aria-pressed={es} onClick={() => onLanguage("es")}>ES<span className="sr-only"> Español</span></button>
         <button type="button" aria-pressed={!es} onClick={() => onLanguage("en")}>EN<span className="sr-only"> English</span></button>

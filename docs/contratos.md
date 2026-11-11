@@ -2,7 +2,11 @@
 
 ## Qué es
 
-Acuerdos entre áreas y contrato de la API local de demostración. El motor Python histórico conserva su propio contrato y se expone en `/api/game/compare`.
+Acuerdos entre áreas y contrato de la API local de demostración. El motor Python histórico conserva su propio contrato y se expone en `POST /api/game/compare`.
+
+El perfil tipado de BancoT2F se define en [`shared/bank-profile.ts`](../shared/bank-profile.ts) y los datos en `shared/demo-data.json:bankProfile`. Véanse [condiciones y versiones](banco-t2f.md). Las tarifas del perfil son informativas y se excluyen del cálculo; un coste anual `null` significa no definido.
+
+En el contexto interno del tutor se usa `bank?: BankProfile` y `instrument.product?: BankProduct` anidado en el instrumento; no hay `product` superior. El cliente puede indicar `bankId` opcional, que el servidor resuelve; los campos extra, incluidos `bank`, `bankProfile` y `product` inyectados, reciben 422.
 
 - **1 → 2:** pantalla, nivel, parámetros del juego o pregunta; recibe resultados y errores.
 - **5 → 3 y 2:** catálogo ficticio y series verificadas con fuente, fecha, licencia, moneda, frecuencia, ajustes y costes; las muestras ficticias deben indicarlo.
@@ -47,7 +51,7 @@ El motor `simulador` (`compare`) está expuesto en `POST /api/game/compare` solo
 
 El catálogo se comparte en `shared/demo-data.json` y el frontend lo expone mediante `frontend/src/catalog.ts`: cada instrumento tiene `instrumentId`, `assetType` (fondo, ETF o acción), `assetClass` (mixta, variable, fija o desconocida), `bankId`, gestora, relación con la entidad (`own`, `third_party`, `fictional` o `unknown`), identificador y clase cuando se conocen, moneda, fuente, fecha de consulta y estado de datos. La relación identifica el vínculo con la gestora o entidad, no la propiedad de los activos. Los campos desconocidos son nulos. El catálogo de demo se carga desde ese archivo tanto en el servidor como en el modo local.
 
-El tipo local vigente de los resultados y puntos temporales está en [`frontend/src/simulation-types.ts`](../frontend/src/simulation-types.ts); [backend-contexto](backend-contexto.md) resume su interpretación y las diferencias con el motor Python aislado. El contrato HTTP de demostración se describe en [backend-contexto](backend-contexto.md).
+El tipo local vigente de los resultados y puntos temporales está en [`frontend/src/simulation-types.ts`](../frontend/src/simulation-types.ts); [backend-contexto](backend-contexto.md) resume su interpretación y las diferencias con el motor Python expuesto para la comparación del juego. El contrato HTTP de demostración se describe en [backend-contexto](backend-contexto.md).
 
 Tres fondos, un ETF y una acción ficticios usan secuencias inventadas diferentes que se repiten cada doce meses; no representan el historial de ningún producto ni una previsión. Las fichas de BBVA y Santander siguen sin histórico disponible. CaixaBank incorpora la muestra anual descrita abajo. No existe conexión bancaria.
 

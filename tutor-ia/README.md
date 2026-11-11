@@ -2,6 +2,8 @@
 
 ## Qué es
 
+El contexto de BancoT2F y los ejemplos de preguntas se recogen en [BancoT2F](../docs/banco-t2f.md) y el [guion](../presentacion/demo-banco-t2f.md). Las formulaciones y respuestas del recorrido deben comprobarse sobre la integración final.
+
 Biblioteca TypeScript sin dependencias que explica conceptos y resultados aportados por la aplicación mediante reglas locales y analiza una serie observada. No es un modelo de IA ni utiliza servicios externos. Devuelve texto plano, idioma, intención y fuentes separadas; la interfaz debe presentar el texto como texto, no como HTML.
 
 `src/index.ts` exporta los tipos, `createLocalTutorProvider()` y `analyzeDecline(input)`. El proveedor no cambia controles ni calcula cifras a partir del mensaje. El historial considera como máximo ocho mensajes y el mensaje admite 1500 caracteres. Admite cancelación con `AbortSignal`. Los datos ausentes o no válidos no producen resultados simulados.

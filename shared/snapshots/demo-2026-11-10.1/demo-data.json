@@ -1,0 +1,528 @@
+{
+  "schemaVersion": "1.0",
+  "banks": [
+    {
+      "id": "demo",
+      "name": {
+        "es": "BancoT2F",
+        "en": "BancoT2F"
+      }
+    },
+    {
+      "id": "bbva",
+      "name": {
+        "es": "BBVA",
+        "en": "BBVA"
+      }
+    },
+    {
+      "id": "santander",
+      "name": {
+        "es": "Santander",
+        "en": "Santander"
+      }
+    },
+    {
+      "id": "caixabank",
+      "name": {
+        "es": "CaixaBank",
+        "en": "CaixaBank"
+      }
+    }
+  ],
+  "instruments": [
+    {
+      "instrumentId": "demo-mixed",
+      "assetType": "fund",
+      "assetClass": "mixed",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "T2F Equilibrio",
+        "en": "T2F Balance"
+      },
+      "returns": [
+        0.015,
+        0.012,
+        -0.025,
+        0.02,
+        -0.085,
+        -0.045,
+        0.03,
+        0.025,
+        0.01,
+        0.02,
+        -0.012,
+        0.018
+      ]
+    },
+    {
+      "instrumentId": "demo-equity",
+      "assetType": "fund",
+      "assetClass": "equity",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "T2F Horizonte",
+        "en": "T2F Horizon"
+      },
+      "returns": [
+        0.03,
+        -0.04,
+        0.045,
+        -0.08,
+        0.06,
+        0.01,
+        -0.03,
+        0.05,
+        -0.02,
+        0.04,
+        0.025,
+        -0.015
+      ]
+    },
+    {
+      "instrumentId": "demo-fixed",
+      "assetType": "fund",
+      "assetClass": "fixed",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "T2F Estabilidad",
+        "en": "T2F Stability"
+      },
+      "returns": [
+        0.003,
+        0.004,
+        -0.006,
+        0.005,
+        -0.008,
+        0.002,
+        0.004,
+        0.003,
+        -0.002,
+        0.004,
+        0.003,
+        0.002
+      ]
+    },
+    {
+      "instrumentId": "demo-etf",
+      "assetType": "etf",
+      "assetClass": "equity",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "ETF Mercado ficticio",
+        "en": "Fictional Market ETF"
+      },
+      "returns": [
+        0.02,
+        -0.03,
+        0.04,
+        -0.05,
+        0.03,
+        0.02,
+        -0.01,
+        0.03,
+        -0.02,
+        0.02,
+        0.01,
+        0.005
+      ]
+    },
+    {
+      "instrumentId": "demo-stock",
+      "assetType": "stock",
+      "assetClass": "equity",
+      "bankId": "demo",
+      "manager": "Ficticia / Fictional",
+      "relationship": "fictional",
+      "identifier": null,
+      "shareClass": null,
+      "currency": "EUR",
+      "sourceUrl": null,
+      "sourceDate": null,
+      "dataStatus": "fictional",
+      "name": {
+        "es": "Acción Empresa ficticia",
+        "en": "Fictional Company share"
+      },
+      "returns": [
+        0.05,
+        -0.08,
+        0.06,
+        -0.04,
+        0.03,
+        -0.02,
+        0.07,
+        -0.05,
+        0.02,
+        0.04,
+        -0.03,
+        0.01
+      ]
+    },
+    {
+      "instrumentId": "bbva-mi-inversion-bolsa",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "bbva",
+      "manager": "BBVA ASSET MANAGEMENT SGIIC",
+      "relationship": "own",
+      "identifier": "ES0119178004",
+      "shareClass": null,
+      "currency": null,
+      "sourceUrl": "https://www.cnmv.es/Portal/consultas/iic/fondo?nif=V86954104",
+      "sourceDate": "2026-11-09",
+      "dataStatus": "missing_history",
+      "name": {
+        "es": "BBVA MI INVERSION BOLSA, FI",
+        "en": "BBVA MI INVERSION BOLSA, FI"
+      }
+    },
+    {
+      "instrumentId": "santander-rf-ahorro",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "santander",
+      "manager": "Santander Asset Management",
+      "relationship": "own",
+      "identifier": "ES0112793007",
+      "shareClass": null,
+      "currency": null,
+      "sourceUrl": "https://www.santanderassetmanagement.es/fondos-de-inversion/fondos-de-inversion-renta-fija",
+      "sourceDate": "2026-11-09",
+      "dataStatus": "missing_history",
+      "name": {
+        "es": "Santander RF Ahorro",
+        "en": "Santander RF Ahorro"
+      }
+    },
+    {
+      "instrumentId": "caixabank-monetario-estandar",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "caixabank",
+      "manager": "CaixaBank Asset Management",
+      "relationship": "own",
+      "identifier": "ES0138045002",
+      "shareClass": "Estándar",
+      "currency": "EUR",
+      "sourceUrl": "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
+      "sourceDate": "2026-11-09",
+      "dataStatus": "annual_history",
+      "name": {
+        "es": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR",
+        "en": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR"
+      }
+    }
+  ],
+  "annualHistory": {
+    "instrumentId": "caixabank-monetario-estandar",
+    "kind": "annual_published_returns",
+    "sourceUrl": "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
+    "sourceDate": "2026-11-09",
+    "baseline": "2020-12-31",
+    "currency": "EUR",
+    "returns": [
+      {
+        "year": 2021,
+        "rate": -0.0053
+      },
+      {
+        "year": 2022,
+        "rate": -0.0067
+      },
+      {
+        "year": 2023,
+        "rate": 0.0243
+      },
+      {
+        "year": 2024,
+        "rate": 0.0297
+      },
+      {
+        "year": 2025,
+        "rate": 0.0153
+      }
+    ]
+  },
+  "portfolioPoints": [
+    1000,
+    1032,
+    1010,
+    1040,
+    1026,
+    1060,
+    1045,
+    1088,
+    1072,
+    1103,
+    1084,
+    1110,
+    1080,
+    1093
+  ],
+  "bankProfile": {
+    "bankId": "demo",
+    "profileVersion": "bank-demo-2026-11-10.1",
+    "classification": "synthetic_demo",
+    "name": {
+      "es": "BancoT2F",
+      "en": "BancoT2F"
+    },
+    "description": {
+      "es": "Entidad ficticia para una demostración educativa de inversión.",
+      "en": "Fictional institution for an educational investment demonstration."
+    },
+    "source": {
+      "kind": "synthetic_seed",
+      "asOf": "2026-11-10"
+    },
+    "services": [
+      {
+        "id": "catalogue",
+        "name": {
+          "es": "Catálogo",
+          "en": "Catalogue"
+        },
+        "description": {
+          "es": "Consulta instrumentos de la demostración.",
+          "en": "Browse demonstration instruments."
+        }
+      },
+      {
+        "id": "practice",
+        "name": {
+          "es": "Práctica",
+          "en": "Practice"
+        },
+        "description": {
+          "es": "Practica con simulaciones educativas.",
+          "en": "Practise with educational simulations."
+        }
+      },
+      {
+        "id": "tutor",
+        "name": {
+          "es": "Tutor",
+          "en": "Tutor"
+        },
+        "description": {
+          "es": "Consulta explicaciones contextuales.",
+          "en": "Ask for contextual explanations."
+        }
+      },
+      {
+        "id": "portfolio_pause",
+        "name": {
+          "es": "Pausa de cartera",
+          "en": "Portfolio pause"
+        },
+        "description": {
+          "es": "Consulta información sobre una caída antes de vender.",
+          "en": "Review information about a decline before selling."
+        }
+      }
+    ],
+    "conditions": {
+      "currency": "EUR",
+      "maintenanceMonthlyEur": 0,
+      "requiresRealAccount": false,
+      "realOrdersAvailable": false,
+      "externalConnections": false,
+      "text": {
+        "es": "Mantenimiento mensual ficticio de 0 EUR. Sin cuenta real, órdenes reales ni conexiones externas.",
+        "en": "Fictional monthly maintenance of EUR 0. No real account, real orders or external connections."
+      }
+    },
+    "products": [
+      {
+        "instrumentId": "demo-fixed",
+        "minimumInitialEur": 0,
+        "minimumRecurringEur": 0,
+        "fees": {
+          "annualOngoingBps": 40,
+          "entryBps": 0,
+          "exitBps": 0,
+          "orderFixedEur": 0,
+          "custodyAnnualBps": 0,
+          "treatment": "illustrative_excluded"
+        },
+        "description": {
+          "es": "Producto ficticio con condiciones informativas para la demostración.",
+          "en": "Fictional product with informational terms for the demonstration."
+        }
+      },
+      {
+        "instrumentId": "demo-mixed",
+        "minimumInitialEur": 0,
+        "minimumRecurringEur": 0,
+        "fees": {
+          "annualOngoingBps": 75,
+          "entryBps": 0,
+          "exitBps": 0,
+          "orderFixedEur": 0,
+          "custodyAnnualBps": 0,
+          "treatment": "illustrative_excluded"
+        },
+        "description": {
+          "es": "Producto ficticio con condiciones informativas para la demostración.",
+          "en": "Fictional product with informational terms for the demonstration."
+        }
+      },
+      {
+        "instrumentId": "demo-equity",
+        "minimumInitialEur": 0,
+        "minimumRecurringEur": 0,
+        "fees": {
+          "annualOngoingBps": 110,
+          "entryBps": 0,
+          "exitBps": 0,
+          "orderFixedEur": 0,
+          "custodyAnnualBps": 0,
+          "treatment": "illustrative_excluded"
+        },
+        "description": {
+          "es": "Producto ficticio con condiciones informativas para la demostración.",
+          "en": "Fictional product with informational terms for the demonstration."
+        }
+      },
+      {
+        "instrumentId": "demo-etf",
+        "minimumInitialEur": 0,
+        "minimumRecurringEur": 0,
+        "fees": {
+          "annualOngoingBps": 20,
+          "entryBps": 0,
+          "exitBps": 0,
+          "orderFixedEur": 1,
+          "custodyAnnualBps": 0,
+          "treatment": "illustrative_excluded"
+        },
+        "description": {
+          "es": "Producto ficticio con condiciones informativas para la demostración.",
+          "en": "Fictional product with informational terms for the demonstration."
+        }
+      },
+      {
+        "instrumentId": "demo-stock",
+        "minimumInitialEur": 0,
+        "minimumRecurringEur": 0,
+        "fees": {
+          "annualOngoingBps": null,
+          "entryBps": 0,
+          "exitBps": 0,
+          "orderFixedEur": 1,
+          "custodyAnnualBps": 0,
+          "treatment": "illustrative_excluded"
+        },
+        "description": {
+          "es": "Producto ficticio con condiciones informativas para la demostración.",
+          "en": "Fictional product with informational terms for the demonstration."
+        }
+      }
+    ],
+    "faq": [
+      {
+        "id": "identity",
+        "question": {
+          "es": "¿Qué es BancoT2F?",
+          "en": "What is BancoT2F?"
+        },
+        "answer": {
+          "es": "Una entidad ficticia creada para esta demostración.",
+          "en": "A fictional institution created for this demonstration."
+        }
+      },
+      {
+        "id": "services",
+        "question": {
+          "es": "¿Qué servicios ofrece?",
+          "en": "What services does it offer?"
+        },
+        "answer": {
+          "es": "Catálogo, práctica, tutor y pausa informativa de cartera.",
+          "en": "Catalogue, practice, tutor and an informational portfolio pause."
+        }
+      },
+      {
+        "id": "conditions",
+        "question": {
+          "es": "¿Cuáles son las condiciones?",
+          "en": "What are the terms?"
+        },
+        "answer": {
+          "es": "Euros, sin mantenimiento mensual y con mínimos ficticios de cero euros.",
+          "en": "Euros, no monthly maintenance and fictional minimums of zero euros."
+        }
+      },
+      {
+        "id": "fees",
+        "question": {
+          "es": "¿Se descuentan las comisiones?",
+          "en": "Are fees deducted?"
+        },
+        "answer": {
+          "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+          "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+        }
+      },
+      {
+        "id": "real_money",
+        "question": {
+          "es": "¿Se utiliza dinero real?",
+          "en": "Is real money used?"
+        },
+        "answer": {
+          "es": "No. No se requieren cuentas reales ni se tramitan órdenes reales.",
+          "en": "No. No real account is required and no real orders are placed."
+        }
+      },
+      {
+        "id": "external_products",
+        "question": {
+          "es": "¿Son de BancoT2F todos los productos?",
+          "en": "Do all products belong to BancoT2F?"
+        },
+        "answer": {
+          "es": "No. Los productos de otras entidades conservan su identificación y procedencia.",
+          "en": "No. Products from other institutions retain their identity and provenance."
+        }
+      }
+    ],
+    "calculationNotice": {
+      "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
+      "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+    }
+  }
+}

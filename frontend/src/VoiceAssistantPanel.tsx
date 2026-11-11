@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Mic, Square, Volume2, X } from 'lucide-react';
-import { createLocalTutorProvider, MAX_MESSAGE_LENGTH, type TutorContext, type TutorProvider, type TutorReply } from '../../tutor-ia/src/index';
+import { createLocalTutorProvider, MAX_MESSAGE_LENGTH, type TutorContext, type TutorProvider, type TutorReply, type TutorHistoryMessage } from '../../tutor-ia/src/index';
 import { speakLocal, startLocalDictation, stopBrowserVoice, type VoiceState } from './voice/browser-voice';
 import './voice-assistant.css';
 
@@ -22,12 +22,13 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
  const [reply, setReply] = useState<TutorReply | null>(null);
  const generation = useRef(0);
  const request = useRef<AbortController | null>(null);
+ const history = useRef<TutorHistoryMessage[]>([]);
  const consumedStart = useRef(0);
  const currentSession = useRef({ key, provider });
  currentSession.current = { key, provider };
  const cancel = () => { generation.current++; request.current?.abort(); request.current = null; stopBrowserVoice(); setPhase('idle'); setMessage(''); };
  useEffect(() => {
-  cancel(); setQuestion(''); setReply(null);
+  cancel(); history.current = []; setQuestion(''); setReply(null);
   return () => { generation.current++; request.current?.abort(); request.current = null; stopBrowserVoice(); };
  }, [open, key, provider]);
  const talk = () => {
@@ -48,15 +49,17 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
    if (text.length > MAX_MESSAGE_LENGTH) { setPhase('idle'); setMessage(t.limit); return; }
    setQuestion(text); setMessage(t.pending); setPhase('pending');
    const controller = new AbortController(); request.current = controller;
-   void provider.reply({ message: text, history: [], context: snapshot, signal: controller.signal }).then(result => {
+   const timer = window.setTimeout(() => controller.abort(), 10000);
+   void provider.reply({ message: text, history: history.current.slice(-8), context: snapshot, signal: controller.signal }).then(result => {
     if (id !== generation.current || controller.signal.aborted) return;
+    history.current = [...history.current, {role:'user' as const,text}, {role:'assistant' as const,text:result.text,intent:result.intent}].slice(-8);
     request.current = null; setReply(result); setPhase('speaking');
     speakLocal(result.text, result.language, (voiceState, voiceMessage) => {
      if (id !== generation.current) return;
      setMessage(voiceMessage);
      if (voiceState === 'idle' || voiceState === 'error') setPhase('idle');
     });
-   }).catch(() => { if (id === generation.current && !controller.signal.aborted) { request.current = null; setPhase('idle'); setMessage(t.error); } });
+   }).catch(() => { if (id === generation.current) { request.current = null; setPhase('idle'); setMessage(t.error); } }).finally(() => window.clearTimeout(timer));
   };
   void startLocalDictation(context.language, text => { if (id === generation.current) finalText += (finalText ? ' ' : '') + text; }, status);
  };

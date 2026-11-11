@@ -8,7 +8,8 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { annualHistory } from "./annual-history";
-import { type Bank, type Instrument } from "./catalog";
+import { type Bank, type Instrument, type BankProfile } from "./catalog";
+import { ProductCosts } from "./BankInfo";
 import { copy, type Language } from "./copy";
 import {
   MAX_SIMULATION_AMOUNT,
@@ -30,6 +31,7 @@ type Props = {
   language: Language;
   level: Level;
   banks: Bank[];
+  bankProfile: BankProfile;
   instruments: Instrument[];
   history: typeof annualHistory;
   selected: Instrument;
@@ -56,6 +58,7 @@ export default function Simulator({
   language,
   level,
   selected,
+  bankProfile,
   banks,
   instruments,
   history,
@@ -193,6 +196,7 @@ export default function Simulator({
               {selected.name[language]}
             </small>
           </label>
+          <ProductCosts product={bankProfile.products.find(p=>p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />
           <label>
             {t.initial}
             <span>{t.fakeMoney}</span>

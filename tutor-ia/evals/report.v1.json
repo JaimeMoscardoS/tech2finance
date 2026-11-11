@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
   "policyVersion": "1.0.0",
-  "corpusSha256": "eb86212f7daedf95fe336a708cada4490e1823033db633b3b1b5f72dcb706143",
+  "corpusSha256": "9ef9983574a8afc737ecc3799d5562758b211bbac69b64bd287dae0e6f575c8b",
   "policySha256": "79d9ce068aef8b00211af87ee0ff1699ff458ad869b004beac48c04133b82443",
   "implementation": [
     {
       "file": "../src/local-tutor.ts",
-      "sha256": "41d80a60bf5b3cbc96030b8395a3c1e4b4200661ba982b9a719580578f9b76f0"
+      "sha256": "fea2a844370851804740b0f3ccc64e202c789518877e4fa913c38d44a0742201"
+    },
+    {
+      "file": "../src/bank-profile.ts",
+      "sha256": "f218d8fd23b9446cecdda6e50e326c6524334185af5c3e741b28ba1b4f8bfbf2"
     },
     {
       "file": "../src/decline.ts",
@@ -18,22 +22,22 @@
     },
     {
       "file": "./run.ts",
-      "sha256": "1c4cc89349c26c09a50cbca4a28083f43c7144851cd032380fff6b4ac79846bc"
+      "sha256": "fc54f9e1e21a149a5876eb4df9b879166980c83ef034d28c4eda4b2216da2275"
     }
   ],
   "coverage": {
     "es": {
-      "beginner": 16,
+      "beginner": 24,
       "intermediate": 16,
       "advanced": 15
     },
     "en": {
-      "beginner": 16,
+      "beginner": 30,
       "intermediate": 15,
       "advanced": 16
     }
   },
-  "total": 94,
+  "total": 116,
   "failed": 0,
   "results": [
     {
@@ -3206,6 +3210,712 @@
         },
         {
           "invariant": "forbidden:you should buy",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-es-fees",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:0,75%",
+          "pass": true
+        },
+        {
+          "invariant": "required:no se descuentan",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:75",
+          "pass": true
+        },
+        {
+          "invariant": "number:0,75",
+          "pass": true
+        },
+        {
+          "invariant": "number:0",
+          "pass": true
+        },
+        {
+          "invariant": "number:0",
+          "pass": true
+        },
+        {
+          "invariant": "number:0",
+          "pass": true
+        },
+        {
+          "invariant": "number:0",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-en-fees",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:0.75%",
+          "pass": true
+        },
+        {
+          "invariant": "required:not deducted",
+          "pass": true
+        },
+        {
+          "invariant": "number:2",
+          "pass": true
+        },
+        {
+          "invariant": "number:75",
+          "pass": true
+        },
+        {
+          "invariant": "number:0.75",
+          "pass": true
+        },
+        {
+          "invariant": "number:0",
+          "pass": true
+        },
+        {
+          "invariant": "number:0",
+          "pass": true
+        },
+        {
+          "invariant": "number:0",
+          "pass": true
+        },
+        {
+          "invariant": "number:0",
+          "pass": true
+        },
+        {
+          "invariant": "no-unexpected-number",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-es-definition",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:comisiones",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0,75",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-en-foreign",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0.75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75 basis",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-es-future",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:futura",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0,75",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-es-follow-fee",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no se descuentan",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-en-cut-history",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0.75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75 basis",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-preflight-maintenance-es",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:mantenimiento",
+          "pass": true
+        },
+        {
+          "invariant": "required:0 EUR",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0,75",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-preflight-maintenance-en",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:maintenance",
+          "pass": true
+        },
+        {
+          "invariant": "required:EUR 0",
+          "pass": true
+        },
+        {
+          "invariant": "required:minimum",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0.75",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-preflight-external-es",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no.",
+          "pass": true
+        },
+        {
+          "invariant": "required:otras entidades",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-preflight-external-en",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no.",
+          "pass": true
+        },
+        {
+          "invariant": "required:other institutions",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-preflight-unknown-bank",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:maintenance",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:EUR 0",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-preflight-unknown-bank-follow",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0.75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75 basis",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-preflight-page-selected",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:catalogue",
+          "pass": true
+        },
+        {
+          "invariant": "required:T2F Balance",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-preflight-page-home",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:home",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:T2F Balance",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-gate-contribution",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:1,000",
+          "pass": true
+        },
+        {
+          "invariant": "required:-100",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0.75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:basis points",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-gate-otherbank",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:maintenance",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:EUR 0",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "bank-gate-bankother",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:maintenance",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:EUR 0",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "review-r1-other-fees-en",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:not available",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0.75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75 basis",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "review-r1-other-fees-es",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:no hay información disponible",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0,75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75 puntos",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "review-r1-active-fees-en",
+      "language": "en",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:0.75%",
+          "pass": true
+        },
+        {
+          "invariant": "required:not deducted",
+          "pass": true
+        },
+        {
+          "invariant": "no-guarantee",
+          "pass": true
+        },
+        {
+          "invariant": "no-pressure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "id": "review-r1-generic-fees-es",
+      "language": "es",
+      "level": "beginner",
+      "checks": [
+        {
+          "invariant": "cancelled",
+          "pass": true
+        },
+        {
+          "invariant": "required:comisiones",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:0,75",
+          "pass": true
+        },
+        {
+          "invariant": "forbidden:75 puntos",
           "pass": true
         },
         {
