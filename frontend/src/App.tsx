@@ -33,6 +33,7 @@ import { copy, type Language } from "./copy";
 import { analyzeDecline, type DeclineReport, type DecisionContext, type TutorContext } from "../../tutor-ia/src/index";
 import { buildDemoPortfolio } from "./dashboard-portfolio.ts";
 import { buildRealPortfolio } from "./portfolio-real.ts";
+import { displayCatalog } from "./fund-names.ts";
 import navData from "../../shared/nav-history.json";
 import dataManifest from "../../shared/data-manifest.json";
 import localData from "../../shared/demo-data.json";
@@ -40,6 +41,7 @@ import { simulateNav } from "./nav-history";
 import AssistantPanel from "./AssistantPanel";
 import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
+import { useDeclineEvent } from "./decline-events";
 import Recovery from "./Recovery";
 import HomeDashboard from "./views/home/HomeDashboard.tsx";
 import FundsDashboard from "./views/funds/FundsDashboard.tsx";
@@ -49,7 +51,6 @@ import { AgentPanelSection } from "./components/dashboard/AgentPanel.tsx";
 import { LEVELS, type Level, type Theme } from "./types/level";
 import { readStoredLevel, writeStoredLevel } from "./preferences";
 const PracticeLab = lazy(() => import("./PracticeLab"));
-const HoldSellGame = lazy(() => import("./HoldSellGame"));
 
 type Page = "home" | "explore" | "simulator" | "portfolio" | "learn";
 function saved(key: string, options: string[], fallback: string) {
@@ -89,6 +90,8 @@ export default function App() {
   const [declineSpec, setDeclineSpec] = useState<DeclineSpec | undefined>();
   const [demoLaunch, setDemoLaunch] = useState(false);
   const [pauseSell, setPauseSell] = useState(false);
+  const [journeyRevealed, setJourneyRevealed] = useState(false);
+  const [journeyFund, setJourneyFund] = useState<false | "fund" | "example">(false);
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [practiceResult, setPracticeResult] = useState<{spec: SimulationSpec; result: ServerSimulation} | null>(null);
   const [page, setPage] = useState<Page>("home"),
@@ -270,8 +273,14 @@ export default function App() {
   }, [page, catalog, selectedId]);
   const demoPortfolio = useMemo(() => buildDemoPortfolio(), []);
   // Misma cartera que muestra «Mi cartera» (FundsDashboard): NAV reales CNMV si hay datos suficientes; si no, la cartera DEMO.
-  // Gestora por ISIN desde el catálogo (dato publicado); riesgo, TER y clase no constan y se muestran como «No disponible».
-  const realPortfolio = useMemo(() => buildRealPortfolio(catalog?.navHistory, Object.fromEntries((catalog?.instruments ?? []).filter(i => i.identifier && i.manager).map(i => [i.identifier!, i.manager!]))), [catalog?.navHistory, catalog?.instruments]);
+  // Gestora y nombre genérico por ISIN desde el catálogo completo (los alias de main; sin nombres comerciales). Riesgo, TER y clase
+  // no constan y se muestran como «No disponible».
+  const realPortfolio = useMemo(() => {
+    const all = rawCatalog ? displayCatalog(rawCatalog.instruments) : [];
+    const info: Record<string, {manager?: string; name?: string}> = {};
+    for (const i of all) if (i.identifier && i.dataStatus === "historical_nav" && !info[i.identifier]) info[i.identifier] = {manager: i.manager || undefined, name: i.name[language]};
+    return buildRealPortfolio(catalog?.navHistory, info);
+  }, [catalog?.navHistory, rawCatalog, language]);
   const shownPortfolio = realPortfolio ?? demoPortfolio;
   const shownPortfolioName = realPortfolio ? (language === "es" ? "Mi cartera (NAV CNMV; participaciones DEMO)" : "My portfolio (CNMV NAVs; DEMO holdings)") : t.examplePortfolio;
   const portfolioSpec = catalog?.portfolioExample;
@@ -279,6 +288,7 @@ export default function App() {
   const portfolioRows = catalog?.navHistory.instruments.find(i => i.isin === portfolioInstrument?.identifier && i.eligible)?.monthly;
   const portfolioResult = (() => { try { return portfolioRows && portfolioSpec ? simulateNav(portfolioRows, portfolioSpec.initial, portfolioSpec.recurringContribution, portfolioSpec.periods, portfolioSpec.startDate, portfolioSpec.contributionFrequency) : null; } catch { return null; } })();
   const points = portfolioResult?.timeline ?? [];
+  const declineEvent = useDeclineEvent(!!portfolioResult, mode, language, JSON.stringify({portfolioSpec, portfolioRows}));
   const nav = [
     { key: "home" as const, icon: Grid2X2 },
     { key: "explore" as const, icon: Compass },
@@ -291,6 +301,7 @@ export default function App() {
     setPracticeOpen(false); setPracticeResult(null); setAssistantDecline(undefined); setDeclineSpec(undefined);
     if (p !== "simulator") { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false); }
     if (p === "explore" && selected.assetType !== "fund") { const firstFund = instruments.find(item => item.assetType === "fund"); if (firstFund) setSelectedId(firstFund.instrumentId); }
+    if (p !== "simulator") setJourneyFund(false);
     setPage(p);
     if (mobileNav) {
       setMobileNav(false);
@@ -341,7 +352,7 @@ export default function App() {
   function launchDeclineDemo() {
     if (!catalog) return;
     const spec = catalog.portfolioExample;
-    choose("simulator"); setSelectedId(spec.instrumentId); setInitial(String(spec.initial)); setMonthly(String(spec.recurringContribution)); setContributionFrequency(spec.contributionFrequency ?? "monthly"); setMonths(String(spec.periods)); setResult(null); setDemoLaunch(true);
+    setJourneyFund("example"); choose("simulator"); setSelectedId(spec.instrumentId); setInitial(String(spec.initial)); setMonthly(String(spec.recurringContribution)); setContributionFrequency(spec.contributionFrequency ?? "monthly"); setMonths(String(spec.periods)); setResult(null); setDemoLaunch(true);
   }
   const openAssistant = () => {
     setVoiceAssistant(false);
@@ -385,7 +396,7 @@ export default function App() {
   function selectInstrument(item: Instrument) { declineGeneration.current++; declineRequest.current?.abort(); setSelectedId(item.instrumentId); setError(null); void calculate(item); }
   function run(e: FormEvent) { e.preventDefault(); void calculate(selected); }
   const source = selected.sourceUrl ? [{label:"CNMV",url:selected.sourceUrl,checkedAt:selected.sourceDate ?? undefined}] : [];
-  const validResult = page === "simulator" && !practiceOpen && result?.instrumentId === selected.instrumentId ? result : null;
+  const validResult = page === "simulator" && !practiceOpen && journeyRevealed && result?.instrumentId === selected.instrumentId ? result : null;
   const practiceInstrument = practiceResult && instruments.find(item => item.instrumentId === practiceResult.spec.instrumentId);
   const tutorInstrument = page === "explore"
     ? instruments.find(item => item.instrumentId === selectedId)
@@ -568,35 +579,38 @@ export default function App() {
             <div className="welcome-actions home-extra-actions">
               <button type="button" className="text-link" onClick={openPractice}>{t.practice}<small> · {t.practiceDesc}</small><ArrowRight size={15} /></button>
               <button type="button" className="text-link calm-link" onClick={openPortfolioDecline}>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}<small> · {language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options."}</small><Pause size={15} aria-hidden="true" /></button>
-              {configuredBank === "demo" && <button type="button" className="text-link" onClick={launchDeclineDemo}>{language === "es" ? "Probar una caída" : "Try a decline"}<ArrowRight size={15} /></button>}
+              {configuredBank === "demo" && <button type="button" className="text-link" onClick={launchDeclineDemo}>{language === "es" ? "Probar una caída" : "Try a decline"}<small> · {declineEvent.event?.status === "triggered" ? `${language === "es" ? "Caída detectada en el ejemplo histórico" : "Decline detected in the historical example"}: ${declineEvent.event.news.periodStart} – ${declineEvent.event.news.periodEnd} · ${declineEvent.event.news.items.length} ${language === "es" ? "fuentes de contexto BCE" : "ECB context sources"}` : (language === "es" ? "Ejemplo histórico de estudio con datos reales." : "Historical study example with real data.")}</small><ArrowRight size={15} /></button>}
+              {configuredBank === "demo" && <div role="status" className="decline-event-status">{declineEvent.state === "error" ? (language === "es" ? "No se pudo comprobar la caída y el contexto del BCE." : "The decline and ECB context could not be checked.") : ""}</div>}
+              {configuredBank === "demo" && <button type="button" className="text-link" hidden={!declineEvent.hasError} onClick={declineEvent.retry}>{declineEvent.state === "ready" ? (language === "es" ? "Actualizar contexto" : "Refresh context") : (language === "es" ? "Reintentar" : "Retry")}</button>}
             </div>
           </>}
-          {page === "explore" && <FundsExplorer hostBankId={configuredBank} navHistory={catalog.navHistory} language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { selectInstrument(item); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
+          {page === "explore" && <FundsExplorer hostBankId={configuredBank} navHistory={catalog.navHistory} language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { if (item.dataStatus !== "historical_nav") return; selectInstrument(item); setJourneyFund("fund"); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
           {page === "simulator" && (
             practiceOpen ? <Suspense fallback={<p role="status">{language === "es" ? "Cargando práctica…" : "Loading practice…"}</p>}><PracticeLab language={language} level={level} instruments={instruments} annualHistory={catalog.annualHistory} mode={mode} calculate={calculatePractice} onActiveResult={setPracticeResult} onExit={() => choose("simulator")} openAssistant={openAssistant} /></Suspense> : (
-            <SimulatorPage language={language} level={level} onExplain={openAssistant} onPractice={openPractice} holdSell={<Suspense fallback={<p role="status">{language === "es" ? "Cargando ejercicio…" : "Loading exercise…"}</p>}><HoldSellGame language={language} level={level} mode={mode} instruments={instruments} navHistory={catalog.navHistory} guided={level === "beginner"} defaults={{ instrumentId: selected.instrumentId, initial, monthly, months }} /></Suspense>} product={(embedded) => (
+            <SimulatorPage language={language} level={level} onExplain={openAssistant} onPractice={openPractice} product={(embedded) => (
             <Simulator
               {...{
                 t,
                 language,
                 level,
+                mode,
+                navHistory: catalog.navHistory,
+                prechosen: journeyFund !== false,
+                example: journeyFund === "example",
+                onRevealed: setJourneyRevealed,
                 selected,
                 bankProfile: configuredBank === "demo" ? catalog.bankProfile : undefined,
-                banks: catalog.banks,
                 instruments,
-                history: catalog.annualHistory,
                 result,
                 error,
                 initial,
                 monthly,
-                annual,
                 months,
                 contributionFrequency,
                 setContributionFrequency,
                 maxMonths: Math.max(0, (catalog.navHistory.instruments.find(h => h.isin === selected.identifier && h.eligible)?.monthly.length ?? 1) - 1),
                 setInitial,
                 setMonthly,
-                setAnnual,
                 setMonths,
                 setResult,
                 setError,
@@ -624,7 +638,7 @@ export default function App() {
       </main>
       <AssistantPanel provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
       <VoiceAssistantPanel open={voiceAssistant} onClose={() => { if (voiceRef.current?.contains(document.activeElement)) voiceTriggerRef.current?.focus(); setVoiceAssistant(false); }} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
-      {pause && <AntiPanicPanel level={level} sellOption={pauseSell} onTalk={talkDecline} report={pause} spec={declineSpec} mode={mode} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
+      {pause && <AntiPanicPanel level={level} sellOption={pauseSell} onTalk={talkDecline} report={pause} spec={declineSpec} initialNews={declineSpec?.basis === "portfolio_demo" && declineEvent.event?.status === "triggered" ? declineEvent.event.news : null} mode={mode} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
 
     </div>
   );

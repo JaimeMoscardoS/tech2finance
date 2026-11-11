@@ -42,12 +42,12 @@ test('voice keeps only the current open session history and does not restart lis
  await dictate('¿Qué producto veo?');
  expect(requests[2].history).toEqual([]);
  expect(requests[2].context.page).toBe('explore');
- await expect(page.locator('.beginner-card h2')).toContainText('CAIXABANK MONETARIO RENDIMIENTO');
+ await expect(page.locator('.beginner-card h2')).toContainText('Fondo monetario');
  expect(requests[2].context.instrumentId).toBe('caixabank-monetario-estandar');
  expect(requests[2].context.simulation).toBeUndefined();
  await dialog.getByRole('button',{name:'Cerrar asistente de voz'}).click();
  await page.locator('.beginner-guide select').last().selectOption('bbva-mi-inversion-bolsa-acumulacion');
- await expect(page.locator('.beginner-card h2')).toContainText('BBVA MI INVERSION BOLSA ACUMULACION');
+ await expect(page.locator('.beginner-card h2')).toContainText('Fondo bolsa 2');
  await page.getByRole('button',{name:'Hablar con IA'}).click();
  await expect.poll(()=>page.evaluate(()=>(window as any).bankVoice.starts)).toBe(4);
  await dictate('Otra pregunta');

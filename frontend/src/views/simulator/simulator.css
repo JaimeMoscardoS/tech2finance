@@ -24,19 +24,12 @@ html[data-level='advanced'] .sim-table th, html[data-level='advanced'] .sim-tabl
 html[data-level='advanced'] .sim-stack { gap: 12px; }
 .sim-explain { margin-top: 14px; }
 .sim-page { display: grid; gap: 22px; color: var(--ink); }
+/* Los hijos de la rejilla no deben imponer su ancho mínimo (tablas y recorrido): evita desbordes horizontales en 320–375 px. */
+.sim-page > *, .sim-catalog { min-width: 0; }
+.sim-catalog { display: grid; gap: 22px; }
 .sim-page__lead { margin: 6px 0 0; color: var(--muted); display: flex; gap: 6px; align-items: flex-start; }
 .sim-page__lead svg { flex: none; margin-top: 3px; }
 .sim-page__title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; font-size: clamp(1.4rem, 3vw, 1.8rem); }
 .sim-catalog > .dash-section__head { margin-bottom: 4px; }
-.page-heading.embedded h3 { font-size: 1.15rem; margin: 0; }
+.page-heading.embedded { margin: 0; }
 
-/* Pestañas «Simular» / «¿Y si vendo?» (role=tablist). Solo tokens; foco visible y objetivos de 44 px. */
-.sim-page__panel { display: grid; gap: 22px; min-width: 0; }
-.sim-page__panel[hidden] { display: none; }
-.sim-tabs { display: inline-flex; gap: 4px; padding: 4px; width: fit-content; max-width: 100%; background: var(--surface-raised); border: 1px solid var(--card-border); border-radius: 14px; }
-.sim-tab { min-height: 44px; padding: 8px 16px; font: inherit; font-weight: 700; font-size: .9rem; color: var(--muted); background: transparent; border: 0; border-radius: 10px; cursor: pointer; }
-.sim-tab:hover { color: var(--ink); background: var(--accent-soft); }
-.sim-tab[aria-selected='true'] { color: var(--ink); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
-.sim-tab:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-@media (max-width: 420px) { .sim-tabs { display: flex; } .sim-tab { flex: 1; padding-inline: 8px; } }
-@media (prefers-reduced-motion: reduce) { .sim-tab { transition: none; } }

@@ -66,14 +66,15 @@ test("display name from the published name", () => {
   assert.equal(displayName("BBVA ESTRATEGIA 0-50, FI"), "BBVA Estrategia 0-50, FI");
 });
 
-test("unpublished attributes stay unknown (never deduced); only holdings are DEMO; manager comes from the catalog", () => {
-  const p = buildRealPortfolio(real, { ES0112793007: "Santander Asset Management" })!;
+test("unpublished attributes stay unknown (never deduced); only holdings are DEMO; manager and generic name come from the catalog", () => {
+  const p = buildRealPortfolio(real, { ES0112793007: { manager: "Santander Asset Management", name: "Fondo ahorro" } })!;
   for (const r of p.positions) {
     assert.equal(r.fund.assetClass, "unknown"); assert.equal(r.fund.region, "unknown");
     assert.equal(r.fund.riskLevel, null); assert.equal(r.fund.ter, null); assert.equal(r.fund.equityWeight, null);
     assert.ok(Math.abs(r.cost - DEMO_AMOUNT_PER_FUND_EUR) < 1e-9);
   }
   assert.equal(p.positions.find((r) => r.fund.id === "ES0112793007")!.fund.manager, "Santander Asset Management");
+  assert.equal(p.positions.find((r) => r.fund.id === "ES0112793007")!.fund.name, "Fondo ahorro");
   assert.equal(p.positions.find((r) => r.fund.id === "ES0138045002")!.fund.manager, "ISIN ES0138045002");
   assert.equal(p.averageRisk, null); assert.equal(p.equityExposure, null);
 });

@@ -102,7 +102,8 @@ test.describe('Educación y Test MiFID', () => {
 });
 
 test.describe('Simulador', () => {
-  test('Básico: juego guiado arriba, práctica accesible y simulador de producto debajo', async ({ page }) => {
+  // El producto del catálogo es el recorrido guiado de 3 pasos de main (paso 3: «¿Y si vendo?»); su paso 1 es #jr-h-1.
+  test('Básico: juego guiado arriba, práctica accesible y recorrido de producto debajo', async ({ page }) => {
     await openApp(page, { level: 'beginner' });
     await goTo(page, 'simulator');
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
@@ -112,19 +113,21 @@ test.describe('Simulador', () => {
     await expect(page.getByRole('button', { name: 'Abrir práctica guiada' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Explícame esta simulación' })).toBeVisible();
     const guided = await page.getByRole('heading', { name: 'Elige cuánto ahorrarías al mes' }).boundingBox();
-    const catalog = await page.getByRole('heading', { name: 'Prueba con un producto del catálogo' }).boundingBox();
+    const catalog = await page.locator('#jr-h-1').boundingBox();
     expect(guided!.y).toBeLessThan(catalog!.y);
     await page.getByRole('group', { name: 'Ahorro al mes' }).getByRole('button', { name: /200/ }).click();
     await expect(page.getByRole('group', { name: 'Ahorro al mes' }).getByRole('button', { name: /200/ })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByLabel('Importe inicial')).toBeVisible();
+    await expect(page.locator('.journey')).toBeVisible();
     await expect(page.getByRole('combobox', { name: /^Escenario/ })).toHaveCount(0);
   });
 
-  test('Intermedio: simulador de producto primero y comparación de escenarios y plazos después, con un único mensaje de error vinculado a los campos', async ({ page }) => {
+  test('Intermedio: recorrido de producto primero y comparación de escenarios y plazos después, con un único mensaje de error vinculado a los campos', async ({ page }) => {
     await openApp(page, { level: 'intermediate' });
     await goTo(page, 'simulator');
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
-    await expect(page.getByLabel('Importe inicial')).toBeVisible();
+    const journey = await page.locator('#jr-h-1').boundingBox();
+    const compare = await page.getByRole('heading', { name: 'Comparar escenarios y plazos' }).boundingBox();
+    expect(journey!.y).toBeLessThan(compare!.y);
     await expect(page.getByRole('button', { name: 'Abrir práctica guiada' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Comparar escenarios y plazos' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Evolución ilustrativa' })).toBeVisible();
@@ -148,7 +151,7 @@ test.describe('Simulador', () => {
     await expect(page.getByRole('spinbutton', { name: 'Años' })).toHaveAttribute('aria-describedby', id!);
   });
 
-  test('Avanzado: tabla de escenarios marcada con texto y aria-current, plazos, condiciones y producto debajo', async ({ page }) => {
+  test('Avanzado: tabla de escenarios marcada con texto y aria-current, plazos, condiciones y recorrido de producto debajo', async ({ page }) => {
     await openApp(page, { level: 'advanced' });
     await goTo(page, 'simulator');
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
@@ -161,7 +164,7 @@ test.describe('Simulador', () => {
     await page.locator('.sim-form select').first().selectOption('dynamic');
     await expect(current).toContainText('Dinámico');
     const scenarios = await page.getByRole('heading', { name: 'Escenarios múltiples' }).boundingBox();
-    const catalog = await page.getByRole('heading', { name: /Producto del catálogo/ }).boundingBox();
+    const catalog = await page.locator('#jr-h-1').boundingBox();
     expect(scenarios!.y).toBeLessThan(catalog!.y);
   });
 });

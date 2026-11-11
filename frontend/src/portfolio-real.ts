@@ -1,8 +1,8 @@
 /**
  * Adaptador: cartera de «Mi cartera» (y de Inicio) a partir del histórico REAL de valores liquidativos (CNMV).
  *
- * REAL (viene del dataset y del catálogo): nombre del fondo, ISIN, divisa, NAV mensuales, fechas, fuente (CNMV)
- * y gestora (del catálogo, si consta).
+ * REAL (viene del dataset y del catálogo): ISIN, divisa, NAV mensuales, fechas, fuente (CNMV) y gestora (del catálogo,
+ * si consta). El fondo se muestra con su nombre genérico del catálogo (`shared/fund-aliases.json`), como el resto de la app.
  * Calculado en código probado desde esos NAV: valor de la cartera, rentabilidades, volatilidad, caída
  * máxima, Sharpe (con tipo libre de riesgo SUPUESTO y declarado), mapa mensual, mejor/peor mes.
  * DEMO (supuesto ficticio): solo las participaciones: una compra única de DEMO_AMOUNT_PER_FUND_EUR por fondo
@@ -42,8 +42,11 @@ export function displayName(name: string): string {
  * (la interfaz cae entonces a la cartera DEMO). Usa solo instrumentos elegibles, en EUR y con
  * meses comunes consecutivos.
  */
-/** `managers`: gestora por ISIN tomada del catálogo (`identifier` → `manager`); si falta, se muestra el ISIN. */
-export function buildRealPortfolio(nav: NavSource | null | undefined, managers: Readonly<Record<string, string>> = {}): DemoPortfolio | null {
+/** Datos de presentación por ISIN tomados del catálogo: gestora y nombre genérico (alias de `shared/fund-aliases.json`). */
+export type FundInfo = Readonly<Record<string, { manager?: string; name?: string }>>;
+
+/** `info`: gestora y nombre genérico por ISIN; sin gestora se muestra el ISIN y sin alias, el nombre publicado. */
+export function buildRealPortfolio(nav: NavSource | null | undefined, info: FundInfo = {}): DemoPortfolio | null {
   if (!nav?.instruments?.length) return null;
   const usable = nav.instruments.filter((i) => i.eligible && i.currency === "EUR" && i.monthly.length > 1).slice(0, MAX_REAL_FUNDS);
   if (!usable.length) return null;
@@ -66,7 +69,7 @@ export function buildRealPortfolio(nav: NavSource | null | undefined, managers: 
     const returns = navs.slice(1).map((v, i) => (v / navs[i] - 1) * 100);
     const units = DEMO_AMOUNT_PER_FUND_EUR / navs[0];
     funds.push({
-      id: inst.isin, isin: inst.isin, name: displayName(inst.name), manager: managers[inst.isin] ?? `ISIN ${inst.isin}`,
+      id: inst.isin, isin: inst.isin, name: info[inst.isin]?.name ?? displayName(inst.name), manager: info[inst.isin]?.manager ?? `ISIN ${inst.isin}`,
       assetClass: "unknown", region: "unknown", currency: "EUR", riskLevel: null, ter: null, equityWeight: null,
       startPrice: navs[0], monthlyReturnsPct: returns,
     });

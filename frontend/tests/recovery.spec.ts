@@ -1,3 +1,4 @@
+import { pickFund, reveal, startJourney } from './journey';
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 
@@ -100,8 +101,8 @@ test('switching mode cancels an in-flight simulation', async ({page}) => {
   });
   await page.goto('/');
   await page.getByRole('button',{name:'Simulador',exact:true}).click();
+  await startJourney(page);
   await page.getByLabel('Importe inicial').fill('123');
-  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
   await startedRequest;
   await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();
@@ -113,14 +114,22 @@ test('switching mode cancels an in-flight simulation', async ({page}) => {
 
 test('changed inputs invalidate a failed simulation retry', async ({page}) => {
   let count = 0;
-  await page.route('**/api/simulations', async route => { count++; await route.abort(); });
+  const bodies: { initial: number }[] = [];
+  await page.route('**/api/simulations', async route => { count++; bodies.push(route.request().postDataJSON()); await route.abort(); });
   await page.goto('/');
   await page.getByRole('button',{name:'Simulador',exact:true}).click();
+  await pickFund(page);
+  await expect(page.getByRole('button',{name:'Reintentar'})).toBeVisible();
+  await reveal(page);
   await page.getByLabel('Importe inicial').fill('123');
-  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
+  await expect(page.getByRole('button',{name:'Reintentar'})).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Reintentar'})).toBeVisible();
   await page.getByLabel('Importe inicial').fill('456');
   await expect(page.getByRole('button',{name:'Reintentar'})).toHaveCount(0);
+  // The live update for 456 fails too and offers its own retry; wait for it so the count is stable before switching.
+  await expect(page.getByRole('button',{name:'Reintentar'})).toBeVisible();
+  // The retried request carries the newest input, not the old 123.
+  expect(bodies.at(-1)!.initial).toBe(456);
   const before = count;
   await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();

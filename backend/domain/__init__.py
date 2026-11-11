@@ -3,6 +3,7 @@ from copy import deepcopy
 import math
 from .provenance import load_verified_dataset, read_json, ROOT
 from .nav_history import NavHistoryError, select_nav, replay_nav
+from .fund_names import display_name
 
 _DATA, _PROVENANCE = load_verified_dataset()
 _NAV = read_json(ROOT / 'nav-history.json')
@@ -117,7 +118,7 @@ def analyze_decline(spec):
             result = run_simulation({'instrumentId': inst['instrumentId'], 'initial': 100, 'recurringContribution': 0, 'periods': spec['periods'], 'startDate': spec.get('startDate')})
             values = result['points']
             labels = [row['date'] for row in result['timeline']]
-            name, sources = inst['name'][language], _source(inst, language)
+            name, sources = display_name(inst, language, _DATA['instruments']), _source(inst, language)
             kind = 'historical_nav'
         else:
             raise ValueError
@@ -182,7 +183,7 @@ def build_tutor_context(context):
             result['bank'] = deepcopy(_DATA['bankProfile'])
         if page in ('explore', 'simulator') and ids:
             inst = _instrument(ids[0])
-            result['instrument'] = {'id': ids[0], 'name': inst['name'][language], 'currency': inst['currency'],
+            result['instrument'] = {'id': ids[0], 'name': display_name(inst, language, _DATA['instruments']), 'currency': inst['currency'],
                                     'dataKind': inst['dataStatus'], 'sources': _source(inst, language)}
             product = next((p for p in _DATA['bankProfile']['products'] if p['instrumentId'] == ids[0]), None) if bank_id == _DATA['bankProfile']['bankId'] else None
             if product is not None:

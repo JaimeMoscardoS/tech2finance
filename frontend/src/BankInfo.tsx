@@ -30,7 +30,7 @@ export default function BankInfo({profile,language}:{profile:BankProfile;languag
  const restrictions = [
   conditions.requiresRealAccount ? (es ? 'Se requiere una cuenta real' : 'A real account is required') : (es ? 'Sin cuenta real' : 'No real account'),
   conditions.realOrdersAvailable ? (es ? 'Órdenes reales disponibles' : 'Real orders available') : (es ? 'Sin órdenes reales' : 'No real orders'),
-  conditions.externalConnections ? (es ? 'Conexiones externas disponibles' : 'External connections available') : (es ? 'Sin conexiones externas' : 'No external connections'),
+  conditions.externalConnections ? (es ? 'Conexiones externas disponibles' : 'External connections available') : (es ? 'Sin conexión bancaria real' : 'No real bank connection'),
  ];
  return <section className="bank-info" aria-labelledby="bank-info-title">
   <div className="bank-info__intro"><span className="kicker">{es ? 'CONOCE BANCO T2F' : 'ABOUT BANCO T2F'}</span><h2 id="bank-info-title">{profile.name[language]}</h2><p className="bank-info__description">{es ? 'El banco de este entorno de demostración, con herramientas para aprender a invertir.' : 'The bank in this demonstration environment, with tools for learning about investing.'}</p>
