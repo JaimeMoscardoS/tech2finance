@@ -141,7 +141,7 @@ def test_decline_episodes_and_tutor_contract(monkeypatch):
     assert report['latestLabel'] == '2020-03-31'
     assert report['causesStatus'] == 'unknown'
     client = TestClient(app, raise_server_exceptions=False)
-    assert client.get('/api/health').json() == {'status':'ok', 'mode':'demo', 'tutorProvider':'server_rules', 'externalProviders':False, 'newsProvider':'off', 'voiceProvider':'browser'}
+    assert client.get('/api/health').json() == {'status':'ok', 'mode':'demo', 'tutorProvider':'server_rules', 'speechProvider':'browser_local', 'speechKeyConfigured':False, 'externalProviders':False, 'newsProvider':'off'}
     response = client.post('/api/tutor', json={'message':'Explica la caída', 'context':{'page':'portfolio','level':'beginner','language':'es','decline':spec}})
     assert response.status_code == 200, response.text
     assert response.json()['provider'] == 'server_rules'

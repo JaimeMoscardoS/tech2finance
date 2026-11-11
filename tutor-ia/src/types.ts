@@ -17,5 +17,5 @@ export type DeclineReport = { historicalContext?:{events:HistoricalEvent[]}; sta
 export type TutorContext = { page: Page; level: KnowledgeLevel; language: Language; bank?: BankProfile; instrument?: InstrumentContext; simulation?: SimulationFacts; portfolio?: PortfolioFacts; decline?: DeclineReport; decision?: DecisionContext };
 export type TutorHistoryMessage = { role: 'user' | 'assistant'; text: string; intent?: string };
 export type TutorRequest = { message: string; history?: readonly TutorHistoryMessage[]; context: TutorContext; signal?: AbortSignal };
-export type TutorReply = { text: string; language: Language; mode: 'local' | 'api'; provider: string; intent: string; sources: SourceRef[] };
+export type TutorReply = { text: string; language: Language; mode: 'local' | 'api'; provider: string; model?: string; intent: string; sources: SourceRef[] };
 export type TutorProvider = { readonly id: string; reply(request: TutorRequest): Promise<TutorReply> };

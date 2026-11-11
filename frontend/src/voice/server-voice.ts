@@ -23,8 +23,8 @@ export function serverVoiceAvailable(): Promise<boolean> {
     try {
       const response = await fetch('/api/health', { signal: aborter.signal });
       if (!response.ok) return false;
-      const body = await response.json() as { voiceProvider?: unknown };
-      return body.voiceProvider === 'elevenlabs';
+      const body = await response.json() as { speechProvider?: unknown; speechKeyConfigured?: unknown };
+      return body.speechProvider === 'elevenlabs' && body.speechKeyConfigured !== false;
     } catch { return false; }
     finally { clearTimeout(timer); }
   })();

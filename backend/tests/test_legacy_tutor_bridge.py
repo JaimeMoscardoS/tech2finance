@@ -4,10 +4,28 @@ import re
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+from fastapi import FastAPI
 
 from backend import tutor_bridge
-from backend.app import app
 from backend.domain import build_tutor_context
+from backend.schemas import TutorRequest
+
+# Exercise the preserved PR 36 compatibility bridge independently of the
+# current HTTP endpoint, which intentionally has a different no-fallback policy.
+app = FastAPI()
+
+
+@app.post('/api/tutor')
+def legacy_tutor(request: TutorRequest):
+    payload = request.model_dump(mode='json', exclude_none=True)
+    payload['context'] = build_tutor_context(payload['context'])
+    return tutor_bridge.reply(payload)
+
+
+@app.get('/api/health')
+def legacy_health():
+    selected = tutor_bridge.tutor_provider()
+    return {'tutorProvider': selected, 'externalProviders': selected == 'anthropic'}
 
 client = TestClient(app, raise_server_exceptions=False)
 SPEC = {"instrumentId": "bbva-mi-inversion-bolsa-acumulacion", "initial": 500, "recurringContribution": 50, "periods": 1}

@@ -5,7 +5,7 @@ import { resetServerVoiceCache, speak, stopVoice } from './server-voice.ts';
 
 type Handler = (url: string) => Response | Promise<Response>;
 const audioResponse = () => new Response(new Blob(['mp3']), { status: 200, headers: { 'content-type': 'audio/mpeg' } });
-const health = (provider: string) => new Response(JSON.stringify({ voiceProvider: provider }), { status: 200 });
+const health = (provider: string) => new Response(JSON.stringify({ speechProvider: provider, speechKeyConfigured: provider === 'elevenlabs' }), { status: 200 });
 
 function setup(handler: Handler) {
   resetServerVoiceCache();
@@ -34,7 +34,7 @@ function setup(handler: Handler) {
 }
 
 test('falls back to local voice when health reports browser', async () => {
-  const t = setup(url => url === '/api/health' ? health('browser') : audioResponse());
+  const t = setup(url => url === '/api/health' ? health('browser_local') : audioResponse());
   await speak('Hola', 'es', t.status);
   assert.deepEqual(t.urls, ['/api/health']);
   assert.equal(t.local.length, 1);

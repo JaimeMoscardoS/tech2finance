@@ -12,7 +12,7 @@ test('occupied port is rejected without affecting its owner', async () => {
 });
 test('readiness validates both JSON responses via frontend port', async () => {
   let invalid = true;
-  const server = await serve((req, res) => { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify(req.url.endsWith('health') ? {status:'ok', mode:'demo', tutorProvider:'server_rules', externalProviders:false} : {schemaVersion:'1.0', banks:[], instruments:[], ...(invalid ? {} : {annualHistory:{}})})); });
+  const server = await serve((req, res) => { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify(req.url.endsWith('health') ? {status:'ok', mode:'demo', tutorProvider:'server_rules', speechProvider:'browser_local', speechKeyConfigured:false, externalProviders:false} : {schemaVersion:'1.0', banks:[], instruments:[], ...(invalid ? {} : {annualHistory:{}})})); });
   try { await assert.rejects(waitForContracts(server.address().port, 250), /Tiempo agotado/); invalid = false; await waitForContracts(server.address().port, 1000); }
   finally { await close(server); }
 });

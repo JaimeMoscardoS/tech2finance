@@ -6,6 +6,8 @@ import threading
 
 import httpx
 
+from backend.providers import rate_limit
+
 TRANSPORT = None
 _slots = threading.BoundedSemaphore(2)
 PROVIDER_DEADLINE = 20
@@ -19,11 +21,8 @@ class TtsUnavailable(Exception):
         self.code = code
 
 
-def voice_provider():
-    return 'elevenlabs' if os.environ.get('T2F_VOICE_PROVIDER') == 'elevenlabs' else 'browser'
-
-
 async def synthesize(text):
+    rate_limit()
     key = os.environ.get('ELEVENLABS_API_KEY', '')
     voice_id = os.environ.get('T2F_ELEVENLABS_VOICE_ID', DEFAULT_VOICE_ID)
     model = os.environ.get('T2F_ELEVENLABS_MODEL_ID', DEFAULT_MODEL_ID)

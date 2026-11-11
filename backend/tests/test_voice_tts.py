@@ -2,12 +2,19 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from backend import voice_tts
+from backend import providers, voice_tts
 from backend.app import app
 
 client = TestClient(app, raise_server_exceptions=False)
 KEY = 'sk_test_SECRET_KEY_123'
 AUDIO = b'ID3\x04fakemp3bytes'
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limit():
+    providers._token_requests.clear()
+    yield
+    providers._token_requests.clear()
 
 
 class Calls(list):
@@ -23,7 +30,7 @@ def calls(monkeypatch):
         seen.append(request)
         return seen.handler(request)
     monkeypatch.setattr(voice_tts, 'TRANSPORT', httpx.MockTransport(transport))
-    monkeypatch.setenv('T2F_VOICE_PROVIDER', 'elevenlabs')
+    monkeypatch.setenv('T2F_SPEECH_PROVIDER', 'elevenlabs')
     monkeypatch.setenv('ELEVENLABS_API_KEY', KEY)
     return seen
 
@@ -38,13 +45,35 @@ def assert_no_key(response):
 
 
 def test_disabled_by_default(monkeypatch):
-    monkeypatch.delenv('T2F_VOICE_PROVIDER', raising=False)
+    monkeypatch.delenv('T2F_SPEECH_PROVIDER', raising=False)
+    monkeypatch.delenv('ELEVENLABS_API_KEY', raising=False)
     called = []
     monkeypatch.setattr(voice_tts, 'TRANSPORT', httpx.MockTransport(lambda r: called.append(r)))
     response = post()
     assert response.status_code == 503 and response.json()['error']['code'] == 'tts_disabled'
     assert not called
-    assert client.get('/api/health').json()['voiceProvider'] == 'browser'
+    assert client.get('/api/health').json()['speechProvider'] == 'browser_local'
+
+
+def test_enabled_by_key_without_variable(calls, monkeypatch):
+    monkeypatch.delenv('T2F_SPEECH_PROVIDER')
+    assert post().status_code == 200
+    assert client.get('/api/health').json()['speechProvider'] == 'elevenlabs'
+
+
+def test_browser_local_is_disabled(calls, monkeypatch):
+    monkeypatch.setenv('T2F_SPEECH_PROVIDER', 'browser_local')
+    response = post()
+    assert response.status_code == 503 and response.json()['error']['code'] == 'tts_disabled'
+    assert not calls
+
+
+def test_rate_limited(calls):
+    for _ in range(30):
+        assert post().status_code == 200
+    response = post()
+    assert response.status_code == 429 and response.json()['error']['code'] == 'speech_rate_limited'
+    assert len(calls) == 30
 
 
 def test_success_and_outgoing_request(calls, monkeypatch):
@@ -67,7 +96,7 @@ def test_success_and_outgoing_request(calls, monkeypatch):
 
 def test_health_reflects_provider(calls):
     body = client.get('/api/health').json()
-    assert body['voiceProvider'] == 'elevenlabs' and body['externalProviders'] is True
+    assert body['speechProvider'] == 'elevenlabs' and body['externalProviders'] is True
 
 
 @pytest.mark.parametrize('text', ['', '   ', 'a' * 1501])

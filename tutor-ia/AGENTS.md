@@ -20,7 +20,7 @@ Ejecutor: `t2f-04-tutor-executor`. Revisor: `t2f-04-tutor-reviewer`. Planificado
 
 ## Flujo de conversación
 
-La implementación actual es un tutor local basado en reglas, sin modelo ni llamadas a servicios, que explica los datos válidos recibidos. La voz local del navegador pertenece a la interfaz y queda fuera de este núcleo. Claude y ElevenLabs existen solo en ramas de trabajo (ElevenLabs en `feature/voz-elevenlabs`, probado con simulación y sin clave real), no en este núcleo: cualquier proveedor y sus credenciales deben gestionarse en el servidor, sin exponer claves; conservar siempre la alternativa textual. Consultar los detalles y límites en `docs/contratos.md`.
+El núcleo local aplica reglas a datos reconstruidos por el servidor. El endpoint puede añadir una explicación de Claude y rechaza errores del proveedor sin fallback silencioso; el puente anterior se conserva para compatibilidad. El dictado local o mediante ElevenLabs se selecciona según la configuración. Las claves permanecen en el servidor y se mantiene la alternativa de texto. Los contratos, límites y pruebas pendientes están en `docs/contratos.md`. La lectura con ElevenLabs (`/api/tts`, rama `feature/voz-elevenlabs`, probada con clave real por el equipo) pertenece al servidor y a la interfaz, no a este núcleo.
 
 ## Motor de análisis de caídas
 
