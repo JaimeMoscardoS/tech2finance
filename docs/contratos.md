@@ -6,7 +6,7 @@ Acuerdos entre áreas y contrato de la API local de demostración. El motor Pyth
 
 El perfil tipado de BancoT2F se define en [`shared/bank-profile.ts`](../shared/bank-profile.ts) y los datos en `shared/demo-data.json:bankProfile`. Véanse [condiciones y versiones](banco-t2f.md). Las tarifas del perfil son informativas y se excluyen del cálculo; un coste anual `null` significa no definido.
 
-En el contexto interno del tutor se usa `bank?: BankProfile` y `instrument.product?: BankProduct` anidado en el instrumento; no hay `product` superior. El cliente puede indicar `bankId` opcional, que el servidor resuelve; los campos extra, incluidos `bank`, `bankProfile` y `product` inyectados, reciben 422.
+En el contexto interno del tutor se usa `bank?: BankProfile` y `instrument.product?: BankProduct` anidado en el instrumento; no hay `product` superior. El cliente puede indicar `bankId` opcional, que el servidor resuelve (si se omite usa `demo`); los bancos conocidos distintos de `demo` no reciben perfil ni tarifas de BancoT2F y el instrumento debe pertenecer al banco indicado. Los desconocidos devuelven 400 `unknown_bank`; esta validación no es autorización. Los campos extra, incluidos `bank`, `bankProfile` y `product` inyectados, reciben 422.
 
 - **1 → 2:** pantalla, nivel, parámetros del juego o pregunta; recibe resultados y errores.
 - **5 → 3 y 2:** catálogo ficticio y series verificadas con fuente, fecha, licencia, moneda, frecuencia, ajustes y costes; las muestras ficticias deben indicarlo.
@@ -72,3 +72,8 @@ Este ejemplo es local y manual: no hay histórico diario, proveedor conectado ni
 El contrato operativo, validaciones y errores están en [backend-contexto](backend-contexto.md). El cliente no envía al tutor resultados, fuentes ni saldos calculados; envía especificaciones y el servidor recalcula. `GET /api/catalog` devuelve `schemaVersion: "1.0"`, `banks`, `instruments` y `annualHistory`. `POST /api/simulations` devuelve el resultado temporal, identificador, moneda, momento de aportación, fuentes y supuestos; `POST /api/game/compare` devuelve la comparación educativa mantener/vender solo para instrumentos ficticios (campos en [backend-contexto](backend-contexto.md)); `POST /api/declines` devuelve el informe y `POST /api/tutor` devuelve `TutorReply` por reglas del servidor. No hay integración con proveedores externos ni datos reales de clientes.
 
 La práctica guiada utiliza dos solicitudes de simulación independientes. La interfaz compara los resultados de aportaciones, plazo o activos bajo las condiciones indicadas en [contexto](contexto-proyecto.md#práctica-guiada-con-dinero-ficticio). Solo la especificación de la opción A o B seleccionada se transmite al tutor; el servidor vuelve a calcular sus hechos. Los resultados obsoletos se invalidan y un error no activa el modo local automáticamente. No se crea una nueva ruta ni una cartera a partir de la comparación.
+
+
+### Contexto del fondo en Explorar
+
+En esta rama, el cliente envía el identificador del fondo seleccionado al tutor por reglas en la pantalla `explore`. El servidor reconstruye identidad y fuentes desde el catálogo, sin aceptar cifras del cliente; no añade una simulación. Las vistas de detalle comparten esa selección y los mismos datos. Esta capacidad no conecta un LLM ni un proveedor de voz.

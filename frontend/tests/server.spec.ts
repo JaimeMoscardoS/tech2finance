@@ -4,9 +4,9 @@ test('real server calculates annual contributions, decline and contextual tutor'
   const catalog = await request.get('/api/catalog'); expect(catalog.ok()).toBeTruthy(); expect((await catalog.json()).schemaVersion).toBe('1.0');
   const invalid = await request.post('/api/simulations', {data:{instrumentId:'demo-mixed',initial:-1,recurringContribution:0,periods:12}}); expect(invalid.status()).toBe(422);
   const missing = await request.post('/api/simulations', {data:{instrumentId:'bbva-mi-inversion-bolsa',initial:500,recurringContribution:0,periods:12}}); expect(missing.status()).toBe(409);
-  await page.goto('/'); await expect(page.getByText('Servidor de demo', {exact:true})).toBeVisible();
+  await page.goto('http://127.0.0.1:5177/'); await expect(page.locator('.connection-settings summary')).toContainText('Servidor de demo');
   await page.getByRole('button',{name:'Simulador',exact:true}).click();
-  await page.getByRole('button',{name:/Probar.*históric/i}).click();
+  await expect(page.getByLabel('Instrumento')).toHaveValue('caixabank-monetario-estandar');
   await page.getByLabel('Aportación anual').fill('100'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
   await expect(page.locator('.sim-values')).toContainText('1048,55'); await expect(page.locator('.sim-values')).toContainText('1000,00'); await expect(page.locator('.sim-values')).toContainText('48,55');
   await page.getByRole('button',{name:'Entender las caídas'}).click(); await expect(page.getByRole('dialog')).toContainText('2023');

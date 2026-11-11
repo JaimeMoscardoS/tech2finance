@@ -1,0 +1,717 @@
+.funds-controls {
+  display: flex;
+  align-items: end;
+  gap: 20px;
+  padding: 18px;
+  margin-bottom: 20px;
+  background: var(--surface-tint);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.funds-controls label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 220px;
+}
+.funds-controls select {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.funds-controls p,
+.fund-intro,
+.fund-voice-note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.funds-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.fund-list {
+  display: grid;
+  gap: 8px;
+}
+.fund-list button {
+  text-align: left;
+  display: grid;
+  gap: 7px;
+  padding: 16px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  line-height: 1.4;
+}
+.fund-list button.selected {
+  border: 2px solid var(--accent);
+  background: var(--surface-tint);
+}
+.fund-list button span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.fund-detail {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  min-width: 0;
+}
+.fund-detail h2 {
+  font-size: 27px;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+.fund-facts,
+.fund-identity {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+.fund-facts div,
+.fund-identity div {
+  background: var(--surface-raised);
+  border-radius: 8px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+}
+.fund-facts dt,
+.fund-identity dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+.fund-facts dd,
+.fund-identity dd {
+  margin: 5px 0 0;
+  font-weight: 700;
+  font-size: 14px;
+}
+.fund-learning {
+  border-top: 1px solid var(--border);
+  padding-top: 18px;
+  line-height: 1.55;
+  font-size: 14px;
+}
+.fund-learning h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.fund-learning p {
+  margin: 8px 0;
+}
+.fund-learning h3:not(:first-child) {
+  margin-top: 20px;
+}
+.fund-table-wrap {
+  overflow-x: auto;
+}
+.fund-learning table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+  text-align: left;
+  font-size: 13px;
+}
+.fund-learning th,
+.fund-learning td {
+  border-bottom: 1px solid var(--border);
+  padding: 10px 8px;
+  vertical-align: top;
+}
+.fund-source {
+  margin: 18px 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.fund-source a {
+  color: var(--accent);
+}
+.fund-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.fund-voice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  font-weight: 700;
+}
+.fund-voice-note {
+  margin-top: 8px;
+}
+@media (max-width: 760px) {
+  .funds-controls {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .funds-controls label {
+    min-width: 0;
+  }
+  .funds-layout {
+    grid-template-columns: 1fr;
+  }
+  .fund-detail {
+    padding: 18px;
+  }
+  .fund-facts,
+  .fund-identity {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fund-level {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.fund-level > span {
+  font-weight: 700;
+}
+.fund-level > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.fund-level button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+}
+.fund-level button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--action-ink);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.fund-level p {
+  flex-basis: 100%;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.annual-overview {
+  border-top: 1px solid var(--border);
+  padding: 18px 0;
+}
+.annual-overview h3 {
+  font-size: 16px;
+}
+.annual-overview p {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 8px 0;
+  color: var(--muted);
+}
+.annual-bars {
+  display: grid;
+  gap: 7px;
+  margin: 14px 0;
+}
+.annual-row {
+  display: grid;
+  grid-template-columns: 42px minmax(80px, 1fr) 65px;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+}
+.annual-row strong {
+  text-align: right;
+}
+.annual-track {
+  display: block;
+  position: relative;
+  height: 14px;
+  background: linear-gradient(
+    to right,
+    transparent 49.8%,
+    var(--border) 49.8%,
+    var(--border) 50.2%,
+    transparent 50.2%
+  );
+}
+.annual-track span {
+  display: block;
+  height: 100%;
+  position: absolute;
+  background: var(--chart-flat);
+}
+.annual-track .positive {
+  left: 50%;
+  background: var(--chart-rise);
+}
+.annual-track .negative {
+  right: 50%;
+  background: var(--chart-fall);
+}
+.beginner-layout,
+.compare-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.4fr);
+  gap: 16px;
+  align-items: start;
+}
+.compare-layout {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+}
+.beginner-guide,
+.compare-panel {
+  padding: 24px;
+  background: var(--surface-tint);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  min-width: 0;
+}
+.beginner-guide h2,
+.compare-panel h2,
+.dashboard-heading h2 {
+  font-size: 24px;
+  margin: 10px 0;
+}
+.beginner-guide p,
+.compare-panel > p,
+.dashboard-heading p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.beginner-guide label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  margin: 22px 0;
+}
+.beginner-guide select {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+}
+.beginner-guide details,
+.technical-inspector details {
+  border-top: 1px solid var(--border);
+  padding: 12px 0;
+}
+.beginner-guide summary,
+.technical-inspector summary {
+  cursor: pointer;
+  font-weight: 700;
+  min-height: 32px;
+}
+.beginner-summary,
+.planning-prompt {
+  padding: 16px;
+  background: var(--surface-tint);
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.beginner-summary p,
+.planning-prompt p {
+  margin-top: 6px;
+}
+.planning-prompt {
+  background: var(--surface);
+  margin-top: 18px;
+}
+.compare-panel table,
+.technical-inspector table,
+.mini-values,
+.period-summary table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  text-align: left;
+  font-size: 13px;
+}
+.compare-panel th,
+.compare-panel td,
+.technical-inspector th,
+.technical-inspector td,
+.mini-values th,
+.mini-values td,
+.period-summary th,
+.period-summary td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.fund-table-select {
+  background: none;
+  color: var(--accent);
+  font-weight: 700;
+  text-align: left;
+  min-height: 44px;
+  padding: 4px;
+}
+.fund-table-select[aria-pressed="true"] {
+  text-decoration: underline;
+}
+.dashboard-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 10px 0 18px;
+}
+.dashboard-heading p {
+  max-width: 330px;
+}
+.fund-dashboard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+.dashboard-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  min-width: 0;
+}
+.dashboard-card.selected {
+  border: 2px solid var(--accent);
+}
+.dashboard-select {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  min-height: 60px;
+  background: none;
+  color: var(--ink);
+  padding: 0 0 12px;
+}
+.dashboard-select span {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+}
+.dashboard-select strong {
+  font-size: 15px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.fund-chart {
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+.fund-chart h4 {
+  font-size: 14px;
+  margin: 0;
+}
+.fund-chart p {
+  margin: 8px 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.fund-empty {
+  padding: 25px 12px;
+  background: var(--surface-raised);
+  border-radius: 8px;
+}
+.technical-inspector {
+  margin-top: 20px;
+}
+.technical-inspector .fund-identity {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+.mini-bars {
+  display: flex;
+  gap: 3px;
+  height: 110px;
+  margin: 14px 0 4px;
+  background: linear-gradient(
+    to bottom,
+    transparent 49.5%,
+    var(--border) 49.5%,
+    var(--border) 50.5%,
+    transparent 50.5%
+  );
+}
+.mini-column {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+}
+.mini-column i {
+  position: absolute;
+  width: 75%;
+  left: 12.5%;
+}
+.mini-column .positive {
+  bottom: 50%;
+  background: var(--chart-rise);
+}
+.mini-column .negative {
+  top: 50%;
+  background: var(--chart-fall);
+}
+.mini-column .flat {
+  top: 50%;
+  min-height: 2px;
+  background: var(--chart-flat);
+}
+.mini-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+.fund-chart details summary {
+  min-height: 44px;
+  padding: 12px 0;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+}
+.mini-values caption {
+  text-align: left;
+  font-weight: 700;
+}
+.funds-explorer .page-heading.internal {
+  margin-bottom: 18px;
+}
+.funds-explorer .page-heading h1 {
+  font-size: clamp(28px, 2.8vw, 38px);
+}
+.funds-explorer .page-heading .eyebrow {
+  margin-bottom: 8px;
+}
+.fund-help {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 22px;
+  margin: 0 0 18px;
+  background: var(--surface-tint);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.fund-help strong {
+  font-size: 18px;
+}
+.fund-help p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 6px;
+  max-width: 570px;
+}
+.fund-help > div:last-child {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fund-help button,
+.fund-export {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 50px;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: var(--action-ink);
+  border-radius: 10px;
+  font-weight: 700;
+}
+.fund-help button + button {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+.fund-export:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.fund-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.fund-filters label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  flex: 1 1 130px;
+}
+.fund-filters input,
+.fund-filters select {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 8px;
+}
+.fund-filters p {
+  width: 100%;
+  color: var(--muted);
+  font-size: 12px;
+}
+.beginner-questions {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0;
+}
+.beginner-questions div {
+  padding: 12px;
+  background: var(--surface-raised);
+  border-radius: 8px;
+}
+.beginner-questions strong {
+  font-size: 14px;
+}
+.beginner-questions p {
+  margin-top: 4px;
+  line-height: 1.45;
+  font-size: 13px;
+}
+.fund-documents,
+.comparison-details {
+  margin: 18px 0;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  line-height: 1.5;
+  font-size: 13px;
+}
+.fund-documents summary,
+.comparison-details summary {
+  cursor: pointer;
+  min-height: 40px;
+  font-weight: 700;
+}
+.period-summary {
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 16px;
+}
+.period-summary h3 {
+  font-size: 16px;
+}
+.period-summary p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 8px 0;
+}
+@media (max-width: 1000px) {
+  .fund-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .beginner-layout,
+  .compare-layout,
+  .fund-dashboard {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .beginner-guide,
+  .compare-panel {
+    padding: 18px;
+  }
+  .fund-help {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .fund-help > div:last-child {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .fund-help button {
+    width: 100%;
+  }
+}
+
+.compare-picker {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 16px 0;
+}
+.compare-picker legend {
+  font-weight: 700;
+  font-size: 13px;
+}
+.compare-picker label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  font-size: 13px;
+}
+.compare-picker input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+/* Keep help prominent while leaving space for the current mode's content. */
+html .fund-help button + button { color:var(--ink); background:var(--surface); }
+@media (min-width: 1001px) {
+  .funds-explorer .page-heading.internal { margin-bottom:10px; }
+  .funds-explorer .fund-level { margin-bottom:8px; gap:6px 12px; }
+  .funds-explorer .funds-controls { padding:10px 14px; margin-bottom:10px; }
+  .funds-explorer .fund-help { padding:12px 16px; margin-bottom:10px; }
+  .funds-explorer .fund-help > div:last-child { flex-wrap:nowrap; }
+  .funds-explorer .fund-filters { padding:10px 14px; margin-bottom:10px; }
+}
+.fund-help button { min-height:56px; }
+@media (min-width: 1001px) {
+ .funds-explorer .fund-level p { display:none; }
+ .funds-explorer .funds-controls { padding:8px 12px; }
+ .funds-explorer .fund-help { padding:10px 14px; }
+ .funds-explorer .fund-filters { padding:8px 12px; }
+ .dashboard-heading { margin:4px 0 10px; }
+ .dashboard-select { min-height:44px; padding-bottom:6px; }
+ .fund-chart--compact { margin-top:8px; padding-top:8px; }
+}
+.institution-label { margin:8px 0 14px; color:var(--muted); font-size:13px; }.filter-disclosure { margin:12px 0; }.filter-disclosure summary { cursor:pointer; min-height:44px; font-weight:700; }.beginner-guide input { min-width:0; width:100%; min-height:44px; background:var(--surface); color:var(--ink); border:1px solid var(--border); border-radius:8px; padding:8px; }

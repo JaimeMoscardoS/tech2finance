@@ -28,6 +28,25 @@ test('foreign products, missing history and malformed data never inherit fees', 
   const malformed = { ...context, bank: { ...bank, services: null }, instrument: { ...context.instrument!, product: { ...context.instrument!.product!, fees: null } } } as unknown as TutorContext;
   assert.doesNotMatch((await ask('¿Cuánto cuesta este fondo?', malformed)).text, /0,75|75/);
 });
+test('external selected instrument explains missing history without a bank profile', async () => {
+  for (const [language, question, expected] of [
+    ['es', '¿Por qué no puedo simularlo?', /no tiene histórico disponible/i],
+    ['en', "Why can't I simulate it?", /no available history/i],
+  ] as const) {
+    const external: TutorContext = { ...context, language, bank: undefined, instrument: { id: 'bbva-mi-inversion-bolsa', name: 'BBVA', currency: 'EUR', dataKind: 'missing_history', sources: [] } };
+    const reply = await ask(question, external);
+    assert.equal(reply.intent, 'bank_missing_history');
+    assert.match(reply.text, expected);
+    assert.doesNotMatch(reply.text, /0[,.]75|BancoT2F/i);
+  }
+});
+test('missing context remains a safe fallback for simulation questions', async () => {
+  for (const absent of [undefined, null]) for (const message of ["Why can't I simulate it?", '¿Por qué no puedo simularlo?']) {
+    const reply = await createLocalTutorProvider().reply({ message, context: absent as unknown as TutorContext });
+    assert.notEqual(reply.intent, 'bank_missing_history');
+    assert.doesNotMatch(reply.text, /0[,.]75|BancoT2F|selected instrument has no available history|no tiene histórico disponible/i);
+  }
+});
 test('English script and latest abstention retain scope', async () => {
   const c = { ...context, language: 'en' as const };
   assert.match((await ask('What is BancoT2F?', c)).text, /fictional/i);

@@ -131,7 +131,8 @@ def build_tutor_context(context):
         allowed = {'page', 'level', 'language', 'bankId', 'instrumentId', 'simulation', 'decline', 'decision'}
         if set(context) - allowed:
             raise ValueError
-        if context.get('bankId', 'demo') != _DATA['bankProfile']['bankId']:
+        bank_id = context.get('bankId', 'demo')
+        if bank_id not in {bank['id'] for bank in _DATA['banks']}:
             raise DomainError('unknown_bank', 400, 'Bank not found.')
         sim, decline = context.get('simulation'), context.get('decline')
         if sim and page != 'simulator':
@@ -140,13 +141,17 @@ def build_tutor_context(context):
         if len(set(ids)) > 1 or decline and decline.get('language') != language:
             raise ValueError
         if ids:
-            _instrument(ids[0])
-        result = {'page': page, 'level': level, 'language': language, 'bank': deepcopy(_DATA['bankProfile'])}
+            selected_instrument = _instrument(ids[0])
+            if 'bankId' in context and bank_id != _DATA['bankProfile']['bankId'] and selected_instrument['bankId'] != bank_id:
+                raise ValueError
+        result = {'page': page, 'level': level, 'language': language}
+        if bank_id == _DATA['bankProfile']['bankId']:
+            result['bank'] = deepcopy(_DATA['bankProfile'])
         if page in ('explore', 'simulator') and ids:
             inst = _instrument(ids[0])
             result['instrument'] = {'id': ids[0], 'name': inst['name'][language], 'currency': inst['currency'],
                                     'dataKind': 'annual_published_returns' if inst['dataStatus'] == 'annual_history' else inst['dataStatus'], 'sources': _source(inst, language)}
-            product = next((p for p in _DATA['bankProfile']['products'] if p['instrumentId'] == ids[0]), None)
+            product = next((p for p in _DATA['bankProfile']['products'] if p['instrumentId'] == ids[0]), None) if bank_id == _DATA['bankProfile']['bankId'] else None
             if product is not None:
                 result['instrument']['product'] = deepcopy(product)
         if sim:

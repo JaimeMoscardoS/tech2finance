@@ -37,7 +37,7 @@ test('mobile loading permits explicit local choice and ignores late catalog', as
   await expect(page.locator('.app-shell')).toBeVisible();
   release();
   await Promise.all(settled);
-  await expect(page.getByText('Demo local', {exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
   await expect(page.locator('main.main')).toBeFocused();
 });
 
@@ -45,7 +45,8 @@ test('returning from local to unavailable server never displays local content as
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.route('**/api/catalog', route => route.abort());
   await page.goto('/');
-  await expect(page.getByText('Demo local', {exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
+  await page.locator('.connection-settings summary').click();
   await page.getByRole('button', {name:'Usar servidor de demo'}).click();
   await expect(page.getByRole('status')).toContainText('No se pudo cargar');
   await expect(page.locator('.app-shell')).toHaveCount(0);
@@ -60,10 +61,10 @@ test('late successful catalog cannot replace a local choice', async ({page}) => 
   })(); settled.push(done); return done; });
   await page.goto('/');
   await page.getByRole('button', {name:'Usar demo local'}).click();
-  await expect(page.getByText('Demo local', {exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
   release();
   await Promise.all(settled);
-  await expect(page.getByText('Demo local', {exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
 });
 
 test('focus in preferences moves to main when delayed catalog succeeds', async ({page}) => {
@@ -102,11 +103,12 @@ test('switching mode cancels an in-flight simulation', async ({page}) => {
   await page.getByLabel('Importe inicial').fill('123');
   await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
   await startedRequest;
+  await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();
-  await expect(page.getByText('Demo local',{exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
   release();
   await Promise.all(settled);
-  await expect(page.getByText('Demo local',{exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
 });
 
 test('changed inputs invalidate a failed simulation retry', async ({page}) => {
@@ -120,7 +122,8 @@ test('changed inputs invalidate a failed simulation retry', async ({page}) => {
   await page.getByLabel('Importe inicial').fill('456');
   await expect(page.getByRole('button',{name:'Reintentar'})).toHaveCount(0);
   const before = count;
+  await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();
-  await expect(page.getByText('Demo local',{exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
   expect(count).toBe(before);
 });

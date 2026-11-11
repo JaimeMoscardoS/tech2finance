@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
-async function openPractice(page: Page) {
-  await page.goto('/');
+async function openPractice(page: Page, url = '/') {
+  await page.goto(url);
   await page.getByRole('button', {name: /Practica sin riesgo/}).click();
   await expect(page.getByRole('heading', {name: 'Aprende haciendo preguntas.'})).toBeVisible();
   await expect(page.getByRole('heading', {name: 'Aprende haciendo preguntas.'})).toBeFocused();
@@ -10,7 +10,7 @@ async function openPractice(page: Page) {
 test('real server compares annual contributions and sends the chosen case to the tutor', async ({page}) => {
   const simulations: unknown[] = [];
   page.on('request', req => { if (req.url().endsWith('/api/simulations') && req.method() === 'POST') simulations.push(req.postDataJSON()); });
-  await openPractice(page);
+  await openPractice(page, 'http://127.0.0.1:5177/');
   await page.getByLabel('Instrumento A').selectOption('caixabank-monetario-estandar');
   await page.getByLabel('Importe inicial (€)').fill('500');
   await page.getByLabel(/Aportación periódica/).fill('100');
@@ -88,6 +88,7 @@ test('late responses and server errors never replace a changed practice', async 
   release?.();
   await delayedRequestFinished;
   await expect(page.locator('.practice-result-card').nth(1).locator('dd').first()).toHaveText(fresh);
+  await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();
   await expect(page.locator('.practice-result-card')).toHaveCount(0);
 });
@@ -98,7 +99,8 @@ test('server failure is visible and cannot silently compute locally', async ({pa
   await page.getByRole('button',{name:'Comparar ejemplos'}).click();
   await expect(page.getByRole('alert')).toContainText('No se ha podido completar');
   await expect(page.locator('.practice-result-card')).toHaveCount(0);
-  await expect(page.getByText('Servidor de demo',{exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Servidor de demo');
+  await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();
   await page.getByRole('button',{name:'Comparar ejemplos'}).click();
   await expect(page.locator('.practice-result-card')).toHaveCount(2);

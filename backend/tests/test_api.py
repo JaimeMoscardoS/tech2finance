@@ -236,6 +236,20 @@ def test_unknown_host_is_rejected():
     assert client.get("/api/health", headers={"host": "attacker.example"}).status_code == 400
 
 
+def test_explore_tutor_receives_selected_catalog_fund(monkeypatch):
+    seen = {}
+    def capture(payload):
+        seen.update(payload['context'])
+        return {'text': 'Respuesta de prueba', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'fund', 'sources': []}
+    monkeypatch.setattr('backend.app.reply', capture)
+    response = client.post('/api/tutor', json={'message': '¿Qué es este fondo?', 'context': {'page': 'explore', 'level': 'advanced', 'language': 'es', 'instrumentId': 'caixabank-monetario-estandar'}})
+    assert response.status_code == 200
+    assert seen['instrument']['id'] == 'caixabank-monetario-estandar'
+    assert seen['instrument']['dataKind'] == 'annual_published_returns'
+    assert seen['instrument']['sources'][0]['url'].startswith('https://www.caixabankassetmanagement.com/')
+    assert 'simulation' not in seen
+
+
 GAME = {"instrumentId": "demo-equity", "initial": 500, "monthly": 50, "months": 12, "sellMonth": 6, "buyFeeRate": 0, "sellFeeRate": 0}
 
 
@@ -274,3 +288,36 @@ def test_game_rejects_bad_values_and_unavailable_banks():
     for identifier in ("bbva-mi-inversion-bolsa", "santander-rf-ahorro"):
         response = client.post("/api/game/compare", json=GAME | {"instrumentId": identifier})
         assert response.status_code == 422 and response.json()["error"]["code"] == "game_unavailable"
+
+
+def test_configured_external_bank_context_is_scoped(monkeypatch):
+    captured = {}
+    def capture(payload):
+        captured.clear()
+        captured.update(payload['context'])
+        return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
+    monkeypatch.setattr('backend.app.reply', capture)
+    for bank, instrument in [('bbva', 'bbva-mi-inversion-bolsa'), ('caixabank', 'caixabank-monetario-estandar')]:
+        response = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': 'explore', 'bankId': bank, 'instrumentId': instrument}})
+        assert response.status_code == 200
+        assert 'bank' not in captured and 'product' not in captured['instrument']
+        assert captured['instrument']['id'] == instrument
+    response = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': 'explore', 'bankId': 'bbva', 'instrumentId': 'demo-mixed'}})
+    assert response.status_code == 422
+    response = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'bankId': 'unknown'}})
+    assert response.status_code == 400 and response.json()['error']['code'] == 'unknown_bank'
+
+
+@pytest.mark.parametrize(('language', 'question', 'expected'), [
+    ('es', '¿Por qué no puedo simularlo?', 'no tiene histórico disponible'),
+    ('en', "Why can't I simulate it?", 'no available history'),
+])
+def test_external_missing_history_through_tutor_bridge(language, question, expected):
+    context = {'page': 'simulator', 'level': 'beginner', 'language': language,
+               'bankId': 'bbva', 'instrumentId': 'bbva-mi-inversion-bolsa'}
+    response = client.post('/api/tutor', json={'message': question, 'context': context})
+    assert response.status_code == 200
+    answer = response.json()
+    assert answer['intent'] == 'bank_missing_history'
+    assert expected in answer['text']
+    assert '0,75' not in answer['text'] and '0.75' not in answer['text']

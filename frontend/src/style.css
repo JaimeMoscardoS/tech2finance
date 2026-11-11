@@ -165,7 +165,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 }
 
 @media (max-width: 520px) { .topbar .breadcrumb { display: none; } .topbar { gap: 8px; } .top-actions { gap: 4px; } }
-@media (max-width: 360px) {
+@media (max-width: 520px) {
   .topbar { height: auto; min-height: 62px; padding: 8px 12px; align-items: flex-start; }
   .top-actions { flex: 1; flex-wrap: wrap; justify-content: flex-end; }
   .top-actions .level-wrap { flex-basis: 100%; }
@@ -243,4 +243,24 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   .portfolio-page-grid { grid-template-columns: minmax(0, 1fr); }
   .sim-values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sim-values > div:first-child { grid-column: 1 / -1; }
+}
+
+/* Home destinations and connection controls */
+.connection-area { margin: -22px 0 24px; color: var(--ink); font-size: 13px; }
+.connection-settings summary { cursor: pointer; width: fit-content; color: var(--ink); min-height: 44px; padding: 12px 0; }
+.connection-settings summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.connection-settings p { margin: 6px 0 10px; line-height: 1.5; }
+.connection-settings button, .connection-retry { background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; min-height: 44px; padding: 8px 12px; }
+.connection-status:not(:empty) { margin: 8px 0; font-weight: 600; }
+.welcome-card { min-height: 0; }
+.welcome-content { max-width: 100%; padding: 26px 30px; }
+.welcome-content p { max-width: 680px; }
+@media (max-width: 760px) { .connection-area { margin-top: -12px; } .welcome-content { padding: 24px; } }
+
+.result-help { display:flex; gap:14px; align-items:center; padding:18px; margin:22px 0; border:1px solid var(--border); border-radius:14px; background:var(--surface-tint); color:var(--ink); }.result-help > svg { color:var(--accent); flex-shrink:0; }.result-help > div { flex:1; }.result-help strong { font-size:16px; }.result-help p { color:var(--muted); font-size:13px; line-height:1.45; margin-top:5px; }.result-help .button { min-height:56px; font-size:15px; }
+@media(max-width:760px) { .result-help { align-items:flex-start; flex-wrap:wrap; }.result-help > div { flex:1 1 calc(100% - 44px); }.result-help .button { width:100%; } }
+.topbar { position: relative; }
+@media (max-width: 1100px) {
+  .topbar .demo-badge { display: block; position: absolute; top: 100%; left: 0; width: 100%; text-align: center; padding: 5px 12px; background: var(--surface, #fbfcf8); z-index: 1; }
+  .content { padding-top: 60px; }
 }
