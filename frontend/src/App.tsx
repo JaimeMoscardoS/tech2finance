@@ -604,7 +604,6 @@ export default function App() {
             </>
           )}
           {page === "portfolio" && <>
-            {configuredBank === "demo" && <BankInfo profile={catalog.bankProfile} language={language} />}
             <div className="info-banner"><LockKeyhole size={19} /><span>{t.portfolioWarning}</span><button type="button" className="button outline" onClick={openPortfolioDecline}><TrendingDown size={17} />{t.understandFall}</button></div>
             <FundsDashboard language={language} level={level} theme={theme} onExplore={()=>choose("explore")} onSimulate={()=>choose("simulator")} onSell={openPortfolioDecline} />
             <AgentPanelSection level={level} language={language} />

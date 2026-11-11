@@ -44,3 +44,14 @@ test("validateQuestions flags malformed data", () => {
   };
   assert.ok(validateQuestions([bad, bad]).length >= 4);
 });
+
+test("the question bank is ordered by level and has the expected counts", () => {
+  const rank = { beginner: 0, intermediate: 1, advanced: 2 } as const;
+  const ranks = mifidQuestions.map((q) => rank[q.level ?? "beginner"]);
+  assert.ok(ranks.every((r, i) => i === 0 || ranks[i - 1] <= r), "mifidQuestions must be ordered beginner, intermediate, advanced");
+  assert.equal(mifidQuestions.length, 27);
+  assert.equal(questionsForLevel(mifidQuestions, "beginner").length, 12);
+  assert.equal(questionsForLevel(mifidQuestions, "intermediate").length, 22);
+  assert.equal(questionsForLevel(mifidQuestions, "advanced").length, 27);
+  assert.deepEqual(validateQuestions(mifidQuestions), []);
+});
