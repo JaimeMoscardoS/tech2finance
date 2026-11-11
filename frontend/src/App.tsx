@@ -33,6 +33,7 @@ import { MAX_SIMULATION_AMOUNT } from "./simulation-types";
 import { copy, type Language } from "./copy";
 import { analyzeDecline, type DeclineReport, type DecisionContext, type TutorContext } from "../../tutor-ia/src/index";
 import { portfolioPoints } from "./portfolio-demo";
+import { withDemoDecline } from "../../tutor-ia/src/decline-demo";
 import AssistantPanel from "./AssistantPanel";
 import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
@@ -73,6 +74,7 @@ export default function App() {
   const declineRequest = useRef<AbortController | null>(null);
   const declineGeneration = useRef(0);
   const [declineSpec, setDeclineSpec] = useState<DeclineSpec | undefined>();
+  const [demoLaunch, setDemoLaunch] = useState(false);
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [practiceResult, setPracticeResult] = useState<{spec: SimulationSpec; result: ServerSimulation} | null>(null);
   const [page, setPage] = useState<Page>("home"),
@@ -300,6 +302,27 @@ export default function App() {
     if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
     return {...outcome, instrumentId:item.instrumentId, currency:"EUR", contributionTiming:item.dataStatus === "annual_history" ? "year_end_after_return" : "month_start", sources:item.sourceUrl ? [{label:language === "es" ? "Ficha oficial" : "Official product page",url:item.sourceUrl,checkedAt:item.sourceDate ?? undefined}] : [], assumptions:item.dataStatus === "annual_history" ? [language === "es" ? "Rentabilidades anuales publicadas y redondeadas; aportaciones al cierre." : "Published rounded annual returns; contributions at year end."] : [language === "es" ? "Serie ficticia repetida; aportaciones al inicio de cada mes." : "Repeated fictional series; contributions at the start of each month."]};
   }, [catalog, mode, language]);
+  useEffect(() => {
+    if (!demoLaunch || !catalog || page !== "simulator" || selectedId !== "demo-mixed" || initial !== "1000" || monthly !== "0" || months !== "6") return;
+    setDemoLaunch(false);
+    const item = catalog.instruments.find(i => i.instrumentId === "demo-mixed");
+    if (!item) return;
+    simulationRequest.current?.abort();
+    const controller = new AbortController(); simulationRequest.current = controller;
+    const id = ++simulationGeneration.current;
+    setServerError(false); setError(null); setOperationPending(true);
+    retryAction.current = () => setDemoLaunch(true);
+    const spec = {instrumentId:"demo-mixed", initial:1000, recurringContribution:0, periods:6};
+    calculatePractice(spec, controller.signal).then(outcome => {
+      if (controller.signal.aborted || id !== simulationGeneration.current) return;
+      setResult({...outcome, initial:1000, monthly:0, annual:0, months:6});
+      const decline = {basis:"instrument" as const, language, instrumentId:"demo-mixed", periods:6};
+      void showDecline(decline, () => withDemoDecline(analyzeDecline({name:item.name[language], dataKind:"fictional", sources:[], observations:outcome.timeline.map(point=>({label:`${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}), "demo-mixed", 6));
+    }).catch(() => {if (!controller.signal.aborted && id === simulationGeneration.current) {setServerError(true); setOperationPending(false);}});
+  }, [demoLaunch, catalog, page, selectedId, initial, monthly, months, calculatePractice, language]);
+  function launchDeclineDemo() {
+    choose("simulator"); setSelectedId("demo-mixed"); setInitial("1000"); setMonthly("0"); setMonths("6"); setResult(null); setDemoLaunch(true);
+  }
   const openAssistant = () => {
     setAssistantDecline(undefined);
     assistantTriggerRef.current = mobileNav
@@ -361,7 +384,7 @@ export default function App() {
     catch {if(id===declineGeneration.current && !controller.signal.aborted)setServerError(true);} finally {if(id===declineGeneration.current)setOperationPending(false);}
   }
   function openPortfolioDecline(){void showDecline({basis:"portfolio_demo",language},()=>analyzeDecline({name:t.examplePortfolio,dataKind:"fictional",sources:[],observations:points.map((value,index)=>({label:`${t.pointLabel} ${index+1}`,value}))}));}
-  function openSimulationDecline(){if(!validResult)return;void showDecline({basis:"instrument",language,instrumentId:selected.instrumentId,periods:validResult.kind === "annual_history" ? 5 : validResult.months},()=>analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}));}
+  function openSimulationDecline(){if(!validResult)return;void showDecline({basis:"instrument",language,instrumentId:selected.instrumentId,periods:validResult.kind === "annual_history" ? 5 : validResult.months},()=>withDemoDecline(analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}),selected.instrumentId,validResult.kind === "annual_history" ? 5 : validResult.months));}
   function askDecline(){if(!pause)return;setAssistantDecline(pause);setPause(null);assistantTriggerRef.current=pauseTriggerRef.current;setAssistant(true);}
   const levelTitle = {
     beginner: t.beginnerView,
@@ -566,6 +589,10 @@ export default function App() {
                     >
                       {t.trySimulator}
                       <ArrowRight size={16} />
+                    </button>
+                    <button className="text-link" onClick={launchDeclineDemo}>
+                      {language === "es" ? "Probar una caída" : "Try a decline"}
+                      <ArrowRight size={15} />
                     </button>
                     <button
                       className="text-link"

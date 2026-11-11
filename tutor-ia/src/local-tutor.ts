@@ -17,7 +17,7 @@ const validFacts = (s: SimulationFacts | undefined): s is SimulationFacts => !!s
 function detect(message: string): string {
   const m = message.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   if (/ignore|ignora|system prompt|api.?key|secret|password/.test(m)) return 'unknown';
-  if (/caus|why.*(fall|drop)|por que.*(ca|baj)/.test(m)) return 'causes';
+  if (/caus|noticia|news|contexto|why.*(fall|drop)|por que.*(ca|baj)/.test(m)) return 'causes';
   if (/liquid|horizon|horizonte|plazo|vender|sell|mantener|hold/.test(m)) return 'decision';
   if (/drawdown|caida|caido|bajada|recuper|recovery|drop/.test(m)) return 'decline';
   if (/fuente|source|histor|nav|publicad/.test(m)) return 'source';
@@ -101,7 +101,10 @@ export function createLocalTutorProvider(): TutorProvider {
       const d = context?.decline;
       if (!d || d.status !== 'ok' || !Number.isFinite(d.currentDrawdownPercent) || !Number.isFinite(d.maxDrawdownPercent) || typeof d.latestLabel !== 'string') text = en ? 'There are not enough valid observations to analyse a decline.' : 'No hay observaciones válidas suficientes para analizar una caída.';
       else text = en ? `At ${d.latestLabel}, the observed decline from the peak is ${fmt(d.currentDrawdownPercent!)}%; the largest observed decline is ${fmt(d.maxDrawdownPercent!)}%. An observed recovery does not guarantee a future recovery.` : `En ${d.latestLabel}, la caída observada desde el máximo es del ${fmt(d.currentDrawdownPercent!)}%; la mayor caída observada es del ${fmt(d.maxDrawdownPercent!)}%. Una recuperación observada no garantiza una recuperación futura.`;
-    } else if (intent === 'causes') text = en ? 'The cause is unknown from the available data. There are no verified news or comparable cases here.' : 'La causa es desconocida con los datos disponibles. Aquí no hay noticias verificadas ni casos comparables.';
+    } else if (intent === 'causes') {
+      const demo = context?.decline?.demoContext;
+      text = demo?.sourceKind === 'synthetic_demo' ? `${demo.explanation[lang]} ${en ? 'Fictional BancoT2F script, not verified news; no comparable cases are available.' : 'Guion ficticio BancoT2F, no son noticias verificadas; no hay casos comparables.'}` : (en ? 'The cause is unknown from the available data. There are no verified news or comparable cases here.' : 'La causa es desconocida con los datos disponibles. Aquí no hay noticias verificadas ni casos comparables.');
+    }
     else if (intent === 'decision') {
       const decision = context?.decision;
       const parts: string[] = [];
