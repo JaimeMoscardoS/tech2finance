@@ -85,7 +85,7 @@ La arquitectura anterior de conversación y voz mediante proveedores sigue siend
 
 La guardia de origen solo acepta `http://localhost:5173` y `http://127.0.0.1:5173`; si el frontend se lanza con otro `T2F_FRONTEND_PORT`, `/api/tts` responde 403 y el botón usa la voz del navegador.
 
-Estado: implementado en la rama `feature/voz-elevenlabs`; probado solo con ElevenLabs simulado (`httpx.MockTransport`) y con pruebas unitarias del frontend; no probado con clave real, no integrado en `main` ni desplegado. Limitaciones: el endpoint lee cualquier texto de hasta 1500 caracteres ; exige `Content-Type: application/json` y rechaza con 403 `forbidden_origin` los orígenes cruzados; no hay límite de frecuencia ni cupo, solo 2 peticiones simultáneas y 1500 caracteres, y consume créditos de la cuenta de ElevenLabs; con la voz activa, el texto leído se envía a ElevenLabs.
+Estado: implementado en la rama `feature/voz-elevenlabs`; probado solo con ElevenLabs simulado (`httpx.MockTransport`) y con pruebas unitarias del frontend; no probado con clave real, no integrado en `main` ni desplegado. Limitaciones: el endpoint lee cualquier texto de hasta 1500 caracteres; exige `Content-Type: application/json` y rechaza con 403 `forbidden_origin` las peticiones de otros orígenes web (protege frente a páginas abiertas en el navegador, no frente a clientes locales sin `Origin`, como curl u otros procesos de la máquina, que se aceptan); no hay límite de frecuencia ni cupo, solo 2 peticiones simultáneas y 1500 caracteres, y consume créditos de la cuenta de ElevenLabs; con la voz activa, el texto leído se envía a ElevenLabs.
 
 ## Motor de análisis de caídas
 
