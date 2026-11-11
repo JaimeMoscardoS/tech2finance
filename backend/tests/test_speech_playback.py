@@ -79,6 +79,8 @@ def test_oversized_and_timeout(monkeypatch):
     ('es', '1.234,01 €; 21 EUR; 0,02 EUR; -0,5%; Fondo bolsa 2, estrategia 0-50.', 'mil doscientos treinta y cuatro euros con un céntimo; veintiún euros; cero euros con dos céntimos; menos cero coma cinco por ciento; Fondo bolsa 2, estrategia 0-50.'),
     ('es', '28 175,75 EUR', 'veintiocho mil ciento setenta y cinco euros con setenta y cinco céntimos'),
     ('en', '28\u202f175.75 EUR', 'twenty eight thousand one hundred seventy five euros and seventy five cents'),
+    ('en', 'EUR 28,175.75', 'twenty eight thousand one hundred seventy five euros and seventy five cents'),
+    ('es', '€ 28.175,75', 'veintiocho mil ciento setenta y cinco euros con setenta y cinco céntimos'),
 ])
 def test_financial_speech_payload_is_normalized_without_changing_request(monkeypatch, language, source, expected):
     submitted = {'text': source, 'language': language}

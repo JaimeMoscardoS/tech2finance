@@ -93,8 +93,9 @@ def normalize_speech(text: str, language: str) -> str:
         if fractional: result += (' coma ' if language == 'es' else ' point ') + ' '.join(_number(int(c), language) for c in fractional)
         return (('menos ' if language == 'es' else 'minus ') if value < 0 else '') + result + (' por ciento' if language == 'es' else ' percent')
 
-    number = r'-?(?:\d{1,3}(?:[ \u00a0\u202f]\d{3})+|\d+)[\d.,]*'
+    number = r'-?(?:\d{1,3}(?:[ \u00a0\u202f]\d{3})+|\d+)(?:[.,]\d+)*'
     text = re.sub(r'(?<![\w\d])\d{4}-\d{2}-\d{2}(?![\w\d])', calendar, text)
+    text = re.sub(rf'(?:\bEUR\b|€)\s*(?P<number>{number})(?![\w\d]|[.,]\d)', money, text, flags=re.IGNORECASE)
     text = re.sub(rf'(?<![\w\d.,])(?P<number>{number})\s*(?:EUR\b|€)', money, text, flags=re.IGNORECASE)
     text = re.sub(rf'(?<![\w\d.,])(?P<number>{number})\s*%', percent, text)
     return re.sub(r'\bEUR\b', 'euros', text, flags=re.IGNORECASE)
