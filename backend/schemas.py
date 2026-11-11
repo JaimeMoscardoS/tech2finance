@@ -102,6 +102,9 @@ class TutorRequest(RequestModel):
     history: Annotated[list[HistoryMessage], Field(max_length=8)] = Field(default_factory=list)
     context: TutorContext
 
+class SpeechTokenRequest(RequestModel):
+    language: Language
+
 class DeclineExplanationRequest(RequestModel):
     decline: DeclineSpec
     level: Literal['beginner', 'intermediate', 'advanced']

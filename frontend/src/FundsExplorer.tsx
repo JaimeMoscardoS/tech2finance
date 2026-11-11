@@ -482,8 +482,8 @@ export default function FundsExplorer({
           </strong>
           <p>
             {es
-              ? "Pregunta al asistente por reglas sobre el fondo seleccionado. La voz usa funciones locales del dispositivo cuando están disponibles."
-              : "Ask the rule-based assistant about the selected fund. Voice uses local device features when available."}
+              ? "Pregunta al asistente sobre el fondo seleccionado."
+              : "Ask the assistant about the selected fund."}
           </p>
         </div>
         <div>

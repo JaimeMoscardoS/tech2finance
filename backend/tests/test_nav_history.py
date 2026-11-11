@@ -42,7 +42,7 @@ def test_annual_frequency_propagates_through_api_and_tutor(monkeypatch):
     from fastapi.testclient import TestClient
     from backend.app import app
     captured = {}
-    def reply(payload):
+    def reply(payload, *, rules_only=False):
         captured.update(payload['context'])
         return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
     monkeypatch.setattr('backend.app.reply', reply)
