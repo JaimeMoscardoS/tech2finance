@@ -24,12 +24,13 @@ test.beforeEach(async ({ page }) => {
  });
 });
 
-test('unavailable local dictation explains how to reach the written assistant', async ({ page }) => {
+test('unavailable local dictation offers writing in the same conversation', async ({ page }) => {
  await page.goto('/');
  await page.evaluate(() => { (window as any).voiceTest.availability = 'unavailable'; });
  await page.getByRole('button', { name: 'Hablar con IA' }).click();
  const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
- await expect(dialog.getByRole('status')).toContainText('Para escribir, cierra esta ventana y abre Tu asistente.');
+ await expect(dialog.getByRole('status')).toContainText('puedes escribir');
+ await expect(dialog.getByLabel('O escribe tu pregunta')).toBeVisible();
  expect(await page.evaluate(() => (window as any).voiceTest.starts)).toBe(0);
  expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
  await page.evaluate(() => { (window as any).voiceTest.availability = 'available'; });

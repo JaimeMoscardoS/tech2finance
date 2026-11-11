@@ -19,6 +19,7 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
  const [phase, setPhase] = useState<Phase>('idle');
  const [message, setMessage] = useState('');
  const [question, setQuestion] = useState('');
+ const [draft, setDraft] = useState('');
  const [reply, setReply] = useState<TutorReply | null>(null);
  const generation = useRef(0);
  const request = useRef<AbortController | null>(null);
@@ -28,9 +29,26 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
  currentSession.current = { key, provider };
  const cancel = () => { generation.current++; request.current?.abort(); request.current = null; stopBrowserVoice(); setPhase('idle'); setMessage(''); };
  useEffect(() => {
-  cancel(); history.current = []; setQuestion(''); setReply(null);
+  cancel(); history.current = []; setQuestion(''); setReply(null); setDraft('');
   return () => { generation.current++; request.current?.abort(); request.current = null; stopBrowserVoice(); };
  }, [open, key, provider]);
+ const submitQuestion = (text: string, id: number, snapshot: TutorContext) => {
+  if (!text) { setPhase('idle'); setMessage(t.empty); return; }
+  if (text.length > MAX_MESSAGE_LENGTH) { setPhase('idle'); setMessage(t.limit); return; }
+  setQuestion(text); setReply(null); setMessage(t.pending); setPhase('pending');
+  const controller = new AbortController(); request.current = controller;
+  const timer = window.setTimeout(() => { controller.abort(); if (id === generation.current) { request.current = null; setPhase('idle'); setMessage(t.error); } }, 10000);
+  void provider.reply({ message: text, history: history.current.slice(-8), context: snapshot, signal: controller.signal }).then(result => {
+   if (id !== generation.current || controller.signal.aborted) return;
+   history.current = [...history.current, {role:'user' as const,text}, {role:'assistant' as const,text:result.text,intent:result.intent}].slice(-8);
+   request.current = null; setReply(result); setPhase('speaking');
+   speakLocal(result.text, result.language, (voiceState, voiceMessage) => {
+    if (id !== generation.current) return;
+    setMessage(voiceMessage);
+    if (voiceState === 'idle' || voiceState === 'error') setPhase('idle');
+   });
+  }).catch(() => { if (id === generation.current) { request.current = null; setPhase('idle'); setMessage(t.error); } }).finally(() => window.clearTimeout(timer));
+ };
  const talk = () => {
   cancel(); setQuestion(''); setReply(null);
   const id = ++generation.current;
@@ -40,26 +58,11 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
   setPhase('dictating');
   const status = (state: VoiceState, detail: string) => {
    if (id !== generation.current) return;
-   if (state === 'error') { setPhase('idle'); setMessage(`${detail} ${t.writeHelp}`); return; }
+   if (state === 'error') { setPhase('idle'); setMessage(detail); return; }
    if (state !== 'idle') { setMessage(detail); return; }
    if (submitted) return;
    submitted = true;
-   const text = finalText.trim();
-   if (!text) { setPhase('idle'); setMessage(t.empty); return; }
-   if (text.length > MAX_MESSAGE_LENGTH) { setPhase('idle'); setMessage(t.limit); return; }
-   setQuestion(text); setMessage(t.pending); setPhase('pending');
-   const controller = new AbortController(); request.current = controller;
-   const timer = window.setTimeout(() => controller.abort(), 10000);
-   void provider.reply({ message: text, history: history.current.slice(-8), context: snapshot, signal: controller.signal }).then(result => {
-    if (id !== generation.current || controller.signal.aborted) return;
-    history.current = [...history.current, {role:'user' as const,text}, {role:'assistant' as const,text:result.text,intent:result.intent}].slice(-8);
-    request.current = null; setReply(result); setPhase('speaking');
-    speakLocal(result.text, result.language, (voiceState, voiceMessage) => {
-     if (id !== generation.current) return;
-     setMessage(voiceMessage);
-     if (voiceState === 'idle' || voiceState === 'error') setPhase('idle');
-    });
-   }).catch(() => { if (id === generation.current) { request.current = null; setPhase('idle'); setMessage(t.error); } }).finally(() => window.clearTimeout(timer));
+   submitQuestion(finalText.trim(), id, snapshot);
   };
   void startLocalDictation(context.language, text => { if (id === generation.current) finalText += (finalText ? ' ' : '') + text; }, status);
  };
@@ -86,9 +89,16 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
   });
  };
  const close = () => { cancel(); onClose(); };
+ const submitText = (event: React.FormEvent) => {
+  event.preventDefault();
+  const text = draft.trim();
+  if (!text) return;
+  cancel(); setDraft('');
+  submitQuestion(text, generation.current, structuredClone(context));
+ };
  if (!open) return null;
  const active = phase !== 'idle';
- return <><button type="button" className="drawer-overlay" onClick={close} aria-label={t.close}/><aside ref={panelRef} className="voice-panel" role="dialog" aria-modal="true" aria-label={t.title}>
+ return <><button type="button" className="voice-panel__overlay" onClick={close} aria-hidden="true" tabIndex={-1}/><aside ref={panelRef} className="voice-panel" role="dialog" aria-modal="true" aria-label={t.title}>
   <header className="voice-panel__header"><div><span className="voice-panel__eyebrow">{t.subtitle}</span><h2>{t.title}</h2></div><button className="voice-panel__close" type="button" onClick={close} aria-label={t.close}><X size={21}/></button></header>
   <div className="voice-panel__mode">{provider.id === 'server_rules' ? t.server : t.local}</div>
   <div className="voice-panel__body"><p className="voice-panel__intro">{t.intro}</p>
@@ -96,5 +106,6 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
    <p className="voice-panel__status" role="status" aria-live="polite">{message || t.privacy}</p>
    {(question || reply) && <div className="voice-panel__result">{question && <section><h3>{t.heard}</h3><p>{question}</p></section>}{reply && <section><h3>{t.answer}</h3><p>{reply.text}</p>{reply.sources.length > 0 && <div className="voice-panel__sources">{t.sources}: {reply.sources.map(source => <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.label}</a>)}</div>}</section>}</div>}
    {reply && <button type="button" className="voice-panel__listen" onClick={phase === 'speaking' ? cancel : play} disabled={phase === 'dictating' || phase === 'pending'}><Volume2 size={17}/>{phase === 'speaking' ? t.stop : t.listen}</button>}
+   <form className="voice-panel__form" onSubmit={submitText}><label htmlFor="voice-question">{context.language === 'es' ? 'O escribe tu pregunta' : 'Or type your question'}</label><div><input id="voice-question" value={draft} onChange={event => setDraft(event.target.value)} maxLength={MAX_MESSAGE_LENGTH} placeholder={context.language === 'es' ? 'Escribe aquí…' : 'Type here…'}/><button type="submit" disabled={!draft.trim()}>{context.language === 'es' ? 'Enviar' : 'Send'}</button></div></form>
   </div></aside></>;
 }

@@ -40,6 +40,10 @@ En esta rama, el inicio presenta accesos a fondos, práctica guiada y cartera fi
 
 ## Tres niveles, una misma información de fondo
 
+El selector de detalle de la cabecera despliega los tres niveles mediante una transición interactiva; admite teclado y movimiento reducido. La selección afecta al nivel global de la sesión y no cambia el perfil de riesgo.
+
+La cabecera ofrece «Hablar con IA» para abrir directamente la conversación centrada, por voz o texto; la disponibilidad de voz sigue dependiendo de las capacidades locales del navegador.
+
 | Nivel | Experiencia prevista |
 | --- | --- |
 | Principiante | Pocos elementos a la vez, palabras sencillas, explicaciones de conceptos, riesgos y costes en términos comprensibles. |

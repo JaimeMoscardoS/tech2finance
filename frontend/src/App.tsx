@@ -2,8 +2,6 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type
 import {
   ArrowRight,
   BarChart3,
-  Check,
-  ChevronDown,
   Compass,
   FlaskConical,
   Grid2X2,
@@ -13,13 +11,14 @@ import {
   Mic,
   MessageCircle,
   Moon,
-  Sparkles,
   Sun,
   TrendingDown,
   Wallet,
   X,
 } from "lucide-react";
 import CountUp from "./CountUp";
+import LevelSelector from "./LevelSelector";
+import { ShinyButton } from "./components/ui/shiny-button";
 import BankInfo from "./BankInfo";
 import { simulate } from "./demo";
 import { annualHistory, replayAnnual } from "./annual-history";
@@ -85,7 +84,6 @@ export default function App() {
   const [practiceResult, setPracticeResult] = useState<{spec: SimulationSpec; result: ServerSimulation} | null>(null);
   const [page, setPage] = useState<Page>("home"),
     [level, setLevel] = useState<Level>("beginner"),
-    [levelOpen, setLevelOpen] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [assistant, setAssistant] = useState(false),
     [voiceAssistant, setVoiceAssistant] = useState(false),
@@ -111,14 +109,6 @@ export default function App() {
     >(null),
     [error, setError] = useState<FieldError>(null);
   const [selectedId, setSelectedId] = useState("caixabank-monetario-estandar");
-  useEffect(() => {
-    if (!levelOpen) return;
-    const close = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLevelOpen(false);
-    };
-    document.addEventListener("keydown", close);
-    return () => document.removeEventListener("keydown", close);
-  }, [levelOpen]);
   const instruments = catalog?.instruments ?? [];
   const selected = instruments.find(
     (item) => item.instrumentId === selectedId,
@@ -166,7 +156,7 @@ export default function App() {
         panel?.querySelectorAll<HTMLElement>(
           "button, a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
         ) ?? [],
-      );
+      ).filter((item) => !item.matches(":disabled") && !item.closest("[inert]") && item.getClientRects().length > 0 && getComputedStyle(item).visibility !== "hidden");
     items()[0]?.focus();
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -451,7 +441,7 @@ export default function App() {
         </nav>
         <div className="side-divider" />
         <div className="nav-label">{t.learn}</div>
-        <button className="nav-item" onClick={openAssistant}>
+        <button className="nav-item" onClick={openAssistant} aria-label={t.openAssistant}>
           <MessageCircle size={18} />
           <span>{t.assistant}</span>
         </button>
@@ -516,43 +506,10 @@ export default function App() {
             >
               {theme === "light" ? <Moon size={19} /> : <Sun size={19} />}
             </button>
-            <button className="icon-button theme-button" onClick={openVoice} aria-label={language === "es" ? "Hablar con IA" : "Talk to AI"}>
-              <Mic size={19} />
-            </button>
-            <button className="icon-button theme-button" onClick={openAssistant} aria-label={t.openAssistant}>
-              <Sparkles size={19} />
-            </button>
-            <div className="level-wrap">
-              <button
-                className="level-button"
-                onClick={() => setLevelOpen((v) => !v)}
-                aria-expanded={levelOpen}
-                aria-label={`${t.detailLevel}: ${levelNames[level]}`}
-              >
-                <span>
-                  {t.detailLevel}: <strong>{levelNames[level]}</strong>
-                </span>
-                <ChevronDown size={15} />
-              </button>
-              {levelOpen && (
-                <div className="level-menu">
-                  {(["beginner", "intermediate", "advanced"] as Level[]).map(
-                    (l) => (
-                      <button
-                        key={l}
-                        onClick={() => {
-                          setLevel(l);
-                          setLevelOpen(false);
-                        }}
-                      >
-                        {levelNames[l]}
-                        {level === l && <Check size={15} />}
-                      </button>
-                    ),
-                  )}
-                </div>
-              )}
-            </div>
+            <ShinyButton className="top-voice-button" onClick={openVoice} aria-label={language === "es" ? "Hablar con IA" : "Talk to AI"}>
+              <Mic size={17} aria-hidden="true" />{language === "es" ? "Hablar con IA" : "Talk to AI"}
+            </ShinyButton>
+            <LevelSelector level={level} onChange={setLevel} names={levelNames} label={t.detailLevel} backLabel={language === "es" ? "Volver" : "Back"} />
           </div>
         </header>
         <div className="content">
