@@ -16,9 +16,9 @@ import {
   type SimulationResult,
 } from "./simulation-types";
 import InvestmentChart from "./LazyInvestmentChart";
+import type { Level } from "./types/level";
 
 export type FieldError = "initial" | "monthly" | "annual" | "general" | null;
-type Level = "beginner" | "intermediate" | "advanced";
 export type ViewResult = SimulationResult & {
   instrumentId: string;
   initial: number;

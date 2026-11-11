@@ -1,0 +1,139 @@
+/*
+ * Tokens de color de Tech2Finance: 3 niveles x 2 temas (docs/diseno-dashboard.md).
+ * El contenedor raíz (<html>) lleva data-level="beginner|intermediate|advanced" y
+ * data-theme="light|dark". El nivel no es un perfil de riesgo: solo cambia la presentación.
+ * Los nombres antiguos (--ground, --ink, --muted, --border, ...) se conservan como alias
+ * para no tocar el resto de hojas; --border es el borde de controles (AA) y
+ * --card-border el borde decorativo de tarjetas.
+ *
+ * Paleta inspirada en design/referencias: barra lateral azul marino con elemento activo en bloque
+ * azul, fondo gris azulado y tarjetas blancas en claro; azul-negro con acentos azul vivo, verde y
+ * morado en oscuro. --chart-2 es el secundario de las áreas de gráfica (turquesa en claro, morado en
+ * oscuro); --cat-1..6 la paleta categórica de donuts y barras; --chrome-bg el fondo de barra lateral.
+ */
+
+/* Valores por defecto (Básico claro) por si falta algún atributo. */
+:root,
+html[data-level='beginner'][data-theme='light'] {
+  --ground: #f6f9fd; --surface: #ffffff; --surface-raised: #ffffff;
+  --ink: #0f1b2d; --muted: #4a5a70; --accent: #2760cc;
+  --card-border: #dfe7f1; --border: #7a8ba3;
+  --positive: #17693f; --negative: #b3261e;
+  --chart-rise: #17693f; --chart-fall: #b3261e; --chart-flat: #4a5a70;
+  --chrome-bg: #0b2a52;
+}
+html[data-level='intermediate'][data-theme='light'] {
+  --ground: #f3f6fb; --surface: #ffffff; --surface-raised: #ffffff;
+  --ink: #13223a; --muted: #4a5a70; --accent: #2862d0;
+  --card-border: #d7e0ec; --border: #748aa6;
+  --positive: #17693f; --negative: #b3261e;
+  --chart-rise: #17693f; --chart-fall: #b3261e; --chart-flat: #4a5a70;
+  --chrome-bg: #0b2545;
+}
+html[data-level='advanced'][data-theme='light'] {
+  --ground: #e9eef5; --surface: #ffffff; --surface-raised: #ffffff;
+  --ink: #0f1a2b; --muted: #46566c; --accent: #2459c4;
+  --card-border: #c9d4e3; --border: #6e819b;
+  --positive: #146b3a; --negative: #b3261e;
+  --chart-rise: #146b3a; --chart-fall: #b3261e; --chart-flat: #46566c;
+  --chrome-bg: #071a33;
+}
+html[data-level='beginner'][data-theme='dark'] {
+  --ground: #171d30; --surface: #212940; --surface-raised: #2a3350;
+  --ink: #eef2fb; --muted: #b0bbd0; --accent: #7aa0ff;
+  --card-border: #323c58; --border: #6a7a9c;
+  --positive: #3ddc84; --negative: #ff8c8c;
+  --chart-rise: #3ddc84; --chart-fall: #ff8c8c; --chart-flat: #b0bbd0;
+  --chrome-bg: #10152a;
+}
+html[data-level='intermediate'][data-theme='dark'] {
+  --ground: #121726; --surface: #1b2133; --surface-raised: #232b42;
+  --ink: #e9eefa; --muted: #a9b4cb; --accent: #7099ff;
+  --card-border: #2b3350; --border: #66769a;
+  --positive: #3ddc84; --negative: #ff8c8c;
+  --chart-rise: #3ddc84; --chart-fall: #ff8c8c; --chart-flat: #a9b4cb;
+  --chrome-bg: #0c101c;
+}
+html[data-level='advanced'][data-theme='dark'] {
+  --ground: #0c101d; --surface: #151b2b; --surface-raised: #1c2336;
+  --ink: #e8edf9; --muted: #a4b0c8; --accent: #6c94ff;
+  --card-border: #232b42; --border: #5f6f92;
+  --positive: #3ddc84; --negative: #ff8585;
+  --chart-rise: #3ddc84; --chart-fall: #ff8585; --chart-flat: #a4b0c8;
+  --chrome-bg: #070a14;
+}
+
+/* Derivados comunes a las 6 combinaciones. */
+html {
+  --hairline: var(--card-border);
+  --surface-tint: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --accent-hover: color-mix(in srgb, var(--accent) 78%, var(--ink));
+  --error-ink: var(--negative);
+  --focus: var(--accent);
+  --chart-grid: var(--card-border);
+  --chart-line: var(--accent);
+  --chart-fill: var(--chart-2-soft);
+  --chrome-border: color-mix(in srgb, #ffffff 14%, var(--chrome-bg));
+  color-scheme: light;
+}
+html[data-theme='light'] {
+  --action-ink: #ffffff;
+  --chart-2: #0e8fa6; --chart-2-soft: color-mix(in srgb, #0e8fa6 16%, var(--surface));
+  --purple: #6d3fd6;
+  --amber: #7a4f00; --amber-soft: #fcefd2; --amber-fill: #c77700;
+  --cat-1: #2f6fe0; --cat-2: #0e9aa7; --cat-3: #c77700; --cat-4: #7c4fe0; --cat-5: #2e9b61; --cat-6: #d4533f;
+  --overlay: #0a1a30a8; --shadow: #0f2a5a1a;
+  --card-shadow: 0 1px 2px #0f2a5a0d, 0 6px 18px #0f2a5a14;
+  --card-shadow-hover: 0 2px 4px #0f2a5a12, 0 12px 28px #0f2a5a22;
+  --icon-tile-1: var(--accent); --icon-tile-2: var(--purple); --icon-tile-3: var(--chart-2);
+}
+html[data-theme='dark'] {
+  --action-ink: #0b1020;
+  --chart-2: #8b5cf6; --chart-2-soft: color-mix(in srgb, #3ddc84 14%, var(--surface));
+  --purple: #a58bfa;
+  --amber: #ffd98a; --amber-soft: #4a3a14; --amber-fill: #f5b942;
+  --cat-1: #4c7dff; --cat-2: #3ddc84; --cat-3: #8b5cf6; --cat-4: #f5b942; --cat-5: #3cc4d9; --cat-6: #ff7a7a;
+  --overlay: #02060fc7; --shadow: #00000080;
+  --card-shadow: 0 1px 2px #00000066, 0 6px 20px #00000052;
+  --card-shadow-hover: 0 2px 4px #00000073, 0 12px 30px #0000006b;
+  --icon-tile-1: var(--accent); --icon-tile-2: var(--purple); --icon-tile-3: var(--chart-2);
+  --nav-active: #2f6fe0;
+  color-scheme: dark;
+}
+/* Brillo ligero solo en oscuro: degradado azul sutil en tarjetas (la sombra viene de --card-shadow). */
+html[data-theme='dark'] .panel,
+html[data-theme='dark'] .action-card,
+html[data-theme='dark'] .portfolio-card {
+  background-image: linear-gradient(160deg, color-mix(in srgb, var(--accent) 7%, transparent), transparent 55%);
+}
+/* Elemento activo: bloque azul con 3:1 contra la barra y texto blanco >= 4,5:1 en los 6 temas. */
+html[data-theme='dark'] .nav-item.active { background: var(--nav-active); color: #ffffff; }
+html[data-theme='dark'] .nav-item.active svg { color: #ffffff; }
+
+/*
+ * Tema claro: barra lateral azul marino en los 3 niveles (Básico algo menos intensa, Avanzado la más
+ * oscura) y, solo en Avanzado, también la cabecera. Se redefinen los tokens dentro de esos
+ * contenedores para que botones, menús y texto conserven contraste sin reglas por componente.
+ */
+html[data-theme='light'] .sidebar,
+html[data-level='advanced'][data-theme='light'] .topbar {
+  --surface: var(--chrome-bg);
+  --surface-raised: color-mix(in srgb, #ffffff 9%, var(--chrome-bg));
+  --surface-tint: #ffffff1f;
+  --accent-soft: #ffffff24;
+  --ink: #ffffff;
+  --muted: #b8c7dc;
+  --accent: #8cb8ff;
+  --accent-hover: #bcd5ff;
+  --action-ink: #0a2342;
+  --border: #7d96b8;
+  --hairline: color-mix(in srgb, #ffffff 18%, var(--chrome-bg));
+  --focus: #ffffff;
+  --shadow: #00000066;
+  --nav-active: #2f6fe0;
+}
+html[data-theme='light'] .nav-item.active { background: var(--nav-active); color: #ffffff; }
+html[data-theme='light'] .nav-item.active svg { color: #ffffff; }
+/* Básico e Intermedio claro: cabecera blanca (solo la barra lateral es azul marino). */
+html[data-theme='light']:not([data-level='advanced']) .topbar { --chrome-bg: var(--surface); --chrome-border: var(--card-border); }

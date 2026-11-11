@@ -4,7 +4,7 @@ test('users can explore, change level and run a labelled simulation', async ({ p
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Invertir empieza/ })).toBeVisible();
-  await page.getByRole('button', { name: /Detalle: Principiante/ }).click();
+  await page.getByRole('button', { name: /Detalle: Básico/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
   await page.getByRole('button', { name: 'Simulador', exact: true }).click();
   await expect(page.getByText(/variaciones son inventadas/)).toBeVisible();
@@ -59,7 +59,7 @@ test('experience levels show distinct views without changing the selected risk',
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await expect(page.getByText('Tu punto de partida')).toBeVisible();
-  await page.getByRole('button', { name: /Detalle: Principiante/ }).click();
+  await page.getByRole('button', { name: /Detalle: Básico/ }).click();
   await page.getByRole('button', { name: 'Intermedio' }).click();
   await expect(page.getByText('Tu panorama')).toBeVisible();
   await page.getByRole('button', { name: /Detalle: Intermedio/ }).click();
@@ -102,7 +102,7 @@ test('English intermediate view fits a 320px screen', async ({ browser }) => {
  const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button', { name: 'English' }).click();
- await page.getByRole('button', { name: 'Detail: Beginner' }).click();
+ await page.getByRole('button', { name: 'Detail: Basic' }).click();
  await page.getByRole('button', { name: 'Intermediate', exact: true }).click();
  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
  await context.close();
@@ -132,7 +132,7 @@ test('catalogue selection changes the example and real funds have no invented re
  await expect(page.getByLabel('Instrumento')).toHaveValue('demo-etf');
  expect(await panel.locator('.sim-values strong').first().textContent()).not.toBe(original);
  const newValue=await panel.locator('.sim-values strong').first().textContent();
- await page.getByRole('button', {name:/Detalle: Principiante/}).click();
+ await page.getByRole('button', {name:/Detalle: Básico/}).click();
  await page.getByRole('button', {name:'Avanzado', exact:true}).click();
  await expect(panel.locator('.sim-values strong').first()).toHaveText(newValue!);
  await expect(page.getByLabel('Entidad',{exact:true})).toHaveCount(0);
@@ -193,7 +193,7 @@ test('annual history keeps fixed period and excludes monthly contributions', asy
  await expect(panel.getByText(/Has cambiado los datos/)).toBeVisible();
  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await expect(panel.locator('.sim-values strong').filter({hasText:'1058,05 €'})).toBeVisible();
- await page.getByRole('button',{name:/Detalle: Principiante/}).click();
+ await page.getByRole('button',{name:/Detalle: Básico/}).click();
  await page.getByRole('button',{name:'Avanzado',exact:true}).click();
  await expect(panel.locator('.sim-values strong').filter({hasText:'1058,05 €'})).toBeVisible();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
@@ -211,9 +211,9 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await page.getByRole('button',{name:'Simulator',exact:true}).click();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
  await page.screenshot({path:'test-results/simulator-tablet.png',fullPage:true});
- await page.getByRole('button',{name:'Detail: Beginner'}).click();
+ await page.getByRole('button',{name:'Detail: Basic'}).click();
  await page.keyboard.press('Escape');
- await expect(page.getByRole('button',{name:'Detail: Beginner'})).toHaveAttribute('aria-expanded','false');
+ await expect(page.getByRole('button',{name:'Detail: Basic'})).toHaveAttribute('aria-expanded','false');
  await tablet.close();
  const mobile=await browser.newContext({viewport:{width:568,height:320}});
  const phone=await mobile.newPage(); await phone.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local')); await phone.goto('/');
@@ -250,7 +250,7 @@ test('annual deposits, table and percentage view stay consistent across preferen
  await expect(rows.last()).toContainText('5,8 %');
  await panel.getByRole('button',{name:'Evolución del instrumento (%)'}).click();
  await expect(rows.last()).toContainText('5,8 %');
- await page.getByRole('button',{name:/Detalle: Principiante/}).click();
+ await page.getByRole('button',{name:/Detalle: Básico/}).click();
  await page.getByRole('button',{name:'Intermedio',exact:true}).click();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
  await page.getByRole('button',{name:'English'}).click();

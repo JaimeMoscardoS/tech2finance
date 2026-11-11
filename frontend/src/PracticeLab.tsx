@@ -7,10 +7,11 @@ import type { annualHistory as historyType } from './annual-history';
 import { buildExperiment, explainComparison, type Lesson, type PracticeSettings, type ExperimentPair } from './practice-domain';
 import InvestmentChart from './LazyInvestmentChart';
 import './practice-lab.css';
+import type { Level } from './types/level';
 
 type Props = {
   language: Language;
-  level?: 'beginner' | 'intermediate' | 'advanced';
+  level?: Level;
   instruments: Instrument[];
   annualHistory: typeof historyType;
   mode: 'server' | 'local';

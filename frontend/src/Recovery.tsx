@@ -1,11 +1,13 @@
+import { BrandMark } from "./components/BrandMark";
 import { forwardRef } from "react";
 import { Moon, Sun } from "lucide-react";
 import type { Language } from "./copy";
+import type { Theme } from "./types/level";
 import "./recovery.css";
 
 type Props = {
-  language: Language; theme: "light" | "dark"; failed: boolean;
-  onLanguage: (language: Language) => void; onTheme: (theme: "light" | "dark") => void;
+  language: Language; theme: Theme; failed: boolean;
+  onLanguage: (language: Language) => void; onTheme: (theme: Theme) => void;
   onRetry: () => void; onLocal: () => void;
 };
 
@@ -13,7 +15,7 @@ const Recovery = forwardRef<HTMLDivElement, Props>(function Recovery({language, 
   const es = language === "es";
   return <div className="recovery" ref={ref}>
     <header className="recovery-header">
-      <div className="brand"><div className="brand-mark" aria-hidden="true"><span>t</span><span>2</span></div><div><strong>BancoT2F</strong><small>{es ? "Demo ficticia · tecnología Tech2Finance" : "Fictional demo · powered by Tech2Finance"}</small></div></div>
+      <div className="brand"><BrandMark /><div><strong>BancoT2F</strong><small>{es ? "Demo ficticia · tecnología Tech2Finance" : "Fictional demo · powered by Tech2Finance"}</small></div></div>
       <div className="recovery-preferences" aria-label={es ? "Preferencias" : "Preferences"}>
         <button type="button" aria-pressed={es} onClick={() => onLanguage("es")}>ES<span className="sr-only"> Español</span></button>
         <button type="button" aria-pressed={!es} onClick={() => onLanguage("en")}>EN<span className="sr-only"> English</span></button>

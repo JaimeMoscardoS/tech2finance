@@ -1,3 +1,5 @@
+import { BrandMark } from "./components/BrandMark";
+import { animate } from "motion/react";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowRight,
@@ -38,10 +40,10 @@ import AssistantPanel from "./AssistantPanel";
 import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
 import Recovery from "./Recovery";
+import { LEVELS, type Level, type Theme } from "./types/level";
 const PracticeLab = lazy(() => import("./PracticeLab"));
 
 type Page = "home" | "explore" | "simulator" | "portfolio";
-type Level = "beginner" | "intermediate" | "advanced";
 function saved(key: string, options: string[], fallback: string) {
   try {
     const value = localStorage.getItem(key);
@@ -54,8 +56,8 @@ export default function App() {
   const [language, setLanguage] = useState<Language>(
     () => saved("t2f-language", ["es", "en"], "es") as Language,
   );
-  const [theme, setTheme] = useState<"light" | "dark">(
-    () => saved("t2f-theme", ["light", "dark"], "light") as "light" | "dark",
+  const [theme, setTheme] = useState<Theme>(
+    () => saved("t2f-theme", ["light", "dark"], "light") as Theme,
   );
   const [mode, setMode] = useState<"server" | "local">(() => saved("t2f-data-mode", ["server", "local"], "server") as "server" | "local");
   const [rawCatalog, setCatalog] = useState<Catalog | null>(() => saved("t2f-data-mode", ["server", "local"], "server") === "local" ? {schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,bankProfile:localBankProfile,annualHistory} : null);
@@ -142,6 +144,15 @@ export default function App() {
       style: "currency",
       currency: "EUR",
     }).format(n);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const themeMounted = useRef(false);
+  useEffect(() => {
+    // Transición suave al cambiar nivel o tema; no se anima la primera carga ni con movimiento reducido.
+    if (!themeMounted.current) { themeMounted.current = true; return; }
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || !shellRef.current) return;
+    const controls = animate(shellRef.current, { opacity: [0.82, 1] }, { duration: 0.32, ease: "easeOut" });
+    return () => controls.stop();
+  }, [level, theme]);
   useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dataset.level = level;
@@ -388,7 +399,7 @@ export default function App() {
   if (!catalog) return <Recovery ref={recoveryRef} language={language} theme={theme} failed={serverError} onLanguage={setLanguage} onTheme={setTheme} onRetry={retryCatalog} onLocal={switchMode} />;
   if (!catalog.banks.length || !catalog.instruments.length) return <main className="content"><h1>{language === "es" ? "Catálogo no disponible" : "Catalogue unavailable"}</h1><p>{language === "es" ? "La entidad configurada no tiene instrumentos en esta demo. Revisa la configuración del despliegue." : "The configured institution has no instruments in this demo. Check the deployment configuration."}</p></main>;
   return (
-    <div className="app-shell">
+    <div className="app-shell" ref={shellRef}>
       <aside
         ref={navRef}
         className={`sidebar ${mobileNav ? "open" : ""}`}
@@ -398,10 +409,7 @@ export default function App() {
         aria-label={t.space}
       >
         <div className="brand">
-          <div className="brand-mark">
-            <span>t</span>
-            <span>2</span>
-          </div>
+          <BrandMark />
           <div>
             <strong>
               {catalog.banks[0].name[language]}
@@ -518,7 +526,7 @@ export default function App() {
               </button>
               {levelOpen && (
                 <div className="level-menu">
-                  {(["beginner", "intermediate", "advanced"] as Level[]).map(
+                  {LEVELS.map(
                     (l) => (
                       <button
                         key={l}

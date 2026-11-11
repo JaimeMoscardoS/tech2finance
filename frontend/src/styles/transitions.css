@@ -1,0 +1,7 @@
+/* Cambio suave de nivel y tema en las superficies grandes. La animación de opacidad la lanza App con `motion`. */
+html, body, .sidebar, .topbar, .welcome-card, .panel, .portfolio-card, .fund-card {
+  transition: background-color .24s ease, border-color .24s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  html, body, .sidebar, .topbar, .welcome-card, .panel, .portfolio-card, .fund-card { transition: none !important; }
+}

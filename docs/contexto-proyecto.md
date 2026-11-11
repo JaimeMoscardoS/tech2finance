@@ -30,7 +30,7 @@ En esta rama, el botón «Probar una caída» prepara T2F Equilibrio ficticio co
 
 Para la demo, los controles y acciones del guion deben funcionar de principio a fin, sin botones decorativos; ante un fallo deben mostrar un error y permitir una recuperación o reintento real. La voz es opcional y queda fuera de ese recorrido obligatorio. Las noticias sintéticas deben estar etiquetadas y el asistente debe utilizar los mismos hechos del escenario. Esta es una condición de aceptación: las comprobaciones específicas del recorrido de caída no prueban por sí solas todos los controles de la aplicación.
 
-1. **Entrar y elegir nivel.** El usuario abre la sección ficticia de inversión y escoge principiante, intermedio o avanzado. Puede cambiarlo cuando quiera.
+1. **Entrar y elegir nivel.** El usuario abre la sección ficticia de inversión y escoge básico, intermedio o avanzado. Puede cambiarlo cuando quiera.
 2. **Explorar y preguntar.** Ve información de productos de ejemplo y pregunta al tutor qué significa un concepto o un dato de la pantalla. El tutor responde por texto y, si está disponible, por voz.
 3. **Practicar.** Introduce una cantidad y una aportación periódica ficticias. En la máquina del tiempo recorre un periodo histórico para observar subidas y caídas y comparar decisiones de juego. Debe quedar claro qué serie representa el gráfico y cuáles son los supuestos.
 4. **Comprender una caída.** En una cartera de ejemplo, el usuario puede encontrar una bajada y activar una pausa informativa. El asistente muestra el contexto disponible, recuerda el objetivo y el plazo si se conocen y pregunta si necesita liquidez. El usuario decide qué hacer.
@@ -42,7 +42,7 @@ En esta rama, el inicio presenta accesos a fondos, práctica guiada y cartera fi
 
 | Nivel | Experiencia prevista |
 | --- | --- |
-| Principiante | Pocos elementos a la vez, palabras sencillas, explicaciones de conceptos, riesgos y costes en términos comprensibles. |
+| Básico (id interno `beginner`) | Pocos elementos a la vez, palabras sencillas, explicaciones de conceptos, riesgos y costes en términos comprensibles. |
 | Intermedio | Mayor detalle sobre distribución, evolución, costes y comparación de alternativas. |
 | Avanzado | Más información técnica y parámetros cuando existan datos fiables y métricas implementadas. |
 
