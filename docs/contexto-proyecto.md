@@ -112,7 +112,7 @@ Una noticia que coincide con una caída no demuestra por sí misma que la haya c
 
 ## Conversación y voz
 
-En esta rama el tutor funciona mediante reglas locales y contexto explícito, no un LLM. La lectura de voz utiliza voces locales del dispositivo cuando están disponibles; el dictado solo se habilita con procesamiento local y modelo instalado. El micrófono de la barra abre el panel y solicita el reconocimiento local de inmediato; el dictado final se procesa al terminar, sin reactivar el micrófono tras la respuesta. Desde la pausa el inicio es manual. En el chat escrito el dictado se revisa antes de enviarse. La arquitectura siguiente es futura:
+En esta rama el tutor funciona por defecto mediante reglas y contexto explícito; opcionalmente (`T2F_TUTOR_PROVIDER=anthropic` con clave en el servidor) Claude redacta la respuesta a partir de los hechos verificados y de la respuesta por reglas, con respaldo visible a reglas ante cualquier fallo (rama `feature/tutor-claude`, comprobado solo con proveedor simulado, no probado con clave real, ni en `main` ni desplegado; detalles en [contratos](contratos.md#tutor-del-chat-con-claude-opcional)). La lectura de voz utiliza voces locales del dispositivo cuando están disponibles; el dictado solo se habilita con procesamiento local y modelo instalado. El micrófono de la barra abre el panel y solicita el reconocimiento local de inmediato; el dictado final se procesa al terminar, sin reactivar el micrófono tras la respuesta. Desde la pausa el inicio es manual. En el chat escrito el dictado se revisa antes de enviarse. La parte de voz con proveedor sigue siendo futura:
 
 La arquitectura propuesta es:
 
@@ -148,7 +148,7 @@ La elegibilidad se basa en informes semestrales que cubren 2020–2025, sin dist
 
 ## Integración local de demostración
 
-En esta rama, el frontend utiliza por defecto la API FastAPI local de catálogo, simulación, caídas y tutor por reglas. Ofrece demo local explícita ante fallo y comparte los ejemplos mediante `shared/demo-data.json`. El chat se ejecuta mediante Node local y no usa LLM ni servicios externos; el análisis detallado incorpora aparte un adaptador opcional para Sonnet, pendiente de prueba real. Véase [backend-contexto](backend-contexto.md) para contrato, ejecución y límites. Esta integración no implica despliegue ni conexión bancaria.
+En esta rama, el frontend utiliza por defecto la API FastAPI local de catálogo, simulación, caídas y tutor por reglas. Ofrece demo local explícita ante fallo y comparte los ejemplos mediante `shared/demo-data.json`. Por defecto el chat se ejecuta mediante Node local sin LLM ni servicios externos; con `T2F_TUTOR_PROVIDER=anthropic` puede redactarlo Claude (el servidor envía a Anthropic la pregunta, el historial y el contexto, sin el objetivo libre de la pausa), y el análisis detallado incorpora aparte un adaptador opcional para Sonnet; ambos pendientes de prueba real. Véase [backend-contexto](backend-contexto.md) para contrato, ejecución y límites. Esta integración no implica despliegue ni conexión bancaria.
 
 
 Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](planning/plan.md).

@@ -17,7 +17,7 @@ from backend.domain.game import run_game
 from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest
 from backend.decline_explanations import AnalysisUnavailable, explain, provider
 from backend.news import get_news
-from backend.tutor_bridge import TutorUnavailable, reply
+from backend.tutor_bridge import TutorUnavailable, reply, tutor_provider
 
 MAX_BODY = 65536
 
@@ -112,7 +112,7 @@ async def analysis_error(_request: Request, exc: AnalysisUnavailable):
 @app.get("/api/health")
 def health():
     news_provider = os.environ.get('T2F_NEWS_PROVIDER', 'ecb_archive')
-    return {"status": "ok", "mode": "demo", "tutorProvider": "server_rules", "externalProviders": provider() == "anthropic" or news_provider == 'ecb_archive', "newsProvider": news_provider}
+    return {"status": "ok", "mode": "demo", "tutorProvider": tutor_provider(), "externalProviders": provider() == "anthropic" or tutor_provider() == "anthropic" or news_provider == 'ecb_archive', "newsProvider": news_provider}
 
 
 @app.get("/api/catalog")
