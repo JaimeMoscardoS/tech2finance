@@ -6,7 +6,7 @@ import type { Language } from "./copy";
 import type { Catalog } from "./server-api";
 import "./funds-explorer.css";
 import GoalsPanel from "./GoalsPanel";
-import { annualPeriods } from "./annual-periods";
+import manifest from "../../shared/data-manifest.json";
 
 type Level = "beginner" | "intermediate" | "advanced";
 type Props = {
@@ -16,6 +16,8 @@ type Props = {
   banks: Bank[];
   instruments: Instrument[];
   history: Catalog["annualHistory"];
+  navHistory: Catalog["navHistory"];
+  hostBankId: string;
   bankProfile?: BankProfile;
   selectedId: string;
   onSelect: (item: Instrument) => void;
@@ -31,6 +33,8 @@ export default function FundsExplorer({
   banks,
   instruments,
   history,
+  navHistory,
+  hostBankId,
   bankProfile,
   selectedId,
   onSelect,
@@ -46,13 +50,7 @@ export default function FundsExplorer({
   const [filterKnown, setFilterKnown] = useState("all");
   const [comparison, setComparison] = useState<Record<string, string[]>>({});
   const [chartSelection, setChartSelection] = useState<string[] | null>(null);
-  // These educational examples are invented solely for the fictional demo funds.
-  const examples: Record<string, { risk: number; years: number }> =
-    {
-      "demo-mixed": { risk: 3, years: 3 },
-      "demo-equity": { risk: 5, years: 5 },
-      "demo-fixed": { risk: 2, years: 2 },
-    };
+  const examples: Record<string, { risk: number; years: number }> = {};
 
   const feeFor = (id: string): number | null => {
     const bps = bankProfile?.products.find((p) => p.instrumentId === id)?.fees.annualOngoingBps;
@@ -69,9 +67,9 @@ export default function FundsExplorer({
     availableBanks.find((b) => b.id === "demo")?.id ??
     availableBanks[0]?.id ??
     "";
-  const bankFunds = funds.filter((i) => i.bankId === bankId);
+  const bankFunds = hostBankId === "demo" ? funds : funds.filter((i) => i.bankId === bankId);
   const compared =
-    comparison[bankId] ?? bankFunds.slice(0, 3).map((i) => i.instrumentId);
+    comparison[hostBankId === "demo" ? "demo" : bankId] ?? bankFunds.slice(0, 3).map((i) => i.instrumentId);
   const selected =
     bankFunds.find((i) => i.instrumentId === selectedId) ?? bankFunds[0];
   const visibleFunds = bankFunds
@@ -87,12 +85,12 @@ export default function FundsExplorer({
         (filterType === "all" || i.assetClass === filterType) &&
         (filterHistory === "all" ||
           (filterHistory === "available"
-            ? (i.dataStatus === "fictional" && !!i.returns?.length) ||
+            ? (i.dataStatus === "historical_nav" && !!navHistory.instruments.find(h=>h.isin === i.identifier && h.eligible)) || (i.dataStatus === "fictional" && !!i.returns?.length) ||
               (i.dataStatus === "annual_history" &&
                 i.instrumentId === history.instrumentId &&
                 history.returns.length > 0)
             : !(
-                (i.dataStatus === "fictional" && !!i.returns?.length) ||
+                (i.dataStatus === "historical_nav" && !!navHistory.instruments.find(h=>h.isin === i.identifier && h.eligible)) || (i.dataStatus === "fictional" && !!i.returns?.length) ||
                 (i.dataStatus === "annual_history" &&
                   i.instrumentId === history.instrumentId &&
                   history.returns.length > 0)
@@ -119,7 +117,7 @@ export default function FundsExplorer({
       unknown: es ? "No disponible" : "Unavailable",
     })[i.assetClass] ?? (es ? "No disponible" : "Unavailable");
   const historyLabel = (i: Instrument) =>
-    i.dataStatus === "fictional"
+    i.dataStatus === "historical_nav" ? (es ? "Cierres mensuales de la CNMV" : "CNMV monthly closes") : i.dataStatus === "fictional"
       ? es
         ? "Serie simulada mensual"
         : "Simulated monthly series"
@@ -141,7 +139,9 @@ export default function FundsExplorer({
       maximumFractionDigits: 2,
     }).format(n);
   const rowsFor = (i: Instrument) => {
+    const nav = navHistory.instruments.find(h => h.isin === i.identifier && h.eligible)?.monthly ?? [];
     const rows =
+      i.dataStatus === "historical_nav" ? nav.slice(1).map((row,index)=>({label:row.date,rate:Number(row.nav)/Number(nav[index].nav)-1})) :
       i.dataStatus === "annual_history" &&
       i.instrumentId === history.instrumentId
         ? history.returns.map((row) => ({
@@ -184,12 +184,11 @@ export default function FundsExplorer({
     0.001,
   );
   const download = (i: Instrument) => {
-    const rows = rowsFor(i);
-    if (!rows.length) return;
-    const csv = [
-      "period,rate_percent,data_kind",
-      ...rows.map((row) => `${row.label},${row.rate * 100},${i.dataStatus}`),
-    ].join("\r\n");
+    const nav = navHistory.instruments.find(h => h.isin === i.identifier && h.eligible)?.monthly ?? [];
+    if (!nav.length) return;
+    const quote = (value: string | number | null) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    const header = ['instrument_id','name','isin','currency','date','nav','rate_percent','source','dataset_version','dataset_sha256','nav_history_sha256'];
+    const csv = [header.join(','), ...nav.map((row,index) => [i.instrumentId,i.name[language],i.identifier,i.currency,row.date,row.nav,index ? (Number(row.nav)/Number(nav[index-1].nav)-1)*100 : '',navHistory.source.indexUrl,navHistory.datasetVersion,manifest.datasetSha256,manifest.navHistorySha256].map(quote).join(','))].join('\r\n');
     const url = URL.createObjectURL(
       new Blob([csv], { type: "text/csv;charset=utf-8" }),
     );
@@ -199,51 +198,17 @@ export default function FundsExplorer({
     link.click();
     URL.revokeObjectURL(url);
   };
-  const periodSummary = (i: Instrument) =>
-    i.dataStatus === "annual_history" &&
-    i.instrumentId === history.instrumentId && (
-      <section className="period-summary">
-        <h3>
-          {es
-            ? "Rentabilidad derivada por periodo"
-            : "Derived returns by period"}
-        </h3>
-        <p>
-          {es
-            ? "Compuesta a partir de cifras anuales publicadas y redondeadas; no predice resultados. Sin impuestos ni costes externos."
-            : "Compounded from rounded published annual figures; not a forecast. Excludes taxes and external costs."}
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">{es ? "Años" : "Years"}</th>
-              <th scope="col">{es ? "Acumulada" : "Cumulative"}</th>
-              <th scope="col">{es ? "Anualizada" : "Annualised"}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[1, 3, 5].map((n) => {
-              const value = annualPeriods(history.returns, n);
-              return (
-                <tr key={n}>
-                  <th scope="row">
-                    {n}
-                    {value ? ` (${value.start}–${value.end})` : ""}
-                  </th>
-                  <td>{value ? percent(value.cumulative) : unavailable}</td>
-                  <td>{value ? percent(value.annualised) : unavailable}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </section>
-    );
+  const periodSummary = (i: Instrument) => {
+    const nav = navHistory.instruments.find(h=>h.isin === i.identifier && h.eligible)?.monthly ?? [];
+    if (i.dataStatus !== "historical_nav" || nav.length < 2) return null;
+    const end = nav[nav.length-1];
+    return <section className="period-summary"><h3>{es ? "Rentabilidad por periodo" : "Returns by period"}</h3><p>{es ? "Calculada entre cierres mensuales observados. El pasado no predice resultados futuros; costes adicionales e impuestos desconocidos." : "Calculated between observed monthly closes. Past performance does not predict future results; additional costs and taxes are unknown."}</p><table><thead><tr><th>{es ? "Años" : "Years"}</th><th>{es ? "Acumulada" : "Cumulative"}</th><th>{es ? "Anualizada" : "Annualised"}</th></tr></thead><tbody>{[1,3,5].map(n=>{const start=nav[nav.length-1-n*12];const cumulative=start ? Number(end.nav)/Number(start.nav)-1 : null;return <tr key={n}><th scope="row">{n}{start ? ` (${start.date}–${end.date})` : ""}</th><td>{cumulative===null ? unavailable : percent(cumulative)}</td><td>{cumulative===null ? unavailable : percent(Math.pow(1+cumulative,1/n)-1)}</td></tr>})}</tbody></table></section>;
+  };
   const source = (i: Instrument) =>
     i.sourceUrl ? (
       <p className="fund-source">
         <a href={i.sourceUrl} target="_blank" rel="noreferrer">
-          {es ? "Consultar ficha oficial" : "View official product page"}
+          {i.dataStatus === "historical_nav" ? (es ? "Consultar fuente CNMV" : "View CNMV source") : (es ? "Consultar ficha oficial" : "View official product page")}
         </a>{" "}
         · {i.sourceDate ?? unavailable}
       </p>
@@ -278,8 +243,8 @@ export default function FundsExplorer({
                     ? "Una secuencia inventada, no datos históricos ni una previsión."
                     : "An invented sequence, not historical data or a forecast."
                   : es
-                    ? "Cifras anuales redondeadas, no precios ni previsiones. Gastos corrientes deducidos; sin impuestos ni costes externos."
-                    : "Rounded annual figures, not prices or forecasts. Ongoing charges deducted; excludes taxes and external costs."}
+                    ? "Variación entre cierres mensuales observados; no es una previsión. Los costes adicionales e impuestos son desconocidos."
+                    : "Change between observed monthly closes; not a forecast. Additional costs and taxes are unknown."}
               </p>
             )}
             {compact ? (
@@ -356,8 +321,8 @@ export default function FundsExplorer({
                     ? "Una secuencia inventada, no datos históricos ni una previsión."
                     : "An invented sequence, not historical data or a forecast."
                   : es
-                    ? "Cifras anuales redondeadas, no precios ni previsiones. Gastos corrientes deducidos; sin impuestos ni costes externos."
-                    : "Rounded annual figures, not prices or forecasts. Ongoing charges deducted; excludes taxes and external costs."}
+                    ? "Variación entre cierres mensuales observados; no es una previsión. Los costes adicionales e impuestos son desconocidos."
+                    : "Change between observed monthly closes; not a forecast. Additional costs and taxes are unknown."}
               </p>
             )}
             <p>
@@ -484,7 +449,7 @@ export default function FundsExplorer({
       </div>
       <p className="institution-label">
         {es ? "Catálogo de" : "Catalogue of"}:{" "}
-        {availableBanks.find((b) => b.id === bankId)?.name[language]} ·{" "}
+        {hostBankId === "demo" ? (es ? "Casos de estudio de distintas gestoras" : "Study cases from different managers") : availableBanks.find((b) => b.id === bankId)?.name[language]} ·{" "}
         {es ? "Catálogo de fondos" : "Fund catalogue"}
       </p>
       <aside
@@ -566,7 +531,7 @@ export default function FundsExplorer({
                 onChange={(e) => setFilterKnown(e.target.value)}
               >
                 <option value="all">{es ? "Todos" : "All"}</option>
-                <option value="known">
+                <option value="known" disabled>
                   {es
                     ? "Características disponibles"
                     : "Features available"}
@@ -582,13 +547,13 @@ export default function FundsExplorer({
                 <option value="data">
                   {es ? "Datos disponibles" : "Data availability"}
                 </option>
-                <option value="risk">
+                <option value="risk" disabled>
                   {es ? "Riesgo" : "Risk"}
                 </option>
-                <option value="fee">
+                <option value="fee" disabled>
                   {es ? "Coste" : "Fee"}
                 </option>
-                <option value="horizon">
+                <option value="horizon" disabled>
                   {es ? "Plazo" : "Horizon"}
                 </option>
               </select>
@@ -660,7 +625,7 @@ export default function FundsExplorer({
                   ),
                 ].map((i) => (
                   <option key={i.instrumentId} value={i.instrumentId}>
-                    {i.name[language]}
+                    {i.name[language]} · {i.manager}
                   </option>
                 ))}
               </select>
@@ -755,7 +720,7 @@ export default function FundsExplorer({
                 </p>
               </div>
             </div>
-            {bankProfile && <ProductCosts product={bankProfile.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />}
+            <ProductCosts product={bankProfile?.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />
             <details>
               <summary>{es ? "Ver detalles" : "View details"}</summary>
               <p>
@@ -777,8 +742,8 @@ export default function FundsExplorer({
                       ? "Los cambios se han inventado para practicar."
                       : "Changes are invented for practice."
                     : es
-                      ? "No hay una serie histórica verificada para practicar."
-                      : "No verified historical series is available for practice."}
+                      ? selected.dataStatus === "historical_nav" ? "Valores liquidativos mensuales de la CNMV disponibles para practicar." : "No hay una serie histórica verificada para practicar."
+                      : selected.dataStatus === "historical_nav" ? "CNMV monthly NAVs are available for practice." : "No verified historical series is available for practice."}
               </p>
             </div>
             {source(selected)}
@@ -831,7 +796,7 @@ export default function FundsExplorer({
                     onChange={(e) =>
                       setComparison({
                         ...comparison,
-                        [bankId]: e.target.checked
+                        [hostBankId === "demo" ? "demo" : bankId]: e.target.checked
                           ? [...compared, i.instrumentId]
                           : compared.filter((id) => id !== i.instrumentId),
                       })
@@ -907,7 +872,7 @@ export default function FundsExplorer({
             </span>
             <h2>{selected.name[language]}</h2>
             {chart(selected)}
-            {bankProfile && <ProductCosts product={bankProfile.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />}
+            <ProductCosts product={bankProfile?.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />
             {periodSummary(selected)}
             <details className="comparison-details">
               <summary>
@@ -917,8 +882,8 @@ export default function FundsExplorer({
               </summary>
               <p>
                 {es
-                  ? "Composición, índice de referencia, valor liquidativo y fecha, condiciones de liquidez: no disponibles. El plazo es un supuesto ilustrativo solo en los ejemplos marcados."
-                  : "Composition, benchmark, net asset value and date, liquidity conditions are unavailable. Horizon is an illustrative assumption only in marked examples."}
+                  ? "Composición, índice de referencia y condiciones de liquidez: no disponibles. Los cierres mensuales y sus fechas proceden de la CNMV."
+                  : "Composition, benchmark and liquidity conditions are unavailable. Monthly closes and dates come from CNMV."}
               </p>
               <p>
                 {es ? "Gestora" : "Manager"}: {selected.dataStatus === "fictional" ? (es ? "No especificada" : "Not specified") : (selected.manager || unavailable)}{" "}
@@ -1113,7 +1078,7 @@ export default function FundsExplorer({
                   : "Illustrative characteristics. Fees are informational and are not deducted in the simulation."}
               </p>
             )}
-            {bankProfile && <ProductCosts product={bankProfile.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />}
+            <ProductCosts product={bankProfile?.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />
             {periodSummary(selected)}
             <div className="technical-groups">
               <details>
@@ -1134,7 +1099,7 @@ export default function FundsExplorer({
                 </summary>
                 <p>
                   {es
-                    ? "Valor liquidativo, volatilidad, máxima caída, Sharpe, beta y tracking error: no disponibles."
+                    ? "Volatilidad, máxima caída, Sharpe, beta y tracking error: no disponibles. Los valores liquidativos mensuales figuran en la serie."
                     : "Net asset value, volatility, maximum drawdown, Sharpe, beta and tracking error: unavailable."}
                 </p>
               </details>

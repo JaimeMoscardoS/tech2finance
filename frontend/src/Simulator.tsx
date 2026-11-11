@@ -41,6 +41,9 @@ type Props = {
   monthly: string;
   annual: string;
   months: string;
+  maxMonths: number;
+  contributionFrequency: "monthly" | "annual";
+  setContributionFrequency: Dispatch<SetStateAction<"monthly" | "annual">>;
   setInitial: Dispatch<SetStateAction<string>>;
   setMonthly: Dispatch<SetStateAction<string>>;
   setAnnual: Dispatch<SetStateAction<string>>;
@@ -68,6 +71,9 @@ export default function Simulator({
   monthly,
   annual,
   months,
+  maxMonths,
+  contributionFrequency,
+  setContributionFrequency,
   setInitial,
   setMonthly,
   setAnnual,
@@ -90,29 +96,14 @@ export default function Simulator({
       <div className="info-banner">
         <FlaskConical size={20} />
         <span>
-          {selected.dataStatus === "fictional"
-            ? t.simWarning
+          {selected.dataStatus === "historical_nav"
+            ? (language === "es" ? "Cierres mensuales históricos de la CNMV. Aportaciones al cierre; costes adicionales desconocidos." : "Historical monthly CNMV closes. Contributions at month end; additional costs unknown.")
+            : selected.dataStatus === "fictional" ? t.simWarning
             : selected.dataStatus === "annual_history"
               ? t.historyIntro
               : t.missingHistory}
         </span>
       </div>
-      {instruments.some(item => item.instrumentId === history.instrumentId) && (
-      <button
-        className="text-link history-shortcut"
-        type="button"
-        onClick={() =>
-          selectInstrument(
-            instruments.find(
-              (item) => item.instrumentId === history.instrumentId,
-            )!,
-          )
-        }
-      >
-        {t.tryHistory}
-        <ArrowRight size={15} />
-      </button>
-      )}
       <div className="sim-grid">
         <form className="panel sim-form" onSubmit={run} noValidate>
           <div className="panel-number">01 / {t.configure}</div>
@@ -153,12 +144,11 @@ export default function Simulator({
                 {instruments
                   .filter(
                     (item) =>
-                      item.assetType === selected.assetType &&
-                      item.bankId === selected.bankId,
+                      item.assetType === selected.assetType,
                   )
                   .map((item) => (
                     <option key={item.instrumentId} value={item.instrumentId}>
-                      {item.name[language]}
+                      {item.name[language]} · {item.manager}
                     </option>
                   ))}
               </select>
@@ -167,7 +157,7 @@ export default function Simulator({
               {selected.name[language]}
             </small>
           </label>
-          {bankProfile && <ProductCosts product={bankProfile.products.find(p=>p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />}
+          <ProductCosts product={bankProfile?.products.find(p=>p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />
           <label>
             {t.initial}
             <span>{t.fakeMoney}</span>
@@ -221,8 +211,9 @@ export default function Simulator({
             </>
           ) : (
             <>
+              <label>{language === "es" ? "Frecuencia de aportación" : "Contribution frequency"}<div className="field"><select value={contributionFrequency} onChange={e => {setContributionFrequency(e.target.value as "monthly" | "annual"); setResult(null);}}><option value="monthly">{language === "es" ? "Mensual" : "Monthly"}</option><option value="annual">{language === "es" ? "Anual" : "Annual"}</option></select></div></label>
               <label>
-                {t.monthly}
+                {contributionFrequency === "annual" ? (language === "es" ? "Aportación anual" : "Annual contribution") : t.monthly}
                 <span>{t.optional}</span>
                 <div className="field">
                   <input
@@ -239,9 +230,10 @@ export default function Simulator({
                       setError(null);
                     }}
                   />
-                  <span>{t.perMonth}</span>
+                  <span>{contributionFrequency === "annual" ? (language === "es" ? "€ / año" : "€ / year") : t.perMonth}</span>
                 </div>
               </label>
+              {contributionFrequency === "annual" && <p>{language === "es" ? "Se aporta después de cada 12 cierres mensuales. En menos de 12 meses no hay aportación periódica." : "A contribution is added after every 12 monthly closes. There is no periodic contribution in periods shorter than 12 months."}</p>}
               <label>
                 {t.duration}
                 <div className="field">
@@ -253,10 +245,7 @@ export default function Simulator({
                       setError(null);
                     }}
                   >
-                    <option value="6">{t.months6}</option>
-                    <option value="12">{t.year1}</option>
-                    <option value="36">{t.years3}</option>
-                    <option value="60">{t.years5}</option>
+                    {[[3, language === "es" ? "3 meses" : "3 months"], [6,t.months6], [12,t.year1], [36,t.years3], [60,t.years5], [72,language === "es" ? "6 años" : "6 years"]].filter(([n]) => Number(n) <= maxMonths).map(([n,label]) => <option key={n} value={n}>{label}</option>)}
                   </select>
                 </div>
               </label>
@@ -270,7 +259,7 @@ export default function Simulator({
           <button
             className="button dark full"
             type="submit"
-            disabled={selected.dataStatus === "missing_history"}
+            disabled={selected.dataStatus !== "historical_nav"}
           >
             {t.showExample}
             <ArrowRight size={16} />
@@ -281,16 +270,18 @@ export default function Simulator({
             <div>
               <div className="panel-number">02 / {t.discover}</div>
               <h2>
-                {selected.dataStatus === "fictional"
-                  ? t.resultTitle
+                {selected.dataStatus === "historical_nav"
+                  ? (language === "es" ? "Evolución histórica" : "Historical performance")
+                  : selected.dataStatus === "fictional" ? t.resultTitle
                   : selected.dataStatus === "annual_history"
                     ? t.historyTitle
                     : t.noHistory}
               </h2>
             </div>
             <span className="pill">
-              {selected.dataStatus === "fictional"
-                ? t.hypothetical
+              {selected.dataStatus === "historical_nav"
+                ? (language === "es" ? "HISTÓRICO MENSUAL" : "MONTHLY HISTORY")
+                : selected.dataStatus === "fictional" ? t.hypothetical
                 : selected.dataStatus === "annual_history"
                   ? t.historical
                   : t.unavailable}
@@ -298,8 +289,9 @@ export default function Simulator({
           </div>
           <p>
             <strong>{selected.name[language]}</strong> ·{" "}
-            {selected.relationship === "fictional"
-              ? t.fictionalInstrument
+            {selected.dataStatus === "historical_nav"
+              ? `${language === "es" ? "Gestora" : "Manager"}: ${selected.manager}`
+              : selected.relationship === "fictional" ? t.fictionalInstrument
               : selected.relationship === "own"
                 ? t.ownFund
                 : selected.relationship === "third_party"
@@ -327,7 +319,7 @@ export default function Simulator({
               {selected.sourceUrl && (
                 <p>
                   <a href={selected.sourceUrl} target="_blank" rel="noreferrer">
-                    {t.sourceLink} <ArrowUpRight size={14} />
+                    {selected.dataStatus === "historical_nav" ? "CNMV" : t.sourceLink} <ArrowUpRight size={14} />
                   </a>{" "}
                   · {t.sourceChecked}: {selected.sourceDate}
                 </p>
@@ -335,7 +327,7 @@ export default function Simulator({
             </div>
           )}
           <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">{result && result.instrumentId === selected.instrumentId ? `${t.resultUpdated}: ${euro(result.value)}, ${t.totalPaid}: ${euro(result.contributed)}.` : ""}</span>
-          {selected.dataStatus === "missing_history" ? (
+          {selected.dataStatus !== "historical_nav" && selected.dataStatus !== "annual_history" && selected.dataStatus !== "fictional" ? (
             <div role="status">
               <p>{t.missingHistory}</p>
             </div>
@@ -363,13 +355,14 @@ export default function Simulator({
                 <div><strong>{t.explainResult}</strong><p>{language === "es" ? "Pregunta al asistente por este ejemplo y sus datos." : "Ask the assistant about this example and its data."}</p></div>
                 <button className="button dark" type="button" onClick={openAssistant}>{language === "es" ? "Explícame este resultado" : "Explain this result"}<ArrowRight size={17}/></button>
               </div>
+              {result.timeline[0]?.date && result.timeline.at(-1)?.date && <p>{language === "es" ? "Periodo observado" : "Observed period"}: {result.timeline[0].date} – {result.timeline.at(-1)!.date}</p>}
               <InvestmentChart
                 language={language}
                 title={t.chartTitle}
                 description={selected.dataStatus === "annual_history" ? `${t.chartDescription} ${t.annualClosingDescription}` : t.chartDescription}
                 data={result.timeline.map((point) => ({
                   label: point.date
-                    ? point.date.slice(0, 4)
+                    ? selected.dataStatus === "annual_history" ? point.date.slice(0, 4) : point.date
                     : point.period === 0
                       ? t.start
                       : `${t.month} ${point.period}`,
@@ -411,7 +404,7 @@ export default function Simulator({
               <div className="assumption">
                 <CircleHelp size={16} />
                 <span>
-                  {selected.dataStatus === "annual_history" ? (
+                  {selected.dataStatus === "historical_nav" ? (language === "es" ? "Valores liquidativos históricos CNMV; aportaciones al cierre tras la rentabilidad. No incluye impuestos ni costes adicionales desconocidos. El pasado no predice resultados futuros." : "Historical CNMV NAVs; contributions after each month’s return. Taxes and unknown additional costs are excluded. Past performance does not predict future results.") : selected.dataStatus === "annual_history" ? (
                     t.historyAssumption
                   ) : (
                     <>

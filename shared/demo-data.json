@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "2.0",
   "banks": [
     {
       "id": "demo",
@@ -32,164 +32,114 @@
   ],
   "instruments": [
     {
-      "instrumentId": "demo-mixed",
+      "instrumentId": "caixabank-monetario-estandar",
       "assetType": "fund",
-      "assetClass": "mixed",
-      "bankId": "demo",
-      "manager": "Ficticia / Fictional",
-      "relationship": "fictional",
-      "identifier": null,
-      "shareClass": null,
+      "assetClass": "unknown",
+      "bankId": "caixabank",
+      "manager": "CaixaBank Asset Management",
+      "relationship": "unknown",
+      "identifier": "ES0138045002",
+      "shareClass": "Estándar",
       "currency": "EUR",
-      "sourceUrl": null,
-      "sourceDate": null,
-      "dataStatus": "fictional",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
       "name": {
-        "es": "T2F Equilibrio",
-        "en": "T2F Balance"
+        "es": "CAIXABANK MONETARIO RENDIMIENTO, FI",
+        "en": "CAIXABANK MONETARIO RENDIMIENTO, FI"
       },
-      "returns": [
-        0.015,
-        0.012,
-        -0.025,
-        0.02,
-        -0.085,
-        -0.045,
-        0.03,
-        0.025,
-        0.01,
-        0.02,
-        -0.012,
-        0.018
-      ]
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
     },
     {
-      "instrumentId": "demo-equity",
+      "instrumentId": "santander-rf-ahorro",
       "assetType": "fund",
-      "assetClass": "equity",
-      "bankId": "demo",
-      "manager": "Ficticia / Fictional",
-      "relationship": "fictional",
-      "identifier": null,
-      "shareClass": null,
+      "assetClass": "unknown",
+      "bankId": "santander",
+      "manager": "Santander Asset Management",
+      "relationship": "unknown",
+      "identifier": "ES0112793007",
+      "shareClass": "A",
       "currency": "EUR",
-      "sourceUrl": null,
-      "sourceDate": null,
-      "dataStatus": "fictional",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
       "name": {
-        "es": "T2F Horizonte",
-        "en": "T2F Horizon"
+        "es": "SANTANDER RF AHORRO, FI",
+        "en": "SANTANDER RF AHORRO, FI"
       },
-      "returns": [
-        0.03,
-        -0.04,
-        0.045,
-        -0.08,
-        0.06,
-        0.01,
-        -0.03,
-        0.05,
-        -0.02,
-        0.04,
-        0.025,
-        -0.015
-      ]
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
     },
     {
-      "instrumentId": "demo-fixed",
+      "instrumentId": "bbva-mi-inversion-bolsa-acumulacion",
       "assetType": "fund",
-      "assetClass": "fixed",
-      "bankId": "demo",
-      "manager": "Ficticia / Fictional",
-      "relationship": "fictional",
-      "identifier": null,
-      "shareClass": null,
+      "assetClass": "unknown",
+      "bankId": "bbva",
+      "manager": "BBVA Asset Management SGIIC",
+      "relationship": "unknown",
+      "identifier": "ES0125269003",
+      "shareClass": "Clase 0",
       "currency": "EUR",
-      "sourceUrl": null,
-      "sourceDate": null,
-      "dataStatus": "fictional",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
       "name": {
-        "es": "T2F Estabilidad",
-        "en": "T2F Stability"
+        "es": "BBVA MI INVERSION BOLSA ACUMULACION, FI",
+        "en": "BBVA MI INVERSION BOLSA ACUMULACION, FI"
       },
-      "returns": [
-        0.003,
-        0.004,
-        -0.006,
-        0.005,
-        -0.008,
-        0.002,
-        0.004,
-        0.003,
-        -0.002,
-        0.004,
-        0.003,
-        0.002
-      ]
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
     },
     {
-      "instrumentId": "demo-etf",
-      "assetType": "etf",
-      "assetClass": "equity",
-      "bankId": "demo",
-      "manager": "Ficticia / Fictional",
-      "relationship": "fictional",
-      "identifier": null,
-      "shareClass": null,
+      "instrumentId": "santander-renta-fija-a",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "santander",
+      "manager": "Santander Asset Management",
+      "relationship": "unknown",
+      "identifier": "ES0146133006",
+      "shareClass": "A",
       "currency": "EUR",
-      "sourceUrl": null,
-      "sourceDate": null,
-      "dataStatus": "fictional",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
       "name": {
-        "es": "ETF Mercado ficticio",
-        "en": "Fictional Market ETF"
+        "es": "SANTANDER RENTA FIJA, FI",
+        "en": "SANTANDER RENTA FIJA, FI"
       },
-      "returns": [
-        0.02,
-        -0.03,
-        0.04,
-        -0.05,
-        0.03,
-        0.02,
-        -0.01,
-        0.03,
-        -0.02,
-        0.02,
-        0.01,
-        0.005
-      ]
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
     },
     {
-      "instrumentId": "demo-stock",
-      "assetType": "stock",
-      "assetClass": "equity",
-      "bankId": "demo",
-      "manager": "Ficticia / Fictional",
-      "relationship": "fictional",
-      "identifier": null,
-      "shareClass": null,
+      "instrumentId": "bbva-estrategia-0-50",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "bbva",
+      "manager": "BBVA Asset Management SGIIC",
+      "relationship": "unknown",
+      "identifier": "ES0118857004",
+      "shareClass": "Clase 0",
       "currency": "EUR",
-      "sourceUrl": null,
-      "sourceDate": null,
-      "dataStatus": "fictional",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
       "name": {
-        "es": "Acción Empresa ficticia",
-        "en": "Fictional Company share"
+        "es": "BBVA ESTRATEGIA 0-50, FI",
+        "en": "BBVA ESTRATEGIA 0-50, FI"
       },
-      "returns": [
-        0.05,
-        -0.08,
-        0.06,
-        -0.04,
-        0.03,
-        -0.02,
-        0.07,
-        -0.05,
-        0.02,
-        0.04,
-        -0.03,
-        0.01
-      ]
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
     },
     {
       "instrumentId": "bbva-mi-inversion-bolsa",
@@ -203,46 +153,10 @@
       "currency": null,
       "sourceUrl": "https://www.cnmv.es/Portal/consultas/iic/fondo?nif=V86954104",
       "sourceDate": "2026-11-09",
-      "dataStatus": "missing_history",
+      "dataStatus": "unsupported_distributions",
       "name": {
         "es": "BBVA MI INVERSION BOLSA, FI",
         "en": "BBVA MI INVERSION BOLSA, FI"
-      }
-    },
-    {
-      "instrumentId": "santander-rf-ahorro",
-      "assetType": "fund",
-      "assetClass": "unknown",
-      "bankId": "santander",
-      "manager": "Santander Asset Management",
-      "relationship": "own",
-      "identifier": "ES0112793007",
-      "shareClass": null,
-      "currency": null,
-      "sourceUrl": "https://www.santanderassetmanagement.es/fondos-de-inversion/fondos-de-inversion-renta-fija",
-      "sourceDate": "2026-11-09",
-      "dataStatus": "missing_history",
-      "name": {
-        "es": "Santander RF Ahorro",
-        "en": "Santander RF Ahorro"
-      }
-    },
-    {
-      "instrumentId": "caixabank-monetario-estandar",
-      "assetType": "fund",
-      "assetClass": "unknown",
-      "bankId": "caixabank",
-      "manager": "CaixaBank Asset Management",
-      "relationship": "own",
-      "identifier": "ES0138045002",
-      "shareClass": "Estándar",
-      "currency": "EUR",
-      "sourceUrl": "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
-      "sourceDate": "2026-11-09",
-      "dataStatus": "annual_history",
-      "name": {
-        "es": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR",
-        "en": "CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR"
       }
     }
   ],
@@ -276,22 +190,6 @@
       }
     ]
   },
-  "portfolioPoints": [
-    1000,
-    1032,
-    1010,
-    1040,
-    1026,
-    1060,
-    1045,
-    1088,
-    1072,
-    1103,
-    1084,
-    1110,
-    1080,
-    1093
-  ],
   "bankProfile": {
     "bankId": "demo",
     "profileVersion": "bank-demo-2026-11-10.1",
@@ -365,93 +263,7 @@
         "en": "Fictional monthly maintenance of EUR 0. No real account, real orders or external connections."
       }
     },
-    "products": [
-      {
-        "instrumentId": "demo-fixed",
-        "minimumInitialEur": 0,
-        "minimumRecurringEur": 0,
-        "fees": {
-          "annualOngoingBps": 40,
-          "entryBps": 0,
-          "exitBps": 0,
-          "orderFixedEur": 0,
-          "custodyAnnualBps": 0,
-          "treatment": "illustrative_excluded"
-        },
-        "description": {
-          "es": "Producto ficticio con condiciones informativas para la demostración.",
-          "en": "Fictional product with informational terms for the demonstration."
-        }
-      },
-      {
-        "instrumentId": "demo-mixed",
-        "minimumInitialEur": 0,
-        "minimumRecurringEur": 0,
-        "fees": {
-          "annualOngoingBps": 75,
-          "entryBps": 0,
-          "exitBps": 0,
-          "orderFixedEur": 0,
-          "custodyAnnualBps": 0,
-          "treatment": "illustrative_excluded"
-        },
-        "description": {
-          "es": "Producto ficticio con condiciones informativas para la demostración.",
-          "en": "Fictional product with informational terms for the demonstration."
-        }
-      },
-      {
-        "instrumentId": "demo-equity",
-        "minimumInitialEur": 0,
-        "minimumRecurringEur": 0,
-        "fees": {
-          "annualOngoingBps": 110,
-          "entryBps": 0,
-          "exitBps": 0,
-          "orderFixedEur": 0,
-          "custodyAnnualBps": 0,
-          "treatment": "illustrative_excluded"
-        },
-        "description": {
-          "es": "Producto ficticio con condiciones informativas para la demostración.",
-          "en": "Fictional product with informational terms for the demonstration."
-        }
-      },
-      {
-        "instrumentId": "demo-etf",
-        "minimumInitialEur": 0,
-        "minimumRecurringEur": 0,
-        "fees": {
-          "annualOngoingBps": 20,
-          "entryBps": 0,
-          "exitBps": 0,
-          "orderFixedEur": 1,
-          "custodyAnnualBps": 0,
-          "treatment": "illustrative_excluded"
-        },
-        "description": {
-          "es": "Producto ficticio con condiciones informativas para la demostración.",
-          "en": "Fictional product with informational terms for the demonstration."
-        }
-      },
-      {
-        "instrumentId": "demo-stock",
-        "minimumInitialEur": 0,
-        "minimumRecurringEur": 0,
-        "fees": {
-          "annualOngoingBps": null,
-          "entryBps": 0,
-          "exitBps": 0,
-          "orderFixedEur": 1,
-          "custodyAnnualBps": 0,
-          "treatment": "illustrative_excluded"
-        },
-        "description": {
-          "es": "Producto ficticio con condiciones informativas para la demostración.",
-          "en": "Fictional product with informational terms for the demonstration."
-        }
-      }
-    ],
+    "products": [],
     "faq": [
       {
         "id": "identity",
@@ -482,8 +294,8 @@
           "en": "What are the terms?"
         },
         "answer": {
-          "es": "Euros, sin mantenimiento mensual y con mínimos ficticios de cero euros.",
-          "en": "Euros, no monthly maintenance and fictional minimums of zero euros."
+          "es": "Sin mantenimiento mensual, cuenta real ni órdenes reales. Las condiciones de cada producto no están disponibles.",
+          "en": "No monthly maintenance, real account or real orders. Individual product terms are unavailable."
         }
       },
       {
@@ -493,8 +305,8 @@
           "en": "Are fees deducted?"
         },
         "answer": {
-          "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
-          "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+          "es": "Las comisiones de los productos reales no están disponibles en esta demo. El valor liquidativo ya refleja los gastos incorporados al fondo; no se añade ningún coste externo.",
+          "en": "Real product fees are not available in this demo. NAV already reflects costs embedded in the fund; no external cost is added."
         }
       },
       {
@@ -521,8 +333,22 @@
       }
     ],
     "calculationNotice": {
-      "es": "Condiciones y comisiones ficticias para la demostración. Las comisiones de BancoT2F son informativas y no se descuentan en los resultados del simulador.",
-      "en": "Fictional terms and fees for the demonstration. BancoT2F fees are informational and are not deducted from simulator results."
+      "es": "Las comisiones de los productos reales no están disponibles en esta demo. El valor liquidativo ya refleja los gastos incorporados al fondo; no se añade ningún coste externo.",
+      "en": "Real product fees are not available in this demo. NAV already reflects costs embedded in the fund; no external cost is added."
     }
+  },
+  "demoStudyInstrumentIds": [
+    "caixabank-monetario-estandar",
+    "santander-rf-ahorro",
+    "bbva-mi-inversion-bolsa-acumulacion",
+    "santander-renta-fija-a",
+    "bbva-estrategia-0-50"
+  ],
+  "portfolioExample": {
+    "instrumentId": "bbva-mi-inversion-bolsa-acumulacion",
+    "startDate": "2019-12-31",
+    "initial": 1000,
+    "recurringContribution": 0,
+    "periods": 3
   }
 }

@@ -22,7 +22,7 @@ test("result help is prominent and opens the local tutor with the current result
   await page.locator("#chat-input").fill("¿Cuál es mi resultado?");
   await page.getByRole("button", { name: "Enviar pregunta" }).click();
   await expect(page.locator(".message.assistant").last()).toContainText(
-    "1093,57",
+    "1100,3",
   );
 });
 
@@ -41,8 +41,8 @@ test("result help sends server tutor the active simulation", async ({
   await page.getByRole("button", { name: "Enviar pregunta" }).click();
   const context = (await req).postDataJSON().context;
   expect(context.page).toBe("simulator");
-  expect(context.instrumentId).toBe("demo-mixed");
-  expect(context.simulation.instrumentId).toBe("demo-mixed");
+  expect(context.instrumentId).toBe("caixabank-monetario-estandar");
+  expect(context.simulation.instrumentId).toBe("caixabank-monetario-estandar");
 });
 
 test("result help fits and remains legible in each level and theme on mobile", async ({

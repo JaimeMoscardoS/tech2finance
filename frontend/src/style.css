@@ -264,3 +264,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
   .topbar .demo-badge { display: block; position: absolute; top: 100%; left: 0; width: 100%; text-align: center; padding: 5px 12px; background: var(--surface, #fbfcf8); z-index: 1; }
   .content { padding-top: 60px; }
 }
+
+/* Keep the demo notice legible at every viewport. */
+@media(max-width:760px){.demo-badge{display:inline;white-space:normal;font-size:11px;letter-spacing:0}.top-actions{gap:5px}.topbar{height:auto;min-height:62px}.breadcrumb{display:none}}

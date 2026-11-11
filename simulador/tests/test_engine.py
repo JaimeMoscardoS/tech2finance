@@ -18,6 +18,20 @@ def req(start='2020-01-01', end='2020-03-01', initial='1000', monthly='100', **k
     return dict(start=start, end=end, initial=initial, monthly=monthly, buy_fee_rate='0', sell_fee_rate='0', **kw)
 
 class HistoricalTests(unittest.TestCase):
+    def test_explicit_monthly_observation_dates_and_sale(self):
+        series = parse_series(data([('2019-12-31', '100'), ('2020-01-30', '80'), ('2020-02-28', '100')]))
+        request = req(start='2019-12-31', end='2020-02-28', monthly='100', sell_date='2020-01-30',
+                      contribution_dates=['2020-01-30', '2020-02-28'])
+        result = compare(series, request)
+        self.assertEqual(Decimal(result['hold']['value']), Decimal('1225'))
+        self.assertEqual(Decimal(result['hold']['contributed']), Decimal('1200'))
+        self.assertEqual(Decimal(result['sell']['value']), Decimal('1000'))
+        self.assertEqual(result['hold']['timeline'][1]['operations'][0]['scheduled_date'], '2020-01-30')
+        self.assertEqual(result['hold']['timeline'][2]['operations'][0]['scheduled_date'], '2020-02-28')
+        for dates in (['2020-01-31'], ['2020-01-30', '2020-01-30'], ['2019-12-31']):
+            with self.subTest(dates=dates), self.assertRaises(InputError):
+                simulate(series, {**request, 'contribution_dates': dates})
+
     def test_manual_cashflows(self):
         s = parse_series(data([('2020-01-01', '100'), ('2020-02-01', '80'), ('2020-03-01', '100')]))
         result = simulate(s, req(monthly='100', end='2020-02-29'))

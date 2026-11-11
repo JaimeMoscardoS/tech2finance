@@ -11,7 +11,7 @@ export function isBankProfile(v: unknown, instruments: {instrumentId:string; ban
  if (!ids(v.services,['catalogue','practice','tutor','portfolio_pause']) || !v.services.every((s: any) => loc(s.name) && loc(s.description)) || !ids(v.faq,['identity','services','conditions','fees','real_money','external_products']) || !v.faq.every((f: any) => loc(f.question) && loc(f.answer))) return false;
  const c = v.conditions;
  if (!obj(c) || c.currency !== 'EUR' || c.maintenanceMonthlyEur !== 0 || c.requiresRealAccount !== false || c.realOrdersAvailable !== false || c.externalConnections !== false || !loc(c.text)) return false;
- const expectedProducts = ['demo-fixed','demo-mixed','demo-equity','demo-etf','demo-stock'];
+ const expectedProducts: string[] = [];
  if (!Array.isArray(v.products) || v.products.length !== expectedProducts.length || !v.products.every((p: unknown) => obj(p) && typeof p.instrumentId === 'string' && expectedProducts.includes(p.instrumentId) && instruments.some(i => i.instrumentId === p.instrumentId && i.bankId === v.bankId && i.dataStatus === 'fictional') && amount(p.minimumInitialEur) && amount(p.minimumRecurringEur) && loc(p.description) && obj(p.fees) && (p.fees.annualOngoingBps === null || amount(p.fees.annualOngoingBps)) && ['entryBps','exitBps','orderFixedEur','custodyAnnualBps'].every(k => amount(p.fees[k])) && p.fees.treatment === 'illustrative_excluded') || !unique(v.products.map(p => p.instrumentId))) return false;
- return instruments.filter(i => i.bankId === v.bankId).every(i => v.products.some((p: any) => p.instrumentId === i.instrumentId));
+ return true;
 }

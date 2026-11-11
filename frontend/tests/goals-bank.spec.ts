@@ -9,15 +9,15 @@ test("beginner search and advanced chart selection retain selected fund", async 
   await page.goto("/");
   await page.getByRole("button", { name: "Explorar", exact: true }).click();
   await expect(page.getByLabel("Entidad de la demo")).toHaveCount(0);
-  await page.getByLabel("Buscar por nombre").fill("Horizonte");
+  await page.getByLabel("Buscar por nombre").fill("ACUMULACION");
   await expect(page.locator(".beginner-guide")).toContainText(
     "Coincidencias: 1",
   );
   await page
     .locator(".beginner-guide select")
     .last()
-    .selectOption("demo-equity");
-  await expect(page.locator(".beginner-card h2")).toHaveText("T2F Horizonte");
+    .selectOption("bbva-mi-inversion-bolsa-acumulacion");
+  await expect(page.locator(".beginner-card h2")).toHaveText("BBVA MI INVERSION BOLSA ACUMULACION, FI");
   await expect(page.locator(".filter-disclosure")).not.toHaveAttribute(
     "open",
     "",
@@ -34,7 +34,7 @@ test("beginner search and advanced chart selection retain selected fund", async 
   await picker.locator("input").first().uncheck();
   await expect(page.locator(".dashboard-card")).toHaveCount(2);
   await expect(page.locator(".technical-inspector h2")).toHaveText(
-    "T2F Horizonte",
+    "BBVA MI INVERSION BOLSA ACUMULACION, FI",
   );
   await page.screenshot({
     path: "/tmp/t2f-latest-advanced.png",
@@ -99,7 +99,7 @@ test("configured Caixa bank scopes exploration, simulator and practice", async (
   await page.addInitScript(() =>
     localStorage.setItem("t2f-data-mode", "local"),
   );
-  await page.goto("http://127.0.0.1:5177/");
+  await page.goto("http://127.0.0.1:5194/");
   await page.getByRole("button", { name: "Explorar", exact: true }).click();
   await expect(page.locator(".institution-label")).toContainText("CaixaBank");
   await expect(page.getByLabel("Entidad de la demo")).toHaveCount(0);
@@ -112,7 +112,7 @@ test("configured Caixa bank scopes exploration, simulator and practice", async (
   await expect(page.getByLabel("Instrumento").locator("option")).toHaveCount(1);
   await page.getByRole("button", { name: "Abrir práctica guiada" }).click();
   await expect(page.locator(".practice-lab")).toBeVisible();
-  await expect(page.locator(".practice-lesson:disabled")).toHaveCount(2);
+  await expect(page.locator(".practice-lesson:disabled")).toHaveCount(1);
   await page.screenshot({ path: "/tmp/t2f-config-caixa.png", fullPage: true });
   await context.close();
 });
@@ -125,9 +125,9 @@ test("invalid configured bank has a clear error and no fallback", async ({
   await page.addInitScript(() =>
     localStorage.setItem("t2f-data-mode", "local"),
   );
-  await page.goto("http://127.0.0.1:5178/");
+  await page.goto("http://127.0.0.1:5195/");
   await expect(
-    page.getByRole("heading", { name: "Catálogo no disponible" }),
+    page.getByRole("heading", { name: "Entidad configurada desconocida" }),
   ).toBeVisible();
   await expect(page.locator(".app-shell")).toHaveCount(0);
   await context.close();

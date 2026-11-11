@@ -1,72 +1,31 @@
-# 1 — Frontend de Tech2Finance
+﻿# Frontend de Tech2Finance
 
 ## Qué es
 
-Interfaz de demostración en React y TypeScript para el copiloto de inversión del proyecto. Incluye inicio, catálogo ficticio, simulador ilustrativo, cartera ficticia, pausa antes de vender y un asistente de ejemplo con respuestas predefinidas. Incluye tres vistas progresivas según conocimiento, interfaz en español e inglés y temas claro y oscuro. El idioma y el tema se guardan en el navegador. Los niveles cambian la presentación y las explicaciones, no el riesgo de las inversiones.
+Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, comparar ejemplos y entender una caída. Ofrece tres niveles, español e inglés, temas claro y oscuro y voz local opcional. La demo no conecta cuentas ni realiza operaciones.
 
-La demo usa por defecto un backend local FastAPI; no conecta Claude, ElevenLabs ni fuentes financieras en directo y no realiza operaciones. El tutor responde mediante reglas; la voz del dispositivo es opcional y el análisis de caídas usa las observaciones disponibles, sin causas verificadas. Para el escenario ficticio de seis meses de T2F Equilibrio se muestra un guion de noticias inventadas identificado expresamente como tal. Los ejemplos ficticios usan variaciones inventadas; el ejemplo CaixaBank reconstruye una cartera con cinco rentabilidades anuales publicadas y aportaciones ficticias al cierre de cada año. No predice resultados ni utiliza valores liquidativos diarios. La fuente y los límites están en [contratos](../docs/contratos.md#muestra-histórica-anual-de-caixabank). El servicio de demo usa sus cálculos propios; el motor Python histórico permanece independiente.
+## Datos y simulación
 
-## Ejecutar
+El catálogo identifica cinco casos de estudio por gestora e ISIN. BancoT2F es el anfitrión simulado; sus condiciones no se atribuyen a esos fondos. Los riesgos, plazos, mínimos y costes adicionales desconocidos se presentan como tales. El modo local usa `shared/demo-data.json`, `shared/nav-history.json` y `shared/data-manifest.json`; el modo servidor obtiene el catálogo v2 y cálculos desde FastAPI. No cambia automáticamente de modo ante errores. Una respuesta de catálogo o simulación incompatible activa la recuperación explícita.
 
-Desde esta carpeta, con Node.js compatible con Vite (Node 22.12 o superior):
+Las series usan 73 cierres mensuales de valor liquidativo observados y publicados por la CNMV, desde diciembre de 2019 hasta diciembre de 2025: se selecciona la última observación diaria real de cada mes, sin interpolar, repetir ni extrapolar. Los archivos, hashes y condiciones de reutilización constan en la fuente compartida; las muestras antiguas quedan en snapshots separados. Cada resultado identifica instrumento, moneda y fechas. El valor liquidativo refleja gastos incorporados al fondo; el cálculo no añade costes externos ni impuestos. La frecuencia predeterminada es mensual: esas aportaciones se suman después de cada cierre. Las anuales se suman en los meses 12, 24 y sucesivos desde el inicio, sin prorrateo. En un plazo inferior a 12 meses no se suma ninguna aportación anual. Los resultados pasados no predicen resultados futuros.
+
+La cartera de ejemplo y «Probar una caída» comparten el caso BBVA Mi Inversión Bolsa Acumulación, ISIN ES0125269003, con 1.000 € de capital de práctica, sin aportaciones, entre el 31 de diciembre de 2019 y el 31 de marzo de 2020. La pausa muestra el dato observado y, cuando coincide con el periodo, un hecho público de la OMS con fecha y enlace; su coincidencia no demuestra causalidad. La persona conserva la decisión.
+
+Explorar muestra los fondos permitidos para el anfitrión, o filtra por emisor para una entidad configurada. La comparación utiliza series compatibles; CSV incluye los cierres, fuente, ISIN, moneda, versión y hashes. La práctica guiada compara aportaciones, plazos o instrumentos con condiciones compatibles y descarta resultados anteriores al editar. La muestra anual publicada previa permanece como método auxiliar de referencia, no como serie de NAV.
+
+## Ejecutar y comprobar
+
+Con Node 22.12 o superior:
 
 ```bash
 npm ci
 npm run dev
-```
-
-En otro terminal, sigue los comandos de preparación y arranque para Windows o Linux/macOS del [README del backend](../backend/README.md#requisitos-y-arranque). Abre la dirección de Vite. Ante un fallo, la interfaz permite reintentar o elegir expresamente la demo local; la elección se guarda en el navegador. Vite reenvía `/api` al servidor local.
-
-Para comprobar el código:
-
-```bash
 npm test
 npm run build
 npx playwright test
 ```
 
-Las pruebas de navegador necesitan Google Chrome instalado. La aplicación y sus datos son solo una demostración.
+Arranca el backend conforme a [su README](../backend/README.md). La API local de demo no utiliza autenticación ni conecta proveedores externos. Vite reenvía `/api` al puerto 8000 por defecto; `T2F_BACKEND_PORT` permite otro puerto. Playwright requiere Chrome y acepta `T2F_PYTHON` para seleccionar el Python con dependencias. `VITE_BANK_ID` admite `demo`, `caixabank`, `bbva` y `santander`; una entidad desconocida produce un error. El filtro de interfaz no sustituye autorización del servidor.
 
-## Tutor local, voz y pausa
-
-El inicio organiza el recorrido en fondos, práctica guiada y cartera ficticia, con un color distinto para cada acceso en ambos temas. En Explorar, la entidad de demo filtra los fondos del catálogo; el selector de detalle ofrece conceptos básicos, comparación de datos disponibles o identidad, fuentes y rentabilidades anuales publicadas cuando existen. El fondo seleccionado se mantiene al cambiar de nivel y sirve de contexto para el asistente por reglas, también por voz si el dispositivo lo permite. Riesgo y costes se muestran como no disponibles si el catálogo no los contiene. El selector **Detalle** cambia la profundidad de la explicación, no el riesgo. **Conexión** permite cambiar entre servidor de demo y demo local; los errores y el reintento aparecen sin abrirlo. Abre el chat desde la navegación o el botón de la barra superior. El micrófono de la barra abre el asistente de voz y solicita inmediatamente el reconocimiento local; la escucha empieza solo si el navegador confirma disponibilidad y concede permiso. Desde la pausa se abre el panel sin iniciar la escucha hasta pulsar Hablar. Una consulta posterior también requiere pulsar Hablar. En el panel de voz, el dictado final se envía al terminar el reconocimiento; tras la respuesta no se vuelve a activar el micrófono automáticamente. En el chat, el dictado se mantiene editable y requiere envío manual. Responde por reglas con el contexto de la pantalla y conserva el texto de cada respuesta. Tras recibir una respuesta, **Escuchar** intenta utilizar una voz local del dispositivo. **Dictar** solo inicia reconocimiento cuando el navegador confirma procesamiento local y un modelo ya instalado; el texto reconocido se puede revisar antes de enviarlo. Si no hay una voz, capacidad o permiso disponibles, se puede seguir escribiendo. La aplicación no instala modelos ni envía audio a proveedores.
-
-En la cartera ficticia, **Entender una caída** analiza los puntos de ejemplo; en un resultado válido del simulador, **Entender las caídas** analiza la evolución del instrumento sin las aportaciones. Se muestran los episodios observados y sus límites, sin atribuir causas verificadas; el guion ficticio identificado se limita al escenario de seis meses de T2F Equilibrio. El objetivo, horizonte y necesidad de liquidez son opcionales y no constituyen una evaluación de idoneidad. La persona puede cerrar y continuar en la demo en cualquier momento.
-
-## Práctica guiada
-
-Desde la tarjeta de práctica de inicio o el enlace del simulador se pueden comparar dos ejemplos: cambiar las aportaciones de un mismo instrumento, comparar plazos de una serie ficticia sin aportaciones o comparar dos activos ficticios con condiciones iguales. Los importes, periodos e instrumentos son editables. El ejemplo histórico anual mantiene cinco años y las aportaciones se suman al cierre; los fondos sin histórico no están disponibles. Las comparaciones muestran capital, aportaciones, ganancia o pérdida, procedencia y límites, sin predecir resultados ni demostrar diversificación.
-
-Cada pareja se calcula en el modo seleccionado. Al editar una entrada, cambiar de lección o de modo se descartan los resultados anteriores; si falla el servidor se muestra el error y no se calcula silenciosamente en local. Se puede seleccionar A o B para preguntar al tutor sobre ese ejemplo. La prueba conceptual es opcional y no puntúa por obtener ganancias. El laboratorio no compra ni vende activos y no utiliza dinero real.
-
-El modo local funciona sin backend; el modo servidor usa las mismas reglas del tutor mediante un proceso Node local. Ninguno es un LLM ni conecta Claude, ElevenLabs o un banco. Los contratos para futuras integraciones están en [contratos](../docs/contratos.md#conversación-y-voz-propuesta); cualquier clave futura debe permanecer en el servidor, fuera del navegador y de Git.
-
-## Componentes y fuentes
-
-Para cambios de interfaz, aplica la [skill frontend-design del proyecto](../.agents/skills/frontend-design/SKILL.md), que incluye criterios para presentar información financiera.
-
-Las condiciones de producto en Explorar y el simulador organizan etiquetas e importes en una lista, destacan los gastos anuales y mantienen visible el aviso de que las comisiones ficticias no se descuentan. Un gasto anual desconocido aparece como «No definidos» y los productos externos muestran su propio aviso. Se usan los mismos datos en español e inglés, en móvil y escritorio y con ambos temas.
-
-La presentación de BancoT2F en Inicio separa el mantenimiento ficticio mensual, los límites de la demo y sus servicios; el aviso completo sobre comisiones permanece visible y las preguntas frecuentes se pueden desplegar.
-
-`src/CountUp.tsx` procede de [React Bits](https://github.com/DavidHDev/react-bits), componente CountUp. Su licencia se conserva en `REACT-BITS-LICENSE.md`. La animación respeta la preferencia de movimiento reducido definida por el navegador cuando la gestiona el componente; la interfaz también incluye reglas de movimiento reducido.
-
-Cada nivel tiene una paleta distinta en temas claro y oscuro; el nivel no indica riesgo. El gráfico usa Recharts 3 y ofrece vistas de capital y variación del instrumento, navegación interactiva y una tabla alternativa. Los segmentos verdes, rojos y grises indican si la serie mostrada sube, baja o no cambia respecto al punto anterior; el capital incluye aportaciones y no representa por sí solo el rendimiento del mercado. En las barras anuales el color indica el signo de la rentabilidad de ese año. Las etiquetas y la tabla también expresan los cambios sin depender del color. Las cifras de la cartera de ejemplo son ficticias y no dependen del resultado del simulador.
-
-Consulta las [instrucciones del área](AGENTS.md), el [contexto](../docs/contexto-proyecto.md) y los [contratos](../docs/contratos.md).
-
-## Contrato de servidor
-
-`GET /api/catalog` carga bancos, instrumentos y muestra anual; `POST /api/simulations`, `/api/declines` y `/api/tutor` devuelven respectivamente resultados, informes y respuestas basadas en reglas. El cliente envía parámetros, no resultados financieros ni fuentes al tutor, y el servidor reconstruye el contexto. Las peticiones se cancelan al cambiar contexto y tienen un plazo de diez segundos. `shared/demo-data.json` es la fuente común de ejemplos. Las pruebas Playwright arrancan backend y Vite, requieren `.venv` con dependencias instaladas y aceptan `T2F_PYTHON` para seleccionar el intérprete.
-
-Si el catálogo tarda o falla, la pantalla de recuperación mantiene idioma y tema disponibles y permite elegir expresamente la demo local; un fallo no cambia de modo automáticamente. En error se puede reintentar la carga. Al llegar el catálogo se traslada el foco al contenido principal si estaba en la pantalla de recuperación. Las solicitudes anteriores se cancelan al cambiar de modo y el reintento de operación se descarta cuando cambian sus entradas o contexto. `npx playwright test tests/recovery.spec.ts` comprueba estos recorridos; las pruebas con lectores de pantalla físicos siguen pendientes.
-
-
-En Explorar, los tres niveles presentan una guía inicial, una comparación seleccionable de hasta tres fondos o un panel técnico por fondo. Los filtros usan datos presentes; los riesgos, costes y plazos de los tres fondos ficticios son supuestos educativos, no se aplican en los cálculos de la simulación y no describen productos reales. La documentación legal no está incorporada; la ficha oficial es una fuente, no un documento precontractual verificado. El panel avanzado permite descargar las observaciones disponibles en CSV. Para la serie anual identificada, las rentabilidades acumuladas y anualizadas de 1, 3 y 5 años se calculan componiendo las cifras anuales redondeadas disponibles; no son predicciones, no incluyen impuestos ni costes externos, y no se muestran si la serie es inválida o insuficiente.
-
-
-La entidad se configura al arrancar o compilar el frontend mediante `VITE_BANK_ID` (identificadores del catálogo: `demo`, `caixabank`, `bbva`, `santander`; por defecto `demo`). Ejemplo en Linux/macOS: `VITE_BANK_ID=caixabank npm run dev`; en PowerShell: `$env:VITE_BANK_ID="caixabank"; npm run dev`. Una entidad inexistente muestra un error de configuración. El filtro es de interfaz, no una barrera de autorización del servidor; una integración real necesitaría control de acceso en backend. El laboratorio deshabilita lecciones sin series compatibles.
-
-La guía de objetivos es un ejercicio local de plantillas educativas editables, condicionado por las respuestas y la preferencia de fluctuación; no evalúa idoneidad ni recomienda productos. Las respuestas permanecen en la pantalla y no se envían al tutor. La comparación avanzada muestra hasta tres series seleccionadas con la misma frecuencia, etiquetas de periodo y procedencia, en gráficos separados con escala común. En el simulador, el botón de ayuda junto al resultado abre el asistente con el resultado válido actual.
-
-La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inversión». La cabecera identifica el modo demo sin dinero real; las fuentes, limitaciones y costes siguen visibles donde aportan contexto.
+El tutor funciona por reglas, no utiliza LLM ni proveedores de voz remotos. El dictado y la lectura dependen de capacidades locales del dispositivo y conservan alternativa escrita. El gráfico ofrece tabla accesible y navegación por teclado. La comprobación con lectores de pantalla físicos sigue pendiente. El componente CountUp procede de React Bits; su licencia figura en `REACT-BITS-LICENSE.md`.

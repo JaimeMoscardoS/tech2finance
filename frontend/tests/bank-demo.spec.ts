@@ -5,7 +5,7 @@ for (const mode of ['local', 'server'] as const) for (const bank of ['caixabank'
   await page.addInitScript((value) => localStorage.setItem('t2f-data-mode', value), mode);
   const requests: any[] = [];
   await page.route('**/api/tutor', async route => { requests.push(route.request().postDataJSON()); await route.continue(); });
-  await page.goto(bank === 'caixabank' ? 'http://127.0.0.1:5177/' : 'http://127.0.0.1:5179/');
+  await page.goto(bank === 'caixabank' ? 'http://127.0.0.1:5194/' : 'http://127.0.0.1:5196/');
   await expect(page.locator('.bank-info')).toHaveCount(0);
   await expect(page.locator('.brand')).toContainText(bank === 'caixabank' ? 'CaixaBank' : 'BBVA');
   await expect(page.locator('.brand')).not.toContainText('BancoT2F');
@@ -19,7 +19,7 @@ for (const mode of ['local', 'server'] as const) for (const bank of ['caixabank'
   await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
   await expect(dialog.locator('.message.assistant[lang="es"]')).toHaveCount(1);
   await expect(dialog).not.toContainText('0,75');
-  if (mode === 'server') expect(requests.at(-1).context).toMatchObject({bankId:bank,instrumentId:bank === 'caixabank' ? 'caixabank-monetario-estandar' : 'bbva-mi-inversion-bolsa'});
+  if (mode === 'server') expect(requests.at(-1).context).toMatchObject({bankId:bank,instrumentId:bank === 'caixabank' ? 'caixabank-monetario-estandar' : 'bbva-mi-inversion-bolsa-acumulacion'});
   await dialog.getByLabel('Tu pregunta').fill('¿Todos los productos de la plataforma son de BancoT2F?');
   await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
   await expect(dialog.locator('.message.assistant[lang="es"]')).toHaveCount(2);
@@ -37,32 +37,31 @@ test('bank identity and product costs follow the selected fund across views', as
  await expect(page.getByText('BancoT2F es el banco de este entorno de demostración.')).toBeVisible();
  await page.getByRole('button',{name:'Explorar',exact:true}).click();
  const beginner = page.locator('.beginner-card');
- await expect(beginner.locator('.bank-costs')).toContainText('0,75 %');
- await expect(beginner.locator('.bank-costs')).toContainText('no se descuentan');
+ await expect(beginner.locator('.bank-costs')).toContainText('costes del fondo no disponibles');
  await page.getByRole('button',{name:'Abrir asistente'}).click();
  const dialog = page.getByRole('dialog',{name:/asistente/i});
  await dialog.getByLabel('Tu pregunta').fill('¿Cuánto cuesta este fondo?');
  await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
  await expect.poll(()=>tutorRequests.length).toBeGreaterThan(0);
- expect(tutorRequests.at(-1).context).toMatchObject({page:'explore',bankId:'demo',instrumentId:'demo-mixed'});
- await expect(dialog).toContainText('0,75');
+ expect(tutorRequests.at(-1).context).toMatchObject({page:'explore',bankId:'demo',instrumentId:'caixabank-monetario-estandar'});
+ await expect(dialog).not.toContainText('0,75');
  await dialog.getByRole('button',{name:'Cerrar asistente',exact:true}).click();
  const levels = page.getByRole('group',{name:'Nivel de detalle'});
  await levels.getByRole('button',{name:'Intermedio'}).click();
- await expect(page.locator('.compare-selected .bank-costs')).toContainText('0,75 %');
+ await expect(page.locator('.compare-selected .bank-costs')).toContainText('costes del fondo no disponibles');
  await levels.getByRole('button',{name:'Avanzado'}).click();
- await expect(page.locator('.technical-inspector .bank-costs')).toContainText('0,75 %');
+ await expect(page.locator('.technical-inspector .bank-costs')).toContainText('costes del fondo no disponibles');
  await page.getByRole('button',{name:'Simulador',exact:true}).click();
- await expect(page.locator('.bank-costs')).toContainText('0,75 %');
+ await expect(page.locator('.bank-costs')).toContainText('costes del fondo no disponibles');
  await page.getByLabel('Importe inicial').fill('1000');
  await page.getByLabel('Aportación mensual').fill('0');
  await page.getByLabel('Tiempo de práctica').selectOption('6');
  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
- await expect(page.locator('.sim-values')).toContainText('892,64');
+ await expect(page.locator('.sim-values')).toContainText('1000,00');
 });
 
 test('invalid profile triggers explicit recovery', async ({page}) => {
- await page.route('**/api/catalog', async route => { const response = await route.fetch(); const body = await response.json(); body.bankProfile.products[0].fees.entryBps = -1; await route.fulfill({response,json:body}); });
+ await page.route('**/api/catalog', async route => { const response = await route.fetch(); const body = await response.json(); body.bankProfile.products = 'invalid'; await route.fulfill({response,json:body}); });
  await page.goto('/');
  await expect(page.getByRole('status')).toContainText('No se pudo cargar');
  await expect(page.locator('.app-shell')).toHaveCount(0);

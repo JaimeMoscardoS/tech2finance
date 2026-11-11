@@ -7,11 +7,12 @@ export const MAX_HISTORY_MESSAGES = 8;
 const validDate = (value: unknown): value is string => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
 const validAnnual = (s: SimulationFacts): boolean => s.annualReturns === undefined || (s.kind === 'annual_history' && Array.isArray(s.annualReturns) && s.annualReturns.length <= 500 && Array.from(s.annualReturns).every((item, i, values) => item && Number.isInteger(item.year) && item.year >= 1900 && item.year <= 2200 && Number.isFinite(item.ratePercent) && item.ratePercent >= -100 && item.ratePercent <= 100000 && (i === 0 || !!values[i - 1] && values[i - 1].year < item.year)));
 const validFacts = (s: SimulationFacts | undefined): s is SimulationFacts => !!s &&
-  (s.kind === 'fictional_monthly' || s.kind === 'annual_history') &&
-  (s.contributionTiming === 'month_start' || s.contributionTiming === 'year_end_after_return') &&
+  (s.kind === 'fictional_monthly' || s.kind === 'annual_history' || s.kind === 'real_monthly_nav') &&
+  (s.contributionTiming === 'month_start' || s.contributionTiming === 'year_end_after_return' || s.contributionTiming === 'month_end_after_return') &&
+  (s.kind !== 'real_monthly_nav' || s.contributionFrequency === undefined || s.contributionFrequency === 'monthly' || s.contributionFrequency === 'annual') &&
   [s.initial, s.recurringContribution, s.periods, s.finalValue, s.totalContributed, s.profit, s.instrumentReturnPercent].every(Number.isFinite) &&
   (s.simpleReturnPercent === null || Number.isFinite(s.simpleReturnPercent)) && s.initial >= 0 && s.recurringContribution >= 0 && s.periods >= 0 && Number.isInteger(s.periods) && s.periods <= 1200 && s.finalValue >= 0 && s.totalContributed >= 0 &&
-  Math.abs(s.profit - (s.finalValue - s.totalContributed)) <= 0.011 && Math.abs(s.totalContributed - (s.initial + s.recurringContribution * s.periods)) <= 0.011 &&
+  Math.abs(s.profit - (s.finalValue - s.totalContributed)) <= 0.011 && Math.abs(s.totalContributed - (s.initial + s.recurringContribution * (s.kind === 'real_monthly_nav' && s.contributionFrequency === 'annual' ? Math.floor(s.periods / 12) : s.periods))) <= 0.011 &&
   ((s.periodStart === undefined && s.periodEnd === undefined) || (validDate(s.periodStart) && validDate(s.periodEnd) && s.periodStart <= s.periodEnd)) && validAnnual(s);
 
 function detect(message: string): string {
@@ -55,7 +56,7 @@ export function createLocalTutorProvider(): TutorProvider {
     const activeName = context?.instrument?.name?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const namedFull = named?.replace(/\s+(?:over this period|in this period|en este periodo|durante este periodo|in eur|en eur)$/, '').replace(/\s+(?:selected|seleccionada|seleccionado)$/, '').replace(/^(?:(?:the|this|selected|my|la|el|esta|este|mi|seleccionada|seleccionado)\s+)*/, '');
     const namedTarget = namedFull?.replace(/^(?:fund|fondo|instrument|instrumento)\s+/, '');
-    const annualYear = s?.kind === 'annual_history' && !!named && /^(?:19|20|21|22)\d{2}$/.test(named);
+    const annualYear = (s?.kind === 'annual_history' || s?.kind === 'real_monthly_nav') && !!named && /^(?:19|20|21|22)\d{2}$/.test(named);
     const foreign = !!namedTarget && !annualYear && !/^(?:simulation|simulacion|instrument|instrumento|fund|fondo|portfolio|cartera|account|cuenta|period|periodo)\s*$/.test(namedTarget) && !(activeName && (namedFull === activeName || namedTarget === activeName));
     const concepts: Record<string, [string, string]> = {
       fund: ['Un fondo reúne el dinero de varios partícipes e invierte según una estrategia; su valor puede bajar.', 'A fund pools investors’ money under a strategy; its value can fall.'],
@@ -75,8 +76,11 @@ export function createLocalTutorProvider(): TutorProvider {
       text = en ? 'The requested instrument or future return is not available in this simulation.' : 'El instrumento o la rentabilidad futura solicitados no están disponibles en esta simulación.';
       intent = 'unknown';
     } else if (intent === 'result') {
-      if (!validFacts(s) || context?.instrument?.dataKind === 'missing_history' || (s.kind === 'annual_history' && s.contributionTiming !== 'year_end_after_return') || (s.kind === 'fictional_monthly' && s.contributionTiming !== 'month_start')) { text = en ? 'There is not enough valid simulation data to explain a result.' : 'No hay datos válidos suficientes de la simulación para explicar un resultado.'; intent = 'unknown'; }
-      else {
+      if (!validFacts(s) || context?.instrument?.dataKind === 'missing_history' || (s.kind === 'annual_history' && s.contributionTiming !== 'year_end_after_return') || (s.kind === 'fictional_monthly' && s.contributionTiming !== 'month_start') || (s.kind === 'real_monthly_nav' && s.contributionTiming !== 'month_end_after_return')) { text = en ? 'There is not enough valid simulation data to explain a result.' : 'No hay datos válidos suficientes de la simulación para explicar un resultado.'; intent = 'unknown'; }
+      else if (s.kind === 'real_monthly_nav' && /\b(?:19|20|21|22)\d{2}\b/.test(message)) {
+        text = en ? 'A separate annual return for the requested year is not available in this simulation.' : 'La rentabilidad anual del año solicitado no está disponible por separado en esta simulación.';
+        intent = 'unknown';
+      } else {
         const name = typeof context.instrument?.name === 'string' && context.instrument.name.trim() && context.instrument.name.length <= 200 ? context.instrument.name : (en ? 'selected instrument' : 'instrumento seleccionado');
         const currency = context.instrument?.currency === 'EUR' ? ' EUR' : '';
         const period = (s.kind === 'annual_history' ? (en ? `${s.periods} annual periods` : `${s.periods} periodos anuales`) : (en ? `${s.periods} monthly periods` : `${s.periods} periodos mensuales`)) + (s.periodStart && s.periodEnd ? `, ${s.periodStart} – ${s.periodEnd}` : '');
@@ -91,12 +95,12 @@ export function createLocalTutorProvider(): TutorProvider {
             text += s.annualReturns?.length ? (en ? ` Published annual rates: ${s.annualReturns.map(item => `${item.year}: ${fmt(item.ratePercent)}%`).join('; ')}.` : ` Rentabilidades anuales publicadas: ${s.annualReturns.map(item => `${item.year}: ${fmt(item.ratePercent)}%`).join('; ')}.`) : (en ? ' Separate annual rates are not available.' : ' No están disponibles las tasas de cada año.');
           }
         }
-        text += s.contributionTiming === 'month_start' ? (en ? ' Contributions enter at the start of each month.' : ' Las aportaciones entran al inicio de cada mes.') : (en ? ' Contributions enter at year end after that year’s return.' : ' Las aportaciones entran al cierre de cada año, después de su rentabilidad.');
+        text += s.contributionTiming === 'month_end_after_return' ? (s.contributionFrequency === 'annual' ? (en ? ' Contributions enter after every 12 monthly closes.' : ' Las aportaciones entran después de cada 12 cierres mensuales.') : (en ? ' Contributions enter at month end after the return.' : ' Las aportaciones entran al cierre mensual, después de la rentabilidad.')) : s.contributionTiming === 'month_start' ? (en ? ' Contributions enter at the start of each month.' : ' Las aportaciones entran al inicio de cada mes.') : (en ? ' Contributions enter at year end after that year’s return.' : ' Las aportaciones entran al cierre de cada año, después de su rentabilidad.');
         if (context.level === 'advanced') text += en ? ' Cash flows affect the account result; instrument return describes the instrument, not the account’s time-weighted return.' : ' Los flujos afectan al resultado de la cuenta; la rentabilidad del instrumento describe el instrumento, no una rentabilidad temporal de la cuenta.';
         text += en ? ' Past or simulated outcomes do not guarantee future results.' : ' Los resultados pasados o simulados no garantizan resultados futuros.';
       }
     } else if (intent === 'source') {
-      text = context?.instrument?.dataKind === 'annual_published_returns' ? (en ? 'This reconstruction uses published annual returns; it is not a daily NAV series.' : 'Esta reconstrucción usa rentabilidades anuales publicadas; no es una serie diaria de valor liquidativo.') : context?.instrument?.dataKind === 'fictional' ? (en ? 'These are fictional example data.' : 'Son datos ficticios de ejemplo.') : (en ? 'There is no connected history to explain.' : 'No hay histórico conectado para explicar.');
+      text = context?.instrument?.dataKind === 'historical_nav' ? (en ? 'Monthly closing NAVs published by CNMV; past performance does not predict future results.' : 'Valores liquidativos de cierre mensual publicados por la CNMV; el pasado no predice resultados futuros.') : context?.instrument?.dataKind === 'annual_published_returns' ? (en ? 'This reconstruction uses published annual returns; it is not a daily NAV series.' : 'Esta reconstrucción usa rentabilidades anuales publicadas; no es una serie diaria de valor liquidativo.') : context?.instrument?.dataKind === 'fictional' ? (en ? 'These are fictional example data.' : 'Son datos ficticios de ejemplo.') : (en ? 'There is no connected history to explain.' : 'No hay histórico conectado para explicar.');
     } else if (intent === 'decline') {
       const d = context?.decline;
       if (!d || d.status !== 'ok' || !Number.isFinite(d.currentDrawdownPercent) || !Number.isFinite(d.maxDrawdownPercent) || typeof d.latestLabel !== 'string') text = en ? 'There are not enough valid observations to analyse a decline.' : 'No hay observaciones válidas suficientes para analizar una caída.';

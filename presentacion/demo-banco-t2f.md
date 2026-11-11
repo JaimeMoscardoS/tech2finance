@@ -1,48 +1,19 @@
-# Demo BancoT2F: guion y preguntas
+# Demo BancoT2F: guion
 
 ## Qué es
 
-La entidad se fija al arrancar o compilar mediante `VITE_BANK_ID`; las pruebas de CaixaBank y BBVA requieren arranques separados y no se cambia de entidad durante el recorrido. El guion de tres minutos usa `demo`.
+Guion propuesto para una experiencia educativa con BancoT2F como anfitrión ficticio, dinero virtual y valores liquidativos históricos de fondos reales publicados por CNMV. No hay cuentas conectadas ni órdenes reales. El catálogo muestra los ISIN y las entidades originales; las cifras históricas no predicen resultados futuros.
 
-Guion de tres minutos para presentar una entidad ficticia con Tech2Finance integrado. Las 24 preguntas originales se ensayaron en la versión anterior por navegador y API local, en ambos idiomas: [español](../docs/planning/evidence/banco-t2f/gui-rehearsal-es.json), [inglés](../docs/planning/evidence/banco-t2f/gui-rehearsal-en.json) y [matriz API](../docs/planning/evidence/banco-t2f/api-matrix.json). Aquellas revisiones independientes R2 de núcleo e interfaz se superaron con 8,8/10; véase el [registro](../docs/planning/banco-t2f-ledger.md). No acreditan el recorrido nuevo de noticias, que tiene cuatro pruebas específicas en navegador para local/servidor y español/inglés. El tutor es por reglas y reconoce formulaciones limitadas.
+## Recorrido
 
-## Recorrido propuesto: tres minutos
+1. En Inicio, explicar que la cuenta es ficticia y que los fondos son casos de estudio externos. Los costes actuales de cada producto no están disponibles; los gastos incorporados en el NAV no se descuentan dos veces.
+2. En Explorar, elegir un fondo y consultar su nombre, ISIN, datos y fuente. El nivel cambia la presentación, no el riesgo. La entidad se fija al arrancar mediante `VITE_BANK_ID`; la demo muestra una lista explícita de estudio.
+3. En Simulador, utilizar una cantidad virtual y aportaciones mensuales o anuales. El inicio y fin son cierres mensuales observados; la aportación se aplica después de la variación del cierre. No extrapolar el histórico.
+4. En «Probar una caída», utilizar BBVA MI INVERSION BOLSA ACUMULACION, FI entre diciembre de 2019 y marzo de 2020: 1.000 € virtuales, sin aportaciones, dan aproximadamente 744,62 €. El enlace a la declaración pública de la OMS del 11 de marzo aporta contexto temporal, no demuestra la causa de la variación ni garantiza recuperación. El usuario decide.
+5. En Cartera y tutor, comprobar que muestran el mismo caso calculado y sus límites. La voz es opcional y depende del dispositivo.
 
-| Tiempo | Pantalla y narración |
-| --- | --- |
-| 0:00–0:30 | Inicio: «BancoT2F es una entidad ficticia. Tech2Finance acompaña dentro de esta demo educativa; no hay cuenta ni dinero real». Mostrar catálogo, práctica, tutor y pausa. |
-| 0:30–1:00 | Explorar → T2F Equilibrio: preguntar por el coste y después si se descuenta. El 0,75 % anual es informativo; el motor no lo resta. |
-| 1:00–1:45 | Inicio → Probar una caída: T2F Equilibrio ficticio, 1.000 EUR, aportación 0 y seis meses. Abrir las noticias del guion y preguntar al tutor por la caída. Aclarar que sucesos y explicación son ficticios, no noticias reales ni una causa verificada. |
-| 1:45–2:15 | Explorar los fondos ficticios de BancoT2F y preguntar por sus costes informativos, que no se descuentan en la simulación. |
-| 2:15–2:45 | Cartera ficticia → pausa: mostrar la caída y la necesidad de liquidez. La pausa informa sin impedir la decisión ni garantizar recuperación. |
-| 2:45–3:00 | Volver al catálogo y dejar que la persona elija. No se tramitan órdenes. La voz es opcional y depende de capacidades locales disponibles; el texto es el recorrido principal. |
+## Evidencia y límites
 
-## Preguntas para ensayar
+Los ficheros CNMV se identifican por URL y SHA-256 de archivo en `shared/nav-history.json`; el manifiesto comprueba por separado histórico y catálogo. Los informes consultados no registran distribuciones durante el periodo a la precisión publicada, sin garantizar una política futura. La reutilización se somete a la [nota legal CNMV](https://www.cnmv.es/portal/Utilidades/NotaLegal). Los detalles están en [contratos](../docs/contratos.md).
 
-La columna «fuente» identifica los datos o la lógica contrastados por API. Para ensayar casos independientes, recargar la página antes de cada pregunta: el chat escrito conserva mensajes visibles y no hay un botón de conversación nueva. La pregunta 4 es la excepción y continúa la conversación de la 3. Cambiar el idioma para repetir el ensayo en inglés.
-
-| # | Pantalla y preparación exacta | Pregunta ES / EN | Respuesta esperada y límites | Fuente |
-| --- | --- | --- | --- | --- |
-| 1 | Inicio; conversación nueva | ¿Qué es BancoT2F? / What is BancoT2F? | Entidad ficticia para la demo educativa. | `shared/demo-data.json:bankProfile.description`, `faq[id=identity]` |
-| 2 | Inicio; conversación nueva | ¿Qué condiciones tiene la cuenta de demo? / What are the demo account terms? | Mantenimiento 0 EUR/mes y mínimos ficticios 0; sin cuenta real, órdenes ni conexiones. | `bankProfile.conditions`, `bankProfile.products[].minimumInitialEur`, `minimumRecurringEur` |
-| 3 | Explorar → seleccionar T2F Equilibrio → Escribir al asistente (banda superior) | ¿Cuánto cuesta este fondo? / How much does this fund cost? | 75 pb = 0,75 % anual informativo; entrada, salida y custodia ficticias 0. | `bankProfile.products[instrumentId=demo-mixed].fees` |
-| 4 | Misma pantalla, producto y conversación de 3 | ¿Y eso está descontado? / Is that deducted? | No; comisión informativa no descontada del simulador. | `bankProfile.calculationNotice`, `products[].fees.treatment` |
-| 5 | Simulador; Equilibrio; inicial 1.000 EUR; aportación mensual 0; 6 meses; ejecutar; conversación nueva | ¿Qué pérdida muestra el resultado? / What loss does the result show? | Valor 892,64 EUR; diferencia −107,36 EUR; rentabilidad acumulada −10,74 %, redondeados. Serie ficticia, no predicción; tarifas no descontadas. | `instruments[instrumentId=demo-mixed].returns`; resultado de `/api/simulations` |
-| 6 | Mantener resultado de 5; conversación nueva | ¿Por qué ha caído? / Why did it fall? | No se conoce la causa; no hay noticias conectadas. No inventar causalidad. | `instruments[instrumentId=demo-mixed].returns`; análisis de caídas local |
-| 7 | Demo separada con `VITE_BANK_ID=caixabank` → Simulador → CAIXABANK MONETARIO RENDIMIENTO, FI CLASE ESTÁNDAR; inicial 1.000 EUR, aportación anual 0, cinco años; Ver mi ejemplo → Abrir asistente | ¿Cuál fue la rentabilidad de 2022? / What was the return of 2022? | −0,67 % publicado para ese año, no rentabilidad acumulada ni serie de BancoT2F. | `annualHistory.returns[year=2022].rate`; `annualHistory.sourceUrl` |
-| 8 | Demo separada con `VITE_BANK_ID=bbva` → Simulador → instrumento `BBVA MI INVERSION BOLSA, FI` → Abrir asistente | ¿Por qué no puedo simularlo? / Why can't I simulate it? | No hay histórico conectado para ese producto; no sustituirlo por otra serie. También aplica a Santander. | `instruments[instrumentId=bbva-mi-inversion-bolsa].dataStatus` |
-| 9 | Inicio; conversación nueva | ¿Qué ganaré el próximo año? / What will I earn next year? | No puede predecirse ni garantizarse una ganancia. | `bankProfile.calculationNotice`; límites del tutor |
-| 10 | Mi cartera → Entender una caída → Tu contexto (opcional) → ¿Necesitas liquidez pronto? → Sí → Preguntar al asistente | Necesito liquidez, ¿debo mantener? / I need liquidity; should I hold? | Considerar liquidez y circunstancias; decidir corresponde al usuario, sin presión ni garantía. Cartera 1.093 EUR frente a 1.000 iniciales; caída máxima 2,70 % y actual 1,53 % son métricas distintas. | `portfolioPoints`; `/api/declines` con `basis=portfolio_demo` |
-| 11 | Explorar → seleccionar T2F Equilibrio → Escribir al asistente (banda superior) | ¿Qué estoy viendo? / What am I seeing? | Describir el contexto de exploración y producto disponible, sin inventar datos. | `instruments[instrumentId=demo-mixed]`; contexto de página del tutor |
-| 12 | Demo `VITE_BANK_ID=demo` → Inicio → Abrir asistente | ¿Todos los productos de la plataforma son de BancoT2F? / Are all products on the platform from BancoT2F? | No: en el catálogo global hay productos de otras entidades, con identidad y procedencia propias. El frontend configurado solo muestra la entidad elegida. | `bankProfile.faq[id=external_products]`; `instruments[].bankId` |
-
-Para el recorrido nuevo: desde Inicio pulsa «Probar una caída», despliega «Ver contexto ilustrativo, sin noticias en directo» y abre el asistente. Pregunta «¿Por qué ha caído?», «¿Qué noticias hay?» o «Necesito liquidez, ¿debo mantener?». El tutor explica el supuesto narrativo de tipos y beneficios, identifica que no son noticias verificadas y respeta la decisión del usuario. La cifra 13,10 % es desde el máximo; −10,74 % es desde el inicio. El caso 6 de la tabla conserva el ensayo anterior sin abrir la pausa, donde la causa sigue siendo desconocida.
-
-## Cómo verificar
-
-1. Con la integración final, ejecutar pruebas de backend, tutor y frontend según sus README. Anotar comandos y resultados; las pruebas unitarias no sustituyen el recorrido visual.
-2. Comprobar la API local: `GET /api/catalog`, `POST /api/simulations` con la especificación del caso 5, `POST /api/declines` con `portfolio_demo` y `POST /api/tutor` con cada contexto. Comparar cifras y fuentes con la tabla y guardar respuestas sin datos privados. No dar por aprobado un caso solo porque una prueba de otro caso pase.
-3. Recorrer las 12 preguntas en pantalla en ambos idiomas y comprobar selección, continuidad de la pregunta 4, cambios de contexto y presentación de límites. Registrar cada resultado como pendiente, pasa o falla con evidencia; repetir tras cualquier corrección relevante.
-4. Si se muestra voz, confirmar que el navegador dispone de procesamiento y modelo locales ya instalados. No se descarga un modelo ni se configura ninguna clave desde la demo. Las pruebas con mocks no certifican micrófono, voz ni hardware. El texto sigue disponible.
-
-El historial de voz se limita a ocho mensajes de la sesión y se reinicia al cerrar o cambiar contexto, idioma, nivel, modo o proveedor. No se mantiene una grabación permanente ni se reactiva automáticamente la escucha tras responder. Claude y ElevenLabs no están integrados.
+Las [preguntas ensayadas anteriormente](../docs/planning/evidence/banco-t2f/gui-rehearsal-es.json) corresponden a la versión de fondos ficticios y no acreditan este recorrido nuevo. La comprobación de esta rama debe documentarse con sus propias pruebas.

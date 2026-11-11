@@ -2,7 +2,7 @@
 
 ## Qué es
 
-En la rama de trabajo, **BancoT2F** es la entidad ficticia anfitriona de la experiencia y Tech2Finance su tutor. Sus condiciones, tarifas informativas y límites se detallan en [BancoT2F](banco-t2f.md); el [guion de demo](../presentacion/demo-banco-t2f.md) recoge preguntas pendientes de comprobación tras la integración.
+En la rama de trabajo, **BancoT2F** es la entidad ficticia anfitriona de la experiencia y Tech2Finance su tutor. Las condiciones del anfitrión, los costes de productos no disponibles y los límites se detallan en [BancoT2F](banco-t2f.md); el [guion de demo](../presentacion/demo-banco-t2f.md) recoge el recorrido histórico propuesto.
 
 Tech2Finance es una propuesta de asistente para la sección de inversión de la aplicación de un banco. Su propósito es ayudar al cliente a entender lo que ve, aprender cómo se comportan las inversiones y explorar decisiones con dinero ficticio antes de comprometer dinero real.
 
@@ -26,9 +26,9 @@ La idea puede ser útil para distintos perfiles de edad, pero no se ha demostrad
 
 ### Recorrido de caída para la demo
 
-En esta rama, el botón «Probar una caída» prepara T2F Equilibrio ficticio con 1.000 €, sin aportaciones y seis meses; abre la pausa informativa y permite desplegar dos noticias del guion y preguntar al tutor. La serie existente calcula 892,64 € finales, una pérdida de 107,36 € desde el inicio y una caída del 13,10 % desde el máximo. La explicación y las noticias son un supuesto narrativo, sin fechas ni fuentes reales; no prueban la causa de una caída real. Otros productos no heredan este relato. El servidor reconstruye el contexto a partir de la especificación y rechaza hechos enviados por el cliente. No hay proveedor de noticias ni modelo de lenguaje conectado.
+En esta rama, el caso de caída usa BBVA MI INVERSION BOLSA ACUMULACION, FI, con valores liquidativos CNMV desde el cierre de diciembre de 2019 hasta el de marzo de 2020 e inversión virtual inicial de 1.000 €, sin aportaciones. La reconstrucción arroja aproximadamente 744,62 € y una caída del 25,54 % desde el máximo observado. La declaración pública de la OMS del 11 de marzo aparece solo si el periodo la incluye; su coincidencia no acredita la causa de la variación ni garantiza recuperación. El servidor reconstruye los hechos a partir de la especificación y rechaza cifras enviadas por el cliente. No hay proveedor de noticias en directo ni modelo de lenguaje conectado.
 
-Para la demo, los controles y acciones del guion deben funcionar de principio a fin, sin botones decorativos; ante un fallo deben mostrar un error y permitir una recuperación o reintento real. La voz es opcional y queda fuera de ese recorrido obligatorio. Las noticias sintéticas deben estar etiquetadas y el asistente debe utilizar los mismos hechos del escenario. Esta es una condición de aceptación: las comprobaciones específicas del recorrido de caída no prueban por sí solas todos los controles de la aplicación.
+Para la demo, los controles y acciones del guion deben funcionar de principio a fin; ante un fallo deben mostrar un error y permitir recuperación o reintento. La voz es opcional. El asistente utiliza los mismos hechos observados y distingue el evento público de una causa no verificada. Las comprobaciones específicas de caída no prueban por sí solas todos los controles de la aplicación.
 
 1. **Entrar y elegir nivel.** El usuario abre la sección ficticia de inversión y escoge principiante, intermedio o avanzado. Puede cambiarlo cuando quiera.
 2. **Explorar y preguntar.** Ve información de productos de ejemplo y pregunta al tutor qué significa un concepto o un dato de la pantalla. El tutor responde por texto y, si está disponible, por voz.
@@ -64,7 +64,7 @@ La [propuesta técnica del simulador histórico](simulador-historico.md) describ
 
 **Qué es:** una experiencia de tres experimentos guiados con capital ficticio, accesible desde inicio y el simulador. Permite editar los valores, comparar dos resultados calculados y comprobar una idea sin puntuar en función del beneficio.
 
-En aportaciones se contrasta el mismo instrumento y plazo con y sin flujo periódico; la aportación de B debe ser positiva para que exista una diferencia, y el ejemplo anual mantiene sus cinco cierres publicados. En horizonte se comparan plazos de una misma serie mensual ficticia sin aportaciones. En activos se comparan dos series mensuales ficticias bajo los mismos importes y plazo; esto no demuestra diversificación. El capital inicial puede ser cero, como también la aportación en activos. El asistente recibe la opción A o B seleccionada, no una cartera inventada a partir de ambas. El modo servidor utiliza las rutas de simulación existentes y el local sus funciones equivalentes; no hay cambio automático de modo ante errores.
+En aportaciones se contrasta el mismo instrumento y plazo con y sin flujo periódico; la aportación de B debe ser positiva para que exista una diferencia. En horizonte se comparan plazos de una misma serie mensual observada sin aportaciones. En activos se comparan dos series compatibles bajo los mismos importes y plazo; esto no demuestra diversificación. El capital inicial puede ser cero, como también la aportación en activos. El asistente recibe la opción A o B seleccionada, no una cartera inventada a partir de ambas. El modo servidor utiliza las rutas de simulación existentes y el local sus funciones equivalentes; no hay cambio automático de modo ante errores.
 
 Cada resultado presenta su procedencia y condiciones. Estas comparaciones no usan dinero real, no son recomendaciones ni predicen o garantizan resultados. La evolución de un juego completo con decisiones de compra y venta sigue siendo una propuesta, no una funcionalidad de esta práctica.
 
@@ -93,7 +93,7 @@ Un horizonte largo puede ayudar a contextualizar la volatilidad y disponer de m�
 
 La persona 5 identifica y verifica fuentes y licencias; la 3 define las reglas de comparación y realiza los cálculos; la 2 conecta datos y resultados; la 4 prepara la explicación y la voz; y la 1 presenta los resultados y sus limitaciones. Cada responsable participa en las pruebas de su componente y la persona 5 coordina las pruebas del flujo completo.
 
-En esta rama la pausa muestra un análisis local de las observaciones del instrumento seleccionado o de la cartera ficticia, con episodios y recuperación solo cuando se observa. No busca noticias ni comparables ni atribuye una causa real. El escenario ficticio de seis meses indicado arriba añade un guion narrativo identificado, no noticias verificadas. El motor Python histórico no se usa en la pausa; si faltan datos suficientes, la interfaz lo indica.
+En esta rama la pausa muestra un análisis local de las observaciones del instrumento seleccionado o de la cartera virtual, con episodios y recuperación solo cuando se observa. No busca noticias en directo ni comparables ni atribuye una causa real. El evento público de la OMS se muestra únicamente cuando cae dentro del periodo observado. El motor Python histórico no se usa en la pausa; si faltan datos suficientes, la interfaz lo indica.
 
 Si el instrumento externo seleccionado no tiene histórico, el tutor explica por qué no puede simularse incluso cuando la entidad configurada no dispone de perfil BancoT2F. No incorpora las condiciones ni tarifas de BancoT2F a esa respuesta.
 ## Noticias y explicación de movimientos
@@ -117,7 +117,7 @@ Primero se propone completar el chat escrito con contexto, después la lectura e
 
 ## Demo y visión futura
 
-Para el hackathon se busca un recorrido completo y comprobable con una interfaz bancaria simulada, datos ficticios claramente identificados y, si se consiguen, series históricas verificables. El núcleo propuesto es explorar, practicar y pedir una explicación; la pausa con una cartera de ejemplo representa la segunda parte de la historia. Voz, noticias y otras ampliaciones dependen de su integración y del tiempo disponible.
+Para el hackathon se busca un recorrido completo y comprobable con una interfaz bancaria simulada, capital virtual y cinco series históricas CNMV verificables. El núcleo es explorar, practicar y pedir una explicación; la pausa con una cartera de ejemplo representa la segunda parte de la historia. La voz es opcional y el evento público de la OMS aporta contexto temporal sin demostrar causalidad.
 
 Una versión futura podría integrarse con una entidad, mostrar información autorizada y conectarse a sus procesos de contratación o gestión. Eso requeriría acuerdos, revisiones y controles específicos; no se considera construido por preparar esta demo.
 
@@ -129,12 +129,14 @@ El trabajo se divide entre [cinco áreas](organizacion.md): interfaz, backend, s
 
 En `main` existe una primera demo React/TypeScript con catálogo y cartera ficticios, simulador ilustrativo, asistente de respuestas predefinidas y pausa ante una caída. La demo incluye tres niveles con distinta información, español/inglés y temas claro/oscuro. El frontend inicial y las vistas adaptativas se integraron mediante los pull requests #1 y #2. La [guía para backend](backend-contexto.md) recoge las decisiones y los puntos de conexión pendientes.
 
-La demo usa capital ficticio y, en esta rama, incluye una reconstrucción a partir de rentabilidades anuales publicadas de un fondo. El motor Python de reproducción, escenarios y análisis básico de caídas no consume esa muestra. En esta rama el backend expone su comparación «mantener o vender» en `/api/game/compare` solo para los cinco instrumentos ficticios (la serie de CaixaBank queda excluida del juego por decisión del equipo; BBVA y Santander no tienen histórico); el frontend aún no lo utiliza. En esta rama existe una API FastAPI local; las conexiones a Claude, ElevenLabs y noticias siguen pendientes. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
+La demo usa capital virtual y, en esta rama, cinco históricos mensuales CNMV. El backend expone la comparación «mantener o vender» en `/api/game/compare` sobre esos cierres; el frontend aún no utiliza el endpoint del juego. La muestra anual publicada anterior se conserva aparte. La API FastAPI es local; Claude, ElevenLabs y noticias en directo siguen sin conectarse. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
 
 
 ## Catálogo local de práctica (rama de trabajo)
 
-La rama de trabajo incorpora ejemplos ficticios y una reconstrucción de cinco rentabilidades anuales publicadas de CaixaBank con aportaciones anuales al cierre; las fichas de BBVA y Santander no tienen histórico conectado. Los detalles y límites constan en [contratos](contratos.md#catálogo-local-de-práctica-rama-de-trabajo).
+La rama de trabajo incorpora cinco históricos mensuales CNMV y conserva aparte la reconstrucción de cinco rentabilidades anuales publicadas de CaixaBank. Los detalles y límites constan en [contratos](contratos.md#datos-cnmv-y-cálculo-mensual-rama-de-trabajo).
+
+La elegibilidad se basa en informes semestrales que cubren 2020–2025, sin distribuciones registradas a la precisión publicada. La [Ley 18/2022](https://www.boe.es/eli/es/l/2022/09/28/18) eliminó la obligatoriedad de informes trimestrales y el [Real Decreto 816/2023](https://www.boe.es/eli/es/rd/2023/11/08/816) desarrolló ese cambio. Los informes no publicados no se imputan como cero. El [traspaso del juego](planning/historical-investment-game.md) documenta el trabajo pendiente.
 
 ## Integración local de demostración
 
@@ -147,7 +149,7 @@ Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](planning/
 
 Las cinco líneas de ejecución se integraron en `main` el 2026-11-10: Experiencia 01 (recuperación del catálogo y cancelación al cambiar de modo, [PR 15](https://github.com/JaimeMoscardoS/tech2finance/pull/15)), Plataforma 02 (lanzador local con proxy y CI, [PR 18](https://github.com/JaimeMoscardoS/tech2finance/pull/18)), Datos 03 (procedencia en el catálogo y la simulación del servidor, con derechos aún desconocidos y cálculo TypeScript local sin versionar, [PR 14](https://github.com/JaimeMoscardoS/tech2finance/pull/14)), Tutor 04 (reglas limitadas de alcance y batería sintética, [PR 16](https://github.com/JaimeMoscardoS/tech2finance/pull/16)) y Producto 05 (plan y evidencia de integración local, [PR 17](https://github.com/JaimeMoscardoS/tech2finance/pull/17)). La [ejecución CI de push](https://github.com/JaimeMoscardoS/tech2finance/actions/runs/42859720668) en `main` tras la última integración (commit `0bde0d1`) terminó correctamente. El [registro de ejecución](planning/manifest.json) identifica versiones y evidencia conocidas, y la [integración local aislada](planning/integracion-local.md) documenta la prueba previa. Estar integrado en `main` no implica despliegue, conexión bancaria ni derechos de datos resueltos. El [PR 19](https://github.com/JaimeMoscardoS/tech2finance/pull/19) (reorganización de la navegación) sigue abierto y no está integrado.
 
-En la rama de interfaz, Explorar ofrece guía inicial, comparación de hasta tres fondos de la entidad configurada y panel técnico con exportación de las observaciones disponibles. Los valores de riesgo, coste y plazo añadidos a los tres fondos ficticios son supuestos educativos; no afectan al simulador. Para el fondo anual identificado se muestran rentabilidades compuestas acumuladas y anualizadas de 1, 3 y 5 años solo con una serie anual válida y suficiente, a partir de cifras publicadas redondeadas. Los documentos legales no están incorporados y no se presenta la ficha oficial como documento precontractual.
+En la rama de interfaz, Explorar ofrece guía inicial, comparación y panel técnico sobre los fondos de la entidad configurada o la lista de estudio. Los valores de riesgo, costes y plazo no verificados se muestran como desconocidos. Los documentos legales no están incorporados y las fuentes de datos no se presentan como documentación precontractual.
 
 
 La entidad visible se fija mediante `VITE_BANK_ID` al iniciar o compilar (por defecto `demo`); el filtrado es de interfaz y no sustituye la autorización del servidor. La guía de objetivos usa plantillas locales editables según objetivo y preferencia de fluctuación, con condiciones explícitas de liquidez, reserva y deuda; no es una evaluación de idoneidad y sus respuestas no se envían al tutor. La comparación avanzada permite seleccionar hasta tres series compatibles por frecuencia, periodo y procedencia en gráficos separados con escala común. El simulador ofrece ayuda destacada junto al resultado válido.

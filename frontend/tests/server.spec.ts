@@ -1,26 +1,26 @@
-﻿import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-test('real server calculates annual contributions, decline and contextual tutor', async ({ page, request }) => {
-  const catalog = await request.get('/api/catalog'); expect(catalog.ok()).toBeTruthy(); expect((await catalog.json()).schemaVersion).toBe('1.0');
-  const invalid = await request.post('/api/simulations', {data:{instrumentId:'demo-mixed',initial:-1,recurringContribution:0,periods:12}}); expect(invalid.status()).toBe(422);
+test('real server calculates monthly contributions, decline and contextual tutor', async ({ page, request }) => {
+  const catalog = await request.get('/api/catalog'); expect(catalog.ok()).toBeTruthy(); expect((await catalog.json()).schemaVersion).toBe('2.0');
+  const invalid = await request.post('/api/simulations', {data:{instrumentId:'caixabank-monetario-estandar',initial:-1,recurringContribution:0,periods:12}}); expect(invalid.status()).toBe(422);
   const missing = await request.post('/api/simulations', {data:{instrumentId:'bbva-mi-inversion-bolsa',initial:500,recurringContribution:0,periods:12}}); expect(missing.status()).toBe(409);
-  await page.goto('http://127.0.0.1:5177/'); await expect(page.locator('.connection-settings summary')).toContainText('Servidor de demo');
+  await page.goto('http://127.0.0.1:5194/'); await expect(page.locator('.connection-settings summary')).toContainText('Servidor de demo');
   await page.getByRole('button',{name:'Simulador',exact:true}).click();
   await expect(page.getByLabel('Instrumento')).toHaveValue('caixabank-monetario-estandar');
-  await page.getByLabel('Aportación anual').fill('100'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
-  await expect(page.locator('.sim-values')).toContainText('1048,55'); await expect(page.locator('.sim-values')).toContainText('1000,00'); await expect(page.locator('.sim-values')).toContainText('48,55');
-  await page.getByRole('button',{name:'Entender las caídas'}).click(); await expect(page.getByRole('dialog')).toContainText('2023');
+  await page.getByLabel('Aportación mensual').fill('100'); await page.getByLabel('Tiempo de práctica').selectOption('12'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
+  await expect(page.locator('.sim-values')).toContainText('1700,75'); await expect(page.locator('.sim-values')).toContainText('1700,00'); await expect(page.locator('.sim-values')).toContainText('0,75');
+  await page.getByRole('button',{name:'Entender las caídas'}).click(); await expect(page.getByRole('dialog')).toContainText('2020');
   await page.getByRole('button',{name:/Preguntar al asistente/i}).click();
   await page.locator('#chat-input').fill('¿Cuánto he aportado?'); await page.getByRole('button',{name:'Enviar pregunta'}).click();
-  await expect(page.locator('.message.assistant').last()).toContainText('1000');
+  await expect(page.locator('.message.assistant').last()).toContainText('1700');
   await expect(page.locator('.assistant-banner')).toContainText('SERVIDOR DE DEMO');
   const followup = page.waitForRequest(req => req.url().endsWith('/api/tutor') && req.method() === 'POST');
   await page.locator('#chat-input').fill('Y la ganancia?'); await page.getByRole('button',{name:'Enviar pregunta'}).click();
   const payload = (await followup).postDataJSON(); expect(payload.history.length).toBe(2); expect(payload.history[1].intent).toBeTruthy();
-  await expect(page.locator('.message.assistant').last()).toContainText('48,55');
+  await expect(page.locator('.message.assistant').last()).toContainText('0,75');
   await page.getByRole('dialog',{name:'Tu asistente'}).getByRole('button',{name:'Cerrar asistente'}).click(); await page.getByRole('button',{name:'English'}).click();
   await page.getByRole('button',{name:'Open assistant'}).click(); await page.locator('#chat-input').fill('How much did I contribute?');
-  await page.getByRole('button',{name:'Send question'}).click(); await expect(page.locator('.message.assistant').last()).toContainText('1,000');
+  await page.getByRole('button',{name:'Send question'}).click(); await expect(page.locator('.message.assistant').last()).toContainText('1,700');
 
 });
 
@@ -36,6 +36,6 @@ test('late server simulation cannot replace newer choice', async ({page}) => {
   await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
   await page.getByLabel('Importe inicial').fill('123'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
   await page.getByLabel('Importe inicial').fill('500'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
-  await expect(page.locator('.sim-values')).toContainText('1100,00'); release?.();
-  await expect(page.locator('.sim-values')).toContainText('1100,00');
+  await expect(page.locator('.sim-values')).toContainText('1100,30'); release?.();
+  await expect(page.locator('.sim-values')).toContainText('1100,30');
 });
