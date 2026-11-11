@@ -26,23 +26,24 @@ function Patterns({ id }: { id: string }) {
   );
 }
 
-export function DonutCard({ title, slices, centerLabel, centerValue, demo, language = "es", description }: {
-  title: string; slices: readonly DonutSlice[]; centerLabel?: string; centerValue?: string; demo?: boolean; language?: Lang; description?: string;
+export function DonutCard({ title, slices, centerLabel, centerValue, demo, language = "es", description, headingLevel = 3 }: {
+  title: string; slices: readonly DonutSlice[]; centerLabel?: string; centerValue?: string; demo?: boolean; language?: Lang; description?: string; headingLevel?: 2 | 3;
 }) {
+  const Heading = `h${headingLevel}` as "h2" | "h3";
   const uid = useId().replace(/:/g, "");
   const reduced = usePrefersReducedMotion();
   const clean = slices.filter((s) => s.weight > 0);
   const summary = clean.map((s) => `${s.label} ${pct(s.weight * 100, language)}`).join(", ");
   return (
     <article className="dash-card dash-donut" aria-label={title}>
-      <header className="dash-card__head"><h3>{title}</h3>{demo && <DemoBadge language={language} />}</header>
+      <header className="dash-card__head"><Heading>{title}</Heading>{demo && <DemoBadge language={language} />}</header>
       {description && <p className="dash-card__desc">{description}</p>}
       <Patterns id={uid} />
       <div className="dash-donut__body">
         <div className="dash-donut__chart" role="img" aria-label={`${title}: ${summary}`}>
           <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-            <PieChart>
-              <Pie data={clean} dataKey="weight" nameKey="label" innerRadius="62%" outerRadius="94%" paddingAngle={2} stroke="var(--surface)" strokeWidth={2} startAngle={90} endAngle={-270} isAnimationActive={!reduced}>
+            <PieChart accessibilityLayer={false}>
+              <Pie rootTabIndex={-1} data={clean} dataKey="weight" nameKey="label" innerRadius="62%" outerRadius="94%" paddingAngle={2} stroke="var(--surface)" strokeWidth={2} startAngle={90} endAngle={-270} isAnimationActive={!reduced}>
                 {clean.map((s, i) => <Cell key={s.id} fill={`url(#${uid}-${(i % 6) + 1})`} />)}
               </Pie>
             </PieChart>

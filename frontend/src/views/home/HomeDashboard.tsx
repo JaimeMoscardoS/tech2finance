@@ -1,14 +1,14 @@
 import { Calculator, GraduationCap, Gamepad2, HelpCircle, MessageCircle, Search, Wallet, type LucideIcon } from "lucide-react";
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { demoFacts } from "../../../../shared/mock/demo-facts.ts";
 import { demoHome } from "../../../../shared/mock/demo-home.ts";
 import { DEMO_NOTE } from "../../../../shared/mock/demo-portfolio.ts";
-import { DemoBadge, EvolutionChart, KpiRow, PeriodSelector, Section, StatusChip } from "../../components/dashboard/index.ts";
+import { DemoBadge, EvolutionChart, KpiRow, Section, StatusChip } from "../../components/dashboard/index.ts";
 import { KpiCard } from "../../components/dashboard/index.ts";
 import { eur, num, pct, signedEur, signedPct } from "../../components/dashboard/format.ts";
 import { buildDemoPortfolio } from "../../dashboard-portfolio.ts";
 import { HOME_PERIODS, goalProgress, lastMonthChangePct, planStatus, selectFacts, sliceByPeriod, type HomePeriod, type PlanStatus } from "../../home-logic.ts";
-import type { Level, Theme } from "../../types/level.ts";
+import type { Level } from "../../types/level.ts";
 import "./home.css";
 
 type Page = "explore" | "simulator" | "portfolio" | "learn" | "game";
@@ -28,13 +28,13 @@ const services: { page: Page; icon: LucideIcon; es: [string, string]; en: [strin
   { page: "simulator", icon: Calculator, es: ["Simulador", "Prueba escenarios con supuestos claros."], en: ["Simulator", "Try scenarios with clear assumptions."] },
   { page: "portfolio", icon: Wallet, es: ["Mi cartera", "Revisa tus posiciones de ejemplo."], en: ["My portfolio", "Review your sample positions."] },
   { page: "learn", icon: GraduationCap, es: ["Educación", "Aprende conceptos paso a paso."], en: ["Education", "Learn concepts step by step."] },
-  { page: "game", icon: Gamepad2, es: ["Juego", "Practica con datos históricos."], en: ["Game", "Practise with historical data."] },
+  { page: "game", icon: Gamepad2, es: ["Simulación", "Simulación ilustrativa con rentabilidades ficticias DEMO; no es una previsión ni usa datos de mercado."], en: ["Simulation", "Illustrative simulation with fictional DEMO returns; not a forecast and uses no market data."] },
 ];
 
 const copy = {
   es: {
     title: "Inicio", summary: "Resumen de tu cartera de ejemplo", value: "Valor de la cartera", lastMonth: "Último mes",
-    lastMonthCap: "La serie DEMO es mensual: no hay variación diaria.", available: "Disponible", invested: "Invertido", result: "Resultado", goal: "Progreso al objetivo",
+    lastMonthCap: "La serie DEMO es mensual: no hay variación diaria.", na: "n. d.", available: "Disponible", invested: "Aportado", result: "Resultado", goal: "Progreso al objetivo",
     goalOf: (t: string) => `de ${t}`, vol: "Volatilidad anual", dd: "Caída máxima", kpis: "Indicadores de la cartera de ejemplo",
     chart: "Evolución de la cartera", period: "Periodo del gráfico", series: "Cartera DEMO", bench: "Índice de referencia DEMO",
     weekNote: "1S no disponible: los datos DEMO son mensuales y no se inventan datos diarios. 1M muestra el último mes.",
@@ -47,7 +47,7 @@ const copy = {
   },
   en: {
     title: "Home", summary: "Summary of your sample portfolio", value: "Portfolio value", lastMonth: "Last month",
-    lastMonthCap: "The DEMO series is monthly: there is no daily change.", available: "Available", invested: "Invested", result: "Result", goal: "Progress to goal",
+    lastMonthCap: "The DEMO series is monthly: there is no daily change.", na: "n/a", available: "Available", invested: "Contributed", result: "Result", goal: "Progress to goal",
     goalOf: (t: string) => `of ${t}`, vol: "Annual volatility", dd: "Maximum drawdown", kpis: "Sample portfolio indicators",
     chart: "Portfolio evolution", period: "Chart period", series: "DEMO portfolio", bench: "DEMO reference index",
     weekNote: "1W unavailable: DEMO data is monthly and no daily data is invented. 1M shows the last month.",
@@ -67,11 +67,11 @@ function whatText(level: Level, lang: Lang): string[] {
     : ["You are on Home: at the top you see the value of a sample (DEMO) portfolio and how it has evolved; below, shortcuts to the app sections."];
   if (level === "beginner") return [...base, es ? "El gráfico muestra cómo sube y baja el valor con el tiempo. Subir y bajar es normal; lo importante es tu plazo y tu objetivo." : "The chart shows how the value rises and falls over time. Ups and downs are normal; what matters is your horizon and goal."];
   if (level === "intermediate") return [...base, es ? "Además del valor ves cuánto está invertido y cuánto disponible, el resultado sobre lo aportado y el avance hacia tu objetivo. Puedes cambiar el periodo del gráfico y comparar con un índice DEMO." : "Besides the value you see how much is invested and available, the result over what was contributed, and progress toward your goal. You can change the chart period and compare with a DEMO index."];
-  return [...base, es ? "También aparecen la volatilidad anualizada y la caída máxima calculadas sobre la serie mensual DEMO (menos de unos pocos años de datos limita su fiabilidad). El gráfico compara la cartera con un índice ficticio rebasado al mismo valor inicial." : "Annualised volatility and maximum drawdown, computed on the monthly DEMO series (a short history limits their reliability), also appear. The chart compares the portfolio with a fictional index rebased to the same starting value."];
+  return [...base, es ? "También aparecen la volatilidad anualizada y la caída máxima calculadas sobre la serie mensual DEMO (menos de unos pocos años de datos limita su fiabilidad). El gráfico compara la cartera con un índice ficticio reescalado al mismo valor inicial." : "Annualised volatility and maximum drawdown, computed on the monthly DEMO series (a short history limits their reliability), also appear. The chart compares the portfolio with a fictional index rescaled to the same starting value."];
 }
 
 export default function HomeDashboard({ language, level, onNavigate, onAskAssistant }: {
-  language: Lang; level: Level; theme?: Theme; onNavigate?: (page: Page) => void; onAskAssistant?: () => void;
+  language: Lang; level: Level; onNavigate?: (page: Page) => void; onAskAssistant?: () => void;
 }) {
   const c = copy[language];
   const es = language === "es";
@@ -92,21 +92,33 @@ export default function HomeDashboard({ language, level, onNavigate, onAskAssist
   const plan = progress ? planStatus(progress.pct, goal.monthsElapsed, goal.monthsTotal) : null;
   const facts = useMemo(() => selectFacts(demoFacts, p.positions.map((r) => r.fund.id), DEMO_AS_OF, FACT_COUNT[level]), [p, level]);
 
-  const toggle = (which: "what" | "how") => setPanel((cur) => (cur === which ? null : which));
+  // Foco: al abrir un panel pasa a su encabezado; al cerrarlo vuelve al botón que lo abrió (no hay aria-live: el cambio de foco lo anuncia).
+  const triggers = useRef<Record<"what" | "how", HTMLButtonElement | null>>({ what: null, how: null });
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const lastTrigger = useRef<"what" | "how" | null>(null);
+  const interacted = useRef(false);
+  useEffect(() => {
+    if (!interacted.current) return;
+    if (panel) headingRef.current?.focus();
+    else if (lastTrigger.current) triggers.current[lastTrigger.current]?.focus();
+  }, [panel]);
+  const toggle = (which: "what" | "how") => { interacted.current = true; lastTrigger.current = which; setPanel((cur) => (cur === which ? null : which)); };
+  const close = () => { interacted.current = true; setPanel(null); };
 
   return (
     <div className="home">
-      <Section title={c.summary} demo language={language} description={DEMO_NOTE}>
+      <h1 className="dash-sr">{es ? "Inicio" : "Home"}</h1>
+      <Section title={c.summary} demo language={language} description={DEMO_NOTE[language]}>
         <div className="home__hero">
           <KpiRow label={c.kpis}>
             <KpiCard label={c.value} value={eur(p.totalValue, language)} demo language={language} />
-            <KpiCard label={c.lastMonth} value={signedPct(monthChange ?? 0, language)} delta={monthChange} caption={c.lastMonthCap} demo language={language} />
-            {level !== "beginner" && <KpiCard label={c.invested} value={eur(p.totalValue, language)} caption={`${es ? "Aportado" : "Contributed"}: ${eur(p.totalCost, language)}`} language={language} />}
+            <KpiCard label={c.lastMonth} value={monthChange == null ? c.na : signedPct(monthChange, language)} delta={monthChange} caption={c.lastMonthCap} demo language={language} />
+            {level !== "beginner" && <KpiCard label={c.invested} value={eur(p.totalCost, language)} language={language} />}
             {level !== "beginner" && <KpiCard label={c.available} value={eur(demoHome.availableCashEur, language)} language={language} />}
             {advanced && <KpiCard label={c.result} value={signedEur(p.pnlAmount, language)} delta={p.pnlPercent} language={language} />}
-            {advanced && <KpiCard label={c.vol} value={p.volatilityPct == null ? "n/a" : pct(p.volatilityPct, language)} language={language} />}
-            {advanced && <KpiCard label={c.dd} value={p.maxDrawdownPct == null ? "n/a" : pct(p.maxDrawdownPct, language)} language={language} />}
-            <KpiCard label={c.goal} value={progress ? pct(progress.pct, language) : "n/a"} caption={`${goal.name[language]} ${c.goalOf(eur(goal.targetEur, language))}`} demo language={language}>
+            {advanced && <KpiCard label={c.vol} value={p.volatilityPct == null ? c.na : pct(p.volatilityPct, language)} language={language} />}
+            {advanced && <KpiCard label={c.dd} value={p.maxDrawdownPct == null ? c.na : pct(p.maxDrawdownPct, language)} language={language} />}
+            <KpiCard label={c.goal} value={progress ? pct(progress.pct, language) : c.na} caption={`${goal.name[language]} ${c.goalOf(eur(goal.targetEur, language))}`} demo language={language}>
               {progress && <div className="home__goal-bar" role="progressbar" aria-label={c.goal} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress.pct)}><span style={{ width: `${progress.pct}%` }} /></div>}
             </KpiCard>
           </KpiRow>
@@ -146,24 +158,24 @@ export default function HomeDashboard({ language, level, onNavigate, onAskAssist
 
       <Section title={c.assistant} language={language}>
         <div className="home__assist">
-          <button type="button" aria-expanded={panel === "what"} aria-controls={panelId} onClick={() => toggle("what")}><HelpCircle size={16} aria-hidden="true" />{c.what}</button>
-          <button type="button" aria-expanded={panel === "how"} aria-controls={panelId} onClick={() => toggle("how")}><MessageCircle size={16} aria-hidden="true" />{c.how}</button>
+          <button type="button" ref={(el) => { triggers.current.what = el; }} aria-expanded={panel === "what"} aria-controls={panelId} onClick={() => toggle("what")}><HelpCircle size={16} aria-hidden="true" />{c.what}</button>
+          <button type="button" ref={(el) => { triggers.current.how = el; }} aria-expanded={panel === "how"} aria-controls={panelId} onClick={() => toggle("how")}><MessageCircle size={16} aria-hidden="true" />{c.how}</button>
         </div>
-        <div id={panelId} aria-live="polite">
+        <div id={panelId}>
           {panel === "what" && (
             <div className="home__panel">
-              <h3>{c.what} <DemoBadge language={language} /></h3>
+              <h3 ref={headingRef} tabIndex={-1}>{c.what} <DemoBadge language={language} /></h3>
               {whatText(level, language).map((t) => <p key={t}>{t}</p>)}
               <p className="home__note">{c.limits}</p>
               <div className="home__panel-actions">
                 {onAskAssistant && <button type="button" onClick={onAskAssistant}>{c.ask}</button>}
-                <button type="button" onClick={() => setPanel(null)}>{c.close}</button>
+                <button type="button" onClick={close}>{c.close}</button>
               </div>
             </div>
           )}
           {panel === "how" && (
             <div className="home__panel">
-              <h3>{c.how} <DemoBadge language={language} /></h3>
+              <h3 ref={headingRef} tabIndex={-1}>{c.how} <DemoBadge language={language} /></h3>
               {progress && plan && (
                 <p>
                   <StatusChip tone={plan.status === "behind" ? "warning" : plan.status === "ahead" ? "positive" : "info"}>{c.status[plan.status]}</StatusChip>{" "}
@@ -186,7 +198,7 @@ export default function HomeDashboard({ language, level, onNavigate, onAskAssist
               <p className="home__note">{c.limits}</p>
               <div className="home__panel-actions">
                 {onAskAssistant && <button type="button" onClick={onAskAssistant}>{c.ask}</button>}
-                <button type="button" onClick={() => setPanel(null)}>{c.close}</button>
+                <button type="button" onClick={close}>{c.close}</button>
               </div>
             </div>
           )}

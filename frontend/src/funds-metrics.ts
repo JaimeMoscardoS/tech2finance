@@ -49,8 +49,9 @@ export function rebase(series: readonly number[], base = 100): number[] {
   return series.map((v) => (v / series[0]) * base);
 }
 
-/** Diferencia en puntos porcentuales entre la variación de dos series en los últimos `months`. null si falta histórico. */
+/** Diferencia en puntos porcentuales entre la variación de dos series en los últimos `months`. null si falta histórico o las series tienen distinta longitud. */
 export function excessReturnPct(series: readonly number[], reference: readonly number[], months: number): number | null {
+  if (series.length !== reference.length) return null;
   const a = changePct(series, months);
   const b = changePct(reference, months);
   return a == null || b == null ? null : a - b;
@@ -58,12 +59,12 @@ export function excessReturnPct(series: readonly number[], reference: readonly n
 
 /** Porcentaje de meses con rentabilidad estrictamente positiva. null sin datos. */
 export function positiveMonthsPct(returnsPct: readonly number[]): number | null {
-  return returnsPct.length ? (returnsPct.filter((r) => r > 0).length / returnsPct.length) * 100 : null;
+  return returnsPct.length && returnsPct.every(Number.isFinite) ? (returnsPct.filter((r) => r > 0).length / returnsPct.length) * 100 : null;
 }
 
 /** Mejor y peor mes (índice 0-based dentro de las rentabilidades). null sin datos. */
 export function bestWorstMonth(returnsPct: readonly number[]): { best: { index: number; value: number }; worst: { index: number; value: number } } | null {
-  if (!returnsPct.length) return null;
+  if (!returnsPct.length || !returnsPct.every(Number.isFinite)) return null;
   let best = 0, worst = 0;
   returnsPct.forEach((r, i) => { if (r > returnsPct[best]) best = i; if (r < returnsPct[worst]) worst = i; });
   return { best: { index: best, value: returnsPct[best] }, worst: { index: worst, value: returnsPct[worst] } };

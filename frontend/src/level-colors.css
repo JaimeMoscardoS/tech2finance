@@ -1,13 +1,4 @@
 /* Los colores por nivel y tema viven en styles/tokens.css. El nivel no es un perfil de riesgo. */
 .preference-button.selected { color:var(--action-ink); }
-
-/* Accesos del Inicio: tarjeta blanca (superficie en oscuro), sin tinte; el color solo en el icono y el enlace. */
-.action-card { border: 1px solid transparent; box-shadow: var(--card-shadow); }
-.action-card:hover, .action-card:focus-visible { transform: translateY(-2px); border-color: var(--accent); box-shadow: var(--card-shadow-hover); }
-.action-card--funds .action-icon { --tile: var(--icon-tile-1); }
-.action-card--practice .action-icon { --tile: var(--icon-tile-2); }
-.action-card--portfolio .action-icon { --tile: var(--icon-tile-3); }
-.action-card .action-icon { background: color-mix(in srgb, var(--tile, var(--accent)) 12%, var(--surface)); color: var(--tile, var(--accent)); border-radius: 12px; }
-@media (prefers-reduced-motion: reduce) { .action-card, .action-card:hover { transform: none; transition: none; } }
 /* Separador decorativo de la ruta de navegación: mismo contraste que el texto secundario. */
 .breadcrumb span { color:var(--muted); }

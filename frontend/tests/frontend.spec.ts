@@ -361,7 +361,7 @@ test('decline explanations use observed series without inventing a current crisi
  await page.keyboard.press('Escape'); await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
  await page.getByRole('button',{name:'Entender una caída'}).click();
  dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});
- await expect(dialog.getByText(/Punto 14/)).toBeVisible();
+ await expect(dialog.getByText(/M[0-9]+/).first()).toBeVisible();
  await expect(dialog.getByText('Serie simulada, sin fechas reales.')).toBeVisible();
  await dialog.getByRole('button',{name:'Continuar en la demo'}).click();
  await expect(dialog).toBeHidden();

@@ -83,7 +83,7 @@ export default function EducationDashboard({ language, level, theme: _theme, onG
 
   const conceptCard = (
     <article className="dash-card edu-concept">
-      <header className="dash-card__head"><h3><Lightbulb size={18} aria-hidden="true" /> {t.daily}</h3>
+      <header className="dash-card__head"><h2><Lightbulb size={18} aria-hidden="true" /> {t.daily}</h2>
         <button type="button" className="edu-btn edu-btn--ghost" onClick={() => setOffset(offset + 1)}><Shuffle size={15} aria-hidden="true" /> {t.another}</button></header>
       <p className="edu-concept__term">{concept.term[language]}</p>
       <p aria-live="polite">{concept.text[language]}</p>
@@ -118,7 +118,7 @@ export default function EducationDashboard({ language, level, theme: _theme, onG
     <div className={`edu edu--${level}`}>
       <header className="edu__head">
         <h1><BookOpen size={22} aria-hidden="true" /> {t.title}</h1>
-        <p>{t.subtitle} <DemoBadge language={language} title={DEMO_NOTE} /></p>
+        <p>{t.subtitle} <DemoBadge language={language} title={DEMO_NOTE[language]} /></p>
       </header>
 
       {level === "beginner" && (
@@ -152,10 +152,10 @@ export default function EducationDashboard({ language, level, theme: _theme, onG
       {level === "advanced" && (
         <>
           <div className="edu-grid-2">
-            <DonutCard title={t.allocation} description={t.allocationDesc} demo language={language}
+            <DonutCard headingLevel={2} title={t.allocation} description={t.allocationDesc} demo language={language}
               slices={portfolio.byAssetClass.map((g) => ({ id: g.key, label: assetClassNames[language][g.key], weight: g.weight }))} />
             <div className="edu-stack">
-              <Section title={t.riskMetrics} demo level={3} language={language}>
+              <Section title={t.riskMetrics} demo language={language}>
                 <KpiRow label={t.riskMetrics}>
                   <KpiCard label={t.vol} value={portfolio.volatilityPct == null ? t.na : pct(portfolio.volatilityPct, language, 1)} language={language} />
                   <KpiCard label={t.dd} value={portfolio.maxDrawdownPct == null ? t.na : pct(portfolio.maxDrawdownPct, language, 1)} language={language} />

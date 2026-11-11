@@ -3,7 +3,6 @@ import { animate } from "motion/react";
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   ArrowRight,
-  BarChart3,
   Check,
   ChevronDown,
   Compass,
@@ -11,7 +10,6 @@ import {
   Gamepad2,
   GraduationCap,
   Grid2X2,
-  Leaf,
   LockKeyhole,
   Menu,
   Mic,
@@ -23,20 +21,18 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import CountUp from "./CountUp";
 import BankInfo from "./BankInfo";
 import { simulate } from "./demo";
 import { annualHistory, replayAnnual } from "./annual-history";
 import { banks as localBanks, instruments as localInstruments, bankProfile as localBankProfile, type Instrument } from "./catalog";
 import { requestJson, isCatalog, isSimulation, isDecline, serverTutorProvider, type Catalog, type SimulationSpec, type DeclineSpec, type ServerSimulation } from "./server-api";
-import InvestmentChart from "./LazyInvestmentChart";
 import FundsExplorer from "./FundsExplorer";
 import { scopeCatalog } from "./bank-scope";
 import Simulator, { type FieldError } from "./Simulator";
 import { MAX_SIMULATION_AMOUNT } from "./simulation-types";
 import { copy, type Language } from "./copy";
 import { analyzeDecline, type DeclineReport, type DecisionContext, type TutorContext } from "../../tutor-ia/src/index";
-import { portfolioPoints } from "./portfolio-demo";
+import { buildDemoPortfolio } from "./dashboard-portfolio.ts";
 import { withDemoDecline } from "../../tutor-ia/src/decline-demo";
 import AssistantPanel from "./AssistantPanel";
 import VoiceAssistantPanel from "./VoiceAssistantPanel";
@@ -87,6 +83,7 @@ export default function App() {
   const declineGeneration = useRef(0);
   const [declineSpec, setDeclineSpec] = useState<DeclineSpec | undefined>();
   const [demoLaunch, setDemoLaunch] = useState(false);
+  const [pauseSell, setPauseSell] = useState(false);
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [practiceResult, setPracticeResult] = useState<{spec: SimulationSpec; result: ServerSimulation} | null>(null);
   const [page, setPage] = useState<Page>("home"),
@@ -141,8 +138,8 @@ export default function App() {
     explore: t.explore,
     simulator: t.simulator,
     portfolio: t.portfolio,
-    learn: language === "es" ? "Educación" : "Education",
-    game: language === "es" ? "Juego" : "Game",
+    learn: t.learnNav,
+    game: t.gameNav,
   };
   const levelNames = {
     beginner: t.beginner,
@@ -258,7 +255,7 @@ export default function App() {
     const first = catalog.instruments.find(item => item.assetType === "fund");
     if (first) setSelectedId(first.instrumentId);
   }, [page, catalog, selectedId]);
-  const points = portfolioPoints;
+  const demoPortfolio = useMemo(() => buildDemoPortfolio(), []);
   const nav = [
     { key: "home" as const, icon: Grid2X2 },
     { key: "explore" as const, icon: Compass },
@@ -316,7 +313,7 @@ export default function App() {
       if (controller.signal.aborted || id !== simulationGeneration.current) return;
       setResult({...outcome, initial:1000, monthly:0, annual:0, months:6});
       const decline = {basis:"instrument" as const, language, instrumentId:"demo-mixed", periods:6};
-      void showDecline(decline, () => withDemoDecline(analyzeDecline({name:item.name[language], dataKind:"fictional", sources:[], observations:outcome.timeline.map(point=>({label:`${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}), "demo-mixed", 6));
+      setPauseSell(false); void showDecline(decline, () => withDemoDecline(analyzeDecline({name:item.name[language], dataKind:"fictional", sources:[], observations:outcome.timeline.map(point=>({label:`${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}), "demo-mixed", 6));
     }).catch(() => {if (!controller.signal.aborted && id === simulationGeneration.current) {setServerError(true); setOperationPending(false);}});
   }, [demoLaunch, catalog, page, selectedId, initial, monthly, months, calculatePractice, language]);
   function launchDeclineDemo() {
@@ -374,28 +371,20 @@ export default function App() {
   const tutorContext: TutorContext = {page,level,language,...(configuredBank === "demo" && catalog ? {bank:catalog.bankProfile} : {}),
     ...((page === "explore" || page === "simulator") && tutorInstrument ? {instrument:{id:tutorInstrument.instrumentId,name:tutorInstrument.name[language],currency:tutorInstrument.currency,dataKind:tutorInstrument.dataStatus === "annual_history" ? "annual_published_returns" : tutorInstrument.dataStatus,sources:tutorSource,product:configuredBank === "demo" ? catalog?.bankProfile.products.find(p=>p.instrumentId === tutorInstrument.instrumentId) : undefined}} : {}),
     ...(page === "simulator" && activeResult && activeSpec ? {simulation:{kind:activeResult.kind,initial:activeSpec.initial,recurringContribution:activeSpec.recurringContribution,contributionTiming:activeResult.kind === "annual_history" ? "year_end_after_return" : "month_start",periods:activeSpec.periods,finalValue:activeResult.value,totalContributed:activeResult.contributed,profit:activeResult.profit,simpleReturnPercent:activeResult.simpleReturnPercent,instrumentReturnPercent:activeResult.timeline[activeResult.timeline.length-1].instrumentReturnPercent,...(activeResult.kind === "annual_history" ? {periodStart:(catalog?.annualHistory ?? annualHistory).baseline,periodEnd:activeResult.timeline[activeResult.timeline.length-1].date ?? undefined,annualReturns:(catalog?.annualHistory ?? annualHistory).returns.map(row=>({year:row.year,ratePercent:row.rate*100}))} : {})}} : {}),
-    ...((page === "home" || page === "portfolio") ? {portfolio:{name:t.examplePortfolio,value:1093,initial:1000,dataKind:"fictional" as const}} : {}),
+    ...((page === "home" || page === "portfolio") ? {portfolio:{name:t.examplePortfolio,value:demoPortfolio.totalValue,initial:demoPortfolio.totalCost,dataKind:"fictional" as const}} : {}),
     ...(assistantDecline ? {decline:assistantDecline,decision} : {})};
-  async function showDecline(spec: DeclineSpec, local: () => DeclineReport) {
+  async function showDecline(spec: DeclineSpec, local: () => DeclineReport, localOnly = false) {
     pauseTriggerRef.current=document.activeElement instanceof HTMLElement?document.activeElement:null;
-    declineRequest.current?.abort(); const controller=new AbortController(); declineRequest.current=controller; const id=++declineGeneration.current; setServerError(false); setOperationPending(mode === "server"); retryAction.current = () => {void showDecline(spec,local);};
-    try {const report=mode === "server" ? await requestJson("/api/declines",isDecline,spec,controller.signal) : local(); if(id===declineGeneration.current && !controller.signal.aborted){setDeclineSpec(spec);setPause(report);}}
+    declineRequest.current?.abort(); const controller=new AbortController(); declineRequest.current=controller; const id=++declineGeneration.current; setServerError(false); setOperationPending(mode === "server" && !localOnly); retryAction.current = () => {void showDecline(spec,local,localOnly);};
+    try {const report=mode === "server" && !localOnly ? await requestJson("/api/declines",isDecline,spec,controller.signal) : local(); if(id===declineGeneration.current && !controller.signal.aborted){setDeclineSpec(localOnly?undefined:spec);setPause(report);}}
     catch {if(id===declineGeneration.current && !controller.signal.aborted)setServerError(true);} finally {if(id===declineGeneration.current)setOperationPending(false);}
   }
-  function openPortfolioDecline(){void showDecline({basis:"portfolio_demo",language},()=>analyzeDecline({name:t.examplePortfolio,dataKind:"fictional",sources:[],observations:points.map((value,index)=>({label:`${t.pointLabel} ${index+1}`,value}))}));}
-  function openSimulationDecline(){if(!validResult)return;void showDecline({basis:"instrument",language,instrumentId:selected.instrumentId,periods:validResult.kind === "annual_history" ? 5 : validResult.months},()=>withDemoDecline(analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}),selected.instrumentId,validResult.kind === "annual_history" ? 5 : validResult.months));}
+  // La pausa analiza la cartera DEMO mostrada (M0..M36). El backend solo conoce su propia serie portfolio_demo, asi que se calcula siempre en local
+  // y no se envia `decline` al tutor del servidor (describiria una caida distinta de la mostrada).
+  function openPortfolioDecline(){setPauseSell(true);void showDecline({basis:"portfolio_demo",language},()=>analyzeDecline({name:t.examplePortfolio,dataKind:"fictional",sources:[],observations:demoPortfolio.valueSeries.map((value,index)=>({label:demoPortfolio.labels[index],value}))}),true);}
+  function openSimulationDecline(){if(!validResult)return;setPauseSell(false);void showDecline({basis:"instrument",language,instrumentId:selected.instrumentId,periods:validResult.kind === "annual_history" ? 5 : validResult.months},()=>withDemoDecline(analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}),selected.instrumentId,validResult.kind === "annual_history" ? 5 : validResult.months));}
   function askDecline(){if(!pause)return;setAssistantDecline(pause);setPause(null);assistantTriggerRef.current=pauseTriggerRef.current;setAssistant(true);}
-  const levelTitle = {
-    beginner: t.beginnerView,
-    intermediate: t.intermediateView,
-    advanced: t.advancedView,
-  }[level];
-  const levelText = {
-    beginner: t.beginnerText,
-    intermediate: t.intermediateText,
-    advanced: t.advancedText,
-  }[level];
-  const serverContext = {page:(page === "learn" || page === "game" ? "home" : page),level,language,bankId:configuredBank,...( (page === "explore" || page === "simulator") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline && declineSpec ? {decline:{...declineSpec,language},decision} : {})};
+  const serverContext = {page:(page === "learn" || page === "game" ? "home" : page),level,language,bankId:configuredBank,...( (page === "explore" || page === "simulator") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline ? {...(declineSpec ? {decline:{...declineSpec,language}} : {}),decision} : {})};
   const serverContextKey = JSON.stringify(serverContext);
   const provider = useMemo(() => serverTutorProvider(serverContext), [serverContextKey]);
   const switchMode = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setCatalog(null); setResult(null); setMode(mode === "server" ? "local" : "server"); };
@@ -562,7 +551,7 @@ export default function App() {
           {modeControls}
           {page === "home" && <>
             {configuredBank === "demo" && <BankInfo profile={catalog.bankProfile} language={language} />}
-            <HomeDashboard language={language} level={level} theme={theme} onNavigate={choose} onAskAssistant={openAssistant} />
+            <HomeDashboard language={language} level={level} onNavigate={choose} onAskAssistant={openAssistant} />
             <div className="welcome-actions home-extra-actions">
               <button type="button" className="text-link" onClick={openPractice}>{t.practice}<small> · {t.practiceDesc}</small><ArrowRight size={15} /></button>
               {configuredBank === "demo" && <button type="button" className="text-link" onClick={launchDeclineDemo}>{language === "es" ? "Probar una caída" : "Try a decline"}<ArrowRight size={15} /></button>}
@@ -617,27 +606,8 @@ export default function App() {
       </main>
       <AssistantPanel provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
       <VoiceAssistantPanel open={voiceAssistant} onClose={()=>setVoiceAssistant(false)} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
-      {pause && <AntiPanicPanel level={level} onTalk={talkDecline} report={pause} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
+      {pause && <AntiPanicPanel level={level} sellOption={pauseSell} onTalk={talkDecline} report={pause} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
 
-    </div>
-  );
-}
-function PageIntro({
-  label,
-  title,
-  description,
-}: {
-  label: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="page-heading internal">
-      <div>
-        <div className="eyebrow">{label}</div>
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </div>
     </div>
   );
 }

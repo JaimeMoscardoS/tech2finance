@@ -39,5 +39,8 @@ test("selectFacts filtra por fecha y cartera, ordena y limita", () => {
   assert.equal(selectFacts(demoFacts, ["demo-global", "demo-bonos"], "2026-11-11", 2).length, 2);
   assert.deepEqual(selectFacts(demoFacts, [], "2026-11-11").map((f) => f.id), ["f5"]);
   assert.deepEqual(selectFacts(demoFacts, ["demo-global"], "2026-11-11", 0), []);
-  assert.ok(!selectFacts(demoFacts, ["demo-global"], "2026-11-11").some((f) => f.id === "f6"));
+  // Hecho de prueba con fecha posterior a la consulta (vive solo en la prueba, no en los datos DEMO).
+  const future: (typeof demoFacts)[number] = { id: "f-future", date: "2026-11-20", fundIds: ["demo-global"], text: { es: "futuro", en: "future" }, source: { es: "Prueba", en: "Test" } };
+  assert.ok(!selectFacts([...demoFacts, future], ["demo-global"], "2026-11-11").some((f) => f.id === "f-future"));
+  assert.ok(selectFacts([...demoFacts, future], ["demo-global"], "2026-11-20", 10).some((f) => f.id === "f-future"));
 });

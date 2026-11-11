@@ -149,8 +149,10 @@ function Intermediate(props: FundsDashboardProps & { p: DemoPortfolio }) {
 }
 
 /* ---------------- Avanzado ---------------- */
-const FUND_COLORS = ["var(--cat-1)", "var(--cat-2)", "var(--cat-3)", "var(--cat-4)", "var(--cat-5)"];
-const FUND_DASH = ["", "2 3", "8 3", "10 3 2 3", "1 4"];
+// Cartera: --chart-line, trazo continuo y grueso. Índice: --chart-2 con guiones «6 4». Los fondos no usan --cat-1, --cat-2 ni --cat-3 (en algún tema iguales a esos dos)
+// y todos llevan un patrón de guiones propio, de modo que ninguno se confunde con la cartera ni depende solo del color.
+const FUND_COLORS = ["var(--cat-4)", "var(--cat-5)", "var(--cat-6)", "var(--muted)", "var(--ink)"];
+const FUND_DASH = ["2 3", "10 3 2 3", "1 4", "14 5", "4 2 1 2"];
 
 function MultiSeriesChart({ p, language, months, periodCtl }: { p: DemoPortfolio; language: Lang; months: number; periodCtl: ReactNode }) {
   const t = fc[language];
@@ -165,7 +167,7 @@ function MultiSeriesChart({ p, language, months, periodCtl }: { p: DemoPortfolio
     ];
     p.positions.forEach((r, i) => {
       const prices = cumulativeFromReturns(r.fund.startPrice, r.fund.monthlyReturnsPct).slice(0, length);
-      entries.push({ key: r.fund.id, name: r.fund.name, color: FUND_COLORS[i % FUND_COLORS.length], dash: FUND_DASH[(i + 1) % FUND_DASH.length] || "", values: rebase(periodWindow(prices, months)) });
+      entries.push({ key: r.fund.id, name: r.fund.name, color: FUND_COLORS[i % FUND_COLORS.length], dash: FUND_DASH[i % FUND_DASH.length], values: rebase(periodWindow(prices, months)) });
     });
     return entries;
   }, [p, months, length, t.portfolio, t.index]);
@@ -192,9 +194,9 @@ function MultiSeriesChart({ p, language, months, periodCtl }: { p: DemoPortfolio
           </label>
         ))}
       </fieldset>
-      <div className="fd-plot">
+      <div className="fd-plot" role="img" aria-label={`${t.seriesTitle}: ${shown.map((s) => s.name).join(", ")}`}>
         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-          <LineChart data={data} accessibilityLayer margin={{ top: 8, right: 14, left: 0, bottom: 4 }}>
+          <LineChart data={data} accessibilityLayer={false} margin={{ top: 8, right: 14, left: 0, bottom: 4 }}>
             <CartesianGrid vertical={false} stroke="var(--chart-grid)" strokeDasharray="2 4" />
             <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} minTickGap={16} />
             <YAxis width={44} tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} domain={["auto", "auto"]} tickFormatter={(n: number) => num(n, language, 0)} />
@@ -336,12 +338,13 @@ function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
 
 /** Sección Fondos/Inversiones adaptada al nivel. Datos DEMO ficticios; sin operaciones reales. */
 export default function FundsDashboard(props: FundsDashboardProps) {
-  const { language, level, theme, onExplore, onSimulate, onSell } = props;
+  const { language, level, onExplore, onSimulate, onSell } = props;
   const t = fc[language];
   const p = useMemo(() => buildDemoPortfolio(), []);
   const subtitle = level === "beginner" ? t.subtitleBeginner : level === "intermediate" ? t.subtitleIntermediate : t.subtitleAdvanced;
   return (
-    <div className="fd" data-theme={theme}>
+    <div className="fd">
+      <h1 className="dash-sr">{language === "es" ? "Mi cartera" : "My portfolio"}</h1>
       <Section title={t.title} description={subtitle} demo language={language} actions={level !== "advanced" ? <Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} /> : undefined}>
         <p className="fd__notice">{t.notice}</p>
       </Section>

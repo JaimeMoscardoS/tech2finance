@@ -42,7 +42,7 @@ export function conceptLevelNote(intent: string, level: KnowledgeLevel | undefin
 }
 
 const decisionNotes: LevelNotes = {
-  beginner: ['Si dudas, no hay prisa: piensa cuándo necesitarás el dinero.', 'If you are unsure, there is no rush: think about when you will need the money.'],
+  beginner: ['Puedes decidir ahora o más tarde; piensa cuándo necesitarás el dinero.', 'You can decide now or later; think about when you will need the money.'],
   intermediate: ['Una caída vista en datos pasados no implica que se repita ni que se recupere; sirve como contexto, no como prueba.', 'A fall seen in past data does not mean it will repeat or recover; it is context, not proof.'],
   advanced: ['Límites: el análisis usa solo los puntos disponibles, no incluye impuestos, costes de venta ni tu situación completa, y las noticias son contexto sin causalidad demostrada.', 'Limits: the analysis uses only the available points and excludes taxes, selling costs and your full situation; news is context without proven causality.'],
 };
@@ -85,13 +85,13 @@ const pageHints: Record<Page, Record<KnowledgeLevel, Pair>> = {
   },
   learn: {
     beginner: ['Estás en Educación: lecciones cortas para entender lo básico.', 'You are in Learning: short lessons to understand the basics.'],
-    intermediate: ['Estás en Educación: lecciones y práctica, incluida la práctica del test de conveniencia (educativa, no es una evaluación real).', 'You are in Learning: lessons and practice, including the suitability test practice (educational, not a real assessment).'],
+    intermediate: ['Estás en Educación: lecciones y práctica, incluida la práctica del test de conveniencia e idoneidad (educativa, no es una evaluación real).', 'You are in Learning: lessons and practice, including the appropriateness and suitability test practice (educational, not a real assessment).'],
     advanced: ['Estás en Educación: material técnico y práctica del test MiFID, que es educativa y no sustituye al test real del banco.', 'You are in Learning: technical material and MiFID test practice, which is educational and does not replace the bank’s real test.'],
   },
   game: {
-    beginner: ['Estás en el juego: practicas con datos históricos de ejemplo; no hay dinero real.', 'You are in the game: you practise with sample historical data; no real money.'],
-    intermediate: ['Estás en el juego: decides sobre datos históricos y comparas con lo que ocurrió después; es un ejercicio, no una previsión.', 'You are in the game: you decide on historical data and compare with what followed; it is an exercise, not a forecast.'],
-    advanced: ['Estás en el juego: ejercicio con sesgo de retrospectiva; el resultado pasado no predice el futuro y los costes pueden estar simplificados.', 'You are in the game: an exercise with hindsight bias; past results do not predict the future and costs may be simplified.'],
+    beginner: ['Estás en la simulación: practicas con una simulación ilustrativa con rentabilidades ficticias DEMO; no es una previsión ni usa datos de mercado, y no hay dinero real.', 'You are in the simulation: you practise with an illustrative simulation using fictional DEMO returns; it is not a forecast and uses no market data, and there is no real money.'],
+    intermediate: ['Estás en la simulación: eliges importe, plazo y escenario y ves un resultado ilustrativo con rentabilidades ficticias DEMO; es un ejercicio, no una previsión ni datos de mercado.', 'You are in the simulation: you choose amount, term and scenario and see an illustrative result with fictional DEMO returns; it is an exercise, not a forecast or market data.'],
+    advanced: ['Estás en la simulación: el resultado es sensible a los supuestos y al escenario elegido (rentabilidades ficticias DEMO, costes simplificados); no es una previsión ni usa datos de mercado.', 'You are in the simulation: the result is sensitive to the assumptions and the chosen scenario (fictional DEMO returns, simplified costs); it is not a forecast and uses no market data.'],
   },
 };
 export const pageHint = (page: Page | undefined, level: KnowledgeLevel | undefined, en: boolean): string => {

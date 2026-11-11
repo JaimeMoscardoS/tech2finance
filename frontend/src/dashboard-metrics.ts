@@ -76,10 +76,13 @@ export function weightedAverage(values: readonly number[], w: readonly number[])
   return total > 0 ? values.reduce((s, v, i) => s + v * w[i], 0) / total : null;
 }
 
-/** Rentabilidades porcentuales periódicas a partir de una serie de valores. */
+/** Rentabilidades porcentuales periódicas a partir de una serie de valores. Lanza RangeError si algún valor no es finito o el valor previo no es positivo (no se inventan ceros). */
 export function returnsFromSeries(series: readonly number[]): number[] {
   const out: number[] = [];
-  for (let i = 1; i < series.length; i++) out.push(series[i - 1] > 0 ? (series[i] / series[i - 1] - 1) * 100 : 0);
+  for (let i = 1; i < series.length; i++) {
+    if (!finite(series[i - 1]) || !finite(series[i]) || !(series[i - 1] > 0)) throw new RangeError("series values must be finite and previous values positive");
+    out.push((series[i] / series[i - 1] - 1) * 100);
+  }
   return out;
 }
 

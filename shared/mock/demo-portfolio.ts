@@ -50,7 +50,7 @@ export type DemoPosition = {
 };
 
 export const DEMO_LABEL = "DEMO";
-export const DEMO_NOTE = "Datos ficticios de ejemplo; no son datos reales ni una predicción.";
+export const DEMO_NOTE = { es: "Datos ficticios de ejemplo; no son datos reales ni una predicción.", en: "Fictional sample data; not real data or a prediction." } as const;
 export const DEMO_RETURNS_NOTE = { es: "Rentabilidades DEMO netas de gastos, sin tipo de cambio.", en: "DEMO returns net of fees, without exchange rate." } as const;
 export const DEMO_RISK_FREE_ANNUAL_PCT = 2;
 

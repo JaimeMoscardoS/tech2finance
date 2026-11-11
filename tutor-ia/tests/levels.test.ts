@@ -29,7 +29,7 @@ test('advanced decline answer states assumptions; no level promises recovery or 
   const d = await ask('qué hago, vender o mantener', ctx('game', 'advanced'));
   assert.equal(d.intent, 'decision'); assert.match(d.text, /decisión es tuya/); assert.match(d.text, /causalidad/);
   const b = await ask('sell or hold?', ctx('game', 'beginner', 'en'));
-  assert.match(b.text, /the decision is yours/); assert.match(b.text, /no rush/);
+  assert.match(b.text, /the decision is yours/); assert.match(b.text, /decide now or later/);
 });
 
 test('every page including learn and game gets level-specific orientation and suggestions', async () => {
@@ -51,6 +51,9 @@ test('suggested questions are answered by the local tutor (not unknown)', async 
   for (const page of pages) for (const level of levels) for (const language of ['es', 'en'] as const)
     for (const q of suggestedQuestions(page, level, language)) {
       const r = await ask(q, ctx(page, level, language));
+      assert.doesNotMatch(r.text, /observaciones válidas|valid observations|No hay observaciones|no observations/i, `${page}/${level}/${language}: ${q} returns a no-data text`);
+      if (/drawdown|caída máxima|caída desde/i.test(q)) assert.equal(r.intent, 'decline');
+      if (/fondo y ETF|fund and an ETF/.test(q)) assert.equal(r.intent, 'fund_etf');
       if (/seeing|viendo/.test(q)) assert.ok(['bank_page', 'unknown'].includes(r.intent)); // sin banco en el contexto responde la orientación de pantalla
       else if (!/Explica el resultado|Explain the result|simulaci|simulation|rentabilidad|What is return/.test(q)) assert.notEqual(r.intent, 'unknown', `${page}/${level}/${language}: ${q}`);
     }

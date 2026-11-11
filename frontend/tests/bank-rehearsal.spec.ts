@@ -35,7 +35,7 @@ for (const language of ['es','en'] as const) test(`GUI rehearsal ${language}: tw
    if(i===4||i===5) await runSimulation();
    if(i===6){await selectExternal('caixabank','caixabank-monetario-estandar');await page.getByLabel(t.initial).fill('1000');await page.getByLabel(t.annual).fill('0');await nav(t.run);await expect(page.locator('.sim-values')).toContainText(language==='es'?'1058,05':'1,058.05');await open();}
    if(i===7){await selectExternal('bbva','bbva-mi-inversion-bolsa');await open();}
-   if(i===9){await nav(t.portfolio);await nav(t.pause);const pause=page.getByRole('dialog',{name:language==='es'?'Una pausa para comprender':'A moment to understand'});await expect(pause).toContainText(language==='es'?'2,70':'2.70');await pause.getByText(t.context).click();await pause.getByLabel(t.liquidity).selectOption('yes');await pause.getByRole('button',{name:t.ask}).click();}
+   if(i===9){await nav(t.portfolio);await nav(t.pause);const pause=page.getByRole('dialog',{name:language==='es'?'Una pausa para comprender':'A moment to understand'});await expect(pause).toContainText(language==='es'?'2,43':'2.43');await pause.getByText(t.context).click();await pause.getByLabel(t.liquidity).selectOption('yes');await pause.getByRole('button',{name:t.ask}).click();}
    const input=page.getByLabel(t.question);await input.fill(questions[language][i]);
    const req=page.waitForRequest(r=>r.url().endsWith('/api/tutor') && r.method()==='POST');
    const res=page.waitForResponse(r=>r.url().endsWith('/api/tutor') && r.request().method()==='POST');

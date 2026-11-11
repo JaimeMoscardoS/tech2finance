@@ -33,7 +33,4 @@ export const demoFacts: readonly DemoFact[] = [
   { id: "f5", date: "2026-10-02", fundIds: [],
     text: { es: "La volatilidad general de los mercados ficticios bajó respecto al trimestre anterior.", en: "Overall volatility in fictional markets fell compared with the previous quarter." },
     source: { es: "Indicador DEMO de volatilidad", en: "DEMO volatility indicator" } },
-  { id: "f6", date: "2026-11-20", fundIds: ["demo-global"],
-    text: { es: "Hecho ficticio con fecha posterior a la consulta: no debe mostrarse todavía.", en: "Fictional fact dated after the query date: not to be shown yet." },
-    source: { es: "Prueba DEMO", en: "DEMO test" } },
 ];

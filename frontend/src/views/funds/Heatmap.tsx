@@ -15,12 +15,15 @@ const fmt = (n: number, l: Lang, digits = 1) => new Intl.NumberFormat(locale(l),
 export function Heatmap({ rows, language = "es", title, description, demo = true }: { rows: readonly MatrixRow[]; language?: Lang; title: string; description?: string; demo?: boolean }) {
   const t = fc[language];
   const max = matrixMaxAbs(rows) || 1;
-  const cellStyle = (v: number) => {
-    const intensity = Math.round(Math.min(1, Math.abs(v) / max) * 42) + 6;
+  // Signo, icono y color según el valor redondeado que se muestra (evita «+0,0» con color de subida).
+  const shown = (v: number) => Number(v.toFixed(1)) || 0;
+  const cellStyle = (raw: number) => {
+    const v = shown(raw);
+    const intensity = Math.round(Math.min(1, Math.abs(v) / max) * 34) + 6;
     return { background: `color-mix(in srgb, var(${v > 0 ? "--positive" : v < 0 ? "--negative" : "--muted"}) ${intensity}%, var(--surface))` };
   };
-  const Icon = (v: number) => (v > 0 ? ArrowUp : v < 0 ? ArrowDown : Minus);
-  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  const Icon = (raw: number) => { const v = shown(raw); return v > 0 ? ArrowUp : v < 0 ? ArrowDown : Minus; };
+  const months = Array.from({ length: rows[0]?.months.length ?? 12 }, (_, i) => i + 1);
   return (
     <article className="dash-card fd-heat" aria-label={title}>
       <header className="dash-card__head">
@@ -37,7 +40,7 @@ export function Heatmap({ rows, language = "es", title, description, demo = true
               <thead>
                 <tr>
                   <th scope="col">{t.heatYear}</th>
-                  {months.map((m) => <th scope="col" key={m} className="is-num">M{m}</th>)}
+                  {months.map((m) => <th scope="col" key={m} className="is-num">{language === "es" ? "Mes" : "Month"} {m}</th>)}
                   <th scope="col" className="is-num">{t.heatTotal}</th>
                 </tr>
               </thead>

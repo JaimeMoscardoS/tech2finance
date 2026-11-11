@@ -55,6 +55,12 @@ export const MIFID_DISCLAIMER: Bilingual = {
   en: "Educational material with sample (DEMO) questions written for this project. It is not any institution's real test, does not assess your suitability or appropriateness and produces no recommendation.",
 };
 
+/** Aviso visible: las cifras y normas citadas en las preguntas aún no se han contrastado con fuentes oficiales (ver comentario final de este archivo). */
+export const MIFID_VERIFICATION_NOTICE: Bilingual = {
+  es: "Contenido pendiente de verificación con fuentes oficiales (CNMV, FGD): las cifras y normas citadas (por ejemplo, el límite de 100.000 euros del Fondo de Garantía de Depósitos) son orientativas.",
+  en: "Content pending verification against official sources (CNMV, FGD): the figures and rules cited (for example, the 100,000 euro Deposit Guarantee Fund limit) are indicative.",
+};
+
 export const mifidQuestions: readonly MifidQuestion[] = [
   // NIVEL BÁSICO (beginner): conocimiento y después preguntas personales
   {

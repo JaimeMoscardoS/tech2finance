@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openApp } from './helpers/app';
 
 test('levels change appearance in both themes while chart meanings remain fixed', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode','local'));
@@ -33,20 +34,19 @@ test('levels change appearance in both themes while chart meanings remain fixed'
  await expect(page.locator('.annual-row').first()).toContainText('-0,53');
 });
 
-test.fixme('chart uses the visible series direction and explains contributions', async ({page}) => {
+test('Mi cartera chart: area gradient, DEMO label, data table alternative and no unnamed tab stops', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode','local'));
  await page.goto('/'); await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
- const chart = page.locator('.large-portfolio .investment-chart');
- await expect(chart.getByText(/capital incluye aportaciones/)).toBeVisible();
- await expect(chart.locator('linearGradient stop[stop-color="var(--chart-rise)"]').first()).toBeAttached();
- await expect(chart.locator('linearGradient stop[stop-color="var(--chart-fall)"]').first()).toBeAttached();
- await page.screenshot({path:'/tmp/t2f-chart-colors.png',fullPage:true});
- await chart.getByText('Ver datos').click();
- await expect(chart.getByRole('columnheader',{name:'Cambio desde el punto anterior'})).toBeVisible();
- await expect(chart.getByRole('cell',{name:'Sube'}).first()).toBeVisible();
- await expect(chart.getByRole('cell',{name:'Baja'}).first()).toBeVisible();
- await chart.getByRole('button',{name:'Evolución del instrumento (%)'}).click();
- await expect(chart.getByText(/evolución acumulada del instrumento con el punto anterior/)).toBeVisible();
+ const chart = page.locator('.dash-evo').first();
+ await expect(chart.locator('.dash-demo').first()).toBeVisible();
+ await expect(chart.locator('linearGradient stop[stop-color="var(--chart-line)"]').first()).toBeAttached();
+ await expect(chart.locator('.dash-evo__last')).toContainText('€');
+ // El gráfico es una imagen con nombre; la alternativa es la tabla de datos y no hay paradas de tabulación dentro del SVG.
+ await expect(chart.locator('.dash-evo__plot')).toHaveAttribute('role','img');
+ expect(await chart.locator('.dash-evo__plot [tabindex]:not([tabindex="-1"])').count()).toBe(0);
+ await chart.getByText('Ver datos del gráfico').click();
+ await expect(chart.getByRole('columnheader',{name:'Punto'})).toBeVisible();
+ expect(await chart.locator('tbody tr').count()).toBeGreaterThan(3);
 });
 
 test('flat series stays visible with a neutral line and explicit labels', async ({page}) => {
@@ -67,25 +67,21 @@ test('single observation shows a neutral point', async ({page}) => {
  await expect(page.getByRole('cell',{name:'Starting point'})).toBeVisible();
 });
 
-test.fixme('home destination cards use the neutral surface with distinct icon colours in all levels and themes', async ({page}) => {
- await page.addInitScript(() => localStorage.setItem('t2f-data-mode','local'));
- await page.goto('/');
- for (const theme of ['light','dark']) {
-  if (theme === 'dark') await page.getByRole('button',{name:'Modo oscuro'}).click();
-  for (const [index, level] of ['Básico','Intermedio','Avanzado'].entries()) {
-   if (index > 0 || theme === 'dark') { await page.locator('.level-button').click(); await page.locator('.level-menu').getByRole('button',{name:level,exact:true}).click(); }
-   const backgrounds = await page.locator('.action-grid .action-card').evaluateAll(cards => cards.map(card => getComputedStyle(card).backgroundColor));
+test('home destination cards use the neutral surface and readable text in all levels and themes', async ({page}) => {
+ for (const theme of ['light','dark'] as const) {
+  for (const level of ['beginner','intermediate','advanced'] as const) {
+   await openApp(page, {level, theme});
+   const cards = page.locator('.home__service');
+   await expect(cards).toHaveCount(5);
+   const backgrounds = await cards.evaluateAll(els => els.map(el => getComputedStyle(el).backgroundColor));
    expect(new Set(backgrounds).size).toBe(1);
    const surface = await page.evaluate(() => { const probe = document.createElement('div'); probe.style.background = 'var(--surface)'; document.body.appendChild(probe); const c = getComputedStyle(probe).backgroundColor; probe.remove(); return c; });
    expect(backgrounds[0]).toBe(surface);
-   const iconColors = await page.locator('.action-grid .action-icon').evaluateAll(icons => icons.map(icon => getComputedStyle(icon).color));
-   expect(new Set(iconColors).size).toBe(3);
-   const contrasts = await page.locator('.action-grid .action-card').evaluateAll(cards => {
+   const contrasts = await cards.evaluateAll(els => {
     const luminance = (color: string) => color.match(/\d+/g)!.slice(0,3).map(Number).map(v => v/255).map(v => v <= .04045 ? v/12.92 : ((v+.055)/1.055)**2.4).reduce((sum,v,i) => sum + v * [.2126,.7152,.0722][i],0);
-    return cards.flatMap(card => ['h3','p','span'].map(selector => { const bg = luminance(getComputedStyle(card).backgroundColor), fg = luminance(getComputedStyle(card.querySelector(selector)!).color); return (Math.max(bg,fg)+.05)/(Math.min(bg,fg)+.05); }));
+    return els.flatMap(card => ['strong','span'].filter(selector => card.querySelector(selector)).map(selector => { const bg = luminance(getComputedStyle(card).backgroundColor), fg = luminance(getComputedStyle(card.querySelector(selector)!).color); return (Math.max(bg,fg)+.05)/(Math.min(bg,fg)+.05); }));
    });
    for (const contrast of contrasts) expect(contrast).toBeGreaterThanOrEqual(4.5);
-   if (index === 0) await page.screenshot({path:`/tmp/t2f-home-cards-${theme}.png`,fullPage:true});
   }
  }
 });

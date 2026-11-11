@@ -1,6 +1,6 @@
 import { CheckCircle2, CircleHelp, RotateCcw, XCircle } from "lucide-react";
-import { useId, useMemo, useState } from "react";
-import { mifidQuestions, MIFID_DISCLAIMER, type MifidQuestion } from "../../../../shared/mock/mifid-questions.ts";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { mifidQuestions, MIFID_DISCLAIMER, MIFID_VERIFICATION_NOTICE, type MifidQuestion } from "../../../../shared/mock/mifid-questions.ts";
 import { DemoBadge, Section, StatusChip } from "../../components/dashboard/index.ts";
 import type { Lang } from "../../components/dashboard/copy.ts";
 import { isCorrect, questionsForLevel, scoreAnswers, type MifidAnswers } from "../../education-mifid.ts";
@@ -42,11 +42,22 @@ export default function MifidPractice({ language, level }: { language: Lang; lev
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
   const uid = useId();
+  const resultRef = useRef<HTMLHeadingElement>(null);
+  const legendRef = useRef<HTMLLegendElement>(null);
+  // El botón pulsado desaparece o cambia de pregunta: el foco pasa a la leyenda de la nueva pregunta o al encabezado del resultado,
+  // para que teclado y lector de pantalla no pierdan la posición. Solo se pide tras una acción del usuario (no al montar).
+  const [focusRequest, setFocusRequest] = useState(0);
+  useEffect(() => {
+    if (focusRequest === 0) return;
+    (done ? resultRef.current : legendRef.current)?.focus();
+  }, [focusRequest, done]);
 
-  const reset = () => { setAnswers({}); setChecked({}); setIndex(0); setDone(false); };
+  const reset = () => { setAnswers({}); setChecked({}); setIndex(0); setDone(false); setFocusRequest((n) => n + 1); };
+  const advance = (last: boolean) => { if (last) setDone(true); else setIndex(index + 1); setFocusRequest((n) => n + 1); };
   const header = (
     <>
       <p className="edu-disclaimer" role="note">{MIFID_DISCLAIMER[language]}</p>
+      <p className="edu-disclaimer" role="note">{MIFID_VERIFICATION_NOTICE[language]}</p>
     </>
   );
 
@@ -57,11 +68,13 @@ export default function MifidPractice({ language, level }: { language: Lang; lev
   if (done) {
     const score = scoreAnswers(questions, answers);
     return (
-      <Section title={t.result} demo language={language}>
+      <Section title={t.title} demo language={language}>
+        {header}
         <div className="dash-card edu-result">
+          <h3 className="edu-result__title" ref={resultRef} tabIndex={-1}>{t.result}</h3>
           {score.percent == null ? <p>{t.noScore}</p> : (
             <>
-              <p className="edu-result__score" role="status">{t.score(score.correct, score.scorable)}</p>
+              <p className="edu-result__score">{t.score(score.correct, score.scorable)}</p>
               <p className="edu-result__pct">{Math.round(score.percent)} %</p>
             </>
           )}
@@ -90,7 +103,7 @@ export default function MifidPractice({ language, level }: { language: Lang; lev
           <DemoBadge language={language} label={t.sample} />
         </div>
         <fieldset className="edu-quiz__fieldset">
-          <legend id={`${groupName}-q`}>{q.text[language]}</legend>
+          <legend id={`${groupName}-q`} ref={legendRef} tabIndex={-1}>{q.text[language]}</legend>
           {q.options.map((o) => {
             const selected = given === o.id;
             const showRight = isChecked && q.kind === "knowledge" && o.correct;
@@ -127,7 +140,7 @@ export default function MifidPractice({ language, level }: { language: Lang; lev
         <div className="edu-actions">
           {!isChecked
             ? <button type="button" className="edu-btn" disabled={!given} onClick={() => setChecked({ ...checked, [q.id]: true })}>{t.check}</button>
-            : <button type="button" className="edu-btn" onClick={() => (last ? setDone(true) : setIndex(index + 1))}>{last ? t.finish : t.next}</button>}
+            : <button type="button" className="edu-btn" onClick={() => advance(last)}>{last ? t.finish : t.next}</button>}
           {!isChecked && !given && <span className="edu-note">{t.chooseFirst}</span>}
         </div>
       </article>

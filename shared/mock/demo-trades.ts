@@ -3,6 +3,8 @@
  * no son operaciones reales, no hay broker ni custodia. Solo se guardan entradas (fondo, sentido,
  * unidades y mes relativo de la serie DEMO); el precio y el importe se CALCULAN en código probado
  * (`frontend/src/funds-metrics.ts`) a partir de las series de `demo-portfolio.ts`.
+ * Son movimientos ilustrativos que NO alteran la cartera mostrada (posiciones y serie de valor de `demo-portfolio.ts` fijas); los fondos en USD no tienen efecto divisa.
+ * Invariante probada: las unidades vendidas de cada fondo no superan las unidades en cartera.
  * No se modelan comisiones ni impuestos. `month` es el índice relativo de la serie (M0..M36), sin fechas.
  */
 export type DemoTrade = {

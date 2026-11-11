@@ -10,7 +10,7 @@
 .home__goal-bar { height: .6rem; border-radius: 999px; background: var(--surface-tint); overflow: hidden; margin-top: .5rem; }
 .home__goal-bar > span { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
 
-.home__services { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); margin: 0; padding: 0; list-style: none; }
+.home__services { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); margin: 0; padding: 0; list-style: none; }
 .home__service {
   display: grid; gap: .35rem; width: 100%; height: 100%; text-align: left; padding: .9rem;
   background: var(--surface); color: var(--ink); border: 1px solid var(--card-border); border-radius: 14px;
@@ -30,6 +30,7 @@
 .home__assist button[aria-expanded="true"] { background: var(--accent-soft); border-color: var(--accent); }
 .home__panel { display: grid; gap: .75rem; padding: 1rem; border: 1px solid var(--card-border); border-radius: 14px; background: var(--surface); box-shadow: var(--card-shadow); }
 .home__panel h3 { margin: 0; font-size: 1rem; }
+.home__panel h3:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .home__panel p, .home__panel li { margin: 0; line-height: 1.5; max-width: 70ch; }
 .home__panel ul { margin: 0; padding: 0; list-style: none; display: grid; gap: .6rem; }
 .home__fact { display: grid; gap: .15rem; padding-left: .75rem; border-left: 3px solid var(--hairline); }

@@ -31,7 +31,7 @@ const tx = {
       "El ciclo con caídas repite 12 rendimientos mensuales ficticios; no corresponde a ningún mercado.",
     ],
     invalidAmount: "Introduce importes entre 0 y 1.000.000.000 €.", invalidYears: `Indica un número entero de años entre 1 y ${MAX_YEARS}.`, invalidZero: "Indica un importe inicial o una aportación mensual mayores que cero.",
-    note: "Ilustrativo: no es una predicción.", pickScenario: "Escenario del gráfico", errorChart: "No se puede calcular con estos valores.",
+    note: "Ilustrativo: no es una predicción.", inChart: "en el gráfico", pickScenario: "Escenario del gráfico", errorChart: "No se puede calcular con estos valores.",
   },
   en: {
     title: "Simulation", subtitle: "Illustrative simulation with fictional assumptions (DEMO). It neither predicts nor guarantees returns and uses no real data.",
@@ -48,7 +48,7 @@ const tx = {
       "The cycle with falls repeats 12 fictional monthly returns; it corresponds to no market.",
     ],
     invalidAmount: "Enter amounts between 0 and 1,000,000,000 €.", invalidYears: `Enter a whole number of years between 1 and ${MAX_YEARS}.`, invalidZero: "Enter an initial amount or a monthly contribution greater than zero.",
-    note: "Illustrative: not a prediction.", pickScenario: "Chart scenario", errorChart: "Cannot compute with these values.",
+    note: "Illustrative: not a prediction.", inChart: "in the chart", pickScenario: "Chart scenario", errorChart: "Cannot compute with these values.",
   },
 } as const;
 
@@ -73,6 +73,8 @@ export default function SimulationDashboard({ language, level }: { language: Lan
     : { initial: toNum(initial), monthly: toNum(monthly), years: toNum(years) };
   const err = validateParams(params);
   const errText = err === "amount" ? t.invalidAmount : err === "years" ? t.invalidYears : err === "zero" ? t.invalidZero : null;
+  const errId = `${uid}-err`;
+  const amountBad = err === "amount" || err === "zero";
   const def = level === "beginner" ? BALANCED : (SCENARIOS.find((s) => s.id === scenarioId) ?? BALANCED);
 
   const computed = useMemo(() => {
@@ -102,7 +104,7 @@ export default function SimulationDashboard({ language, level }: { language: Lan
       title={t.chart} description={`${names[def.id].name[language]}: ${names[def.id].desc[language]}`}
       data={main ? chartData(main, t.year) : []} seriesName={t.series} compareName={t.compare}
       changePct={main?.sim.simpleReturnPercent ?? null} demo language={language}
-      error={errText ?? (!main ? t.errorChart : undefined)}
+      error={errText ?? (!main ? t.errorChart : undefined)} errorAlert={!errText} headingLevel={level === "beginner" ? 3 : 2}
     />
   );
 
@@ -110,18 +112,18 @@ export default function SimulationDashboard({ language, level }: { language: Lan
 
   const form = (
     <form className="dash-card sim-form" onSubmit={(e) => e.preventDefault()} noValidate aria-label={t.params}>
-      <h3>{t.params}</h3>
+      <h2>{t.params}</h2>
       <div className="sim-form__grid">
-        <label htmlFor={`${uid}-i`}>{t.initial}<input id={`${uid}-i`} type="number" inputMode="decimal" min={0} step="any" value={initial} onChange={(e) => setInitial(e.target.value)} aria-invalid={err === "amount" || err === "zero"} /></label>
-        <label htmlFor={`${uid}-m`}>{t.monthly}<input id={`${uid}-m`} type="number" inputMode="decimal" min={0} step="any" value={monthly} onChange={(e) => setMonthly(e.target.value)} aria-invalid={err === "amount" || err === "zero"} /></label>
-        <label htmlFor={`${uid}-y`}>{t.years}<input id={`${uid}-y`} type="number" inputMode="numeric" min={1} max={MAX_YEARS} step={1} value={years} onChange={(e) => setYears(e.target.value)} aria-invalid={err === "years"} /></label>
+        <label htmlFor={`${uid}-i`}>{t.initial}<input id={`${uid}-i`} type="number" inputMode="decimal" min={0} step="any" value={initial} onChange={(e) => setInitial(e.target.value)} aria-invalid={amountBad} aria-describedby={amountBad ? errId : undefined} /></label>
+        <label htmlFor={`${uid}-m`}>{t.monthly}<input id={`${uid}-m`} type="number" inputMode="decimal" min={0} step="any" value={monthly} onChange={(e) => setMonthly(e.target.value)} aria-invalid={amountBad} aria-describedby={amountBad ? errId : undefined} /></label>
+        <label htmlFor={`${uid}-y`}>{t.years}<input id={`${uid}-y`} type="number" inputMode="numeric" min={1} max={MAX_YEARS} step={1} value={years} onChange={(e) => setYears(e.target.value)} aria-invalid={err === "years"} aria-describedby={err === "years" ? errId : undefined} /></label>
         <label htmlFor={`${uid}-s`}>{t.scenario}
           <select id={`${uid}-s`} value={scenarioId} onChange={(e) => setScenarioId(e.target.value)}>
             {SCENARIOS.map((s) => <option key={s.id} value={s.id}>{names[s.id].name[language]}</option>)}
           </select>
         </label>
       </div>
-      {errText && <p className="sim-error" role="alert">{errText}</p>}
+      {errText && <p className="sim-error" id={errId} role="alert">{errText}</p>}
     </form>
   );
 
@@ -167,8 +169,8 @@ export default function SimulationDashboard({ language, level }: { language: Lan
                       <th scope="col" className="is-num">{t.result}</th><th scope="col" className="is-num">{t.resultPct}</th><th scope="col" className="is-num">{t.costs}</th>
                     </tr></thead>
                     <tbody>{computed.all.map((r) => (
-                      <tr key={r.def.id} className={r.def.id === def.id ? "is-current" : undefined}>
-                        <th scope="row">{names[r.def.id].name[language]}</th>
+                      <tr key={r.def.id} className={r.def.id === def.id ? "is-current" : undefined} aria-current={r.def.id === def.id ? "true" : undefined}>
+                        <th scope="row">{names[r.def.id].name[language]}{r.def.id === def.id && <small className="sim-current"> ({t.inChart})</small>}</th>
                         <td>{names[r.def.id].desc[language]}</td>
                         <td className="is-num">{eur(r.sim.contributed, language)}</td>
                         <td className="is-num">{eur(r.sim.value, language)}</td>

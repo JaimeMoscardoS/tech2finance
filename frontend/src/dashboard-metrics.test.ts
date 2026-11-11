@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { annualizedVolatility, changePct, cumulativeFromReturns, equityShockImpactPct, groupWeights, lastN, MIN_MONTHLY_OBSERVATIONS, maxDrawdown, profitAndLoss, returnsFromSeries, sharpeRatio, stressImpactPct, weightedAverage, weights } from "./dashboard-metrics.ts";
 import { buildDemoPortfolio } from "./dashboard-portfolio.ts";
+import { analyzeDecline } from "../../tutor-ia/src/index.ts";
 import { demoBenchmark, demoFunds, demoPositions, type DemoFund } from "../../shared/mock/demo-portfolio.ts";
 import { LEVEL_STORAGE_KEY, readStoredLevel, writeStoredLevel } from "./preferences.ts";
 
@@ -37,6 +38,8 @@ test("volatility, drawdown and Sharpe on hand-checkable series", () => {
   close(maxDrawdown([100, 120, 90, 110])!, -25); assert.equal(maxDrawdown([1, 2, 3]), 0); assert.equal(maxDrawdown([1]), null);
   close(maxDrawdown([100, 80, 150, 90])!, -40);
   close(returnsFromSeries([100, 110, 99])[1], -10);
+  assert.throws(() => returnsFromSeries([0, 5]), RangeError);
+  assert.throws(() => returnsFromSeries([100, NaN]), RangeError);
   // returns [2, 0]: mean 1 %/month -> 12 % a year; sd sqrt(2), vol sqrt(24); (12 - 2) / sqrt(24) = 2.0412414523193148
   close(sharpeRatio([2, 0], 2, 2)!, 2.0412414523193148, 1e-12);
   assert.equal(sharpeRatio([1, 1, 1], 2, 2), null);
@@ -168,4 +171,14 @@ test("agent facts come from computed data", () => {
   close(f.scenarios[0].portfolioImpactPct!, (-10 * (eq + 0.4 * mixed)) / 100); close(f.scenarios[1].portfolioImpactPct!, (-20 * (eq + 0.4 * mixed)) / 100);
   assert.ok(f.scenarios.every((s) => Number.isFinite(s.portfolioImpactPct!) && s.portfolioImpactPct! > -100));
   assert.equal(f.topName, p.positions.reduce((a, b) => (b.weight > a.weight ? b : a)).fund.name);
+});
+
+test("la pausa antipánico de la cartera analiza la serie DEMO mostrada (misma caída máxima que el panel)", () => {
+  const p = buildDemoPortfolio();
+  const report = analyzeDecline({ name: "Mi cartera", dataKind: "fictional", sources: [], observations: p.valueSeries.map((value, i) => ({ label: p.labels[i], value })) });
+  assert.equal(report.status, "ok");
+  assert.equal(report.observationCount, p.valueSeries.length);
+  assert.equal(report.observationCount, 37);
+  assert.equal(report.latestLabel, "M36");
+  close(report.maxDrawdownPercent!, Math.abs(p.maxDrawdownPct!), 1e-9);
 });

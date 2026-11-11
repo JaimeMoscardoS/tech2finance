@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { demoFunds } from "../../shared/mock/demo-portfolio.ts";
+import { demoFunds, demoPositions } from "../../shared/mock/demo-portfolio.ts";
 import { demoTrades } from "../../shared/mock/demo-trades.ts";
 import { bestWorstMonth, excessReturnPct, filterPositions, matrixMaxAbs, monthlyReturnMatrix, periodWindow, positiveMonthsPct, rebase, summarizeTrades, tradeValue } from "./funds-metrics.ts";
 
@@ -41,12 +41,15 @@ test("rebase", () => {
 test("excessReturnPct", () => {
   close(excessReturnPct([100, 110], [100, 105], 1), 5);
   assert.equal(excessReturnPct([100], [100], 1), null);
+  assert.equal(excessReturnPct([100, 110, 120], [100, 105], 1), null);
 });
 test("positiveMonthsPct and bestWorstMonth", () => {
   assert.equal(positiveMonthsPct([1, -1, 2, 0]), 50);
   assert.equal(positiveMonthsPct([]), null);
   assert.deepEqual(bestWorstMonth([1, -3, 4, 0]), { best: { index: 2, value: 4 }, worst: { index: 1, value: -3 } });
   assert.equal(bestWorstMonth([]), null);
+  assert.equal(positiveMonthsPct([1, NaN]), null);
+  assert.equal(bestWorstMonth([1, Infinity]), null);
 });
 test("filterPositions", () => {
   const rows = [
@@ -78,4 +81,20 @@ test("demo trades reference existing funds and valid months", () => {
   const s = summarizeTrades(demoTrades, demoFunds);
   assert.equal(s.rows.length, demoTrades.length);
   assert.ok(s.rows.every((r) => r.amount > 0));
+});
+
+test("operaciones DEMO: las unidades vendidas no superan las unidades en cartera en ningún mes", () => {
+  const prices = new Map(demoFunds.map((f) => [f.id, f.monthlyReturnsPct.length]));
+  for (const trade of demoTrades) {
+    const held = demoPositions.find((p) => p.fundId === trade.fundId);
+    assert.ok(held, `fondo sin posición: ${trade.fundId}`);
+    assert.ok(trade.month >= 0 && trade.month <= prices.get(trade.fundId)!, "mes dentro de la serie");
+  }
+  for (const fund of demoFunds) {
+    const units = demoPositions.find((p) => p.fundId === fund.id)?.units ?? 0;
+    for (let month = 0; month <= fund.monthlyReturnsPct.length; month++) {
+      const sold = demoTrades.filter((t) => t.fundId === fund.id && t.side === "sell" && t.month <= month).reduce((s, t) => s + t.units, 0);
+      assert.ok(sold <= units, `${fund.id} mes ${month}: vendidas ${sold} > en cartera ${units}`);
+    }
+  }
 });

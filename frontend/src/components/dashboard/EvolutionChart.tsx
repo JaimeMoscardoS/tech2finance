@@ -9,10 +9,13 @@ import "./dashboard.css";
 export type EvolutionPoint = { label: string; value: number; compare?: number };
 
 /** Gráfica de evolución: área degradada (serie principal), línea discontinua opcional (comparación), tooltip y último valor visible. */
-export function EvolutionChart({ title, data, seriesName, compareName, changePct, periodControl, demo, language = "es", description, loading, error }: {
+export function EvolutionChart({ title, data, seriesName, compareName, changePct, periodControl, demo, language = "es", description, loading, error, errorAlert = true, headingLevel = 3 }: {
   title: string; data: readonly EvolutionPoint[]; seriesName: string; compareName?: string; changePct?: number | null;
   periodControl?: ReactNode; demo?: boolean; language?: Lang; description?: string; loading?: boolean; error?: string;
+  /** false cuando otro elemento (p. ej. el formulario) ya anuncia el mismo error con role="alert". */
+  errorAlert?: boolean; headingLevel?: 2 | 3;
 }) {
+  const Heading = `h${headingLevel}` as "h2" | "h3";
   const t = dash[language];
   const uid = useId().replace(/:/g, "");
   const reduced = usePrefersReducedMotion();
@@ -23,12 +26,12 @@ export function EvolutionChart({ title, data, seriesName, compareName, changePct
     <article className="dash-card dash-evo" aria-labelledby={`${uid}-t`}>
       <header className="dash-card__head">
         <div>
-          <h3 id={`${uid}-t`}>{title}{demo && <> <DemoBadge language={language} /></>}</h3>
+          <Heading id={`${uid}-t`}>{title}{demo && <> <DemoBadge language={language} /></>}</Heading>
           {description && <p className="dash-card__desc">{description}</p>}
         </div>
         {periodControl}
       </header>
-      {error ? <p className="dash-state dash-state--error" role="alert">{error}</p>
+      {error ? <p className="dash-state dash-state--error" role={errorAlert ? "alert" : undefined}>{error}</p>
         : loading ? <p className="dash-state" role="status">{t.loading}</p>
         : !data.length ? <p className="dash-state">{t.empty}</p>
         : (
@@ -41,9 +44,9 @@ export function EvolutionChart({ title, data, seriesName, compareName, changePct
               <li><i className="dash-evo__key dash-evo__key--main" aria-hidden="true" />{seriesName}</li>
               {hasCompare && <li><i className="dash-evo__key dash-evo__key--cmp" aria-hidden="true" />{compareName}</li>}
             </ul>
-            <div className="dash-evo__plot">
+            <div className="dash-evo__plot" role="img" aria-label={`${title}. ${seriesName}: ${eur(last.value, language)}${hasCompare ? `; ${compareName}` : ""}. ${t.showData}.`}>
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                <ComposedChart data={data as EvolutionPoint[]} accessibilityLayer margin={{ top: 12, right: 14, left: 0, bottom: 4 }}>
+                <ComposedChart data={data as EvolutionPoint[]} accessibilityLayer={false} margin={{ top: 12, right: 14, left: 0, bottom: 4 }}>
                   <defs>
                     <linearGradient id={`${uid}-g`} x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="var(--chart-line)" stopOpacity={0.38} />

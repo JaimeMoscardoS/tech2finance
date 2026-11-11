@@ -1,6 +1,6 @@
 # Rediseño del dashboard por niveles
 
-Estado: **aprobado**; fase 1 commiteada y comprobada; fase 2 implementada y comprobada en la rama `mejora-ui` sin commit (no integrada en `main`, sin revisiones todavía); fases 3 a 6 pendientes. Rama de trabajo: `mejora-ui`. Afecta sobre todo al área 1 (frontend); los datos de ejemplo tocan `shared/` y deben coordinarse.
+Estado: **aprobado**; fases 1 a 5 implementadas en la rama `mejora-ui` (commits fd27d9c, 018569a, 613189a y 3213a38, más cambios sin commit de las correcciones); fase 6 (arreglos de revisión, retirada de `/componentes` y CSS muerto, pruebas Playwright de las vistas) implementada sin commit. Sin integrar en `main`. Afecta sobre todo al área 1 (frontend); los datos de ejemplo tocan `shared/mock/` y deben coordinarse.
 
 ## Objetivo
 
@@ -82,7 +82,7 @@ shared/mock/                      carteras y series DEMO
 
 Las PR grandes siguen la revisión ampliada del `CLAUDE.md` (nota mínima 8/10, máximo cuatro rondas). Cada fase comprueba `npm run build`, los tests y el resultado visual en las 6 combinaciones y a ancho de móvil.
 
-## Estado de la fase 1 (rama `mejora-ui`, sin commit)
+## Estado de la fase 1 (rama `mejora-ui`, commiteada)
 
 **Implementado**
 - `frontend/src/styles/tokens.css`: tokens de las 6 combinaciones con los valores de la tabla, aplicados con `data-level` y `data-theme` en `<html>` (contenedor raíz). Los nombres antiguos (`--ground`, `--ink`, `--muted`, `--accent`...) se conservan como alias; `--border` es el borde de controles y `--card-border` el decorativo de tarjetas; `--positive` y `--negative` son nuevos. Derivados (`--surface-tint`, `--accent-soft`, `--accent-hover`) con `color-mix`.
@@ -98,7 +98,7 @@ Las PR grandes siguen la revisión ampliada del `CLAUDE.md` (nota mínima 8/10, 
 
 **Pendiente de la fase 1**: revisión `t2f-01-accesibilidad`; comprobar otras vistas (Simulador, Mi cartera, modales, tutor, pausa) con el mismo recorrido; selector de nivel/tema recordado entre sesiones (el tema ya se guarda, el nivel no).
 
-## Estado de la fase 2 (rama `mejora-ui`, sin commit)
+## Estado de la fase 2 (rama `mejora-ui`, commiteada)
 
 **Implementado**
 - Componentes en `frontend/src/components/dashboard/`: KpiRow/KpiCard (lista de descripción), SparkCard, DonutCard (rellenos con trama sobre `--cat-1..6` y leyenda con porcentajes), FundTable (orden accesible con `aria-sort`, riesgo 1-7 con `role=meter` y valor visible, estados de carga/error/vacío), EvolutionChart (área degradada, línea discontinua de comparación, tooltip, último valor visible, tabla de datos), PeriodSelector, StatusChip/DeltaChip (icono y signo), MetricBar, DemoBadge, Section y AgentPanel (texto de ejemplo DEMO por nivel, sin LLM). Heatmap queda para la fase 3. Español e inglés.
@@ -122,9 +122,9 @@ Las PR grandes siguen la revisión ampliada del `CLAUDE.md` (nota mínima 8/10, 
 
 **Pendiente de la fase 2**: revisiones `t2f-01-frontend-reviewer` y `t2f-03-revisor-matematico` (métricas); comprobar navegación por teclado y lector de pantalla con herramienta real; el contraste medido usa el color de fondo base (el degradado del tema oscuro en tarjetas añade como máximo un 7 % de acento); Heatmap; los componentes no se usan aún en el dashboard real (fase 3); la página `/componentes` está incluida también en la compilación de producción.
 
-## Estado de las fases 3, 4 y 5 e Inicio (rama `mejora-ui`, sin commit, sin revisiones)
+## Estado de las fases 3, 4 y 5 e Inicio (rama `mejora-ui`, commits 613189a y 3213a38)
 
-**Implementado (11-11-2026)**: Inicio (`views/home`, datos `shared/mock/demo-home.ts` y `demo-facts.ts`; 1S deshabilitado porque la serie es mensual, «variación hoy» = último mes DEMO; botones «¿Qué estoy viendo?» y «¿Cómo van las cosas?» sin LLM); Fondos/Inversiones por nivel en «Mi cartera» (`views/funds`, `funds-metrics.ts`, `shared/mock/demo-trades.ts`); páginas nuevas Educación (`views/learn`, Test MiFID con 3 preguntas de ejemplo en `shared/mock/mifid-questions.ts`, formato documentado en su cabecera) y Juego (`views/game`, `game-scenarios.ts`); `AgentPanelSection` en «Mi cartera»; tutor local y preguntas sugeridas por nivel (`tutor-ia/src/level-notes.ts`); pausa antes de vender por nivel (`AntiPanicPanel` con `level?`, informativa, no bloquea).
+**Implementado (11-11-2026)**: Inicio (`views/home`, datos `shared/mock/demo-home.ts` y `demo-facts.ts`; 1S deshabilitado porque la serie es mensual, «variación hoy» = último mes DEMO; botones «¿Qué estoy viendo?» y «¿Cómo van las cosas?» sin LLM); Fondos/Inversiones por nivel en «Mi cartera» (`views/funds`, `funds-metrics.ts`, `shared/mock/demo-trades.ts`); páginas nuevas Educación (`views/learn`, Test MiFID con 27 preguntas de ejemplo en `shared/mock/mifid-questions.ts`, formato documentado en su cabecera) y Juego (`views/game`, `game-scenarios.ts`); `AgentPanelSection` en «Mi cartera»; tutor local y preguntas sugeridas por nivel (`tutor-ia/src/level-notes.ts`); pausa antes de vender por nivel (`AntiPanicPanel` con `level?`, informativa, no bloquea).
 **Contrato**: `Page` del tutor admite `learn` y `game`; el backend solo acepta 4 páginas, por lo que el cliente envía `home` al servidor en esas dos.
 **Comprobado**: build, 103 pruebas unitarias, Playwright 99 superadas y 2 `fixme`; sin desborde horizontal a 320 px en Inicio, Mi cartera, Educación y Juego en los 3 niveles; capturas de las 6 combinaciones.
 **Pendiente**: revisiones (`t2f-01-frontend-reviewer`, `t2f-04-revisor-fundamentos`, `t2f-03-revisor-matematico`, `t2f-04-tutor-reviewer`); contraste AA y teclado en las vistas nuevas; contenido real del Test MiFID; pruebas Playwright específicas de las vistas nuevas; los 2 tests `fixme` de `chart-colors.spec.ts` (apuntaban al gráfico y a las tarjetas antiguos); retirar CSS antiguo y `/componentes` (fase 6).
@@ -134,3 +134,38 @@ Las PR grandes siguen la revisión ampliada del `CLAUDE.md` (nota mínima 8/10, 
 - Contenido del Test MiFID (se genera aparte).
 - Avisar al equipo: el rediseño cambia `App.tsx`, `FundsExplorer.tsx` y estilos compartidos, y añade `shared/mock/`.
 - El nivel y el tema se recuerdan entre sesiones (decidido en la fase 2).
+
+**Correcciones de revisión (11-11-2026, sin commit)**:
+- La pausa de «Vender / Reducir» y «Entender una caída» analiza la cartera DEMO mostrada (`buildDemoPortfolio().valueSeries`, M0..M36), siempre en local, también en modo servidor. Limitación: el backend solo conoce su propia serie `portfolio_demo` (1000 a 1093) y no admite series del cliente; por eso en esa pausa no se envía `decline` al tutor del servidor (solo `decision`) y el contexto de cartera del tutor del servidor sigue siendo el del backend. Pendiente de coordinar con el área 2.
+- La pausa ofrece «Continuar con la venta (simulada, sin operación real)» con el mismo peso que «Continuar en la demo».
+- Las operaciones DEMO son movimientos ilustrativos que no alteran la cartera mostrada (nota visible y prueba de unidades vendidas ≤ unidades en cartera). El Test MiFID muestra el aviso de contenido pendiente de verificación (CNMV, FGD).
+- «Juego» se muestra como «Simulación»; sus textos (Inicio y tutor) la describen como simulación ilustrativa con rentabilidades ficticias DEMO, no como datos históricos.
+- El informe congelado `tutor-ia/evals/report.v1.json` se regeneró (cambió el hash del código fuente del tutor; 116 casos, 0 fallos).
+
+
+## Estado de la fase 6 (arreglos de revisión; rama `mejora-ui`, sin commit)
+
+**Implementado (11-11-2026)**, a raíz del informe `t2f-01-accesibilidad` (6/10):
+- Hover de `.edu-btn--ghost` con contraste AA en los 6 temas (fondo 20 % de acento sobre superficie y texto `--ink`; medido en prueba).
+- Test MiFID: el foco pasa a la leyenda de la nueva pregunta y al encabezado del resultado (acción del usuario, sin depender del montaje); sin `role=status` en el resultado.
+- Recharts: `accessibilityLayer` desactivado (donut con `rootTabIndex=-1`); el gráfico es `role=img` con nombre y la alternativa es la tabla de datos; sin paradas de tabulación sin nombre.
+- Inicio: panel del asistente sin `aria-live`; foco al encabezado al abrir y de vuelta al botón al cerrar.
+- Simulación: un único mensaje de error con `id`, `aria-describedby` en campos con `aria-invalid`, sin doble `role=alert`; escenario del gráfico marcado con «(en el gráfico)» y `aria-current`.
+- Gráfica multiserie (Avanzado): fondos con colores sin `--chart-2`, `--cat-1..3` y guiones propios; ninguno con el trazo continuo de la cartera.
+- `minmax(min(100%, …))` en las rejillas; sin desborde a 320 px en Inicio, Mi cartera, Educación y Simulación en los 3 niveles (prueba Playwright).
+- Un `h1` por vista (oculto visualmente en Inicio y Mi cartera) sin saltos de encabezado (`EvolutionChart`, `DonutCard` y el formulario admiten nivel de encabezado).
+- Bajos: intensidad máxima del mapa de calor 40 %, `min-height` 24 px en botones de orden y `summary`, sin hover en botones deshabilitados.
+- Retirados `/componentes` (página, CSS y `tests/components.spec.ts`; lo útil migró a `tests/dashboard-views.spec.ts`) y las reglas de `style.css` y `level-colors.css` cuyas clases ya no usa ningún código.
+- Los dos `test.fixme` de `chart-colors.spec.ts` se sustituyeron por pruebas válidas contra la interfaz actual.
+
+**Pendientes (hallazgos BAJOS no corregidos)**:
+- Tutor: `p-formacion` mezcla el nivel de la aplicación con productos (`shared/mock/mifid-questions.ts`, ~línea 812).
+- `AgentPanel` solo aparece en Mi cartera (confirmar con el equipo si debe estar en otras vistas).
+- Tipo `Level` duplicado en `AntiPanicPanel` (`DetailLevel`) y en `mifid-questions` (`MifidLevel`).
+- Textos de `SimulationDashboard` duplicados de `SCENARIOS`; «36 rentabilidades» fijo en `AgentPanel`.
+- `MetricBar` lee etiqueta y valor repetidos; `<dl aria-label>`; la explicación DEMO solo está en `title`; `aria-valuenow` > 100 en Inicio.
+- `PeriodSelector` usa `aria-pressed` en lugar de `radiogroup`; el término del concepto del día no se anuncia al cambiar.
+- Precio USD mostrado en € sin tipo de cambio (nota); fondos y gestoras solo en español.
+- Hechos con fechas de 2026 frente a series relativas (M0…M36).
+- No probado con lector de pantalla ni con teclado real (solo comprobaciones automáticas).
+- **Limitación servidor / `learn` y `game`**: el backend no acepta esas páginas del tutor; el cliente envía `home`. Parche propuesto, sin aplicar, en [propuestas/backend-learn-game.patch](propuestas/backend-learn-game.patch).
