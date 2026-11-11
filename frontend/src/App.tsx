@@ -8,6 +8,8 @@ import {
   ChevronDown,
   Compass,
   FlaskConical,
+  Gamepad2,
+  GraduationCap,
   Grid2X2,
   Leaf,
   LockKeyhole,
@@ -40,11 +42,16 @@ import AssistantPanel from "./AssistantPanel";
 import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
 import Recovery from "./Recovery";
+import HomeDashboard from "./views/home/HomeDashboard.tsx";
+import FundsDashboard from "./views/funds/FundsDashboard.tsx";
+import EducationDashboard from "./views/learn/EducationDashboard.tsx";
+import SimulationDashboard from "./views/game/SimulationDashboard.tsx";
+import { AgentPanelSection } from "./components/dashboard/AgentPanel.tsx";
 import { LEVELS, type Level, type Theme } from "./types/level";
 import { readStoredLevel, writeStoredLevel } from "./preferences";
 const PracticeLab = lazy(() => import("./PracticeLab"));
 
-type Page = "home" | "explore" | "simulator" | "portfolio";
+type Page = "home" | "explore" | "simulator" | "portfolio" | "learn" | "game";
 function saved(key: string, options: string[], fallback: string) {
   try {
     const value = localStorage.getItem(key);
@@ -134,6 +141,8 @@ export default function App() {
     explore: t.explore,
     simulator: t.simulator,
     portfolio: t.portfolio,
+    learn: language === "es" ? "Educación" : "Education",
+    game: language === "es" ? "Juego" : "Game",
   };
   const levelNames = {
     beginner: t.beginner,
@@ -255,6 +264,8 @@ export default function App() {
     { key: "explore" as const, icon: Compass },
     { key: "simulator" as const, icon: FlaskConical },
     { key: "portfolio" as const, icon: Wallet },
+    { key: "learn" as const, icon: GraduationCap },
+    { key: "game" as const, icon: Gamepad2 },
   ];
   const choose = (p: Page) => {
     retryAction.current = null; setServerError(false);
@@ -384,7 +395,7 @@ export default function App() {
     intermediate: t.intermediateText,
     advanced: t.advancedText,
   }[level];
-  const serverContext = {page,level,language,bankId:configuredBank,...( (page === "explore" || page === "simulator") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline && declineSpec ? {decline:{...declineSpec,language},decision} : {})};
+  const serverContext = {page:(page === "learn" || page === "game" ? "home" : page),level,language,bankId:configuredBank,...( (page === "explore" || page === "simulator") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline && declineSpec ? {decline:{...declineSpec,language},decision} : {})};
   const serverContextKey = JSON.stringify(serverContext);
   const provider = useMemo(() => serverTutorProvider(serverContext), [serverContextKey]);
   const switchMode = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setCatalog(null); setResult(null); setMode(mode === "server" ? "local" : "server"); };
@@ -549,95 +560,14 @@ export default function App() {
         </header>
         <div className="content">
           {modeControls}
-          {page === "home" && (
-            <>
-              <div className="page-heading">
-                <div>
-                  <div className="eyebrow">{t.eyebrow}</div>
-                  <h1>{t.title}</h1>
-                  <p>{t.intro}</p>
-                </div>
-              </div>
-              {configuredBank === "demo" && <BankInfo profile={catalog.bankProfile} language={language} />}
-              <section className={`welcome-card level-${level}`}>
-                <div className="welcome-content">
-                  <span className="view-tag">
-                    {level === "beginner"
-                      ? t.modeSmall
-                      : level === "intermediate"
-                        ? t.modeMedium
-                        : t.modeAdvanced}
-                  </span>
-                  <h2>{levelTitle}</h2>
-                  <p>{levelText}</p>
-                  <p>{t.knowledgeNote}</p>
-                  <div className="welcome-actions">
-                    <button
-                      className="button dark"
-                      onClick={() => choose("simulator")}
-                    >
-                      {t.trySimulator}
-                      <ArrowRight size={16} />
-                    </button>
-                    {configuredBank === "demo" && <button className="text-link" onClick={launchDeclineDemo}>
-                      {language === "es" ? "Probar una caída" : "Try a decline"}
-                      <ArrowRight size={15} />
-                    </button>}
-                    <button
-                      className="text-link"
-                      onClick={() => choose("explore")}
-                    >
-                      {t.viewFunds}
-                      <ArrowRight size={15} />
-                    </button>
-                  </div>
-                </div>
-              </section>
-              <div className="section-head">
-                <div>
-                  <span className="kicker">{t.learn}</span>
-                  <h2>{t.learnSteps}</h2>
-                </div>
-              </div>
-              <div className="action-grid">
-                <button
-                  className="action-card action-card--funds"
-                  onClick={() => choose("explore")}
-                >
-                  <div className="action-icon mint">
-                    <Compass size={21} />
-                  </div>
-                  <h3>{t.discoverFunds}</h3>
-                  <p>{t.discoverDesc}</p>
-                  <span>
-                    {t.viewFunds}
-                    <ArrowRight size={14} />
-                  </span>
-                </button>
-                <button
-                  className="action-card action-card--practice"
-                  onClick={openPractice}
-                >
-                  <div className="action-icon peach">
-                    <FlaskConical size={21} />
-                  </div>
-                  <h3>{t.practice}</h3>
-                  <p>{t.practiceDesc}</p>
-                  <span>
-                    {language === "es" ? "Comparar ejemplos" : "Compare examples"}
-                    <ArrowRight size={14} />
-                  </span>
-                </button>
-                <button className="action-card action-card--portfolio" onClick={() => choose("portfolio")}>
-                  <div className="action-icon lilac"><Wallet size={21} /></div>
-                  <h3>{t.examplePortfolio}</h3>
-                  <p>{t.portfolioPathDesc}</p>
-                  <span>{language === "es" ? "Ver cartera" : "View portfolio"}<ArrowRight size={14} /></span>
-                </button>
-              </div>
-
-            </>
-          )}
+          {page === "home" && <>
+            {configuredBank === "demo" && <BankInfo profile={catalog.bankProfile} language={language} />}
+            <HomeDashboard language={language} level={level} theme={theme} onNavigate={choose} onAskAssistant={openAssistant} />
+            <div className="welcome-actions home-extra-actions">
+              <button type="button" className="text-link" onClick={openPractice}>{t.practice}<small> · {t.practiceDesc}</small><ArrowRight size={15} /></button>
+              {configuredBank === "demo" && <button type="button" className="text-link" onClick={launchDeclineDemo}>{language === "es" ? "Probar una caída" : "Try a decline"}<ArrowRight size={15} /></button>}
+            </div>
+          </>}
           {page === "explore" && <FundsExplorer language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { selectInstrument(item); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
           {page === "simulator" && (
             practiceOpen ? <Suspense fallback={<p role="status">{language === "es" ? "Cargando práctica…" : "Loading practice…"}</p>}><PracticeLab language={language} level={level} instruments={instruments} annualHistory={catalog.annualHistory} mode={mode} calculate={calculatePractice} onActiveResult={setPracticeResult} onExit={() => choose("simulator")} openAssistant={openAssistant} /></Suspense> : <>
@@ -673,88 +603,14 @@ export default function App() {
             />
             </>
           )}
-          {page === "portfolio" && (
-            <>
-              <PageIntro
-                label={t.examplePortfolioLabel}
-                title={t.portfolioTitle}
-                description={t.portfolioIntro}
-              />
-              <div className="info-banner">
-                <LockKeyhole size={19} />
-                <span>{t.portfolioWarning}</span>
-              </div>
-              <div className="portfolio-page-grid">
-                <section className="panel large-portfolio">
-                  <div className="card-heading">
-                    <div>
-                      <span className="kicker">{t.totalValue}</span>
-                      <div className="big-amount">{euro(1093)}</div>
-                      <span className="change">{t.fictional}</span>
-                    </div>
-                    <span className="pill">{t.examplePortfolioLabel}</span>
-                  </div>
-                  <InvestmentChart
-                    compact
-                    language={language}
-                    title={t.examplePortfolio}
-                    description={t.portfolioChartDescription}
-                    data={points.map((value, index) => ({
-                      label: index === 0 ? t.start : `${t.pointLabel} ${index}`,
-                      value,
-                      contributed: 1000,
-                      returnPercent: (value / 1000 - 1) * 100,
-                    }))}
-                  />
-                  <div className="chart-labels">
-                    <span>{t.start}</span>
-                    <span>{t.now}</span>
-                  </div>
-                </section>
-                <section className="panel objective">
-                  <div className="action-icon mint">
-                    <Leaf size={21} />
-                  </div>
-                  <span className="kicker">{t.exampleGoal}</span>
-                  <h3>{t.goalTitle}</h3>
-                  <p>{t.goalText}</p>
-                  <div className="objective-row">
-                    <span>{t.illustrativeHorizon}</span>
-                    <strong>{t.longTerm}</strong>
-                  </div>
-                  <button
-                    className="button outline full"
-                    onClick={openPortfolioDecline}
-                  >
-                    <TrendingDown size={17} />
-                    {t.understandFall}
-                  </button>
-                </section>
-              </div>
-              <div className="section-head">
-                <div>
-                  <span className="kicker">{t.insidePortfolio}</span>
-                  <h2>{t.distribution}</h2>
-                </div>
-              </div>
-              <div className="holdings">
-                <div className="holding-icon">
-                  <BarChart3 size={20} />
-                </div>
-                <div>
-                  <strong>{t.examplePortfolio}</strong>
-                  <small>{t.fictionalFund}</small>
-                </div>
-                <div className="holding-value">
-                  <strong>{euro(1093)}</strong>
-                  <small>{t.fullPortfolio}</small>
-                </div>
-              </div>
-              {level === "advanced" && (
-                <p className="advanced-note">{t.dataUnavailable}</p>
-              )}
-            </>
-          )}
+          {page === "portfolio" && <>
+            {configuredBank === "demo" && <BankInfo profile={catalog.bankProfile} language={language} />}
+            <div className="info-banner"><LockKeyhole size={19} /><span>{t.portfolioWarning}</span><button type="button" className="button outline" onClick={openPortfolioDecline}><TrendingDown size={17} />{t.understandFall}</button></div>
+            <FundsDashboard language={language} level={level} theme={theme} onExplore={()=>choose("explore")} onSimulate={()=>choose("simulator")} onSell={openPortfolioDecline} />
+            <AgentPanelSection level={level} language={language} />
+          </>}
+          {page === "learn" && <EducationDashboard language={language} level={level} theme={theme} onGoSimulation={()=>choose("game")} />}
+          {page === "game" && <SimulationDashboard language={language} level={level} theme={theme} />}
           <footer>
             <span>© Tech2Finance · {t.footer}</span>
           </footer>
@@ -762,7 +618,7 @@ export default function App() {
       </main>
       <AssistantPanel provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
       <VoiceAssistantPanel open={voiceAssistant} onClose={()=>setVoiceAssistant(false)} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
-      {pause && <AntiPanicPanel onTalk={talkDecline} report={pause} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
+      {pause && <AntiPanicPanel level={level} onTalk={talkDecline} report={pause} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
 
     </div>
   );

@@ -6,7 +6,7 @@ test('users can explore, change level and run a labelled simulation', async ({ p
   await expect(page.getByRole('heading', { name: /Invertir empieza/ })).toBeVisible();
   await page.getByRole('button', { name: /Detalle: Básico/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
-  await page.getByRole('button', { name: 'Simulador', exact: true }).click();
+  await page.locator('aside').first().getByRole('button', { name: 'Simulador', exact: true }).click();
   await expect(page.getByText(/variaciones son inventadas/)).toBeVisible();
   await expect(page.getByText(/repite la misma secuencia/)).toBeVisible();
   await page.getByLabel('Importe inicial').fill('100');
@@ -58,13 +58,15 @@ test('language and theme switches apply across the interface and persist', async
 test('experience levels show distinct views without changing the selected risk', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
-  await expect(page.getByText('Tu punto de partida')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-level', 'beginner');
   await page.getByRole('button', { name: /Detalle: Básico/ }).click();
   await page.getByRole('button', { name: 'Intermedio' }).click();
-  await expect(page.getByText('Tu panorama')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-level', 'intermediate');
+  await expect(page.getByText('Disponible').first()).toBeVisible();
   await page.getByRole('button', { name: /Detalle: Intermedio/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
-  await expect(page.getByText('Panel de análisis')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-level', 'advanced');
+  await expect(page.getByText('Volatilidad').first()).toBeVisible();
 });
 test('English navigation, assistant and simulated portfolio are translated', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
@@ -286,7 +288,7 @@ test('portfolio chart retains useful width on narrow screens', async ({browser})
   if (width===768) { await page.getByRole('button',{name:'English'}).click(); await page.getByRole('button',{name:'Dark theme'}).click(); }
   if (width===320) await page.getByRole('button',{name:'Abrir menú'}).click();
   await page.getByRole('button',{name: width===768 ? 'My portfolio' : 'Mi cartera',exact:true}).click();
-  const plot=page.locator('.large-portfolio .investment-chart__plot');
+  const plot=page.locator('.dash-evo').first();
   await expect(plot).toBeVisible();
   expect((await plot.boundingBox())!.width).toBeGreaterThan(width===320?200:260);
   await page.screenshot({path:`test-results/portfolio-${width}.png`,fullPage:true});

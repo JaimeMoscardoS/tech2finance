@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type RefObject } from "react";
 import { Send, Sparkles, X } from "lucide-react";
-import { createLocalTutorProvider, MAX_HISTORY_MESSAGES, MAX_MESSAGE_LENGTH, type TutorContext, type TutorReply, type TutorProvider } from "../../tutor-ia/src/index";
+import { createLocalTutorProvider, suggestedQuestions, MAX_HISTORY_MESSAGES, MAX_MESSAGE_LENGTH, type TutorContext, type TutorReply, type TutorProvider } from "../../tutor-ia/src/index";
 import VoiceControls from "./components/VoiceControls";
 import { stopBrowserVoice } from "./voice/browser-voice";
 
@@ -30,7 +30,9 @@ export default function AssistantPanel({ open, onClose, context, panelRef, provi
   const snapshot=structuredClone(context); const history=messages.filter(item=>JSON.stringify(item.context)===JSON.stringify(context) && item.providerId===provider.id).slice(-MAX_HISTORY_MESSAGES).map(item=>({role:item.role,text:item.text,intent:item.reply?.intent}));
   const controller=new AbortController(); request.current=controller; const id=++generation.current;
   setMessages(previous=>[...previous,{providerId:provider.id,role:"user",text,context:snapshot}]);setInput("");setError(false);setPending(true);
-  try { const reply=await provider.reply({message:text,history,context:snapshot,signal:controller.signal});
+  try { // El contrato del servidor aún solo admite home/explore/simulator/portfolio: learn y game se envían como home.
+   const sent=provider.id==="local"||(snapshot.page!=="learn"&&snapshot.page!=="game")?snapshot:{...snapshot,page:"home" as const};
+   const reply=await provider.reply({message:text,history,context:sent,signal:controller.signal});
    if(id===generation.current&&!controller.signal.aborted)setMessages(previous=>[...previous,{providerId:provider.id,role:"assistant",text:reply.text,context:snapshot,reply}]);
   } catch {if(id===generation.current&&!controller.signal.aborted)setError(true);}
   finally {if(id===generation.current){request.current=null;setPending(false);}}
@@ -41,7 +43,7 @@ export default function AssistantPanel({ open, onClose, context, panelRef, provi
   <div className="assistant-head"><div className="assistant-avatar"><Sparkles size={20}/></div><div><strong>{t.title}</strong><span>{t.subtitle}</span></div><button className="icon-button" onClick={onClose} aria-label={t.close}><X size={20}/></button></div>
   <div className="assistant-banner">{provider.id === "server_rules" ? (context.language === "es" ? "SERVIDOR DE DEMO · RESPUESTAS POR REGLAS" : "DEMO SERVER · RULE-BASED RESPONSES") : t.mode}</div>
   <div className="messages" aria-live="polite" tabIndex={0}><div className="message assistant"><p>{t.hello}</p></div>{messages.map((m,i)=><div key={i} lang={m.context.language} className={`message ${m.role}`}><div><p>{m.text}</p>{m.reply&&m.reply.sources.length>0&&<div className="message-sources">{t.source}: {m.reply.sources.map(source=><a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.label}</a>)}</div>}</div></div>)}</div>
-  <div className="suggestions"><button type="button" onClick={()=>setInput(t.fund)}>{t.fund}</button><button type="button" onClick={()=>setInput(context.decline?t.decline:t.simulation)}>{context.decline?t.decline:t.simulation}</button>{context.decline && <button type="button" onClick={()=>setInput(context.language === "es" ? "¿Por qué ha caído?" : "Why did it fall?")}>{context.language === "es" ? "¿Por qué ha caído?" : "Why did it fall?"}</button>}</div>
+  <div className="suggestions" role="group" aria-label={context.language==="es"?"Preguntas sugeridas":"Suggested questions"}>{suggestedQuestions(context.page,context.level,context.language,!!context.decline).map(q=><button key={q} type="button" onClick={()=>setInput(q)}>{q}</button>)}</div>
   <form className="chat-form" onSubmit={send}><label className="sr-only" htmlFor="chat-input">{t.input}</label><input id="chat-input" value={input} maxLength={MAX_MESSAGE_LENGTH} onChange={e=>setInput(e.target.value)} placeholder={t.placeholder}/><button type="submit" disabled={pending||!input.trim()} aria-label={t.send}><Send size={17}/></button></form>
   <p className="assistant-foot">{t.limit} {t.reviewed}</p><div className="assistant-voice"><VoiceControls text={lastReply?.text} language={context.language} speechLanguage={lastReply?.reply?.language??context.language} onTranscript={text=>setInput(previous=>(previous?`${previous} ${text}`:text).slice(0,MAX_MESSAGE_LENGTH))}/></div>
   <div className="assistant-status" role="status" aria-live="polite">{pending?(provider.id === "server_rules" ? (context.language === "es" ? "Preparando respuesta del servidor…" : "Preparing server response…") : t.pending):error?t.error:""}</div>{pending&&<button className="plain-link" onClick={cancel}>{t.cancel}</button>}

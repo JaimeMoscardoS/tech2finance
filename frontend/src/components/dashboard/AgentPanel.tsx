@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
-import { useId } from "react";
-import type { AgentFacts } from "../../dashboard-portfolio.ts";
+import { useId, useMemo } from "react";
+import { buildDemoPortfolio, deriveAgentFacts, type AgentFacts } from "../../dashboard-portfolio.ts";
 import type { Level } from "../../types/level.ts";
 import { DemoBadge, StatusChip } from "./basics.tsx";
 import type { Lang } from "./copy.ts";
@@ -37,16 +37,14 @@ export function AgentPanel({ level, facts, language = "es" }: { level: Level; fa
       </header>
       <p className="dash-agent__sample">{c.sample}</p>
 
-      {level === "beginner" && (
-        <section aria-label={c.summary}>
+      <section aria-label={c.summary}>
           <h4>{c.summary}</h4>
           <p>{es
             ? `Tu cartera de ejemplo vale ${eur(facts.totalValue, language)}${facts.pnlPercent != null ? ` y su resultado es ${signedPct(facts.pnlPercent, language)} sobre lo invertido` : ""}. La parte más grande está en «${facts.topName}» (${pct(facts.topWeightPct, language, 0)}).`
             : `Your sample portfolio is worth ${eur(facts.totalValue, language)}${facts.pnlPercent != null ? ` and its result is ${signedPct(facts.pnlPercent, language)} on the amount invested` : ""}. The largest part is in “${facts.topName}” (${pct(facts.topWeightPct, language, 0)}).`}</p>
         </section>
-      )}
 
-      {level === "intermediate" && (
+      {level !== "beginner" && (
         <>
           <section aria-label={c.observations}>
             <h4>{c.observations}</h4>
@@ -56,13 +54,13 @@ export function AgentPanel({ level, facts, language = "es" }: { level: Level; fa
               <li>{es ? `En la serie DEMO, la volatilidad anualizada es ${facts.volatilityPct == null ? "n. d." : pct(facts.volatilityPct, language)} y la mayor caída desde un máximo, ${facts.maxDrawdownPct == null ? "n. d." : pct(facts.maxDrawdownPct, language)}.` : `In the DEMO series, annualised volatility is ${facts.volatilityPct == null ? "n/a" : pct(facts.volatilityPct, language)} and the largest fall from a peak is ${facts.maxDrawdownPct == null ? "n/a" : pct(facts.maxDrawdownPct, language)}.`}</li>
             </ul>
           </section>
-          <section aria-label={c.review}>
+          {level === "intermediate" && <section aria-label={c.review}>
             <h4>{c.review}</h4>
             <ul>
               <li>{es ? "¿Tu horizonte y tu necesidad de liquidez encajan con la parte invertida en renta variable?" : "Do your horizon and liquidity needs fit the part invested in equities?"}</li>
               <li>{es ? "¿Conoces los gastos corrientes (TER) de cada fondo y cómo restan rentabilidad?" : "Do you know each fund's ongoing charges (TER) and how they reduce returns?"}</li>
             </ul>
-          </section>
+          </section>}
         </>
       )}
 
@@ -87,7 +85,14 @@ export function AgentPanel({ level, facts, language = "es" }: { level: Level; fa
           </section>
         </>
       )}
+      {level === "beginner" && <p className="dash-agent__note">{es ? "Pregunta al tutor si algún término no te queda claro (por ejemplo, «diversificar»)." : "Ask the tutor if a term is unclear (for example, “diversification”)."}</p>}
       <p className="dash-agent__limits">{c.limits}</p>
     </aside>
   );
+}
+
+/** Panel listo para colocar en el dashboard: calcula los datos con la cartera DEMO y el código de métricas. */
+export function AgentPanelSection({ level, language = "es" }: { level: Level; language?: Lang }) {
+  const facts = useMemo(() => deriveAgentFacts(buildDemoPortfolio()), []);
+  return <AgentPanel level={level} facts={facts} language={language} />;
 }

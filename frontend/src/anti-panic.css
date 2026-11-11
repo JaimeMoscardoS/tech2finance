@@ -50,3 +50,16 @@
   .anti-panic__actions { grid-template-columns: 1fr; }
   .anti-panic__actions .button { grid-column: auto; }
 }
+.anti-panic .anti-panic__notblock { margin: 16px 0 0; padding: 10px 12px; border-radius: 8px; background: var(--surface-tint); color: var(--ink); font-size: 13px; line-height: 1.5; }
+.anti-panic .anti-panic__plain { margin: 16px 0 0; color: var(--ink); font-size: 15px; line-height: 1.55; }
+.anti-panic__more { margin-top: 14px; border-top: 1px solid var(--border); }
+.anti-panic__more summary { min-height: 44px; display: flex; align-items: center; color: var(--accent); font-size: 14px; font-weight: 700; cursor: pointer; }
+.anti-panic__more summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.anti-panic__consider, .anti-panic__advanced { margin-top: 18px; }
+.anti-panic__consider h3, .anti-panic__advanced h3 { margin: 12px 0 8px; color: var(--ink); font-size: 15px; }
+.anti-panic__consider > p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.anti-panic__consider ul, .anti-panic__advanced ul { margin: 0; padding-left: 20px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.anti-panic__advanced dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; margin: 0 0 12px; }
+.anti-panic__advanced dl > div { padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-raised); }
+.anti-panic__advanced dt { color: var(--muted); font-size: 12px; line-height: 1.4; }
+.anti-panic__advanced dd { margin: 4px 0 0; color: var(--ink); font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }

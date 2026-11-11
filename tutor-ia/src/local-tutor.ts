@@ -1,6 +1,7 @@
 import type { TutorProvider, TutorRequest, TutorReply, SimulationFacts } from './types.ts';
 import { safeSources } from './decline.ts';
 import { bankAnswer } from './bank-profile.ts';
+import { conceptLevelNote, declineLevelNote, decisionLevelNote, pageHint } from './level-notes.ts';
 
 export const MAX_MESSAGE_LENGTH = 1500;
 export const MAX_HISTORY_MESSAGES = 8;
@@ -68,6 +69,7 @@ export function createLocalTutorProvider(): TutorProvider {
     if (concepts[intent]) {
       text = concepts[intent][en ? 1 : 0];
       if (context?.level === 'beginner' && intent === 'diversification') text += en ? ' Think of using several baskets.' : ' Es como repartir objetos en varias cestas.';
+      text += conceptLevelNote(intent, context?.level, en);
     } else if (intent === 'result' && definition) {
       text = en ? 'Return describes the change in value of an investment over a period; it can be negative and depends on the measurement and costs.' : 'La rentabilidad describe la variación de valor de una inversión en un periodo; puede ser negativa y depende de cómo se mida y de los costes.';
       intent = 'unknown';
@@ -101,6 +103,7 @@ export function createLocalTutorProvider(): TutorProvider {
       const d = context?.decline;
       if (!d || d.status !== 'ok' || !Number.isFinite(d.currentDrawdownPercent) || !Number.isFinite(d.maxDrawdownPercent) || typeof d.latestLabel !== 'string') text = en ? 'There are not enough valid observations to analyse a decline.' : 'No hay observaciones válidas suficientes para analizar una caída.';
       else text = en ? `At ${d.latestLabel}, the observed decline from the peak is ${fmt(d.currentDrawdownPercent!)}%; the largest observed decline is ${fmt(d.maxDrawdownPercent!)}%. An observed recovery does not guarantee a future recovery.` : `En ${d.latestLabel}, la caída observada desde el máximo es del ${fmt(d.currentDrawdownPercent!)}%; la mayor caída observada es del ${fmt(d.maxDrawdownPercent!)}%. Una recuperación observada no garantiza una recuperación futura.`;
+      if (d && d.status === 'ok') text += declineLevelNote(context?.level, en);
     } else if (intent === 'causes') {
       const demo = context?.decline?.demoContext;
       text = demo?.sourceKind === 'synthetic_demo' ? `${demo.explanation[lang]} ${en ? 'Fictional BancoT2F script, not verified news; no comparable cases are available.' : 'Guion ficticio BancoT2F, no son noticias verificadas; no hay casos comparables.'}` : (en ? 'The cause is unknown from the available data. There are no verified news or comparable cases here.' : 'La causa es desconocida con los datos disponibles. Aquí no hay noticias verificadas ni casos comparables.');
@@ -114,9 +117,13 @@ export function createLocalTutorProvider(): TutorProvider {
       else if (decision?.needsLiquidity === 'no') parts.push(en ? 'You indicated that you do not need liquidity.' : 'Has indicado que no necesitas liquidez.');
       else if (decision?.needsLiquidity === 'unknown') parts.push(en ? 'Your liquidity need is not yet known.' : 'Tu necesidad de liquidez todavía no se conoce.');
       parts.push(en ? 'Consider your goal, time horizon and whether you need liquidity. A long horizon does not guarantee recovery. You can sell, hold or seek professional advice; the decision is yours.' : 'Ten en cuenta tu objetivo, horizonte y necesidad de liquidez. Un plazo largo no garantiza la recuperación. Puedes vender, mantener o consultar a un profesional; la decisión es tuya.');
-      text = parts.join(' ');
+      text = parts.join(' ') + decisionLevelNote(context?.level, en);
     }
-    else text = en ? 'This local tutor uses predefined explanations. Ask about funds, risk, costs, the simulation or an observed decline.' : 'Este tutor local utiliza explicaciones predefinidas. Pregunta por fondos, riesgo, costes, la simulación o una caída observada.';
+    else {
+      text = en ? 'This local tutor uses predefined explanations. Ask about funds, risk, costs, the simulation or an observed decline.' : 'Este tutor local utiliza explicaciones predefinidas. Pregunta por fondos, riesgo, costes, la simulación o una caída observada.';
+      const hint = pageHint(context?.page, context?.level, en);
+      if (hint) text = hint + ' ' + text;
+    }
     const sources = intent === 'decline' || intent === 'causes' ? safeSources(context?.decline?.sources) : safeSources(context?.instrument?.sources);
     if (request.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     return { text: text.slice(0, 3000), language: lang, mode: 'local', provider: 'local', intent, sources };

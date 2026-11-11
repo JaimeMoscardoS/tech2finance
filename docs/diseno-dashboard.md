@@ -122,6 +122,13 @@ Las PR grandes siguen la revisión ampliada del `CLAUDE.md` (nota mínima 8/10, 
 
 **Pendiente de la fase 2**: revisiones `t2f-01-frontend-reviewer` y `t2f-03-revisor-matematico` (métricas); comprobar navegación por teclado y lector de pantalla con herramienta real; el contraste medido usa el color de fondo base (el degradado del tema oscuro en tarjetas añade como máximo un 7 % de acento); Heatmap; los componentes no se usan aún en el dashboard real (fase 3); la página `/componentes` está incluida también en la compilación de producción.
 
+## Estado de las fases 3, 4 y 5 e Inicio (rama `mejora-ui`, sin commit, sin revisiones)
+
+**Implementado (11-11-2026)**: Inicio (`views/home`, datos `shared/mock/demo-home.ts` y `demo-facts.ts`; 1S deshabilitado porque la serie es mensual, «variación hoy» = último mes DEMO; botones «¿Qué estoy viendo?» y «¿Cómo van las cosas?» sin LLM); Fondos/Inversiones por nivel en «Mi cartera» (`views/funds`, `funds-metrics.ts`, `shared/mock/demo-trades.ts`); páginas nuevas Educación (`views/learn`, Test MiFID con 3 preguntas de ejemplo en `shared/mock/mifid-questions.ts`, formato documentado en su cabecera) y Juego (`views/game`, `game-scenarios.ts`); `AgentPanelSection` en «Mi cartera»; tutor local y preguntas sugeridas por nivel (`tutor-ia/src/level-notes.ts`); pausa antes de vender por nivel (`AntiPanicPanel` con `level?`, informativa, no bloquea).
+**Contrato**: `Page` del tutor admite `learn` y `game`; el backend solo acepta 4 páginas, por lo que el cliente envía `home` al servidor en esas dos.
+**Comprobado**: build, 103 pruebas unitarias, Playwright 99 superadas y 2 `fixme`; sin desborde horizontal a 320 px en Inicio, Mi cartera, Educación y Juego en los 3 niveles; capturas de las 6 combinaciones.
+**Pendiente**: revisiones (`t2f-01-frontend-reviewer`, `t2f-04-revisor-fundamentos`, `t2f-03-revisor-matematico`, `t2f-04-tutor-reviewer`); contraste AA y teclado en las vistas nuevas; contenido real del Test MiFID; pruebas Playwright específicas de las vistas nuevas; los 2 tests `fixme` de `chart-colors.spec.ts` (apuntaban al gráfico y a las tarjetas antiguos); retirar CSS antiguo y `/componentes` (fase 6).
+
 ## Pendiente
 
 - Contenido del Test MiFID (se genera aparte).
