@@ -5,7 +5,6 @@ import { type VoiceState } from './voice/browser-voice';
 import { speak, stopPlayback } from './voice/playback';
 import { cancelDictation, startDictation, type DataMode } from './voice/dictation';
 import { replyOrigin } from './reply-origin';
-import { tutorStatusLabel, useTutorStatus } from './tutor-status';
 import { tutorErrorMessage } from './server-api';
 import './voice-assistant.css';
 
@@ -20,7 +19,6 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
  const t = copy[context.language];
  const local = useMemo(() => createLocalTutorProvider(), []);
  const provider = suppliedProvider ?? local;
- const serverStatus = useTutorStatus(open, dataMode);
  const key = JSON.stringify(context) + provider.id + dataMode;
  const [phase, setPhase] = useState<Phase>('idle');
  const [message, setMessage] = useState('');
@@ -117,10 +115,8 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
    <button type="button" className="voice-panel__icon" onClick={active ? cancel : talk} aria-label={active ? t.cancel : t.talk}>{active ? <Square size={17} fill="currentColor"/> : <Mic size={19}/>}</button>
    <button type="button" className="voice-panel__icon" onClick={close} aria-label={t.close}><X size={20}/></button>
   </div>
-  <p className="voice-panel__privacy">{dataMode === 'local' ? (context.language === 'es' ? 'Modo local · respuestas por reglas' : 'Local mode · rule-based responses') : reply ? (reply.provider === 'anthropic' ? `Anthropic · ${reply.model}` : (context.language === 'es' ? 'Explicaciones de demostración' : 'Demo explanations')) : tutorStatusLabel(serverStatus, context.language)}</p>
+  {dataMode === 'local' && <p className="voice-panel__privacy">{context.language === 'es' ? 'Modo local · respuestas por reglas' : 'Local mode · rule-based responses'}</p>}
   {dataMode === 'local' && onUseServer && <p className="voice-panel__privacy">{context.language === 'es' ? 'Activa el servidor para toda la demo; se descartarán los resultados actuales.' : 'Connects the whole demo to the server; current results will be cleared.'} <button type="button" className="plain-link" onClick={onUseServer}>{context.language === 'es' ? 'Conectar asistente con IA' : 'Connect AI assistant'}</button></p>}
-  {dataMode === 'server' && <p className="voice-panel__privacy">{context.language === 'es' ? 'Si ElevenLabs está configurado, tu audio se enviará a ElevenLabs. Idioma: español.' : 'If ElevenLabs is configured, your audio will be sent to ElevenLabs. Language: English.'}</p>}
-  {dataMode === 'server' && <p className="voice-panel__privacy">{context.language === 'es' ? 'Si ElevenLabs está configurado para la lectura, se le enviará el texto de la respuesta.' : 'If ElevenLabs is configured for playback, the answer text will be sent to it.'}</p>}
   {failed && question && <div className="voice-panel__actions"><span>{question}</span><button type="button" onClick={() => { cancel(); submitQuestion(question, generation.current, structuredClone(context)); }}>{context.language === 'es' ? 'Reintentar pregunta' : 'Retry question'}</button></div>}
   {reply && <div className="voice-panel__actions"><span className="voice-panel__provider">{reply.provider === 'anthropic' ? `Anthropic · ${reply.model ?? 'Claude Sonnet'}` : context.language === 'es' ? 'Respuesta por reglas' : 'Rule-based response'}</span><button type="button" onClick={() => setShowAnswer(value => !value)} aria-expanded={showAnswer}>{context.language === 'es' ? 'Ver respuesta' : 'View answer'}</button></div>}
   {showAnswer && reply && <div className="voice-panel__result">{question && <section><h3>{t.heard}</h3><p>{question}</p></section>}<section><h3>{t.answer}</h3><p>{reply.text}</p>{provider.id === 'server_rules' && replyOrigin(reply.provider, reply.language) && <div className="voice-panel__sources">{replyOrigin(reply.provider, reply.language)}</div>}{reply.sources.length > 0 && <div className="voice-panel__sources">{t.sources}: {reply.sources.map(source => <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.label}</a>)}</div>}</section><button type="button" onClick={phase === 'speaking' ? cancel : play} disabled={phase === 'dictating' || phase === 'pending'}><Volume2 size={17}/>{phase === 'speaking' ? t.stop : t.listen}</button></div>}
