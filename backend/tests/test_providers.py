@@ -192,6 +192,51 @@ def test_tutor_provider_failure_and_untrusted_fields(monkeypatch):
     assert client.post('/api/tutor', json={'message': 'hello', 'context': CONTEXT, 'history': [{'role': 'user', 'text': 'x'}] * 9}).status_code == 422
 
 
+def test_tutor_retries_invalid_model_output_once_with_shared_deadline(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    calls, deadlines = [], []
+    original = providers.post_json
+    async def record(url, headers, data, deadline, limit):
+        deadlines.append(deadline)
+        return await original(url, headers, data, deadline, limit)
+    monkeypatch.setattr(providers, 'post_json', record)
+    def handler(request):
+        calls.append(json.loads(request.content))
+        paragraph = 'El fondo subió 999999 euros.' if len(calls) == 1 else 'La causa concreta es desconocida.'
+        value = {'language': 'es', 'paragraphs': [paragraph], 'sourceIds': []}
+        return httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(handler))
+    response = client.post('/api/tutor', json={'message': '¿Por qué sube?', 'context': CONTEXT})
+    assert response.status_code == 200 and 'La causa concreta es desconocida.' in response.json()['text']
+    assert len(calls) == 2 and 'previous answer failed validation' in calls[1]['messages'][0]['content']
+    assert 0 < deadlines[1] <= deadlines[0] <= 35
+
+
+def test_tutor_http_failure_is_not_retried(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    calls = []
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(429)
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(handler))
+    response = client.post('/api/tutor', json={'message': 'Hola', 'context': CONTEXT})
+    assert response.status_code == 503 and response.json()['error']['code'] == 'tutor_provider_error'
+    assert len(calls) == 1
+
+
+def test_tutor_stops_after_two_invalid_responses(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    calls = []
+    def handler(request):
+        calls.append(request)
+        value = {'language': 'es', 'paragraphs': ['El fondo ganó 999999 euros.'], 'sourceIds': []}
+        return httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(handler))
+    response = client.post('/api/tutor', json={'message': 'Hola', 'context': CONTEXT})
+    assert response.status_code == 503 and response.json()['error']['code'] == 'tutor_validation_error'
+    assert len(calls) == 2
+
+
 def test_token_capacity_is_bounded(monkeypatch):
     monkeypatch.setenv('ELEVENLABS_API_KEY', 'fake-secret')
     for _ in range(4):

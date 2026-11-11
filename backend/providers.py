@@ -210,35 +210,45 @@ async def tutor_reply(payload):
                   'Data: ' + json.dumps(facts, ensure_ascii=False))
         request = {'model': model, 'max_tokens': 900, 'messages': [{'role': 'user', 'content': prompt}],
                    'output_config': {'format': {'type': 'json_schema', 'schema': schema}}}
-        try:
-            body = await post_json('https://api.anthropic.com/v1/messages',
-                                   {'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'}, request, 35, 65536)
-        except (httpx.HTTPError, TimeoutError, ValueError, KeyError, TypeError):
-            raise ProviderError('tutor_provider_error') from None
-        try:
-            blocks = body['content']
-            if body.get('stop_reason') != 'end_turn' or not isinstance(blocks, list):
-                raise ValueError()
-            texts = [block['text'] for block in blocks if isinstance(block, dict) and block.get('type') == 'text']
-            if len(texts) != 1 or any(not isinstance(b, dict) or b.get('type') not in ('text', 'thinking', 'redacted_thinking') for b in blocks):
-                raise ValueError()
-            value = json.loads(texts[0])
-            if not isinstance(value, dict) or set(value) != {'language', 'paragraphs', 'sourceIds'} or value['language'] != payload['context']['language']:
-                raise ValueError()
-            paragraphs, ids = value['paragraphs'], value['sourceIds']
-            if not isinstance(paragraphs, list) or not 1 <= len(paragraphs) <= 4 or not isinstance(ids, list) or len(ids) > 20:
-                raise ValueError()
-            trusted_numbers = financial_numbers({k: context.get(k) for k in ('portfolio', 'simulation', 'decline')}) + ' ' + server_answer
-            if any(not isinstance(p, str) or not 10 <= len(p.strip()) <= 1000 or unsafe_chat_narrative(p) or unsupported_numbers(mask_server_names(p, context), trusted_numbers) or wrong_language(p, value['language']) for p in paragraphs):
-                raise ValueError()
-            if any(not isinstance(i, str) or i not in refs for i in ids):
-                raise ValueError()
-        except (ValueError, KeyError, TypeError):
-            raise ProviderError('tutor_validation_error') from None
-        # A recognized rules answer contains server-owned facts; unknown questions use model explanation alone.
-        text = ' '.join(p.strip() for p in paragraphs) + suffix
-        if len(text) > 3000:
-            raise ProviderError('tutor_validation_error')
+        deadline = time.monotonic() + 35
+        for attempt in range(2):
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise ProviderError('tutor_validation_error' if attempt else 'tutor_provider_error')
+            if attempt:
+                request = {**request, 'messages': [{'role': 'user', 'content': prompt +
+                    ' The previous answer failed validation. Rewrite it using only trusted figures and exact names, registered source IDs, the requested language and the stated length limits.'}]}
+            try:
+                body = await post_json('https://api.anthropic.com/v1/messages',
+                                       {'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'}, request, remaining, 65536)
+            except (httpx.HTTPError, TimeoutError, ValueError, KeyError, TypeError):
+                raise ProviderError('tutor_provider_error') from None
+            try:
+                blocks = body['content']
+                if body.get('stop_reason') != 'end_turn' or not isinstance(blocks, list):
+                    raise ValueError()
+                texts = [block['text'] for block in blocks if isinstance(block, dict) and block.get('type') == 'text']
+                if len(texts) != 1 or any(not isinstance(b, dict) or b.get('type') not in ('text', 'thinking', 'redacted_thinking') for b in blocks):
+                    raise ValueError()
+                value = json.loads(texts[0])
+                if not isinstance(value, dict) or set(value) != {'language', 'paragraphs', 'sourceIds'} or value['language'] != payload['context']['language']:
+                    raise ValueError()
+                paragraphs, ids = value['paragraphs'], value['sourceIds']
+                if not isinstance(paragraphs, list) or not 1 <= len(paragraphs) <= 4 or not isinstance(ids, list) or len(ids) > 20:
+                    raise ValueError()
+                trusted_numbers = financial_numbers({k: context.get(k) for k in ('portfolio', 'simulation', 'decline')}) + ' ' + server_answer
+                if any(not isinstance(p, str) or not 10 <= len(p.strip()) <= 1000 or unsafe_chat_narrative(p) or unsupported_numbers(mask_server_names(p, context), trusted_numbers) or wrong_language(p, value['language']) for p in paragraphs):
+                    raise ValueError()
+                if any(not isinstance(i, str) or i not in refs for i in ids):
+                    raise ValueError()
+                text = ' '.join(p.strip() for p in paragraphs) + suffix
+                if len(text) > 3000:
+                    raise ValueError()
+            except (ValueError, KeyError, TypeError):
+                if attempt:
+                    raise ProviderError('tutor_validation_error') from None
+                continue
+            break
         return {'text': text, 'language': value['language'], 'mode': 'api', 'provider': 'anthropic',
                 'model': model, 'intent': base['intent'], 'sources': base['sources'] if base['intent'] != 'unknown' else [refs[i] for i in dict.fromkeys(ids)]}
     finally:
