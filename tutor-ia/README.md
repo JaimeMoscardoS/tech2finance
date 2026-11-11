@@ -12,6 +12,8 @@ La simulación de NAV histórico aporta fechas ISO de inicio y fin y frecuencia 
 
 El analizador recibe hasta 500 observaciones positivas y finitas, con etiquetas aportadas por quien llama. Debe recibir un índice del instrumento normalizado sin aportaciones, o una cartera ficticia sin flujos; un saldo alterado por aportaciones no mide correctamente la caída del instrumento. Identifica máximos, mínimos y recuperaciones observadas, incluidos episodios abiertos. No infiere causas ni busca noticias o comparables. El contexto opcional puede contener el hecho público verificado de la OMS del 11 de marzo de 2020 cuando esté dentro del periodo; no demuestra causalidad. La recuperación observada no garantiza resultados futuros.
 
+Ante expresiones reconocidas de preocupación por una caída o una venta, en español o inglés, el tutor ofrece una explicación empática y considera el objetivo, el horizonte y la liquidez recibidos. Esta respuesta no incorpora cifras ni fuentes del informe de caída; una pregunta específica sobre la caída conserva la explicación del informe. Si no hay observaciones válidas, lo indica. Las referencias reconocidas a otro producto o a una caída futura se rechazan sin trasladar datos del contexto activo. Los factores generales son posibilidades, no causas demostradas, y cualquier escenario BancoT2F sigue siendo ficticio. La decisión corresponde al usuario, sin garantía de recuperación ni recomendación predeterminada de mantener. La detección se basa en palabras y no comprende todas las formulaciones.
+
 Ejecutar desde la raíz: `node --experimental-strip-types --test tutor-ia/tests/*.test.ts`.
 
 ## Evaluación local

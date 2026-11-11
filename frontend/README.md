@@ -4,6 +4,8 @@
 
 Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, comparar ejemplos y entender una caída. Ofrece tres niveles, español e inglés, temas claro y oscuro y voz local opcional. La demo no conecta cuentas ni realiza operaciones.
 
+La tarjeta «¿Te preocupa la caída?» abre una explicación educativa con acceso al tutor escrito y de voz. El contexto ficticio se carga opcionalmente, es editable y deja la liquidez sin indicar. Los datos y fuentes del análisis se consultan en el desplegable. Objetivos contiene un perfil ficticio editable y restablecible; simulador y práctica usan importes de ejemplo sobre fuentes identificadas.
+
 ## Datos y simulación
 
 El catálogo identifica cinco casos de estudio por gestora e ISIN. BancoT2F es el anfitrión simulado; sus condiciones no se atribuyen a esos fondos. Los riesgos, plazos, mínimos y costes adicionales desconocidos se presentan como tales. El modo local usa `shared/demo-data.json`, `shared/nav-history.json` y `shared/data-manifest.json`; el modo servidor obtiene el catálogo v2 y cálculos desde FastAPI. No cambia automáticamente de modo ante errores. Una respuesta de catálogo o simulación incompatible activa la recuperación explícita.

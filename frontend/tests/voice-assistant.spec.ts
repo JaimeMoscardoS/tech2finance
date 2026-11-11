@@ -89,8 +89,8 @@ test('opening voice from the pause leaves the microphone off until requested', a
  await expect.poll(() => page.evaluate(() => (window as any).voiceTest.starts)).toBe(1);
  await page.getByRole('dialog', { name: 'Habla con tu asistente' }).getByRole('button', { name: 'Cerrar asistente de voz' }).click();
  await page.getByRole('button', { name: 'Mi cartera', exact: true }).click();
- await page.getByRole('button', { name: 'Entender una caída' }).click();
- await page.getByRole('dialog', { name: 'Una pausa para comprender' }).getByRole('button', { name: 'Hablar con el asistente' }).click();
+ await page.getByRole('button', { name: '¿Te preocupa la caída?' }).click();
+ await page.getByRole('dialog', { name: 'Tomemos un momento' }).getByRole('button', { name: 'Hablar con el asistente' }).click();
  const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
  await expect(dialog.getByRole('button', { name: 'Hablar', exact: true })).toBeVisible();
  expect(await page.evaluate(() => (window as any).voiceTest.checks)).toBe(1);
