@@ -6,7 +6,8 @@ import { DEMO_NOTE } from "../../../../shared/mock/demo-portfolio.ts";
 import { DemoBadge, EvolutionChart, KpiRow, Section, StatusChip } from "../../components/dashboard/index.ts";
 import { KpiCard } from "../../components/dashboard/index.ts";
 import { eur, num, pct, signedEur, signedPct } from "../../components/dashboard/format.ts";
-import { buildDemoPortfolio } from "../../dashboard-portfolio.ts";
+import { buildDemoPortfolio, type DemoPortfolio } from "../../dashboard-portfolio.ts";
+import type { HistoricalEvent } from "../../../../tutor-ia/src/types.ts";
 import { HOME_PERIODS, goalProgress, lastMonthChangePct, planStatus, selectFacts, sliceByPeriod, type HomePeriod, type PlanStatus } from "../../home-logic.ts";
 import type { Level } from "../../types/level.ts";
 import "./home.css";
@@ -59,8 +60,16 @@ const copy = {
   },
 } as const;
 
-function whatText(level: Level, lang: Lang): string[] {
+function whatText(level: Level, lang: Lang, real?: DemoPortfolio["real"]): string[] {
   const es = lang === "es";
+  if (real) {
+    const base = es
+      ? [`Estás en el Inicio: arriba ves el valor de tu cartera de ejemplo, calculado con los valores liquidativos mensuales publicados por la CNMV (${real.from} – ${real.to}); las participaciones son ficticias (DEMO). Debajo, accesos a las secciones de la aplicación.`]
+      : [`You are on Home: at the top you see the value of your sample portfolio, computed with the monthly net asset values published by the CNMV (${real.from} – ${real.to}); the holdings are fictional (DEMO). Below, shortcuts to the app sections.`];
+    if (level === "beginner") return [...base, es ? "El gráfico muestra cómo ha subido y bajado el valor. Lo pasado no predice lo futuro; lo importante es tu plazo y tu objetivo." : "The chart shows how the value has risen and fallen. The past does not predict the future; what matters is your horizon and goal."];
+    if (level === "intermediate") return [...base, es ? "Además ves lo invertido, el efectivo DEMO, el resultado y el avance hacia un objetivo DEMO. Puedes cambiar el periodo y comparar con la media simple de los fondos (calculada; no es un índice de mercado)." : "You also see the amount invested, the DEMO cash, the result and progress toward a DEMO goal. You can change the period and compare with the simple average of the funds (calculated; not a market index)."];
+    return [...base, es ? "La volatilidad anualizada y la caída máxima se calculan por código sobre esa serie mensual real. Son los mismos cálculos que en «Mi cartera»." : "Annualised volatility and maximum drawdown are computed by code on that real monthly series. They are the same calculations as in “My portfolio”."];
+  }
   const base = es
     ? ["Estás en el Inicio: arriba ves el valor de una cartera de ejemplo (DEMO) y cómo ha evolucionado; debajo, accesos a las secciones de la aplicación."]
     : ["You are on Home: at the top you see the value of a sample (DEMO) portfolio and how it has evolved; below, shortcuts to the app sections."];
@@ -69,15 +78,20 @@ function whatText(level: Level, lang: Lang): string[] {
   return [...base, es ? "También aparecen la volatilidad anualizada y la caída máxima calculadas sobre la serie mensual DEMO (menos de unos pocos años de datos limita su fiabilidad). El gráfico compara la cartera con un índice ficticio reescalado al mismo valor inicial." : "Annualised volatility and maximum drawdown, computed on the monthly DEMO series (a short history limits their reliability), also appear. The chart compares the portfolio with a fictional index rescaled to the same starting value."];
 }
 
-export default function HomeDashboard({ language, level, onNavigate, onAskAssistant }: {
+export default function HomeDashboard({ language, level, onNavigate, onAskAssistant, portfolio, events }: {
   language: Lang; level: Level; onNavigate?: (page: Page) => void; onAskAssistant?: () => void;
+  /** Misma cartera que «Mi cartera» (construida en App); sin ella, la cartera DEMO. */
+  portfolio?: DemoPortfolio;
+  /** Hechos públicos verificados del dataset CNMV (`navHistory.events`); se usan solo con la cartera real. */
+  events?: readonly HistoricalEvent[];
 }) {
   const c = copy[language];
   const es = language === "es";
   const panelId = useId();
   const [period, setPeriod] = useState<HomePeriod>("max");
   const [panel, setPanel] = useState<"what" | "how" | null>(null);
-  const p = useMemo(() => buildDemoPortfolio(), []);
+  const p = useMemo(() => portfolio ?? buildDemoPortfolio(), [portfolio]);
+  const real = p.real;
   const goal = demoHome.goal;
 
   const values = sliceByPeriod(p.valueSeries, period) ?? p.valueSeries;
@@ -89,7 +103,13 @@ export default function HomeDashboard({ language, level, onNavigate, onAskAssist
   const monthChange = lastMonthChangePct(p.valueSeries);
   const progress = goalProgress(p.totalValue, goal.targetEur);
   const plan = progress ? planStatus(progress.pct, goal.monthsElapsed, goal.monthsTotal) : null;
-  const facts = useMemo(() => selectFacts(demoFacts, p.positions.map((r) => r.fund.id), DEMO_AS_OF, FACT_COUNT[level]), [p, level]);
+  // Con datos reales no se mezclan los hechos DEMO ficticios (hablan de fondos inventados): se muestran hechos públicos
+  // verificados dentro del periodo de la serie, como contexto (no prueban causas).
+  const facts = useMemo(() => real
+    ? [...(events ?? [])].filter((e) => e.date >= real.from && e.date <= real.to).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, FACT_COUNT[level])
+        .map((e) => ({ id: e.id, date: e.date, text: { es: `${e.title.es}. ${e.summary.es}`, en: `${e.title.en}. ${e.summary.en}` }, source: { es: e.publisher, en: e.publisher }, url: e.sourceUrl as string | undefined, verified: true }))
+    : selectFacts(demoFacts, p.positions.map((r) => r.fund.id), DEMO_AS_OF, FACT_COUNT[level]).map((f) => ({ ...f, url: undefined as string | undefined, verified: false })), [p, real, events, level]);
+  const realNote = real ? (es ? `Valores liquidativos mensuales reales (CNMV, ${real.from} – ${real.to}); participaciones, efectivo y objetivo son DEMO.` : `Real monthly net asset values (CNMV, ${real.from} – ${real.to}); holdings, cash and goal are DEMO.`) : null;
 
   // Foco: al abrir un panel pasa a su encabezado; al cerrarlo vuelve al botón que lo abrió (no hay aria-live: el cambio de foco lo anuncia).
   const triggers = useRef<Record<"what" | "how", HTMLButtonElement | null>>({ what: null, how: null });
@@ -107,11 +127,11 @@ export default function HomeDashboard({ language, level, onNavigate, onAskAssist
   return (
     <div className="home">
       <h1 className="dash-sr">{es ? "Inicio" : "Home"}</h1>
-      <Section title={c.summary} demo language={language} description={DEMO_NOTE[language]}>
+      <Section title={c.summary} demo language={language} description={realNote ?? DEMO_NOTE[language]}>
         <div className="home__hero">
           <KpiRow label={c.kpis}>
             <KpiCard label={c.value} value={eur(p.totalValue, language)} demo language={language} />
-            <KpiCard label={c.lastMonth} value={monthChange == null ? c.na : signedPct(monthChange, language)} delta={monthChange} caption={c.lastMonthCap} demo language={language} />
+            <KpiCard label={c.lastMonth} value={monthChange == null ? c.na : signedPct(monthChange, language)} delta={monthChange} caption={real ? (es ? "Serie mensual (NAV CNMV): no hay variación diaria." : "Monthly series (CNMV NAVs): no daily change.") : c.lastMonthCap} demo language={language} />
             {level !== "beginner" && <KpiCard label={c.invested} value={eur(p.totalCost, language)} language={language} />}
             {level !== "beginner" && <KpiCard label={c.available} value={eur(demoHome.availableCashEur, language)} language={language} />}
             {advanced && <KpiCard label={c.result} value={signedEur(p.pnlAmount, language)} delta={p.pnlPercent} language={language} />}
@@ -122,7 +142,7 @@ export default function HomeDashboard({ language, level, onNavigate, onAskAssist
             </KpiCard>
           </KpiRow>
           <EvolutionChart
-            title={c.chart} data={data} seriesName={c.series} compareName={c.bench} changePct={periodChange} demo language={language}
+            title={c.chart} data={data} seriesName={real ? (es ? "Cartera (NAV CNMV)" : "Portfolio (CNMV NAVs)") : c.series} compareName={real ? real.benchmarkName[language] : c.bench} changePct={periodChange} demo language={language}
             periodControl={
               <div className="home__period-wrap">
                 <div className="dash-period" role="group" aria-label={c.period}>
@@ -133,7 +153,7 @@ export default function HomeDashboard({ language, level, onNavigate, onAskAssist
               </div>
             }
           />
-          <p className="home__period-note">{c.weekNote}</p>
+          <p className="home__period-note">{real ? (es ? "1S no disponible: los NAV publicados son mensuales y no se inventan datos diarios. 1M muestra el último mes." : "1W unavailable: published NAVs are monthly and no daily data is invented. 1M shows the last month.") : c.weekNote}</p>
         </div>
       </Section>
 
@@ -164,7 +184,7 @@ export default function HomeDashboard({ language, level, onNavigate, onAskAssist
           {panel === "what" && (
             <div className="home__panel">
               <h3 ref={headingRef} tabIndex={-1}>{c.what} <DemoBadge language={language} /></h3>
-              {whatText(level, language).map((t) => <p key={t}>{t}</p>)}
+              {whatText(level, language, real).map((t) => <p key={t}>{t}</p>)}
               <p className="home__note">{c.limits}</p>
               <div className="home__panel-actions">
                 {onAskAssistant && <button type="button" onClick={onAskAssistant}>{c.ask}</button>}
@@ -183,17 +203,17 @@ export default function HomeDashboard({ language, level, onNavigate, onAskAssist
                     : `Goal "${goal.name.en}": you are at ${num(progress.pct, language, 1)}% (${eur(p.totalValue, language)} of ${eur(goal.targetEur, language)}); with ${goal.monthsElapsed} of ${goal.monthsTotal} plan months elapsed, linear progress would be ${num(plan.expectedPct, language, 1)}%. This is an indicative comparison on DEMO data.`}
                 </p>
               )}
-              <h4>{c.factsTitle}</h4>
+              <h4>{real ? (es ? "Hechos públicos verificados del periodo de la serie" : "Verified public events in the series period") : c.factsTitle}</h4>
               {facts.length ? (
                 <ul>
                   {facts.map((f) => (
                     <li key={f.id} className="home__fact">
                       <span>{f.text[language]}</span>
-                      <small><time dateTime={f.date}>{f.date}</time> · {c.source}: {f.source[language]} <DemoBadge language={language} /></small>
+                      <small><time dateTime={f.date}>{f.date}</time> · {c.source}: {f.url ? <a href={f.url} target="_blank" rel="noreferrer">{f.source[language]}</a> : f.source[language]} {!f.verified && <DemoBadge language={language} />}</small>
                     </li>
                   ))}
                 </ul>
-              ) : <p>{c.noFacts}</p>}
+              ) : <p>{real ? (es ? "No hay hechos públicos verificados en el periodo." : "No verified public events in the period.") : c.noFacts}</p>}
               <p className="home__note">{c.limits}</p>
               <div className="home__panel-actions">
                 {onAskAssistant && <button type="button" onClick={onAskAssistant}>{c.ask}</button>}

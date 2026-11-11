@@ -20,9 +20,11 @@ test('voice keeps only the current open session history and does not restart lis
  await page.route('**/api/tutor', async route => { requests.push(route.request().postDataJSON()); await route.fulfill({json:{text:'Respuesta de prueba',language:'es',mode:'api',provider:'server_rules',intent:'bank_fees',sources:[]}}); });
  await page.goto('/');
  await page.getByRole('button',{name:'Hablar con IA'}).click();
- const dialog = page.getByRole('dialog',{name:'Habla con tu asistente'});
+ const dialog = page.getByRole('region',{name:'Habla con tu asistente'});
  const dictate = async (text:string) => {
   await page.evaluate((value) => { const r=(window as any).bankVoice.recognition; r.onresult({resultIndex:0,results:[{isFinal:true,0:{transcript:value}}]});r.onend(); },text);
+  const show = dialog.getByRole('button',{name:'Ver respuesta'});
+  if (await show.getAttribute('aria-expanded') !== 'true') await show.click();
   await expect(dialog.getByText('Respuesta de prueba')).toBeVisible();
  };
  await expect.poll(()=>page.evaluate(()=>(window as any).bankVoice.starts)).toBe(1);
@@ -40,16 +42,16 @@ test('voice keeps only the current open session history and does not restart lis
  await dictate('¿Qué producto veo?');
  expect(requests[2].history).toEqual([]);
  expect(requests[2].context.page).toBe('explore');
- await expect(page.locator('.beginner-card h2')).toContainText('T2F Equilibrio');
- expect(requests[2].context.instrumentId).toBe('demo-mixed');
+ await expect(page.locator('.beginner-card h2')).toContainText('CAIXABANK MONETARIO RENDIMIENTO');
+ expect(requests[2].context.instrumentId).toBe('caixabank-monetario-estandar');
  expect(requests[2].context.simulation).toBeUndefined();
  await dialog.getByRole('button',{name:'Cerrar asistente de voz'}).click();
- await page.locator('.beginner-guide select').last().selectOption('demo-equity');
- await expect(page.locator('.beginner-card h2')).toContainText('T2F Horizonte');
+ await page.locator('.beginner-guide select').last().selectOption('bbva-mi-inversion-bolsa-acumulacion');
+ await expect(page.locator('.beginner-card h2')).toContainText('BBVA MI INVERSION BOLSA ACUMULACION');
  await page.getByRole('button',{name:'Hablar con IA'}).click();
  await expect.poll(()=>page.evaluate(()=>(window as any).bankVoice.starts)).toBe(4);
  await dictate('Otra pregunta');
  expect(requests[3].history).toEqual([]);
- expect(requests[3].context.instrumentId).toBe('demo-equity');
+ expect(requests[3].context.instrumentId).toBe('bbva-mi-inversion-bolsa-acumulacion');
  expect(requests[3].context.simulation).toBeUndefined();
 });

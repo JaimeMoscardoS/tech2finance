@@ -9,7 +9,7 @@ import "./dashboard.css";
 type SortKey = "name" | "risk" | "value" | "weight" | "pnl" | "change12m";
 const sorters: Record<SortKey, (a: PositionRow, b: PositionRow) => number> = {
   name: (a, b) => a.fund.name.localeCompare(b.fund.name),
-  risk: (a, b) => a.fund.riskLevel - b.fund.riskLevel,
+  risk: (a, b) => (a.fund.riskLevel ?? Infinity) - (b.fund.riskLevel ?? Infinity),
   value: (a, b) => a.value - b.value,
   weight: (a, b) => a.weight - b.weight,
   pnl: (a, b) => a.pnlAmount - b.pnlAmount,

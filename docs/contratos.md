@@ -4,13 +4,25 @@
 
 Acuerdos entre áreas y contrato de la API local de demostración. El motor Python histórico conserva su propio contrato y se expone en `POST /api/game/compare`.
 
+## Datos CNMV y cálculo mensual (rama de trabajo)
+
+El catálogo v2 distingue el anfitrión ficticio BancoT2F de las clases de fondos reales de entidades externas. La lista `demoStudyInstrumentIds` determina qué casos se muestran en la demo y no cambia su entidad ni su ISIN. Los valores liquidativos y su trazabilidad se conservan en `shared/nav-history.json`; el manifiesto fija por separado el hash canónico de catálogo e histórico y ambos archivos tienen una copia versionada. Los snapshots anteriores y el replay periódico anterior se conservan para reproducir los ejemplos antiguos.
+
+La muestra comprende cierres mensuales observados desde diciembre de 2019 hasta diciembre de 2025, con fechas reales y sin interpolación. La inversión inicial se aplica al primer cierre elegido y cada aportación mensual se suma tras la variación del siguiente cierre. La frecuencia anual aplica la cantidad únicamente en los periodos 12, 24 y siguientes; si se simulan menos de doce meses no hay aportación periódica. Solo se admiten fechas de inicio disponibles y periodos dentro de la cobertura; no se repiten ciclos ni se extrapola. El valor liquidativo incorpora los gastos que ya afectan al fondo y no se descuentan de nuevo; no se modelan impuestos ni costes externos.
+
+La elegibilidad requiere identidad ISIN, registro y clase, moneda EUR, cierres completos y ausencia de distribuciones registradas a la precisión publicada en los informes semestrales consultados de 2020 a 2025. Esto no garantiza la política futura. Los informes trimestrales no publicados no se rellenan. El [manual CNMV, campo 23](https://www.cnmv.es/cnmvdia/decetes/Manual_AnexosIIC.pdf) define la cobertura semestral; la [nota legal](https://www.cnmv.es/portal/Utilidades/NotaLegal) exige reutilización fiel y condiciones que deben revisarse para cada uso. La clase BBVA que registra distribuciones queda deshabilitada hasta modelarlas.
+
+La [Ley 18/2022](https://www.boe.es/eli/es/l/2022/09/28/18) eliminó la obligatoriedad de los informes trimestrales y el [Real Decreto 816/2023](https://www.boe.es/eli/es/rd/2023/11/08/816) desarrolló ese cambio; la ausencia de un archivo trimestral no se interpreta como distribución cero. El [traspaso para el juego histórico](planning/historical-investment-game.md) describe el trabajo futuro, aún no implementado en su interfaz.
+
+La API de comparación usa las mismas fechas de cierre y expone fecha programada, fecha de ejecución e índice de periodo. La aportación del cierre de venta se invierte antes de vender y las posteriores permanecen en efectivo. El evento verificado de la OMS solo aparece si su fecha está dentro del periodo observado; la coincidencia temporal no demuestra causalidad y `causesStatus` sigue siendo `unknown`.
+
 El perfil tipado de BancoT2F se define en [`shared/bank-profile.ts`](../shared/bank-profile.ts) y los datos en `shared/demo-data.json:bankProfile`. Véanse [condiciones y versiones](banco-t2f.md). Las tarifas del perfil son informativas y se excluyen del cálculo; un coste anual `null` significa no definido.
 
 En el contexto interno del tutor se usa `bank?: BankProfile` y `instrument.product?: BankProduct` anidado en el instrumento; no hay `product` superior. El cliente puede indicar `bankId` opcional, que el servidor resuelve (si se omite usa `demo`); los bancos conocidos distintos de `demo` no reciben perfil ni tarifas de BancoT2F y el instrumento debe pertenecer al banco indicado. Los desconocidos devuelven 400 `unknown_bank`; esta validación no es autorización. Los campos extra, incluidos `bank`, `bankProfile` y `product` inyectados, reciben 422.
 
 - **1 → 2:** pantalla, nivel, parámetros del juego o pregunta; recibe resultados y errores.
 - **5 → 3 y 2:** catálogo ficticio y series verificadas con fuente, fecha, licencia, moneda, frecuencia, ajustes y costes; las muestras ficticias deben indicarlo.
-- **3 → 2:** evolución por fecha (en `/api/game/compare`, por número de mes sintético), aportaciones, resultados, decisiones de juego, fuente y supuestos. Los cálculos son verificables y no los hace el LLM.
+- **3 → 2:** evolución por fecha (en `/api/game/compare`, por número de mes y por fecha real de cierre), aportaciones, resultados, decisiones de juego, fuente y supuestos. Los cálculos son verificables y no los hace el LLM.
 - **2 → 4:** pregunta, pantalla, nivel y contexto mínimo disponible; objetivo, plazo y noticias verificadas con URL, fecha y procedencia cuando existan.
 - **4 → 2 → 1:** explicación textual y audio opcional, con fuentes y límites. Si no hay contexto o noticias suficientes, comunicarlo.
 - **1–4 → 5:** funciones comprobadas, resultados y limitaciones para pruebas y presentación.
@@ -19,9 +31,19 @@ El juego histórico no es una previsión: documentar qué activo representa cada
 
 ## Conversación y voz propuesta
 
+### Análisis detallado de caídas
+
+`POST /api/decline-explanations` recibe `{decline: DeclineSpec, level: 'beginner'|'intermediate'|'advanced', decision?: Decision}`. El idioma procede de `decline.language`; se rechazan informes, cifras, fuentes y campos extra del cliente. El servidor calcula de nuevo el informe y utiliza el mismo constructor TypeScript que el modo local. La respuesta `DetailedDeclineAnalysis` incluye versión `1.0`, modo `demo` o `ai`, proveedor, modelo, idioma, resumen, seis secciones ordenadas (`observed`, `context`, `mechanism`, `portfolio`, `decision`, `uncertainty`) y fuentes con identificadores y URL. La coincidencia temporal no demuestra causalidad.
+
+El proveedor por defecto es `demo`, basado en reglas. Con `T2F_ANALYSIS_PROVIDER=anthropic` y `ANTHROPIC_API_KEY` en el entorno del servidor se usa Sonnet; `T2F_ANTHROPIC_MODEL` es opcional y por defecto vale `claude-sonnet-5-5`, identificador incluido en la [documentación oficial](https://platform.claude.com/docs/en/models/overview). Solo se aceptan identificadores `claude-sonnet-*`. El proveedor recibe el informe resumido, el contexto histórico curado, idioma, nivel, horizonte y necesidad de liquidez si existen; el objetivo libre no se envía. No se deben usar datos reales de clientes. Las cifras y las secciones de observaciones, decisión e incertidumbre quedan bajo control del código. El modelo genera explicaciones adicionales para contexto, mecanismos y cartera. Las comprobaciones de formato, referencias y texto reducen riesgos, pero no prueban la verdad ni sustituyen una revisión humana.
+
+Se usa la API de mensajes con `output_config.format`, sin reintentos, con concurrencia limitada, plazo total de 35 segundos para el proveedor y lectura limitada a 64 KiB. El proceso local previo tiene un límite independiente de cinco segundos. Configuración incorrecta, error del proveedor o respuesta inválida devuelven 503 (`analysis_configuration_error`, `analysis_provider_error` o `analysis_unavailable`), sin sustitución silenciosa por demo. Los filtros textuales son heurísticos y pueden fallar ante formulaciones distintas, tanto al admitir contenido incorrecto como al rechazar respuestas válidas. La clave permanece en el servidor. `health.externalProviders` indica que Anthropic está seleccionado, no que el servicio esté accesible ni que la clave sea válida. La integración real con credenciales y las respuestas de Sonnet están pendientes de comprobación; las pruebas simuladas no demuestran una conexión real.
+
+La pausa permite cargar un objetivo y horizonte ficticios en el contexto `decision`, sin responder automáticamente a `needsLiquidity`; sus valores editados se transmiten como contexto de la consulta. No se modifica el contrato HTTP ni se envían cifras calculadas desde el cliente. El perfil ficticio de Objetivos es independiente y permanece en el frontend.
+
 En esta rama hay una alternativa local implementada: [`TutorProvider` y los tipos](../tutor-ia/src/types.ts) reciben pregunta limitada, historial acotado y contexto explícito, y devuelven texto por reglas, intención y fuentes. La interfaz conserva texto y contexto de cada respuesta; no invoca un modelo. La pausa usa `analyzeDecline` sobre observaciones del instrumento sin flujos o sobre la cartera ficticia. El informe incluye caída observada, episodios y fuentes; causas y comparables no están disponibles.
 
-Para `demo-mixed` y seis meses, el informe añade `demoContext` desde `shared/decline-demo.json`: versión, identificador, duración, `sourceKind: synthetic_demo`, explicación bilingüe y noticias por número de mes. Es un guion ficticio, sin fuentes ni fechas reales, y no modifica los cálculos; `causesStatus` sigue siendo `unknown`. El servidor lo resuelve internamente y rechaza campos de hechos enviados por el cliente. Otros instrumentos, periodos y cartera no reciben el guion.
+El informe puede añadir `historicalContext` con el evento público de la OMS fechado el 11 de marzo de 2020, solo si cae dentro de la serie observada. Su fuente es verificable y no demuestra la causa de la variación del fondo. El servidor rechaza hechos enviados por el cliente; `causesStatus` permanece `unknown`.
 
 La voz opcional usa capacidades locales del dispositivo: lectura solo con voces marcadas como locales; dictado solo cuando el navegador confirma procesamiento local y modelo ya disponible. Si no están disponibles queda el texto. El micrófono de la barra solicita de inmediato el reconocimiento local y envía la pregunta final cuando termina; desde la pausa la escucha se inicia manualmente. En el chat escrito el dictado se revisa y no se envía automáticamente. No se descargan modelos desde la aplicación ni se llama a proveedores. Las claves de futuras integraciones quedarían en un servidor, nunca en el cliente.
 
@@ -32,7 +54,7 @@ La siguiente arquitectura sigue siendo una propuesta futura, no el modo local ac
 3. Claude genera una explicación adaptada a ese contexto. Los datos y cálculos proceden de los componentes correspondientes; el modelo no debe inventar cifras ni atribuir causas sin evidencia.
 4. La interfaz muestra la respuesta escrita. Si el usuario activa la voz, ElevenLabs convierte esa respuesta en audio para reproducirla.
 
-Para el hackathon, implementar primero el chat de texto contextual, después la lectura de respuestas y, por último, la entrada por micrófono. Mantener la opción escrita y gestionar fallos de cada proveedor. Las claves de Claude y ElevenLabs se conservan en el servidor y fuera de Git. Esta arquitectura es una propuesta; las integraciones todavía no están implementadas ni verificadas.
+La arquitectura anterior de conversación y voz mediante proveedores sigue siendo una propuesta. El adaptador de Sonnet implementado para el análisis detallado es independiente del chat; no se ha verificado con credenciales reales. ElevenLabs sigue pendiente. Las claves se conservan en el servidor y fuera de Git.
 
 ## Motor de análisis de caídas
 
@@ -46,7 +68,7 @@ En esta rama existe análisis cuantitativo básico local; los contratos de integ
 
 ## Contrato del motor Python, versión 1.0
 
-El motor `simulador` (`compare`) está expuesto en `POST /api/game/compare` solo para instrumentos ficticios; el frontend aún no lo consume. `/api/simulations` sigue usando `replay`, con otro momento de aportación, y los resultados no coinciden entre ambos. La [referencia del simulador](../simulador/README.md) define los campos, validaciones y errores, ejemplos de CLI y firmas Python exactas: `load_series`, `parse_series`, `simulate`, `compare`, `drawdowns` y `scenarios`. Los importes, tasas y valores se serializan como cadenas decimales; las duraciones y `max_gap_days` son enteros JSON. Histórico y escenarios usan `Decimal` con 34 cifras; el filtro de caídas compara fracciones exactas y muestra la profundidad con 120 cifras. Las demás rutas de la API usan cálculos propios. Las fuentes y licencias son declaraciones sin verificación. Comparables y causas devuelven información insuficiente o desconocida.
+El motor `simulador` (`compare`) se expone en `POST /api/game/compare` para los fondos con histórico elegible; la sección «¿Y si vendo?» del Simulador lo consume en la rama `feature/juego-pantalla` (ver [README del frontend](../frontend/README.md)); el frontend valida el esquema, la procedencia y la coherencia de los totales antes de mostrarlo. Las aportaciones sin comisiones comparten el momento de cierre de `/api/simulations`. La [referencia del simulador](../simulador/README.md) define el contrato del motor, cuyos importes se serializan como cadenas decimales y utilizan `Decimal` con 34 cifras. La comparación del juego admite costes explícitos y conserva el efectivo posterior a la venta; no implica órdenes reales.
 
 
 ## Catálogo local de práctica (rama de trabajo)
@@ -55,7 +77,7 @@ El catálogo se comparte en `shared/demo-data.json` y el frontend lo expone medi
 
 El tipo local vigente de los resultados y puntos temporales está en [`frontend/src/simulation-types.ts`](../frontend/src/simulation-types.ts); [backend-contexto](backend-contexto.md) resume su interpretación y las diferencias con el motor Python expuesto para la comparación del juego. El contrato HTTP de demostración se describe en [backend-contexto](backend-contexto.md).
 
-Tres fondos, un ETF y una acción ficticios usan secuencias inventadas diferentes que se repiten cada doce meses; no representan el historial de ningún producto ni una previsión. Las fichas de BBVA y Santander siguen sin histórico disponible. CaixaBank incorpora la muestra anual descrita abajo. No existe conexión bancaria.
+Cinco clases de fondos reales tienen valores liquidativos CNMV observados. El instrumento BBVA con distribuciones no modeladas permanece como referencia deshabilitada. La muestra anual de CaixaBank descrita abajo se conserva como método y fuente independientes, no como serie diaria. No existe conexión bancaria.
 
 ### Muestra histórica anual de CaixaBank
 
@@ -69,7 +91,7 @@ Este ejemplo es local y manual: no hay histórico diario, proveedor conectado ni
 
 ## API local de demostración
 
-El contrato operativo, validaciones y errores están en [backend-contexto](backend-contexto.md). El cliente no envía al tutor resultados, fuentes ni saldos calculados; envía especificaciones y el servidor recalcula. `GET /api/catalog` devuelve `schemaVersion: "1.0"`, `banks`, `instruments` y `annualHistory`. `POST /api/simulations` devuelve el resultado temporal, identificador, moneda, momento de aportación, fuentes y supuestos; `POST /api/game/compare` devuelve la comparación educativa mantener/vender solo para instrumentos ficticios (campos en [backend-contexto](backend-contexto.md)); `POST /api/declines` devuelve el informe y `POST /api/tutor` devuelve `TutorReply` por reglas del servidor. No hay integración con proveedores externos ni datos reales de clientes.
+El contrato operativo, validaciones y errores están en [backend-contexto](backend-contexto.md). El cliente no envía al tutor resultados, fuentes ni saldos calculados; envía especificaciones y el servidor recalcula. `GET /api/catalog` devuelve `schemaVersion: "2.0"`, catálogo y `navHistory`. `POST /api/simulations` devuelve el resultado temporal y procedencia; `POST /api/game/compare` compara mantener/vender sobre NAV observados; `POST /api/declines` devuelve el informe y `POST /api/tutor` responde por reglas. No hay conexión bancaria ni datos reales de clientes.
 
 La práctica guiada utiliza dos solicitudes de simulación independientes. La interfaz compara los resultados de aportaciones, plazo o activos bajo las condiciones indicadas en [contexto](contexto-proyecto.md#práctica-guiada-con-dinero-ficticio). Solo la especificación de la opción A o B seleccionada se transmite al tutor; el servidor vuelve a calcular sus hechos. Los resultados obsoletos se invalidan y un error no activa el modo local automáticamente. No se crea una nueva ruta ni una cartera a partir de la comparación.
 

@@ -15,19 +15,18 @@ from backend.domain.provenance import ROOT, canonical_bytes, load_verified_datas
 from simulador.periodic import replay
 
 BASE = Path(__file__).resolve().parents[2]
-SPEC = {'instrumentId': 'demo-mixed', 'initial': 500, 'recurringContribution': 50, 'periods': 1}
+SPEC = {'instrumentId': 'bbva-mi-inversion-bolsa-acumulacion', 'initial': 500, 'recurringContribution': 50, 'periods': 1}
 
 
 def test_registry_covers_catalog_and_known_caixa_costs():
     registry = read_json(BASE / 'datos/registro-fuentes.json')
     entries = registry['instruments']
     ids = [entry['instrumentId'] for entry in entries]
-    assert len(ids) == len(set(ids)) == 8
-    assert set(ids) == {entry['instrumentId'] for entry in get_catalog()['instruments']}
+    assert len(ids) == len(set(ids))
+    assert {entry['instrumentId'] for entry in get_catalog()['instruments']} <= set(ids)
     caixa = next(entry for entry in entries if entry['instrumentId'] == 'caixabank-monetario-estandar')
-    assert 'ficha consultada el 2026-11-09' in caixa['costs']
-    assert 'gastos corrientes están deducidos' in caixa['costs']
-    assert caixa['distributions'] == 'unknown'
+    assert caixa['identifier'] == 'ES0138045002'
+    assert caixa['currency'] == 'EUR'
 
 
 def test_verifier_cli_has_json_output_without_runtime_warning():
@@ -58,25 +57,29 @@ def test_snapshot_reproduces_authoritative_replay(tmp_path):
     rates = snapshot['instruments'][0]['returns'][:1]
     result = replay(500, 50, rates, [None, None], 'fictional_monthly')
     assert result['value'] == 558.25
-    assert result['points'] == run_simulation(SPEC)['points']
+    assert result['points'] == [500, 558.25]
     live = read_json(root / 'demo-data.json')
-    live['instruments'][0]['returns'][0] = 0.5
+    live['instruments'][0]['name']['es'] = 'tampered'
     (root / 'demo-data.json').write_text(json.dumps(live), encoding='utf-8')
     with pytest.raises(ValueError):
         load_verified_dataset(root)
     retained = read_json(root / 'snapshots/demo-2026-11-09.1/demo-data.json')
     assert old_path.read_bytes() == old_bytes
     manifest = read_json(root / 'data-manifest.json')
-    assert manifest['calculationVersion'] == 'demo-calculations-1.0.0'
+    assert manifest['calculationVersion'] == 'nav-month-end-1.0.0'
     assert replay(500, 50, retained['instruments'][0]['returns'][:1], [None, None], 'fictional_monthly') == result
 
 
 @pytest.mark.parametrize('newline', [b'\n', b'\r\n'])
-def test_old_snapshot_identity_accepts_git_line_endings(newline):
-    original = (ROOT / 'snapshots/demo-2026-11-09.1/demo-data.json').read_bytes()
+@pytest.mark.parametrize(('version', 'expected'), [
+    ('demo-2026-11-09.1', 'bbe3f27302476aa080f30847a490658ce8323ae6c8ce04270f94736678a1f625'),
+    ('demo-2026-11-10.1', 'd4900760ea4cadaab48695301c29858d64c38b9f30bf938331f639913c69a3da'),
+])
+def test_old_snapshot_identity_accepts_git_line_endings(newline, version, expected):
+    original = (ROOT / 'snapshots' / version / 'demo-data.json').read_bytes()
     lf = original.replace(b'\r\n', b'\n')
     copy = lf.replace(b'\n', newline)
-    assert hashlib.sha256(copy.replace(b'\r\n', b'\n')).hexdigest() == 'bbe3f27302476aa080f30847a490658ce8323ae6c8ce04270f94736678a1f625'
+    assert hashlib.sha256(copy.replace(b'\r\n', b'\n')).hexdigest() == expected
 
 
 def test_metadata_stable_isolated_and_legacy_fields():
@@ -91,7 +94,7 @@ def test_metadata_stable_isolated_and_legacy_fields():
     assert 'provenance' not in context and 'provenance' not in context['simulation']
 
 
-@pytest.mark.parametrize('path', ['demo-data.json', 'snapshots/demo-2026-11-10.1/demo-data.json', 'data-manifest.json'])
+@pytest.mark.parametrize('path', ['demo-data.json', 'snapshots/cnmv-nav-2019-2025.1/demo-data.json', 'nav-history.json', 'snapshots/cnmv-nav-2019-2025.1/nav-history.json', 'data-manifest.json'])
 def test_integrity_detects_drift(tmp_path, path):
     shutil.copytree(ROOT, tmp_path / 'shared')
     root = tmp_path / 'shared'
@@ -116,9 +119,10 @@ def test_canonicalization_and_invalid_json(tmp_path):
 
 def test_bank_demo_profile_version_and_fees():
     data, metadata = load_verified_dataset()
-    profile = data['bankProfile']
-    assert metadata['datasetVersion'] == 'demo-2026-11-10.1'
-    assert metadata['calculationVersion'] == 'demo-calculations-1.0.0'
+    assert metadata['datasetVersion'] == 'cnmv-nav-2019-2025.1'
+    assert metadata['calculationVersion'] == 'nav-month-end-1.0.0'
+    assert data['bankProfile']['products'] == []
+    profile = read_json(ROOT / 'snapshots/demo-2026-11-10.1/demo-data.json')['bankProfile']
     assert profile['bankId'] == 'demo'
     assert profile['profileVersion'] == 'bank-demo-2026-11-10.1'
     fees = {product['instrumentId']: product['fees'] for product in profile['products']}
@@ -130,12 +134,12 @@ def test_bank_demo_profile_version_and_fees():
 
 
 def test_decline_episodes_and_tutor_contract(monkeypatch):
-    import backend.domain as domain
-    monkeypatch.setitem(domain._DATA, 'portfolioPoints', [100, 80, 100, 90])
     spec = {'basis':'portfolio_demo', 'language':'es'}
     report = analyze_decline(spec)
     assert 'provenance' not in report
-    assert [(e['peakLabel'], e['troughLabel'], e['recoveryLabel']) for e in report['episodes']] == [('Punto 1', 'Punto 2', 'Punto 3'), ('Punto 3', 'Punto 4', None)]
+    assert report['dataKind'] == 'historical_nav'
+    assert report['latestLabel'] == '2020-03-31'
+    assert report['causesStatus'] == 'unknown'
     client = TestClient(app, raise_server_exceptions=False)
     assert client.get('/api/health').json() == {'status':'ok', 'mode':'demo', 'tutorProvider':'server_rules', 'externalProviders':False}
     response = client.post('/api/tutor', json={'message':'Explica la caída', 'context':{'page':'portfolio','level':'beginner','language':'es','decline':spec}})

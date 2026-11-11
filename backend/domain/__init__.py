@@ -1,13 +1,11 @@
 """Demo-domain functions. No provider calls or client-supplied facts."""
 from copy import deepcopy
 import math
-import json
-from pathlib import Path
-
-from simulador.periodic import replay
-from .provenance import load_verified_dataset
+from .provenance import load_verified_dataset, read_json, ROOT
+from .nav_history import NavHistoryError, select_nav, replay_nav
 
 _DATA, _PROVENANCE = load_verified_dataset()
+_NAV = read_json(ROOT / 'nav-history.json')
 
 
 class DomainError(ValueError):
@@ -18,7 +16,7 @@ class DomainError(ValueError):
 
 
 def get_catalog():
-    return deepcopy({**{key: _DATA[key] for key in ('schemaVersion', 'banks', 'instruments', 'annualHistory', 'bankProfile')}, 'provenance': _PROVENANCE})
+    return deepcopy({**{key: _DATA[key] for key in ('schemaVersion', 'banks', 'instruments', 'annualHistory', 'bankProfile', 'demoStudyInstrumentIds', 'portfolioExample')}, 'navHistory': _NAV, 'provenance': _PROVENANCE})
 
 
 def _instrument(identifier):
@@ -31,22 +29,7 @@ def _instrument(identifier):
 def _source(instrument, language='es'):
     if not instrument['sourceUrl']:
         return []
-    return [{'label': 'Ficha oficial' if language == 'es' else 'Official product page', 'url': instrument['sourceUrl'], 'checkedAt': instrument['sourceDate']}]
-
-
-def _rates(instrument, periods):
-    if isinstance(periods, bool) or not isinstance(periods, int) or not 1 <= periods <= 120:
-        raise DomainError('invalid_periods', message='Invalid periods')
-    if instrument['dataStatus'] == 'missing_history':
-        raise DomainError('missing_history', 422, 'Instrument history is unavailable')
-    if instrument['dataStatus'] == 'annual_history':
-        if periods != 5:
-            raise DomainError('invalid_periods', message='Annual history requires five periods')
-        history = _DATA['annualHistory']
-        return ([row['rate'] for row in history['returns']],
-                [history['baseline']] + [f"{row['year']}-12-31" for row in history['returns']], 'annual_history')
-    returns = instrument['returns']
-    return ([returns[i % len(returns)] for i in range(periods)], [None] * (periods + 1), 'fictional_monthly')
+    return [{'label': 'CNMV: datos oficiales' if language == 'es' else 'CNMV: official data', 'url': instrument['sourceUrl'], 'checkedAt': instrument['sourceDate']}]
 
 
 def run_simulation(spec):
@@ -58,35 +41,84 @@ def run_simulation(spec):
     for value in (initial, contribution):
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 <= value <= 1_000_000_000 or not math.isfinite(value):
             raise DomainError('invalid_amount', message='Invalid amount')
-    rates, dates, kind = _rates(instrument, periods)
-    result = replay(initial, contribution, rates, dates, kind)
+    if instrument['dataStatus'] != 'historical_nav':
+        raise DomainError('missing_history', 422, 'Instrument history is unavailable')
+    try:
+        rows = select_nav(_NAV, instrument['identifier'], spec.get('startDate'), periods)
+    except NavHistoryError:
+        raise DomainError('invalid_periods', 422, 'History unavailable or outside coverage') from None
+    try:
+        result = replay_nav(rows, initial, contribution, spec.get('contributionFrequency', 'monthly'))
+    except NavHistoryError:
+        raise DomainError('invalid_simulation', 422, 'Invalid contribution frequency') from None
     result.update(instrumentId=instrument['instrumentId'], currency='EUR', sources=_source(instrument),
-                  contributionTiming='month_start' if kind == 'fictional_monthly' else 'year_end_after_return',
-                  assumptions=(['Fictional monthly returns repeat; outcomes do not predict future returns.'] if kind == 'fictional_monthly' else ['Published annual returns are rounded; contributions occur after each annual return.']))
+                  assumptions=['Published CNMV NAV; contributions after each monthly close.', 'Embedded fund costs are reflected in NAV; no external fees or taxes are applied.', 'Past results do not predict future returns.'])
     result['provenance'] = deepcopy(_PROVENANCE)
     return result
+
+
+# Cartera «Mi cartera» con NAV reales CNMV y participaciones DEMO. Debe coincidir con
+# frontend/src/portfolio-real.ts (buildRealPortfolio): mismos fondos (elegibles, en EUR, con más de un NAV;
+# como máximo MAX_REAL_FUNDS en el orden del dataset), fechas comunes consecutivas y compra única DEMO.
+MAX_REAL_FUNDS = 6
+MIN_REAL_POINTS = 13
+DEMO_AMOUNT_PER_FUND_EUR = 5000
+
+
+def cnmv_portfolio_series():
+    usable = [i for i in _NAV['instruments'] if i.get('eligible') and i.get('currency') == 'EUR' and len(i.get('monthly', [])) > 1][:MAX_REAL_FUNDS]
+    if not usable:
+        raise DomainError('missing_history', 422, 'Portfolio history is unavailable')
+    common = [row['date'] for row in usable[0]['monthly']]
+    for inst in usable[1:]:
+        dates = {row['date'] for row in inst['monthly']}
+        common = [d for d in common if d in dates]
+    month = lambda d: int(d[:4]) * 12 + int(d[5:7])
+    if len(common) < MIN_REAL_POINTS or any(month(b) != month(a) + 1 for a, b in zip(common, common[1:])):
+        raise DomainError('missing_history', 422, 'Portfolio history is unavailable')
+    values = [0.0] * len(common)
+    for inst in usable:
+        by_date = {row['date']: float(row['nav']) for row in inst['monthly']}
+        navs = [by_date[d] for d in common]
+        if any(not math.isfinite(v) or v <= 0 for v in navs):
+            raise DomainError('missing_history', 422, 'Portfolio history is unavailable')
+        units = DEMO_AMOUNT_PER_FUND_EUR / navs[0]
+        for k, nav in enumerate(navs):
+            values[k] += units * nav
+    return common, values
 
 
 def analyze_decline(spec):
     try:
         basis, language = spec['basis'], spec['language']
+        event_range = None
         if language not in ('es', 'en'):
             raise ValueError
         if basis == 'portfolio_demo':
             if 'instrumentId' in spec or 'periods' in spec:
                 raise ValueError
-            values = _DATA['portfolioPoints']
+            result = run_simulation(_DATA['portfolioExample'])
+            values = result['points']
             name = 'Cartera de ejemplo' if language == 'es' else 'Sample portfolio'
-            labels = [f"{'Punto' if language == 'es' else 'Point'} {i+1}" for i in range(len(values))]
-            kind, sources = 'fictional', []
+            labels = [row['date'] for row in result['timeline']]
+            kind, sources = 'historical_nav', result['sources']
+        elif basis == 'portfolio_cnmv':
+            if 'instrumentId' in spec or 'periods' in spec:
+                raise ValueError
+            dates, values = cnmv_portfolio_series()
+            event_range = (dates[0], dates[-1])
+            labels = [d[:7] for d in dates]
+            name = 'Mi cartera (NAV CNMV; participaciones DEMO)' if language == 'es' else 'My portfolio (CNMV NAVs; DEMO holdings)'
+            kind = 'historical_nav'
+            # Misma etiqueta que el análisis local de la pausa (App.tsx): fuente y periodo.
+            sources = [{'label': f"CNMV · {'valores liquidativos mensuales' if language == 'es' else 'monthly net asset values'} {dates[0]} – {dates[-1]}", 'url': _NAV['source']['indexUrl']}]
         elif basis == 'instrument':
             inst = _instrument(spec['instrumentId'])
-            rates, dates, simkind = _rates(inst, spec['periods'])
-            result = replay(100, 0, rates, dates, simkind)
+            result = run_simulation({'instrumentId': inst['instrumentId'], 'initial': 100, 'recurringContribution': 0, 'periods': spec['periods'], 'startDate': spec.get('startDate')})
             values = result['points']
-            labels = [date or f"{'MES' if language == 'es' else 'MONTH'} {i}" for i, date in enumerate(dates)]
+            labels = [row['date'] for row in result['timeline']]
             name, sources = inst['name'][language], _source(inst, language)
-            kind = 'annual_published_returns' if simkind == 'annual_history' else 'fictional'
+            kind = 'historical_nav'
         else:
             raise ValueError
     except (KeyError, TypeError, ValueError) as exc:
@@ -117,9 +149,10 @@ def analyze_decline(spec):
         report['episodes'].append(episode(None))
     report['peakValue'] = peak
     report['currentDrawdownPercent'] = (1 - values[-1] / peak) * 100
-    scenario = json.loads((Path(__file__).resolve().parents[2] / 'shared' / 'decline-demo.json').read_text(encoding='utf-8'))
-    if basis == 'instrument' and spec['instrumentId'] == scenario['instrumentId'] and spec['periods'] == scenario['periods']:
-        report['demoContext'] = scenario
+    first, last = event_range or (labels[0], labels[-1])
+    events = [event for event in _NAV['events'] if first <= event['date'] <= last]
+    if events:
+        report['historicalContext'] = {'events': deepcopy(events)}
     return report
 
 
@@ -150,22 +183,31 @@ def build_tutor_context(context):
         if page in ('explore', 'simulator') and ids:
             inst = _instrument(ids[0])
             result['instrument'] = {'id': ids[0], 'name': inst['name'][language], 'currency': inst['currency'],
-                                    'dataKind': 'annual_published_returns' if inst['dataStatus'] == 'annual_history' else inst['dataStatus'], 'sources': _source(inst, language)}
+                                    'dataKind': inst['dataStatus'], 'sources': _source(inst, language)}
             product = next((p for p in _DATA['bankProfile']['products'] if p['instrumentId'] == ids[0]), None) if bank_id == _DATA['bankProfile']['bankId'] else None
             if product is not None:
                 result['instrument']['product'] = deepcopy(product)
         if sim:
             calculated = run_simulation(sim)
             facts = {'kind': calculated['kind'], 'initial': sim['initial'], 'recurringContribution': sim['recurringContribution'],
-                     'periods': sim['periods'], 'contributionTiming': calculated['contributionTiming'], 'finalValue': calculated['value'],
+                     'periods': sim['periods'], 'contributionTiming': calculated['contributionTiming'], 'contributionFrequency': calculated['contributionFrequency'], 'finalValue': calculated['value'],
                      'totalContributed': calculated['contributed'], 'profit': calculated['profit'], 'simpleReturnPercent': calculated['simpleReturnPercent'],
-                     'instrumentReturnPercent': calculated['timeline'][-1]['instrumentReturnPercent']}
+                     'instrumentReturnPercent': calculated['timeline'][-1]['instrumentReturnPercent'],
+                     'periodStart': calculated['timeline'][0]['date'], 'periodEnd': calculated['timeline'][-1]['date']}
             if calculated['kind'] == 'annual_history':
                 facts.update(periodStart=_DATA['annualHistory']['baseline'], periodEnd=calculated['timeline'][-1]['date'],
                              annualReturns=[{'year': r['year'], 'ratePercent': r['rate'] * 100} for r in _DATA['annualHistory']['returns']])
             result['simulation'] = facts
         if page in ('home', 'portfolio'):
-            result['portfolio'] = {'name': 'Cartera de ejemplo' if language == 'es' else 'Sample portfolio', 'value': _DATA['portfolioPoints'][-1], 'initial': _DATA['portfolioPoints'][0], 'dataKind': 'fictional'}
+            # Misma cartera que muestran Inicio y «Mi cartera» (NAV CNMV, participaciones DEMO); si no hay datos, la de ejemplo.
+            try:
+                _dates, values = cnmv_portfolio_series()
+                usable_count = round(values[0] / DEMO_AMOUNT_PER_FUND_EUR)
+                result['portfolio'] = {'name': 'Mi cartera (NAV CNMV; participaciones DEMO)' if language == 'es' else 'My portfolio (CNMV NAVs; DEMO holdings)',
+                                       'value': values[-1], 'initial': usable_count * DEMO_AMOUNT_PER_FUND_EUR, 'dataKind': 'historical_nav'}
+            except DomainError:
+                portfolio = run_simulation(_DATA['portfolioExample'])
+                result['portfolio'] = {'name': 'Cartera de ejemplo' if language == 'es' else 'Sample portfolio', 'value': portfolio['value'], 'initial': _DATA['portfolioExample']['initial'], 'dataKind': 'historical_nav'}
         if decline:
             result['decline'] = analyze_decline(decline)
         if 'decision' in context:

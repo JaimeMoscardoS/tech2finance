@@ -27,11 +27,11 @@ test('levels change appearance in both themes while chart meanings remain fixed'
   }
   expect(new Set(accents).size).toBe(3);
  }
- await page.goto('http://127.0.0.1:5177/'); await page.getByRole('button',{name:'Explorar',exact:true}).click();
+ await page.goto('http://127.0.0.1:5194/'); await page.getByRole('button',{name:'Explorar',exact:true}).click();
  await levels.getByRole('button',{name:'Intermedio',exact:true}).click();
- await expect(page.locator('.annual-row .negative')).toHaveCount(2);
- await expect(page.locator('.annual-row .positive')).toHaveCount(3);
- await expect(page.locator('.annual-row').first()).toContainText('-0,53');
+ await expect(page.locator('.annual-row .negative')).toHaveCount(28);
+ await expect(page.locator('.annual-row .positive')).toHaveCount(44);
+ await expect(page.locator('.annual-row').first()).toContainText('-0,01');
 });
 
 test('Mi cartera chart: area gradient, DEMO label, data table alternative and no unnamed tab stops', async ({page}) => {

@@ -7,8 +7,8 @@ test('users can explore, change level and run a labelled simulation', async ({ p
   await page.getByRole('button', { name: /Detalle: Básico/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
   await page.locator('aside').first().getByRole('button', { name: 'Simulador', exact: true }).click();
-  await expect(page.getByText(/variaciones son inventadas/)).toBeVisible();
-  await expect(page.getByText(/repite la misma secuencia/)).toBeVisible();
+  await expect(page.getByText(/Cierres mensuales históricos de la CNMV/)).toBeVisible();
+  await expect(page.getByText(/aportaciones al cierre/i).first()).toBeVisible();
   await page.getByLabel('Importe inicial').fill('100');
   await page.getByLabel('Aportación mensual').fill('');
   await page.getByRole('button', { name: 'Ver mi ejemplo' }).click();
@@ -21,7 +21,8 @@ test('pause dialog handles keyboard focus and escape', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await page.getByRole('button', { name: 'Mi cartera', exact: true }).click();
-  const trigger = page.getByRole('button', { name: /Entender una caída/ });
+  // En Mi cartera la pausa se abre con «Entender una caída» (el enlace «¿Te preocupa la caída?» está en Inicio).
+  const trigger = page.getByRole('button', { name: 'Entender una caída' });
   await trigger.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -62,7 +63,7 @@ test('experience levels show distinct views without changing the selected risk',
   await page.getByRole('button', { name: /Detalle: Básico/ }).click();
   await page.getByRole('button', { name: 'Intermedio' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-level', 'intermediate');
-  await expect(page.getByText('Disponible').first()).toBeVisible();
+  await expect(page.getByText('Progreso al objetivo').first()).toBeVisible(); // Inicio intermedio: indicadores de la cartera DEMO (antes «Disponible» de la cabecera de main)
   await page.getByRole('button', { name: /Detalle: Intermedio/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-level', 'advanced');
@@ -76,7 +77,7 @@ test('English navigation, assistant and simulated portfolio are translated', asy
   await expect(page.getByText('Explore the available information and its limits. These are not recommendations.')).toBeVisible();
   await page.getByRole('button', { name: 'My portfolio', exact: true }).click();
   await page.getByRole('button', { name: 'Understand a decline' }).click();
-  await expect(page.getByText(/past recovery does not guarantee another/)).toBeVisible();
+  await expect(page.getByText(/no one can guarantee whether or when it will recover/)).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Open assistant' }).click();
   await expect(page.getByText('LOCAL MODE · RULE-BASED RESPONSES')).toBeVisible();
@@ -94,7 +95,7 @@ test('mobile menu traps focus, closes with Escape and restores focus', async ({ 
  const trigger = page.getByRole('button', { name: 'Abrir menú' });
  await trigger.click(); const close = page.getByRole('dialog', { name: 'MI ESPACIO' }).getByRole('button', { name: 'Cerrar menú', exact: true });
  await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab');
- await expect(page.getByRole('button', { name: 'Tu asistente', exact: true })).toBeFocused();
+ await expect(page.getByRole('button', { name: 'Abrir asistente', exact: true })).toBeFocused();
  await page.keyboard.press('Escape'); await expect(trigger).toBeFocused();
  await context.close();
 });
@@ -115,7 +116,7 @@ test('opening the assistant from the mobile menu transfers focus to the dialog',
  const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button', { name: 'Abrir menú' }).click();
- await page.getByRole('button', { name: 'Tu asistente', exact: true }).click();
+ await page.getByRole('button', { name: 'Abrir asistente', exact: true }).click();
  const dialog = page.getByRole('dialog', { name: 'Tu asistente' });
  await expect(dialog).toBeVisible();
  await expect(dialog.getByRole('button', { name: 'Cerrar asistente' })).toBeFocused();
@@ -124,14 +125,14 @@ test('opening the assistant from the mobile menu transfers focus to the dialog',
  await context.close();
 });
 
-test('catalogue selection changes the example and real funds have no invented result', async ({ page }) => {
+test('catalogue selection changes the example and preserves the selected real fund across levels', async ({ page }) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button', {name:'Simulador', exact:true}).click();
  const panel=page.locator('.sim-result');
  const original=await panel.locator('.sim-values strong').first().textContent();
- await page.getByLabel('Tipo de activo').selectOption('etf');
- await expect(page.getByLabel('Instrumento')).toHaveValue('demo-etf');
+ await page.getByLabel('Instrumento').selectOption('bbva-mi-inversion-bolsa-acumulacion');
+ await expect(page.getByLabel('Instrumento')).toHaveValue('bbva-mi-inversion-bolsa-acumulacion');
  expect(await panel.locator('.sim-values strong').first().textContent()).not.toBe(original);
  const newValue=await panel.locator('.sim-values strong').first().textContent();
  await page.getByRole('button', {name:/Detalle: Básico/}).click();
@@ -141,66 +142,59 @@ test('catalogue selection changes the example and real funds have no invented re
  await page.screenshot({path:'test-results/catalog-desktop.png',fullPage:true});
 });
 
-test('explore transfers the chosen fictional instrument', async ({page}) => {
+test('explore transfers the chosen real instrument', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button',{name:'Explorar',exact:true}).click();
- await page.locator('.beginner-guide select').last().selectOption('demo-equity');
+ await page.locator('.beginner-guide select').last().selectOption('bbva-mi-inversion-bolsa-acumulacion');
  await page.getByRole('button',{name:'Practicar con este fondo'}).click();
- await expect(page.getByLabel('Instrumento')).toHaveValue('demo-equity');
- await expect(page.locator('.sim-result')).toContainText('T2F Horizonte');
+ await expect(page.getByLabel('Instrumento')).toHaveValue('bbva-mi-inversion-bolsa-acumulacion');
+ await expect(page.locator('.sim-result')).toContainText('BBVA MI INVERSION BOLSA ACUMULACION');
 });
 
 test('catalogue fits mobile in English dark mode', async ({browser}) => {
  const context=await browser.newContext({viewport:{width:320,height:700}});
  const page=await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('http://127.0.0.1:5177/');
+  await page.goto('http://127.0.0.1:5194/');
  await page.getByRole('button',{name:'English'}).click();
  await page.getByRole('button',{name:'Dark theme'}).click();
  await page.getByRole('button',{name:'Open menu'}).click();
  await page.getByRole('button',{name:'Simulator',exact:true}).click();
  await page.getByLabel('Asset type').selectOption('fund');
  await page.screenshot({path:'test-results/catalog-mobile.png',fullPage:true});
- await expect(page.getByText('ANNUAL HISTORY')).toBeVisible();
+ await expect(page.getByText(/Historical monthly CNMV closes/).first()).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
  await context.close();
 });
 
-test('annual history keeps fixed period and excludes monthly contributions', async ({ page }) => {
+test('monthly NAV simulation preserves contributions and values across preferences', async ({ page }) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('http://127.0.0.1:5177/');
+  await page.goto('http://127.0.0.1:5194/');
  await page.getByRole('button', {name:'Simulador', exact:true}).click();
- await page.getByRole('button', {name:'Probar histórico 2021–2025'}).click();
  const panel=page.locator('.sim-result');
  await expect(page.getByLabel('Instrumento')).toHaveValue('caixabank-monetario-estandar');
- await expect(page.getByLabel('Aportación mensual')).toHaveCount(0);
- await expect(page.getByText('Periodo fijo: 2021–2025')).toBeVisible();
- await expect(panel.locator('.sim-values strong').filter({hasText:'529,02 €'})).toBeVisible();
- await expect(panel.locator('.sim-values strong').filter({hasText:'500,00 €'})).toBeVisible();
- await expect(panel.getByRole('table', {name:'Rentabilidades anuales publicadas'}).locator('tbody tr')).toHaveCount(5);
- await expect(panel.getByText(/MES 5/)).toHaveCount(0);
- await page.getByLabel('Aportación anual').fill('100');
+ await page.getByLabel('Tiempo de práctica').selectOption('12');
+ await page.getByLabel('Aportación mensual').fill('100');
  await expect(panel.getByText(/Has cambiado los datos/)).toBeVisible();
  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
- await expect(panel.locator('.sim-values strong').filter({hasText:'1048,55 €'})).toBeVisible();
- await expect(panel.locator('.sim-values strong').filter({hasText:'1000,00 €'})).toBeVisible();
- await page.screenshot({path:'test-results/simulator-annual-100.png',fullPage:true});
+ await expect(panel.locator('.sim-values strong').filter({hasText:'1700,75 €'})).toBeVisible();
+ await expect(panel.locator('.sim-values strong').filter({hasText:'1700,00 €'})).toBeVisible();
  await page.getByRole('button',{name:'Abrir asistente'}).click();
  await page.getByRole('button',{name:'¿Cómo funciona la simulación?'}).click();
  await page.getByRole('button',{name:'Enviar pregunta'}).click();
- await expect(page.getByText(/rentabilidades anuales publicadas|al cierre de cada año/)).toBeVisible();
+ await expect(page.locator('.message.assistant').last()).toContainText(/mensual|cierre/i);
  await page.keyboard.press('Escape');
- await page.getByLabel('Aportación anual').fill('0');
+ await page.getByLabel('Aportación mensual').fill('0');
  await page.getByLabel('Importe inicial').fill('1000');
  await expect(panel.getByText(/Has cambiado los datos/)).toBeVisible();
  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
- await expect(panel.locator('.sim-values strong').filter({hasText:'1058,05 €'})).toBeVisible();
+ await expect(panel.locator('.sim-values strong').filter({hasText:'999,70 €'})).toBeVisible();
  await page.getByRole('button',{name:/Detalle: Básico/}).click();
  await page.getByRole('button',{name:'Avanzado',exact:true}).click();
- await expect(panel.locator('.sim-values strong').filter({hasText:'1058,05 €'})).toBeVisible();
+ await expect(panel.locator('.sim-values strong').filter({hasText:'999,70 €'})).toBeVisible();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
  await page.getByRole('button',{name:'English'}).click();
- await expect(panel.locator('.sim-values strong').filter({hasText:'€1,058.05'})).toBeVisible();
+ await expect(panel.locator('.sim-values strong').filter({hasText:'€999.70'})).toBeVisible();
 
 });
 
@@ -231,44 +225,43 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await mobile.close();
 });
 
-test('annual deposits, table and percentage view stay consistent across preferences', async ({page}) => {
+test('monthly deposits, table and percentage view stay consistent across preferences', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('http://127.0.0.1:5177/');
+  await page.goto('http://127.0.0.1:5194/');
  await page.getByRole('button',{name:'Simulador',exact:true}).click();
- await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
- await page.getByLabel('Aportación anual').fill('50');
+ await page.getByLabel('Tiempo de práctica').selectOption('12');
+ await page.getByLabel('Aportación mensual').fill('50');
  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  const panel=page.locator('.sim-result');
- await expect(panel.locator('.sim-values strong').nth(0)).toHaveText('788,79 €');
- await expect(panel.locator('.sim-values strong').nth(1)).toHaveText('750,00 €');
- await expect(panel.locator('.sim-values strong').nth(2)).toHaveText('38,79 €');
+ await expect(panel.locator('.sim-values strong').nth(0)).toHaveText('1100,30 €');
+ await expect(panel.locator('.sim-values strong').nth(1)).toHaveText('1100,00 €');
+ await expect(panel.locator('.sim-values strong').nth(2)).toHaveText('0,30 €');
  await expect(panel.locator('[role="status"][aria-atomic="true"]')).toContainText('Resultado actualizado');
  await panel.getByText('Ver datos', {exact:true}).click();
  const rows=panel.getByRole('table',{name:'Datos del gráfico: Evolución de la práctica'}).locator('tbody tr');
- await expect(rows).toHaveCount(6);
+ await expect(rows).toHaveCount(13);
  await expect(rows.nth(0)).toContainText('Importe inicial: 500,00 €');
- await expect(rows.last()).toContainText('788,79 €');
- await expect(rows.last()).toContainText('750,00 €');
- await expect(rows.last()).toContainText('5,8 %');
+ await expect(rows.last()).toContainText('1100,30 €');
+ await expect(rows.last()).toContainText('1100,00 €');
+ await expect(rows.last()).toContainText('2020-12-31');
  await panel.getByRole('button',{name:'Evolución del instrumento (%)'}).click();
- await expect(rows.last()).toContainText('5,8 %');
+ await expect(rows.last()).toContainText('2020-12-31');
  await page.getByRole('button',{name:/Detalle: Básico/}).click();
  await page.getByRole('button',{name:'Intermedio',exact:true}).click();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
  await page.getByRole('button',{name:'English'}).click();
- await expect(panel.locator('.sim-values strong').nth(0)).toHaveText('€788.79');
+ await expect(panel.locator('.sim-values strong').nth(0)).toHaveText('€1,100.30');
  await expect(panel.getByRole('button',{name:'Instrument performance (%)'})).toHaveAttribute('aria-pressed','true');
- await page.getByLabel('Annual contribution').fill('75');
+ await page.getByLabel('Monthly contribution').fill('75');
  await expect(panel.getByText(/Your inputs changed/)).toBeVisible();
  await expect(panel.locator('.investment-chart')).toHaveCount(0);
 
 });
 
-test('validation identifies the actual field and retains annual help', async ({page}) => {
+test('validation identifies the actual monthly contribution field', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('http://127.0.0.1:5177/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
- await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
- const initial=page.getByLabel('Importe inicial'); const annual=page.getByLabel('Aportación anual');
+  await page.goto('http://127.0.0.1:5194/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+ const initial=page.getByLabel('Importe inicial'); const annual=page.getByLabel('Aportación mensual');
  await initial.fill('-1'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await expect(initial).toHaveAttribute('aria-invalid','true');
  await expect(annual).toHaveAttribute('aria-invalid','false');
@@ -276,8 +269,8 @@ test('validation identifies the actual field and retains annual help', async ({p
  await initial.fill('500'); await annual.fill('-1'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await expect(initial).toHaveAttribute('aria-invalid','false');
  await expect(annual).toHaveAttribute('aria-invalid','true');
- await expect(annual).toHaveAttribute('aria-describedby','annual-help sim-error');
- await expect(page.getByRole('alert')).toContainText('Aportación anual');
+ await expect(annual).toHaveAttribute('aria-describedby','sim-error');
+ await expect(page.getByRole('alert')).toContainText('Aportación mensual');
 });
 
 test('portfolio chart retains useful width on narrow screens', async ({browser}) => {
@@ -300,17 +293,17 @@ test('local tutor grounds results, keeps previous messages and excludes dirty re
  const providerRequests:string[]=[];
  page.on('request',request=>{if (/anthropic|elevenlabs/i.test(request.url())) providerRequests.push(request.url());});
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('http://127.0.0.1:5177/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
- await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
- await page.getByLabel('Aportación anual').fill('50'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
+  await page.goto('http://127.0.0.1:5194/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+ await page.getByLabel('Tiempo de práctica').selectOption('12');
+ await page.getByLabel('Aportación mensual').fill('50'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await page.getByRole('button',{name:'Abrir asistente'}).click();
  const dialog=page.getByRole('dialog',{name:'Tu asistente'});
  await dialog.getByLabel('Tu pregunta').fill('¿Cuál es el resultado?'); await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
- await expect(dialog.getByText(/788,79/)).toBeVisible();
- await expect(dialog.getByText(/750/)).toBeVisible();
- await expect(dialog.getByRole('link',{name:'Ficha oficial'})).toBeVisible();
- await dialog.getByLabel('Tu pregunta').fill('¿Cuál fue la rentabilidad de 2022?'); await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
- await expect(dialog.getByText(/2022.*-0,67/)).toBeVisible();
+ await expect(dialog.locator('.message.assistant').last()).toContainText('valor final 1100,3 EUR');
+ await expect(dialog.locator('.message.assistant').last()).toContainText('aportado en total 1100 EUR');
+ await expect(dialog.getByRole('link',{name:/CNMV/})).toBeVisible();
+ await dialog.getByLabel('Tu pregunta').fill('¿Cómo funciona la simulación?'); await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
+ await expect(dialog.locator('.message.assistant').last()).toContainText(/mensual|cierre/i);
  const previous=await dialog.locator('.message.assistant p').last().textContent();
  await page.keyboard.press('Escape'); await page.getByRole('button',{name:'English'}).click();
  await page.getByRole('button',{name:'Open assistant'}).click();
@@ -318,7 +311,7 @@ test('local tutor grounds results, keeps previous messages and excludes dirty re
  await expect(page.locator('.message.assistant[lang="es"]').last()).toBeVisible();
  await expect(page.getByRole('button',{name:'Dictate'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Listen'})).toBeVisible();
- await page.keyboard.press('Escape'); await page.getByLabel('Annual contribution').fill('75');
+ await page.keyboard.press('Escape'); await page.getByLabel('Monthly contribution').fill('75');
  await page.getByRole('button',{name:'Open assistant'}).click();
  const english=page.getByRole('dialog',{name:'Your assistant'});
  await english.getByLabel('Your question').fill('What is the result?'); await english.getByRole('button',{name:'Send question'}).click();
@@ -329,7 +322,7 @@ test('local tutor grounds results, keeps previous messages and excludes dirty re
 test('assistant remains scrollable and voice controls reachable in short landscape', async ({browser}) => {
  const context=await browser.newContext({viewport:{width:568,height:320}}); const page=await context.newPage();
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
+  await page.goto('/'); await page.getByRole('button',{name:'Abrir menú'}).click(); await page.getByRole('button',{name:'Abrir asistente'}).click();
  const dialog=page.getByRole('dialog',{name:'Tu asistente'});
  await dialog.getByLabel('Tu pregunta').fill('¿Qué es un fondo?');
  await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
@@ -346,23 +339,28 @@ test('assistant remains scrollable and voice controls reachable in short landsca
 
 test('decline explanations use observed series without inventing a current crisis', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('http://127.0.0.1:5177/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
- await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
+  await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+ await page.getByLabel('Instrumento').selectOption('bbva-mi-inversion-bolsa-acumulacion');
+ await page.getByLabel('Tiempo de práctica').selectOption('3');
+ await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await page.getByRole('button',{name:'Entender las caídas'}).click();
- let dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});
- await expect(dialog.getByText(/última observación no hay caída/)).toBeVisible();
- await expect(dialog.getByText(/2021.*2022/)).toBeVisible();
- await expect(dialog.getByText(/causa es desconocida/i)).toBeVisible();
- await dialog.getByText('Tu contexto (opcional)').click();
+ let dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
+ await expect(dialog).toContainText('2020-03-31');
+ await expect(dialog).toContainText('2020-03-11');
+ await expect(dialog.locator('.detailed-analysis')).toContainText(/causas.*no están disponibles/i);
+ await dialog.getByText('Añadir contexto (opcional)').click();
  await dialog.getByLabel('Objetivo (opcional)').fill('Ejemplo educativo');
  await dialog.getByLabel('¿Necesitas liquidez pronto? (opcional)').selectOption('yes');
  await dialog.getByRole('button',{name:'Preguntar al asistente'}).click();
  await expect(page.getByRole('dialog',{name:'Tu asistente'})).toBeVisible();
  await page.keyboard.press('Escape'); await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
+ // Mi cartera: la pausa analiza la serie REAL mostrada (NAV CNMV, participaciones DEMO): caída máxima 8,79 % (2019-12 -> 2020-03; 5 fondos x 5.000 € DEMO), contrastada con un cálculo independiente (también en backend/tests/test_nav_history.py).
  await page.getByRole('button',{name:'Entender una caída'}).click();
- dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});
- await expect(dialog.getByText(/M[0-9]+/).first()).toBeVisible();
- await expect(dialog.getByText('Serie simulada, sin fechas reales.')).toBeVisible();
+ dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
+ await expect(dialog).toContainText('NAV CNMV; participaciones DEMO');
+ await expect(dialog).toContainText('2019-12-31 – 2025-12-31');
+ await expect(dialog).toContainText('8,79 %');
+ await expect(dialog).toContainText('2020-03-11');
  await dialog.getByRole('button',{name:'Continuar en la demo'}).click();
  await expect(dialog).toBeHidden();
 });
@@ -416,6 +414,7 @@ test('local panels fit desktop and mobile in both themes', async ({browser}) => 
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   if(width===320){await page.getByRole('button',{name:'English'}).click();await page.getByRole('button',{name:'Dark theme'}).click();}
+  if(width===320) await page.getByRole('button',{name:'Open menu'}).click();
   await page.getByRole('button',{name:width===320?'Open assistant':'Abrir asistente'}).click();
   const assistant=page.getByRole('dialog',{name:width===320?'Your assistant':'Tu asistente'});
   await expect(assistant).toBeVisible();

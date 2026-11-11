@@ -10,7 +10,8 @@ test.describe('Inicio', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
     await expect(page.locator('.dash-kpi')).toHaveCount(3);
     await expect(page.locator('.dash-demo').first()).toBeVisible();
-    await expect(page.getByText('Datos ficticios de ejemplo').first()).toBeVisible();
+    // Inicio usa la misma cartera que «Mi cartera»: NAV reales CNMV y participaciones DEMO, dicho explícitamente.
+    await expect(page.getByText(/Valores liquidativos mensuales reales \(CNMV, 2019-12-31 – 2025-12-31\); participaciones, efectivo y objetivo son DEMO/).first()).toBeVisible();
     await expect(page.locator('.dash-kpi__value').first()).toContainText('€');
   });
 

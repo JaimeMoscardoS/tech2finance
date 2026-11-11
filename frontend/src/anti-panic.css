@@ -1,4 +1,23 @@
 .pause-modal.anti-panic { width: min(680px, 100%); padding: clamp(20px, 4vw, 36px); color: var(--ink); }
+.calm-card { display: flex; align-items: center; gap: 14px; width: 100%; margin: 20px 0; padding: 18px; text-align: left; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-tint); color: var(--ink); cursor: pointer; }
+.calm-card > span:nth-child(2) { display: grid; gap: 5px; flex: 1; }
+.calm-card strong { font-size: 17px; }
+.calm-card small { color: var(--muted); line-height: 1.4; }
+.calm-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.anti-panic__comfort { margin: 20px 0; padding: 16px; border-radius: 12px; background: var(--surface-tint); line-height: 1.55; }
+.anti-panic__comfort p + p { margin-top: 10px; }
+.detailed-analysis { margin: 24px 0; }
+.detailed-analysis h3 { margin: 0 0 12px; font-size: 20px; }
+.detailed-analysis__mode { display: block; margin: 14px 0 0; color: var(--accent); font-size: 12px; font-weight: 700; }
+.detailed-analysis__summary { margin: 10px 0 18px; font-size: 15px; line-height: 1.6; }
+.detailed-analysis__sections { border-top: 1px solid var(--border); }
+.detailed-analysis__sections section { padding: 16px 0; border-bottom: 1px solid var(--border); }
+.detailed-analysis__sections h4 { margin: 0 0 8px; font-size: 16px; }
+.detailed-analysis__sections p { margin: 8px 0; line-height: 1.6; overflow-wrap: anywhere; }
+.detailed-analysis__sources { font-size: 13px; color: var(--muted); }
+.detailed-analysis__sources a { display: inline-block; margin-right: 10px; }
+.detailed-analysis > .button { margin-top: 18px; }
+.anti-panic__context > p { color: var(--muted); font-size: 13px; line-height: 1.5; }
 .anti-panic__header { display: flex; align-items: flex-start; gap: 16px; padding-right: 38px; }
 .anti-panic__header .pause-icon { flex: 0 0 45px; margin: 0; background: var(--surface-tint); color: var(--accent); }
 .anti-panic__header .kicker { color: var(--accent); font-size: 10px; }
@@ -34,7 +53,6 @@
 .anti-panic__story article span { display: inline-block; padding: 3px 8px; border-radius: 6px; background: var(--surface-tint); color: var(--ink); font-size: 11px; font-weight: 700; }
 .anti-panic__story article h4 { margin: 8px 0 4px; color: var(--ink); font-size: 14px; }
 .anti-panic__story article p, .anti-panic__story small { color: var(--muted); font-size: 13px; line-height: 1.5; }
-.anti-panic .anti-panic__limits { margin: 18px 0; padding: 13px 14px; border-left: 3px solid var(--border); background: var(--surface-raised); color: var(--ink); font-size: 13px; line-height: 1.55; }
 .anti-panic__context { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .anti-panic__context summary { min-height: 48px; padding: 14px 2px; cursor: pointer; color: var(--ink); font-size: 14px; font-weight: 700; }
 .anti-panic__context summary:focus-visible, .anti-panic__voice:focus-visible, .anti-panic a:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }

@@ -1,0 +1,354 @@
+{
+  "schemaVersion": "2.0",
+  "banks": [
+    {
+      "id": "demo",
+      "name": {
+        "es": "BancoT2F",
+        "en": "BancoT2F"
+      }
+    },
+    {
+      "id": "bbva",
+      "name": {
+        "es": "BBVA",
+        "en": "BBVA"
+      }
+    },
+    {
+      "id": "santander",
+      "name": {
+        "es": "Santander",
+        "en": "Santander"
+      }
+    },
+    {
+      "id": "caixabank",
+      "name": {
+        "es": "CaixaBank",
+        "en": "CaixaBank"
+      }
+    }
+  ],
+  "instruments": [
+    {
+      "instrumentId": "caixabank-monetario-estandar",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "caixabank",
+      "manager": "CaixaBank Asset Management",
+      "relationship": "unknown",
+      "identifier": "ES0138045002",
+      "shareClass": "Estándar",
+      "currency": "EUR",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
+      "name": {
+        "es": "CAIXABANK MONETARIO RENDIMIENTO, FI",
+        "en": "CAIXABANK MONETARIO RENDIMIENTO, FI"
+      },
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
+    },
+    {
+      "instrumentId": "santander-rf-ahorro",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "santander",
+      "manager": "Santander Asset Management",
+      "relationship": "unknown",
+      "identifier": "ES0112793007",
+      "shareClass": "A",
+      "currency": "EUR",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
+      "name": {
+        "es": "SANTANDER RF AHORRO, FI",
+        "en": "SANTANDER RF AHORRO, FI"
+      },
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
+    },
+    {
+      "instrumentId": "bbva-mi-inversion-bolsa-acumulacion",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "bbva",
+      "manager": "BBVA Asset Management SGIIC",
+      "relationship": "unknown",
+      "identifier": "ES0125269003",
+      "shareClass": "Clase 0",
+      "currency": "EUR",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
+      "name": {
+        "es": "BBVA MI INVERSION BOLSA ACUMULACION, FI",
+        "en": "BBVA MI INVERSION BOLSA ACUMULACION, FI"
+      },
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
+    },
+    {
+      "instrumentId": "santander-renta-fija-a",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "santander",
+      "manager": "Santander Asset Management",
+      "relationship": "unknown",
+      "identifier": "ES0146133006",
+      "shareClass": "A",
+      "currency": "EUR",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
+      "name": {
+        "es": "SANTANDER RENTA FIJA, FI",
+        "en": "SANTANDER RENTA FIJA, FI"
+      },
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
+    },
+    {
+      "instrumentId": "bbva-estrategia-0-50",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "bbva",
+      "manager": "BBVA Asset Management SGIIC",
+      "relationship": "unknown",
+      "identifier": "ES0118857004",
+      "shareClass": "Clase 0",
+      "currency": "EUR",
+      "sourceUrl": "https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx",
+      "sourceDate": "2026-11-11",
+      "dataStatus": "historical_nav",
+      "name": {
+        "es": "BBVA ESTRATEGIA 0-50, FI",
+        "en": "BBVA ESTRATEGIA 0-50, FI"
+      },
+      "riskIndicator": null,
+      "annualFee": null,
+      "minimumInitial": null,
+      "horizon": null
+    },
+    {
+      "instrumentId": "bbva-mi-inversion-bolsa",
+      "assetType": "fund",
+      "assetClass": "unknown",
+      "bankId": "bbva",
+      "manager": "BBVA ASSET MANAGEMENT SGIIC",
+      "relationship": "own",
+      "identifier": "ES0119178004",
+      "shareClass": null,
+      "currency": null,
+      "sourceUrl": "https://www.cnmv.es/Portal/consultas/iic/fondo?nif=V86954104",
+      "sourceDate": "2026-11-09",
+      "dataStatus": "unsupported_distributions",
+      "name": {
+        "es": "BBVA MI INVERSION BOLSA, FI",
+        "en": "BBVA MI INVERSION BOLSA, FI"
+      }
+    }
+  ],
+  "annualHistory": {
+    "instrumentId": "caixabank-monetario-estandar",
+    "kind": "annual_published_returns",
+    "sourceUrl": "https://www.caixabankassetmanagement.com/es/fondos/caixabank-monetario-rendimiento-fi-clase-estandar",
+    "sourceDate": "2026-11-09",
+    "baseline": "2020-12-31",
+    "currency": "EUR",
+    "returns": [
+      {
+        "year": 2021,
+        "rate": -0.0053
+      },
+      {
+        "year": 2022,
+        "rate": -0.0067
+      },
+      {
+        "year": 2023,
+        "rate": 0.0243
+      },
+      {
+        "year": 2024,
+        "rate": 0.0297
+      },
+      {
+        "year": 2025,
+        "rate": 0.0153
+      }
+    ]
+  },
+  "bankProfile": {
+    "bankId": "demo",
+    "profileVersion": "bank-demo-2026-11-10.1",
+    "classification": "synthetic_demo",
+    "name": {
+      "es": "BancoT2F",
+      "en": "BancoT2F"
+    },
+    "description": {
+      "es": "Entidad ficticia para una demostración educativa de inversión.",
+      "en": "Fictional institution for an educational investment demonstration."
+    },
+    "source": {
+      "kind": "synthetic_seed",
+      "asOf": "2026-11-10"
+    },
+    "services": [
+      {
+        "id": "catalogue",
+        "name": {
+          "es": "Catálogo",
+          "en": "Catalogue"
+        },
+        "description": {
+          "es": "Consulta instrumentos de la demostración.",
+          "en": "Browse demonstration instruments."
+        }
+      },
+      {
+        "id": "practice",
+        "name": {
+          "es": "Práctica",
+          "en": "Practice"
+        },
+        "description": {
+          "es": "Practica con simulaciones educativas.",
+          "en": "Practise with educational simulations."
+        }
+      },
+      {
+        "id": "tutor",
+        "name": {
+          "es": "Tutor",
+          "en": "Tutor"
+        },
+        "description": {
+          "es": "Consulta explicaciones contextuales.",
+          "en": "Ask for contextual explanations."
+        }
+      },
+      {
+        "id": "portfolio_pause",
+        "name": {
+          "es": "Pausa de cartera",
+          "en": "Portfolio pause"
+        },
+        "description": {
+          "es": "Consulta información sobre una caída antes de vender.",
+          "en": "Review information about a decline before selling."
+        }
+      }
+    ],
+    "conditions": {
+      "currency": "EUR",
+      "maintenanceMonthlyEur": 0,
+      "requiresRealAccount": false,
+      "realOrdersAvailable": false,
+      "externalConnections": false,
+      "text": {
+        "es": "Mantenimiento mensual ficticio de 0 EUR. Sin cuenta real, órdenes reales ni conexiones externas.",
+        "en": "Fictional monthly maintenance of EUR 0. No real account, real orders or external connections."
+      }
+    },
+    "products": [],
+    "faq": [
+      {
+        "id": "identity",
+        "question": {
+          "es": "¿Qué es BancoT2F?",
+          "en": "What is BancoT2F?"
+        },
+        "answer": {
+          "es": "Una entidad ficticia creada para esta demostración.",
+          "en": "A fictional institution created for this demonstration."
+        }
+      },
+      {
+        "id": "services",
+        "question": {
+          "es": "¿Qué servicios ofrece?",
+          "en": "What services does it offer?"
+        },
+        "answer": {
+          "es": "Catálogo, práctica, tutor y pausa informativa de cartera.",
+          "en": "Catalogue, practice, tutor and an informational portfolio pause."
+        }
+      },
+      {
+        "id": "conditions",
+        "question": {
+          "es": "¿Cuáles son las condiciones?",
+          "en": "What are the terms?"
+        },
+        "answer": {
+          "es": "Sin mantenimiento mensual, cuenta real ni órdenes reales. Las condiciones de cada producto no están disponibles.",
+          "en": "No monthly maintenance, real account or real orders. Individual product terms are unavailable."
+        }
+      },
+      {
+        "id": "fees",
+        "question": {
+          "es": "¿Se descuentan las comisiones?",
+          "en": "Are fees deducted?"
+        },
+        "answer": {
+          "es": "Las comisiones de los productos reales no están disponibles en esta demo. El valor liquidativo ya refleja los gastos incorporados al fondo; no se añade ningún coste externo.",
+          "en": "Real product fees are not available in this demo. NAV already reflects costs embedded in the fund; no external cost is added."
+        }
+      },
+      {
+        "id": "real_money",
+        "question": {
+          "es": "¿Se utiliza dinero real?",
+          "en": "Is real money used?"
+        },
+        "answer": {
+          "es": "No. No se requieren cuentas reales ni se tramitan órdenes reales.",
+          "en": "No. No real account is required and no real orders are placed."
+        }
+      },
+      {
+        "id": "external_products",
+        "question": {
+          "es": "¿Son de BancoT2F todos los productos?",
+          "en": "Do all products belong to BancoT2F?"
+        },
+        "answer": {
+          "es": "No. Los productos de otras entidades conservan su identificación y procedencia.",
+          "en": "No. Products from other institutions retain their identity and provenance."
+        }
+      }
+    ],
+    "calculationNotice": {
+      "es": "Las comisiones de los productos reales no están disponibles en esta demo. El valor liquidativo ya refleja los gastos incorporados al fondo; no se añade ningún coste externo.",
+      "en": "Real product fees are not available in this demo. NAV already reflects costs embedded in the fund; no external cost is added."
+    }
+  },
+  "demoStudyInstrumentIds": [
+    "caixabank-monetario-estandar",
+    "santander-rf-ahorro",
+    "bbva-mi-inversion-bolsa-acumulacion",
+    "santander-renta-fija-a",
+    "bbva-estrategia-0-50"
+  ],
+  "portfolioExample": {
+    "instrumentId": "bbva-mi-inversion-bolsa-acumulacion",
+    "startDate": "2019-12-31",
+    "initial": 1000,
+    "recurringContribution": 0,
+    "periods": 3
+  }
+}

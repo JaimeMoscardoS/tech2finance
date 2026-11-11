@@ -1,7 +1,8 @@
 {
-  "datasetVersion": "demo-2026-11-10.1",
-  "calculationVersion": "demo-calculations-1.0.0",
-  "datasetSha256": "70d234a224a2dc3f08d8e3f92cd4bfad3456ebb3cbcd9bb8db208940dafed0a4",
+  "datasetVersion": "cnmv-nav-2019-2025.1",
+  "calculationVersion": "nav-month-end-1.0.0",
+  "datasetSha256": "bcf93143ca4f4f8b26d6697086b11ddcb0cca10981b62fb94d3d962da1d6fd85",
+  "navHistorySha256": "743e76f281b6114d04b5ae18ae1994c3ecbef2fcef0dd3f3b4614c96409e36d5",
   "canonicalization": "canonical-json-v1",
   "canonicalizationDescription": "json.dumps(data, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode('utf-8'); complete parsed document, duplicate keys and nonfinite numbers rejected"
 }

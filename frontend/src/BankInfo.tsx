@@ -3,9 +3,9 @@ import type { Language } from './copy';
 import { BookOpen, CircleHelp, Info, ShieldCheck } from 'lucide-react';
 import './bank-info.css';
 
-export function ProductCosts({ product, profile, language }: { product?: BankProduct; profile: BankProfile; language: Language }) {
+export function ProductCosts({ product, profile, language }: { product?: BankProduct; profile?: BankProfile; language: Language }) {
  const es = language === 'es';
- if (!product) return <div className="bank-costs bank-costs--external"><div className="bank-costs__heading"><strong>{es ? 'Referencia externa' : 'External reference'}</strong></div><div className="bank-costs__notice"><Info size={17} aria-hidden="true" /><p>{es ? 'Consulta las condiciones en la fuente del producto; no se aplican las comisiones de BancoT2F.' : 'Check the product source for its terms; BancoT2F fees do not apply.'}</p></div></div>;
+ if (!product) return <div className="bank-costs bank-costs--external"><div className="bank-costs__heading"><strong>{es ? 'Referencia externa' : 'External reference'}</strong></div><div className="bank-costs__notice"><Info size={17} aria-hidden="true" /><p>{es ? 'Condiciones y costes del fondo no disponibles. Consulta la fuente del producto.' : 'Fund terms and costs are unavailable. Check the product source.'}</p></div></div>;
  const pct = (n: number) => new Intl.NumberFormat(es ? 'es-ES' : 'en-GB', {minimumFractionDigits:2, maximumFractionDigits:2}).format(n / 100) + ' %';
  const money = (n: number) => new Intl.NumberFormat(es ? 'es-ES' : 'en-GB', {style:'currency',currency:'EUR'}).format(n);
  return <div className="bank-costs">
@@ -19,7 +19,7 @@ export function ProductCosts({ product, profile, language }: { product?: BankPro
    <div><dt>{es ? 'Salida' : 'Exit'}</dt><dd>{pct(product.fees.exitBps)}</dd></div>
    <div><dt>{es ? 'Custodia anual' : 'Annual custody'}</dt><dd>{pct(product.fees.custodyAnnualBps)}</dd></div>
   </dl>
-  <div className="bank-costs__notice"><Info size={17} aria-hidden="true" /><p>{es ? 'Comisiones informativas: no se descuentan en la simulación.' : 'Fees are informational and are not deducted in the simulation.'}</p></div>
+  <div className="bank-costs__notice"><Info size={17} aria-hidden="true" /><p>{es ? 'Los costes de los fondos reales no están disponibles. El valor liquidativo incluye los gastos incorporados al fondo; no se añaden costes externos.' : 'Real fund costs are unavailable. NAV includes costs embedded in the fund; no external costs are added.'}</p></div>
  </div>;
 }
 
@@ -38,8 +38,8 @@ export default function BankInfo({profile,language}:{profile:BankProfile;languag
    <ul className="bank-info__restrictions">{restrictions.map(item=><li key={item}><ShieldCheck size={17} aria-hidden="true" /><span>{item}</span></li>)}</ul>
   </div>
   <div className="bank-info__services"><h3>{es ? 'Servicios' : 'Services'}</h3><ul className="bank-info__service-list">{profile.services.map(s=><li key={s.id}><BookOpen size={18} aria-hidden="true" /><div><strong>{s.name[language]}</strong><p>{s.description[language]}</p></div></li>)}</ul>
-   <details className="bank-info__faq"><summary><CircleHelp size={18} aria-hidden="true" />{es ? 'Preguntas frecuentes' : 'Frequently asked questions'}</summary>{profile.faq.map(f=><details key={f.id}><summary>{f.question[language]}</summary><p>{f.id === 'identity' ? (es ? 'BancoT2F es el banco de este entorno de demostración.' : 'BancoT2F is the bank in this demonstration environment.') : f.id === 'fees' ? (es ? 'Comisiones informativas: no se descuentan en la simulación.' : 'Fees are informational and are not deducted in the simulation.') : f.answer[language]}</p></details>)}</details>
+   <details className="bank-info__faq"><summary><CircleHelp size={18} aria-hidden="true" />{es ? 'Preguntas frecuentes' : 'Frequently asked questions'}</summary>{profile.faq.map(f=><details key={f.id}><summary>{f.question[language]}</summary><p>{f.id === 'identity' ? (es ? 'BancoT2F es el banco de este entorno de demostración.' : 'BancoT2F is the bank in this demonstration environment.') : f.id === 'fees' ? (es ? 'Los costes de los fondos reales no están disponibles. El valor liquidativo incluye los gastos incorporados al fondo; no se añaden costes externos.' : 'Real fund costs are unavailable. NAV includes costs embedded in the fund; no external costs are added.') : f.answer[language]}</p></details>)}</details>
   </div>
-  <div className="bank-info__notice"><Info size={20} aria-hidden="true" /><div><strong>{es ? 'Sobre las comisiones' : 'About fees'}</strong><p>{es ? 'Comisiones informativas: no se descuentan en la simulación.' : 'Fees are informational and are not deducted in the simulation.'}</p></div></div>
+  <div className="bank-info__notice"><Info size={20} aria-hidden="true" /><div><strong>{es ? 'Sobre las comisiones' : 'About fees'}</strong><p>{es ? 'Los costes de los fondos reales no están disponibles. El valor liquidativo incluye los gastos incorporados al fondo; no se añaden costes externos.' : 'Real fund costs are unavailable. NAV includes costs embedded in the fund; no external costs are added.'}</p></div></div>
  </section>;
 }

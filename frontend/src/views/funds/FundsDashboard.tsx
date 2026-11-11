@@ -13,7 +13,7 @@ import { changePct, cumulativeFromReturns, returnsFromSeries } from "../../dashb
 import { buildDemoPortfolio, type DemoPortfolio } from "../../dashboard-portfolio.ts";
 import { bestWorstMonth, excessReturnPct, filterPositions, monthlyReturnMatrix, periodWindow, positiveMonthsPct, rebase, summarizeTrades } from "../../funds-metrics.ts";
 import type { Level, Theme } from "../../types/level.ts";
-import { fc, type Lang } from "./copy.ts";
+import { fc, fr, type Lang } from "./copy.ts";
 import { Heatmap } from "./Heatmap.tsx";
 import "./funds.css";
 
@@ -24,6 +24,8 @@ export type FundsDashboardProps = {
   onExplore?: () => void;
   onSimulate?: () => void;
   onSell?: () => void;
+  /** Cartera ya construida por App (NAV reales CNMV vía `buildRealPortfolio`, la misma que usa Inicio). Sin ella, la cartera DEMO. */
+  portfolio?: DemoPortfolio;
 };
 
 type PeriodId = "3" | "6" | "12" | "24" | "all";
@@ -91,7 +93,7 @@ function Basic(props: FundsDashboardProps & { p: DemoPortfolio }) {
   return (
     <>
       <Kpis p={p} language={language} />
-      <EvolutionChart title={t.evolution} description={t.evolutionDesc} data={data} seriesName={t.portfolio} changePct={change} periodControl={periodControl(language, per)} demo language={language} />
+      <EvolutionChart title={t.evolution} description={p.real ? fr[language].evolutionDesc : t.evolutionDesc} data={data} seriesName={t.portfolio} changePct={change} periodControl={periodControl(language, per)} demo language={language} />
       <Section title={t.yourFunds} description={t.yourFundsDesc} demo language={language} level={3}>
         <ul className="fd-cards">
           {p.positions.map((r) => (
@@ -126,15 +128,15 @@ function Intermediate(props: FundsDashboardProps & { p: DemoPortfolio }) {
   return (
     <>
       <Kpis p={p} language={language} />
-      <EvolutionChart title={t.evolution} description={t.compareDesc} data={data} seriesName={t.portfolio} compareName={t.index} changePct={change} periodControl={periodControl(language, per)} demo language={language} />
+      <EvolutionChart title={t.evolution} description={p.real ? fr[language].compareDesc : t.compareDesc} data={data} seriesName={t.portfolio} compareName={p.real ? p.real.benchmarkName[language] : t.index} changePct={change} periodControl={periodControl(language, per)} demo language={language} />
       <article className="dash-card" aria-label={t.compare}>
-        <header className="dash-card__head"><h3>{t.compare} <DemoBadge language={language} /></h3></header>
+        <header className="dash-card__head"><h3>{p.real ? fr[language].indexLabel : t.compare} {!p.real && <DemoBadge language={language} />}</h3></header>
         <div className="fd-compare">
           <div><span>{t.portfolioChange}</span><strong>{change == null ? t.na : signedPct(change, language)}</strong></div>
-          <div><span>{t.indexChange}</span><strong>{benchChange == null ? t.na : signedPct(benchChange, language)}</strong></div>
+          <div><span>{p.real ? fr[language].indexLabel : t.indexChange}</span><strong>{benchChange == null ? t.na : signedPct(benchChange, language)}</strong></div>
           <div><span>{t.difference}</span><strong>{diff == null ? t.na : `${num(diff, language, 2)} ${t.pp}`}</strong></div>
         </div>
-        <p className="fd-note">{t.forPeriod}. {t.compareNote}</p>
+        <p className="fd-note">{t.forPeriod}. {p.real ? fr[language].compareNote : t.compareNote}</p>
       </article>
       <Section title={t.mix} description={t.mixDesc} demo language={language} level={3}>
         <div className="fd-grid">
@@ -163,14 +165,14 @@ function MultiSeriesChart({ p, language, months, periodCtl }: { p: DemoPortfolio
   const series = useMemo(() => {
     const entries: { key: string; name: string; color: string; dash: string; values: number[] }[] = [
       { key: "portfolio", name: t.portfolio, color: "var(--chart-line)", dash: "", values: rebase(periodWindow(p.valueSeries, months)) },
-      { key: "index", name: t.index, color: "var(--chart-2)", dash: "6 4", values: rebase(periodWindow(p.benchmarkSeries, months)) },
+      { key: "index", name: p.real ? p.real.benchmarkName[language] : t.index, color: "var(--chart-2)", dash: "6 4", values: rebase(periodWindow(p.benchmarkSeries, months)) },
     ];
     p.positions.forEach((r, i) => {
       const prices = cumulativeFromReturns(r.fund.startPrice, r.fund.monthlyReturnsPct).slice(0, length);
       entries.push({ key: r.fund.id, name: r.fund.name, color: FUND_COLORS[i % FUND_COLORS.length], dash: FUND_DASH[i % FUND_DASH.length], values: rebase(periodWindow(prices, months)) });
     });
     return entries;
-  }, [p, months, length, t.portfolio, t.index]);
+  }, [p, months, length, t.portfolio, t.index, language]);
   const labels = periodWindow(p.labels, months);
   const data = labels.map((label, i) => ({ label, ...Object.fromEntries(series.map((s) => [s.key, s.values[i]])) })) as Record<string, number | string>[];
   const shown = series.filter((s) => visible.has(s.key));
@@ -179,8 +181,8 @@ function MultiSeriesChart({ p, language, months, periodCtl }: { p: DemoPortfolio
     <article className="dash-card" aria-labelledby={`${uid}-t`}>
       <header className="dash-card__head">
         <div>
-          <h3 id={`${uid}-t`}>{t.seriesTitle} <DemoBadge language={language} /></h3>
-          <p className="dash-card__desc">{t.seriesDesc}</p>
+          <h3 id={`${uid}-t`}>{t.seriesTitle} {!p.real && <DemoBadge language={language} />}</h3>
+          <p className="dash-card__desc">{p.real ? fr[language].seriesDesc : t.seriesDesc}</p>
         </div>
         {periodCtl}
       </header>
@@ -228,10 +230,10 @@ function MultiSeriesChart({ p, language, months, periodCtl }: { p: DemoPortfolio
   );
 }
 
-function ExposureBars({ title, description, items, language }: { title: string; description?: string; items: { key: string; label: string; weight: number }[]; language: Lang }) {
+function ExposureBars({ title, description, items, language, demo = true }: { title: string; description?: string; items: { key: string; label: string; weight: number }[]; language: Lang; demo?: boolean }) {
   return (
     <article className="dash-card" aria-label={title}>
-      <header className="dash-card__head"><div><h3>{title} <DemoBadge language={language} /></h3>{description && <p className="dash-card__desc">{description}</p>}</div></header>
+      <header className="dash-card__head"><div><h3>{title} {demo && <DemoBadge language={language} />}</h3>{description && <p className="dash-card__desc">{description}</p>}</div></header>
       <ul className="fd-bars">
         {items.map((i) => (
           <li key={i.key}>
@@ -311,10 +313,11 @@ function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
           caption={bw ? `${t.best}: ${signedPct(bw.best.value, language)} (M${bw.best.index + 1}) · ${t.worst}: ${signedPct(bw.worst.value, language)} (M${bw.worst.index + 1})` : undefined} />
       </KpiRow>
       <MultiSeriesChart p={p} language={language} months={per.months} periodCtl={periodControl(language, per)} />
-      <Heatmap rows={matrix} language={language} title={t.heatmap} description={t.heatmapDesc} />
+      <Heatmap rows={matrix} language={language} title={t.heatmap} description={p.real ? (p.real.heatmapFirstYear != null ? fr[language].heatmapDesc : fr[language].heatmapDescRel) : t.heatmapDesc} demo={!p.real} firstYear={p.real?.heatmapFirstYear} />
       <div className="fd-grid fd-grid--2">
-        <ExposureBars title={t.geo} description={t.geoDesc} items={p.byRegion.map((g) => ({ key: g.key, label: regionNames[language][g.key], weight: g.weight }))} language={language} />
-        <ExposureBars title={t.currency} items={p.byCurrency.map((g) => ({ key: g.key, label: currencyNames[language][g.key], weight: g.weight }))} language={language} />
+        {p.real ? <article className="dash-card" aria-label={t.geo}><header className="dash-card__head"><h3>{t.geo}</h3></header><p className="dash-state">{fr[language].geoUnavailable}</p></article>
+          : <ExposureBars title={t.geo} description={t.geoDesc} items={p.byRegion.map((g) => ({ key: g.key, label: regionNames[language][g.key], weight: g.weight }))} language={language} />}
+        <ExposureBars title={t.currency} items={p.byCurrency.map((g) => ({ key: g.key, label: currencyNames[language][g.key], weight: g.weight }))} language={language} demo={!p.real} />
       </div>
       <Section title={t.positions} demo language={language} level={3} actions={<Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} />}>
         <div className="fd-filters">
@@ -331,7 +334,7 @@ function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
         </div>
         <FundTable rows={rows} caption={t.table} language={language} demo />
       </Section>
-      <RecentTrades language={language} />
+      {p.real ? <article className="dash-card fd-trades" aria-label={t.trades}><header className="dash-card__head"><h3>{t.trades}</h3></header><p className="dash-state">{fr[language].tradesUnavailable}</p></article> : <RecentTrades language={language} />}
     </>
   );
 }
@@ -340,13 +343,27 @@ function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
 export default function FundsDashboard(props: FundsDashboardProps) {
   const { language, level, onExplore, onSimulate, onSell } = props;
   const t = fc[language];
-  const p = useMemo(() => buildDemoPortfolio(), []);
-  const subtitle = level === "beginner" ? t.subtitleBeginner : level === "intermediate" ? t.subtitleIntermediate : t.subtitleAdvanced;
+  const p = useMemo(() => props.portfolio ?? buildDemoPortfolio(), [props.portfolio]);
+  const real = p.real;
+  const r = fr[language];
+  const subtitle = real
+    ? (level === "beginner" ? r.subtitleBeginner : level === "intermediate" ? r.subtitleIntermediate : r.subtitleAdvanced)
+    : (level === "beginner" ? t.subtitleBeginner : level === "intermediate" ? t.subtitleIntermediate : t.subtitleAdvanced);
   return (
     <div className="fd">
       <h1 className="dash-sr">{language === "es" ? "Mi cartera" : "My portfolio"}</h1>
-      <Section title={t.title} description={subtitle} demo language={language} actions={level !== "advanced" ? <Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} /> : undefined}>
-        <p className="fd__notice">{t.notice}</p>
+      <Section title={t.title} description={subtitle} demo={!real} language={language} actions={level !== "advanced" ? <Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} /> : undefined}>
+        <p className="fd__notice">{real ? r.notice : t.notice}</p>
+        {real && (
+          <aside className="fd__source" aria-label={r.sourceTitle}>
+            <h3>{r.sourceTitle} <span className="fd-real" title={r.sourceReal}>{r.sourceReal}</span></h3>
+            <p>{r.sourceLine(real.sourceName, real.from, real.to, real.months)}</p>
+            <p><a href={real.sourceUrl} target="_blank" rel="noopener noreferrer">{r.sourceLink}</a></p>
+            <p><DemoBadge language={language} /> {r.demoLine}</p>
+            {level === "advanced" && <p>{r.sharpeAssumption}</p>}
+            <p>{r.pastNote}</p>
+          </aside>
+        )}
       </Section>
       {level === "beginner" && <Basic {...props} p={p} />}
       {level === "intermediate" && <Intermediate {...props} p={p} />}

@@ -1,31 +1,50 @@
-# 1 — Frontend de Tech2Finance
+﻿# Frontend de Tech2Finance
 
 ## Qué es
 
-Interfaz de demostración en React y TypeScript para el copiloto de inversión del proyecto. Incluye inicio, catálogo ficticio, simulador ilustrativo, cartera ficticia, pausa antes de vender y un asistente de ejemplo con respuestas predefinidas. Incluye tres vistas progresivas según conocimiento, interfaz en español e inglés y temas claro y oscuro. El idioma y el tema se guardan en el navegador. Los niveles cambian la presentación y las explicaciones, no el riesgo de las inversiones.
+Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, comparar ejemplos y entender una caída. Ofrece tres niveles, español e inglés, temas claro y oscuro y voz local opcional. La demo no conecta cuentas ni realiza operaciones.
 
-La demo usa por defecto un backend local FastAPI; no conecta Claude, ElevenLabs ni fuentes financieras en directo y no realiza operaciones. El tutor responde mediante reglas; la voz del dispositivo es opcional y el análisis de caídas usa las observaciones disponibles, sin causas verificadas. Para el escenario ficticio de seis meses de T2F Equilibrio se muestra un guion de noticias inventadas identificado expresamente como tal. Los ejemplos ficticios usan variaciones inventadas; el ejemplo CaixaBank reconstruye una cartera con cinco rentabilidades anuales publicadas y aportaciones ficticias al cierre de cada año. No predice resultados ni utiliza valores liquidativos diarios. La fuente y los límites están en [contratos](../docs/contratos.md#muestra-histórica-anual-de-caixabank). El servicio de demo usa sus cálculos propios; el motor Python histórico permanece independiente.
+La tarjeta «¿Te preocupa la caída?» abre un análisis detallado de seis apartados junto a los datos y fuentes observados. En modo local se identifica como demostración por reglas; en modo servidor solo se identifica como IA cuando el proveedor y modelo están confirmados por la respuesta. Al fallar muestra el error y permite reintentar sin ocultar las observaciones. El contexto editable se aplica al análisis con un botón explícito, no al escribir. El tutor escrito y de voz sigue accesible. La configuración y la prueba real del proveedor son independientes de esta interfaz.
 
-## Ejecutar
+El selector de detalle de la cabecera se expande con Motion; permite volver, elegir un nivel o cerrarlo con Escape o pulsando fuera. Respeta la preferencia de movimiento reducido y mantiene el nivel global durante la sesión. Para comprobarlo: `npx playwright test -c playwright.level.config.ts`.
 
-Desde esta carpeta, con Node.js compatible con Vite (Node 22.12 o superior):
+El botón «Hablar con IA» inicia el dictado local y muestra una barra no modal. La respuesta se lee con voz local disponible; «Ver respuesta» y «Escribir» se abren solo al solicitarlos. El componente y su comprobación se describen en [componentes de interfaz](../docs/ui-components.md).
+
+## Datos y simulación
+
+El catálogo identifica cinco casos de estudio por gestora e ISIN. BancoT2F es el anfitrión simulado; sus condiciones no se atribuyen a esos fondos. Los riesgos, plazos, mínimos y costes adicionales desconocidos se presentan como tales. El modo local usa `shared/demo-data.json`, `shared/nav-history.json` y `shared/data-manifest.json`; el modo servidor obtiene el catálogo v2 y cálculos desde FastAPI. No cambia automáticamente de modo ante errores. Una respuesta de catálogo o simulación incompatible activa la recuperación explícita.
+
+Las series usan 73 cierres mensuales de valor liquidativo observados y publicados por la CNMV, desde diciembre de 2019 hasta diciembre de 2025: se selecciona la última observación diaria real de cada mes, sin interpolar, repetir ni extrapolar. Los archivos, hashes y condiciones de reutilización constan en la fuente compartida; las muestras antiguas quedan en snapshots separados. Cada resultado identifica instrumento, moneda y fechas. El valor liquidativo refleja gastos incorporados al fondo; el cálculo no añade costes externos ni impuestos. La frecuencia predeterminada es mensual: esas aportaciones se suman después de cada cierre. Las anuales se suman en los meses 12, 24 y sucesivos desde el inicio, sin prorrateo. En un plazo inferior a 12 meses no se suma ninguna aportación anual. Los resultados pasados no predicen resultados futuros.
+
+La cartera de ejemplo y «Probar una caída» comparten el caso BBVA Mi Inversión Bolsa Acumulación, ISIN ES0125269003, con 1.000 € de capital de práctica, sin aportaciones, entre el 31 de diciembre de 2019 y el 31 de marzo de 2020. La pausa muestra el dato observado y, cuando coincide con el periodo, un hecho público de la OMS con fecha y enlace; su coincidencia no demuestra causalidad. La persona conserva la decisión.
+
+Explorar muestra los fondos permitidos para el anfitrión, o filtra por emisor para una entidad configurada. La comparación utiliza series compatibles; CSV incluye los cierres, fuente, ISIN, moneda, versión y hashes. La práctica guiada compara aportaciones, plazos o instrumentos con condiciones compatibles y descarta resultados anteriores al editar. La muestra anual publicada previa permanece como método auxiliar de referencia, no como serie de NAV.
+
+## Sección «¿Y si vendo en el mes X?»
+
+Implementada en la rama `feature/juego-pantalla` (no en `main`). `HoldSellGame.tsx` se carga de forma diferida y se muestra bajo «02 / Evolución histórica» del Simulador; es una comparación simple, no el juego por turnos.
+
+- **Entradas:** fondo, importe inicial, aportación mensual, meses (máximo según el histórico del fondo, hasta 72), mes de venta (0..meses) y comisiones opcionales de compra y venta (0–5 %). Los valores del simulador solo inician el estado; después son independientes.
+- **Salida:** llama a `POST /api/game/compare` y muestra dos tarjetas neutras («Si mantengo» y «Si vendo en el mes N») con dinero final, aportado, comisiones y ganancia o pérdida (con signo), un gráfico de dos líneas distinguibles por color y trazo con marca «Venta · mes N», una tabla alternativa, fuente, periodo y supuestos localizados. No señala un mejor resultado ni recomienda; incluye el aviso sobre liquidez, horizonte y objetivo.
+- **Periodo:** el ejercicio siempre empieza en el primer cierre observado (31 dic 2019) y cubre hasta 72 meses; elegir otro mes de inicio queda pendiente. La fuente muestra también el enlace a las condiciones de reutilización de la CNMV.
+- **Validación:** `game-domain.ts` construye la petición y valida la respuesta (esquema, coincidencia con la petición, procedencia frente a `shared/data-manifest.json`, fechas, totales y unidades). Los importes llegan como cadenas decimales y solo se convierten a número para mostrarlos. Cualquier edición borra el resultado y aborta la petición en curso.
+- **Modo local:** con datos locales (`t2f-data-mode=local`) solo se muestra un aviso: no se calcula nada en el navegador ni se envían peticiones.
+- **CaixaBank:** el selector del juego excluye CaixaBank (`GAME_EXCLUDED_BANK_IDS` en `game-domain.ts`); no se ha retirado del resto de la aplicación. Si no queda ningún fondo elegible (por ejemplo `VITE_BANK_ID=caixabank`), se muestra un mensaje en lugar del formulario.
+- **Comprobar:** `npm test` (`game-domain.test.ts`, con una respuesta real en `tests/fixtures/game-compare-santander-rf-ahorro.json`) y `npx playwright test tests/game.spec.ts`.
+
+## Ejecutar y comprobar
+
+Con Node 22.12 o superior:
 
 ```bash
 npm ci
 npm run dev
-```
-
-En otro terminal, sigue los comandos de preparación y arranque para Windows o Linux/macOS del [README del backend](../backend/README.md#requisitos-y-arranque). Abre la dirección de Vite. Ante un fallo, la interfaz permite reintentar o elegir expresamente la demo local; la elección se guarda en el navegador. Vite reenvía `/api` al servidor local.
-
-Para comprobar el código:
-
-```bash
 npm test
 npm run build
 npx playwright test
 ```
 
-Las pruebas de navegador necesitan Google Chrome instalado. La aplicación y sus datos son solo una demostración.
+Arranca el backend conforme a [su README](../backend/README.md). La API local de demo no utiliza autenticación; por defecto el análisis funciona por reglas y puede configurarse para usar Anthropic. Vite reenvía `/api` al puerto 8000 por defecto; `T2F_BACKEND_PORT` permite otro puerto. Playwright requiere Chrome y acepta `T2F_PYTHON` para seleccionar el Python con dependencias. `VITE_BANK_ID` admite `demo`, `caixabank`, `bbva` y `santander`; una entidad desconocida produce un error. El filtro de interfaz no sustituye autorización del servidor.
 
 ## Tutor local, voz y pausa
 
@@ -78,3 +97,14 @@ La entidad se configura al arrancar o compilar el frontend mediante `VITE_BANK_I
 La guía de objetivos es un ejercicio local de plantillas educativas editables, condicionado por las respuestas y la preferencia de fluctuación; no evalúa idoneidad ni recomienda productos. Las respuestas permanecen en la pantalla y no se envían al tutor. La comparación avanzada muestra hasta tres series seleccionadas con la misma frecuencia, etiquetas de periodo y procedencia, en gráficos separados con escala común. En el simulador, el botón de ayuda junto al resultado abre el asistente con el resultado válido actual.
 
 La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inversión». La cabecera identifica el modo demo sin dinero real; las fuentes, limitaciones y costes siguen visibles donde aportan contexto.
+
+El tutor funciona por reglas, no utiliza LLM ni proveedores de voz remotos. El dictado y la lectura dependen de capacidades locales del dispositivo y conservan alternativa escrita. El gráfico ofrece tabla accesible y navegación por teclado. La comprobación con lectores de pantalla físicos sigue pendiente. El componente CountUp procede de React Bits; su licencia figura en `REACT-BITS-LICENSE.md`.
+
+## Integración con `main` (selector de nivel, simulador único y pausa)
+
+- **Interfaz final**: Inicio es `HomeDashboard` (más BankInfo y los accesos de práctica, «¿Te preocupa la caída?» y «Probar una caída»); Mi cartera es `FundsDashboard` + `AgentPanelSection` + banner/pausa; los tres reciben la misma cartera (`portfolio`). La página antigua de cartera/inicio de `main` (PageIntro, `large-portfolio`, tarjetas de acción) se descartó; se conservó su funcionalidad útil: el acceso «calm» que abre `openPortfolioDecline`, el análisis detallado de caídas, `navHistory`, `hostBankId` y los datos `historical_nav` en simulador y práctica. El Simulador muestra su título encima de las pestañas.
+- **Selector de nivel**: `src/LevelSelector.tsx` (de `main`) usa los tokens y temas del dashboard y ocupa el lugar del botón «Detalle». Selectores accesibles: botón `.level-button` (`aria-expanded`, `aria-controls="level-options"`), grupo `.level-menu` (`role="group"`, `aria-label` «Detalle»; `inert` cerrado), botón «Volver» y botones Básico/Intermedio/Avanzado con `aria-pressed`. Escape devuelve el foco al botón; respeta `prefers-reduced-motion`. `localStorage` `t2f-level` y `data-level` en `<html>` no cambian. Las etiquetas visibles son Básico/Intermedio/Avanzado.
+- **Simulador único con pestañas** (`views/simulator/SimulatorPage.tsx`): `role="tablist"` (`aria-label` «Secciones del simulador»), pestañas `#sim-tab-sim` «Simular» y `#sim-tab-sell` «¿Y si vendo?» (flechas, Inicio y Fin; `aria-selected`, `tabIndex` móvil), paneles `#sim-panel-sim` y `#sim-panel-sell` (`role="tabpanel"`, el inactivo con `hidden`; el contenido de «¿Y si vendo?» solo se monta mientras su pestaña está activa, para no duplicar etiquetas de formulario ocultas con las del simulador de producto (al cambiar de pestaña se pierde lo escrito en ese formulario)). «¿Y si vendo?» renderiza `HoldSellGame`: Básico usa `guided` (solo fondo, importe y mes de venta; sin comisiones, meses ni aportación visibles y con una explicación sencilla), Intermedio/Avanzado el formulario completo. Con el modo local muestra el aviso de que no se calcula nada ni se envía ninguna petición. No empuja a mantener ni a vender.
+- **Pausa** (`AntiPanicPanel`): lógica de `main` (análisis detallado con `DetailedDeclinePanel`, contexto histórico público, escenario ficticio identificado) con la profundidad por nivel de la rama. Nunca bloquea ni retrasa la venta; menciona liquidez, horizonte y objetivo; las noticias son contexto y no prueban causalidad. La pausa de cartera (Inicio y Mi cartera) analiza la cartera mostrada (`buildRealPortfolio`, construida una sola vez en `App.tsx`): con servidor envía `{basis:"portfolio_cnmv"}` y el backend reconstruye la misma serie, así que se muestra el análisis detallado y el tutor recibe la misma caída; sin servidor, análisis local de esa serie (`dataKind` `historical_nav`, fuente CNMV con URL y periodo). Sin datos reales, la serie DEMO (`fictional`). «Probar una caída» usa la serie de estudio `portfolio_demo`.
+- **Pruebas Playwright**: `npx playwright test` (169 pruebas). Configuraciones extra: `playwright.level.config.ts` (selector de nivel), `playwright.shiny.config.ts` (voz; necesita `T2F_BACKEND_PORT=8111` porque su vite no pasa por `start-vite.mjs`) y `calm.playwright.config.ts` (sin `webServer`: requiere vite en 5187 con `VITE_BANK_ID=demo` y el backend en 8111).
+- **Asistente**: preguntas sugeridas por página y nivel más las de caída; en el servidor `learn` se envía como `home`.

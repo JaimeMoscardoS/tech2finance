@@ -18,7 +18,24 @@ export type PositionRow = {
   change12m: number | null;
 };
 
+/** Procedencia de una cartera construida con NAV reales (ver `portfolio-real.ts`). Ausente = todo DEMO. */
+export type RealMeta = {
+  sourceName: string;
+  sourceUrl: string;
+  /** Primera y última fecha de NAV real usadas (ISO). */
+  from: string;
+  to: string;
+  months: number;
+  /** Referencia comparativa calculada (no es un índice de mercado). */
+  benchmarkName: { es: string; en: string };
+  /** Año natural de la primera rentabilidad mensual si la serie empieza en diciembre (permite rotular el mapa mensual); null si no. */
+  heatmapFirstYear: number | null;
+  /** ISIN de los fondos con NAV real. */
+  isins: string[];
+};
+
 export type DemoPortfolio = {
+  real?: RealMeta;
   positions: PositionRow[];
   totalValue: number;
   totalCost: number;
@@ -88,8 +105,9 @@ export function buildDemoPortfolio(funds: readonly DemoFund[] = demoFunds, held 
     byAssetClass: groupWeights(positions, (r) => r.fund.assetClass, (r) => r.value),
     byRegion: groupWeights(positions, (r) => r.fund.region, (r) => r.value),
     byCurrency: groupWeights(positions, (r) => r.fund.currency, (r) => r.value),
-    equityExposure: weightedAverage(positions.map((r) => r.fund.equityWeight), w),
-    averageRisk: weightedAverage(positions.map((r) => r.fund.riskLevel), w),
+    // Sin dato en algún fondo (p. ej. fondos reales sin riesgo/exposición publicados en la demo) => null: no se inventa un agregado parcial.
+    equityExposure: allKnown(positions.map((r) => r.fund.equityWeight)) ? weightedAverage(positions.map((r) => r.fund.equityWeight as number), w) : null,
+    averageRisk: allKnown(positions.map((r) => r.fund.riskLevel)) ? weightedAverage(positions.map((r) => r.fund.riskLevel as number), w) : null,
     volatilityPct: annualizedVolatility(monthly, minObservations),
     maxDrawdownPct: maxDrawdown(valueSeries),
     sharpe: sharpeRatio(monthly, DEMO_RISK_FREE_ANNUAL_PCT, minObservations),
@@ -97,15 +115,21 @@ export function buildDemoPortfolio(funds: readonly DemoFund[] = demoFunds, held 
   };
 }
 
+const allKnown = (values: readonly (number | null)[]): boolean => values.every((v) => v != null);
+
 export type AgentFacts = {
+  /** true si la serie usa NAV reales (CNMV) y solo las participaciones son DEMO. */
+  realNav: boolean;
+  /** Número de rentabilidades mensuales de la serie. */
+  monthlyObservations: number;
   totalValue: number;
   pnlPercent: number | null;
   topName: string;
   topWeightPct: number;
   /** Peso de los fondos de clase «renta variable» (sin contar la parte de renta variable de los mixtos), en %. */
-  equityWeightPct: number;
+  equityWeightPct: number | null;
   /** Exposición a renta variable look-through (incluye la parte de los fondos mixtos), en %; la usa el escenario. */
-  equityExposurePct: number;
+  equityExposurePct: number | null;
   volatilityPct: number | null;
   maxDrawdownPct: number | null;
   averageRisk: number | null;
@@ -118,19 +142,22 @@ export type AgentFacts = {
 /** Hechos calculados que el panel de agente (educativo) se limita a explicar. */
 export function deriveAgentFacts(p: DemoPortfolio, equityShocksPct: readonly number[] = [-10, -20]): AgentFacts {
   const top = [...p.positions].sort((a, b) => b.weight - a.weight)[0];
-  const equity = p.byAssetClass.find((g) => g.key === "equity")?.weight ?? 0;
+  // Si alguna clase es desconocida, el peso de renta variable no se puede saber.
+  const equity = p.byAssetClass.some((g) => g.key === "unknown") ? null : p.byAssetClass.find((g) => g.key === "equity")?.weight ?? 0;
   return {
+    realNav: !!p.real,
+    monthlyObservations: Math.max(0, p.valueSeries.length - 1),
     totalValue: p.totalValue,
     pnlPercent: p.pnlPercent,
     topName: top?.fund.name ?? "",
     topWeightPct: (top?.weight ?? 0) * 100,
-    equityWeightPct: equity * 100,
-    equityExposurePct: (p.equityExposure ?? 0) * 100,
+    equityWeightPct: equity == null ? null : equity * 100,
+    equityExposurePct: p.equityExposure == null ? null : p.equityExposure * 100,
     volatilityPct: p.volatilityPct,
     maxDrawdownPct: p.maxDrawdownPct,
     averageRisk: p.averageRisk,
     sharpe: p.sharpe,
     riskFreeAnnualPct: p.riskFreeAnnualPct,
-    scenarios: equityShocksPct.map((s) => ({ equityShockPct: s, portfolioImpactPct: equityShockImpactPct(p.positions.map((r) => ({ value: r.value, equityWeight: r.fund.equityWeight })), s) })),
+    scenarios: equityShocksPct.map((s) => ({ equityShockPct: s, portfolioImpactPct: allKnown(p.positions.map((r) => r.fund.equityWeight)) ? equityShockImpactPct(p.positions.map((r) => ({ value: r.value, equityWeight: r.fund.equityWeight as number })), s) : null })),
   };
 }

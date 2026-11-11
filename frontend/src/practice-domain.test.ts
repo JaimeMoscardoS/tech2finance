@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { instruments } from './catalog.ts';
+import legacy from '../../shared/snapshots/demo-2026-11-10.1/demo-data.json' with {type:'json'};
+import type {Instrument} from './catalog.ts';
+const instruments = legacy.instruments as Instrument[];
 import { simulate } from './demo.ts';
 import { replayAnnual } from './annual-history.ts';
 import { buildExperiment, explainComparison, type PracticeSettings } from './practice-domain.ts';

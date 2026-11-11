@@ -28,7 +28,14 @@ export function DeltaChip({ value, language = "es", suffix }: { value: number | 
 }
 
 /** Barra de métrica en segmentos (p. ej. nivel de riesgo 1–7) con valor visible y role=meter. */
-export function MetricBar({ label, value, max = 7, valueText, language = "es" }: { label: string; value: number; max?: number; valueText?: string; language?: Lang }) {
+export function MetricBar({ label, value, max = 7, valueText, language = "es" }: { label: string; value: number | null; max?: number; valueText?: string; language?: Lang }) {
+  // Sin dato: se dice explícitamente y no se dibuja una barra vacía que parezca riesgo 0.
+  if (value == null) return (
+    <div className="dash-meter dash-meter--na">
+      <span className="dash-meter__label">{label}</span>
+      <span className="dash-meter__value">{language === "es" ? "No disponible" : "Not available"}</span>
+    </div>
+  );
   const shown = Math.max(0, Math.min(max, value));
   const text = valueText ?? dash[language].riskOf(Math.round(shown), max);
   return (

@@ -22,12 +22,12 @@ export const dash = {
 } as const;
 
 export const assetClassNames: Record<Lang, Record<AssetClass, string>> = {
-  es: { money_market: "Monetario", fixed_income: "Renta fija", mixed: "Mixto", equity: "Renta variable" },
-  en: { money_market: "Money market", fixed_income: "Fixed income", mixed: "Mixed", equity: "Equities" },
+  es: { money_market: "Monetario", fixed_income: "Renta fija", mixed: "Mixto", equity: "Renta variable", unknown: "No disponible" },
+  en: { money_market: "Money market", fixed_income: "Fixed income", mixed: "Mixed", equity: "Equities", unknown: "Not available" },
 };
 export const regionNames: Record<Lang, Record<Region, string>> = {
-  es: { europe: "Europa", global: "Global", emerging: "Emergentes" },
-  en: { europe: "Europe", global: "Global", emerging: "Emerging" },
+  es: { europe: "Europa", global: "Global", emerging: "Emergentes", unknown: "No disponible" },
+  en: { europe: "Europe", global: "Global", emerging: "Emerging", unknown: "Not available" },
 };
 export const currencyNames: Record<Lang, Record<Currency, string>> = {
   es: { EUR: "Euro", USD: "Dólar" },

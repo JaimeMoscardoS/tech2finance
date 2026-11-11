@@ -18,20 +18,23 @@ class SimulationSpec(RequestModel):
     initial: Amount
     recurringContribution: Amount
     periods: Periods
+    startDate: str | None = None
+    contributionFrequency: Literal['monthly', 'annual'] = 'monthly'
 
 
 class DeclineSpec(RequestModel):
-    basis: Literal["instrument", "portfolio_demo"]
+    basis: Literal["instrument", "portfolio_demo", "portfolio_cnmv"]
     language: Language
     instrumentId: Identifier | None = None
     periods: Periods | None = None
+    startDate: str | None = None
 
     @model_validator(mode="after")
     def validate_basis(self):
         if self.basis == "instrument" and (self.instrumentId is None or self.periods is None):
             raise ValueError("instrumentId and periods are required for instrument")
-        if self.basis == "portfolio_demo" and (self.instrumentId is not None or self.periods is not None):
-            raise ValueError("portfolio_demo does not accept instrumentId or periods")
+        if self.basis in ("portfolio_demo", "portfolio_cnmv") and (self.instrumentId is not None or self.periods is not None or self.startDate is not None):
+            raise ValueError(f"{self.basis} does not accept instrumentId or periods")
         return self
 
 
@@ -83,6 +86,7 @@ class GameSpec(RequestModel):
     sellMonth: Annotated[int, Field(ge=0, le=120)]
     buyFeeRate: Rate
     sellFeeRate: Rate
+    startDate: str | None = None
 
     @model_validator(mode="after")
     def validate_game(self):
@@ -97,3 +101,8 @@ class TutorRequest(RequestModel):
     message: Annotated[str, Field(min_length=1, max_length=1500)]
     history: Annotated[list[HistoryMessage], Field(max_length=8)] = Field(default_factory=list)
     context: TutorContext
+
+class DeclineExplanationRequest(RequestModel):
+    decline: DeclineSpec
+    level: Literal['beginner', 'intermediate', 'advanced']
+    decision: Decision | None = None

@@ -12,7 +12,7 @@ const fmt = (n: number, l: Lang, digits = 1) => new Intl.NumberFormat(locale(l),
  * Mapa de calor de rentabilidad mensual. Accesible: es una tabla real con cabeceras, el valor con signo
  * está siempre visible en cada celda y se acompaña de flecha (▲/▼); el color solo refuerza la magnitud.
  */
-export function Heatmap({ rows, language = "es", title, description, demo = true }: { rows: readonly MatrixRow[]; language?: Lang; title: string; description?: string; demo?: boolean }) {
+export function Heatmap({ rows, language = "es", title, description, demo = true, firstYear }: { rows: readonly MatrixRow[]; language?: Lang; title: string; description?: string; demo?: boolean; firstYear?: number | null }) {
   const t = fc[language];
   const max = matrixMaxAbs(rows) || 1;
   // Signo, icono y color según el valor redondeado que se muestra (evita «+0,0» con color de subida).
@@ -47,13 +47,13 @@ export function Heatmap({ rows, language = "es", title, description, demo = true
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.row}>
-                    <th scope="row">{r.row + 1}</th>
+                    <th scope="row">{firstYear == null ? r.row + 1 : firstYear + r.row}</th>
                     {r.months.map((v, i) => {
-                      if (v == null) return <td key={i} className="is-num is-empty"><span className="dash-sr">{t.heatCell(r.row + 1, i + 1)}: {t.na}</span><span aria-hidden="true">·</span></td>;
+                      if (v == null) return <td key={i} className="is-num is-empty"><span className="dash-sr">{t.heatCell(firstYear == null ? r.row + 1 : firstYear + r.row, i + 1)}: {t.na}</span><span aria-hidden="true">·</span></td>;
                       const I = Icon(v);
                       return (
                         <td key={i} className="is-num" style={cellStyle(v)}>
-                          <span className="dash-sr">{t.heatCell(r.row + 1, i + 1)}: </span>
+                          <span className="dash-sr">{t.heatCell(firstYear == null ? r.row + 1 : firstYear + r.row, i + 1)}: </span>
                           <I size={10} aria-hidden="true" />{fmt(v, language)}<span className="dash-sr"> %</span>
                         </td>
                       );

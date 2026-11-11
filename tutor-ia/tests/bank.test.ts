@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { createLocalTutorProvider } from '../src/local-tutor.ts';
 import type { TutorContext } from '../src/types.ts';
 
-const bank = JSON.parse(readFileSync(new URL('../../shared/demo-data.json', import.meta.url), 'utf8')).bankProfile;
+const bank = JSON.parse(readFileSync(new URL('../../shared/snapshots/demo-2026-11-10.1/demo-data.json', import.meta.url), 'utf8')).bankProfile;
 const context: TutorContext = { page: 'simulator', level: 'beginner', language: 'es', bank, instrument: { id: 'demo-mixed', name: 'T2F Equilibrio', currency: 'EUR', dataKind: 'fictional', sources: [], product: bank.products.find((p: {instrumentId: string}) => p.instrumentId === 'demo-mixed') } };
 const ask = (message: string, c = context, history: {role: 'assistant'; text: string; intent: string}[] = []) => createLocalTutorProvider().reply({ message, context: c, history });
 test('bank questions use fictional contextual data and do not deduct fees', async () => {

@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
 import { useId, useMemo } from "react";
-import { buildDemoPortfolio, deriveAgentFacts, type AgentFacts } from "../../dashboard-portfolio.ts";
+import { buildDemoPortfolio, deriveAgentFacts, type AgentFacts, type DemoPortfolio } from "../../dashboard-portfolio.ts";
 import type { Level } from "../../types/level.ts";
 import { DemoBadge, StatusChip } from "./basics.tsx";
 import type { Lang } from "./copy.ts";
@@ -35,7 +35,7 @@ export function AgentPanel({ level, facts, language = "es" }: { level: Level; fa
         <h3 id={`${id}-t`}><Sparkles size={18} aria-hidden="true" /> {c.title}</h3>
         <span className="dash-agent__tags"><DemoBadge language={language} label="DEMO" /><StatusChip tone="info" icon={false}>{c.badge}</StatusChip></span>
       </header>
-      <p className="dash-agent__sample">{c.sample}</p>
+      <p className="dash-agent__sample">{facts.realNav ? (es ? "Esta fase no usa IA real: el texto es una plantilla DEMO que explica cifras calculadas por código sobre los valores liquidativos reales de la CNMV y unas participaciones ficticias (DEMO)." : "This phase uses no real AI: the text is a DEMO template that explains figures computed by code on real CNMV net asset values and fictional (DEMO) holdings.") : c.sample}</p>
 
       <section aria-label={c.summary}>
           <h4>{c.summary}</h4>
@@ -50,8 +50,8 @@ export function AgentPanel({ level, facts, language = "es" }: { level: Level; fa
             <h4>{c.observations}</h4>
             <ul>
               <li>{es ? `Concentración: «${facts.topName}» pesa ${pct(facts.topWeightPct, language, 0)} de la cartera.` : `Concentration: “${facts.topName}” weighs ${pct(facts.topWeightPct, language, 0)} of the portfolio.`}</li>
-              <li>{es ? `La renta variable supone ${pct(facts.equityWeightPct, language, 0)} del valor; el riesgo medio ponderado de los productos es ${n(facts.averageRisk)} sobre 7.` : `Equities make up ${pct(facts.equityWeightPct, language, 0)} of the value; the weighted average product risk is ${n(facts.averageRisk)} out of 7.`}</li>
-              <li>{es ? `En la serie DEMO, la volatilidad anualizada es ${facts.volatilityPct == null ? "n. d." : pct(facts.volatilityPct, language)} y la mayor caída desde un máximo, ${facts.maxDrawdownPct == null ? "n. d." : pct(facts.maxDrawdownPct, language)}.` : `In the DEMO series, annualised volatility is ${facts.volatilityPct == null ? "n/a" : pct(facts.volatilityPct, language)} and the largest fall from a peak is ${facts.maxDrawdownPct == null ? "n/a" : pct(facts.maxDrawdownPct, language)}.`}</li>
+              <li>{es ? `La renta variable supone ${facts.equityWeightPct == null ? "un porcentaje sin dato" : pct(facts.equityWeightPct, language, 0)} del valor; el riesgo medio ponderado de los productos es ${n(facts.averageRisk)} sobre 7.` : `Equities make up ${facts.equityWeightPct == null ? "an unknown share" : pct(facts.equityWeightPct, language, 0)} of the value; the weighted average product risk is ${n(facts.averageRisk)} out of 7.`}</li>
+              <li>{es ? `En la serie ${facts.realNav ? "(NAV reales CNMV)" : "DEMO"}, la volatilidad anualizada es ${facts.volatilityPct == null ? "n. d." : pct(facts.volatilityPct, language)} y la mayor caída desde un máximo, ${facts.maxDrawdownPct == null ? "n. d." : pct(facts.maxDrawdownPct, language)}.` : `In the ${facts.realNav ? "series (real CNMV NAVs)" : "DEMO series"}, annualised volatility is ${facts.volatilityPct == null ? "n/a" : pct(facts.volatilityPct, language)} and the largest fall from a peak is ${facts.maxDrawdownPct == null ? "n/a" : pct(facts.maxDrawdownPct, language)}.`}</li>
             </ul>
           </section>
           {level === "intermediate" && <section aria-label={c.review}>
@@ -78,8 +78,8 @@ export function AgentPanel({ level, facts, language = "es" }: { level: Level; fa
           <section aria-label={c.assumptions}>
             <h4>{c.assumptions}</h4>
             <ul>
-              <li>{es ? `Efecto = exposición a renta variable (${pct(facts.equityExposurePct, language)}, incluida la parte de renta variable del fondo mixto) × variación supuesta; el resto de activos no cambia. Sin efecto de divisa.` : `Effect = equity exposure (${pct(facts.equityExposurePct, language)}, including the equity part of the mixed fund) × assumed move; other assets unchanged. No currency effect.`}</li>
-              <li>{es ? `Sharpe anualizado ${n(facts.sharpe, 2)} con tipo libre de riesgo supuesto del ${pct(facts.riskFreeAnnualPct, language)}, sobre 36 rentabilidades mensuales ficticias netas de gastos y sin tipo de cambio (se muestra «n. d.» con menos de 12).` : `Annualised Sharpe ${n(facts.sharpe, 2)} with an assumed risk-free rate of ${pct(facts.riskFreeAnnualPct, language)}, over 36 fictional monthly returns, net of fees and without exchange rate (shown as “n/a” with fewer than 12).`}</li>
+              <li>{es ? `Efecto = exposición a renta variable (${facts.equityExposurePct == null ? "sin dato" : pct(facts.equityExposurePct, language)}, incluida la parte de renta variable del fondo mixto) × variación supuesta; el resto de activos no cambia. Sin efecto de divisa.` : `Effect = equity exposure (${facts.equityExposurePct == null ? "not available" : pct(facts.equityExposurePct, language)}, including the equity part of the mixed fund) × assumed move; other assets unchanged. No currency effect.`}</li>
+              <li>{es ? `Sharpe anualizado ${n(facts.sharpe, 2)} con tipo libre de riesgo supuesto del ${pct(facts.riskFreeAnnualPct, language)}, sobre ${facts.monthlyObservations} rentabilidades mensuales ${facts.realNav ? "reales (NAV CNMV, netas de los gastos del fondo)" : "ficticias netas de gastos y sin tipo de cambio"} (se muestra «n. d.» con menos de 12).` : `Annualised Sharpe ${n(facts.sharpe, 2)} with an assumed risk-free rate of ${pct(facts.riskFreeAnnualPct, language)}, over ${facts.monthlyObservations} ${facts.realNav ? "real monthly returns (CNMV NAVs, net of fund costs)" : "fictional monthly returns, net of fees and without exchange rate"} (shown as “n/a” with fewer than 12).`}</li>
               <li>{es ? "Sin costes de transacción, impuestos ni correlaciones cambiantes: simplificación didáctica." : "No transaction costs, taxes or changing correlations: a didactic simplification."}</li>
             </ul>
           </section>
@@ -91,8 +91,8 @@ export function AgentPanel({ level, facts, language = "es" }: { level: Level; fa
   );
 }
 
-/** Panel listo para colocar en el dashboard: calcula los datos con la cartera DEMO y el código de métricas. */
-export function AgentPanelSection({ level, language = "es" }: { level: Level; language?: Lang }) {
-  const facts = useMemo(() => deriveAgentFacts(buildDemoPortfolio()), []);
+/** Panel listo para colocar en el dashboard: calcula los datos con la cartera indicada (por defecto la DEMO) y el código de métricas. */
+export function AgentPanelSection({ level, language = "es", portfolio }: { level: Level; language?: Lang; portfolio?: DemoPortfolio }) {
+  const facts = useMemo(() => deriveAgentFacts(portfolio ?? buildDemoPortfolio()), [portfolio]);
   return <AgentPanel level={level} facts={facts} language={language} />;
 }

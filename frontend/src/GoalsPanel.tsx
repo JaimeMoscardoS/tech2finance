@@ -11,16 +11,16 @@ import "./goals.css";
 export default function GoalsPanel({ language }: { language: Language }) {
   const es = language === "es";
   const [answers, setAnswers] = useState<GoalAnswers>({
-    objective: "",
-    horizon: "",
-    liquidity: "",
-    reserve: "",
-    debt: "",
-    loss: "",
+    objective: "project",
+    horizon: "long",
+    liquidity: "no",
+    reserve: "yes",
+    debt: "no",
+    loss: "medium",
   });
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState("10000");
   const [edited, setEdited] = useState(false);
-  const [allocation, setAllocation] = useState(["30", "40", "30"]);
+  const [allocation, setAllocation] = useState((scenarioTemplate({objective:"project", horizon:"long", liquidity:"no", reserve:"yes", debt:"no", loss:"medium"}) ?? [30,40,30]).map(String));
   const ready = scenarioReady(answers);
   const nums = allocation.map((x) => (x.trim() === "" ? NaN : Number(x)));
   const valid = validAllocation(nums);
@@ -65,6 +65,8 @@ export default function GoalsPanel({ language }: { language: Language }) {
           ? "Este ejercicio se queda en la pantalla; sus respuestas no se envían al asistente."
           : "This worksheet stays on this screen; its answers are not sent to the assistant."}
       </p>
+      <p><strong>{es ? "Perfil ficticio de ejemplo: cambia cualquier respuesta para explorar otro caso." : "Fictional example profile: change any answer to explore another case."}</strong></p>
+      <button type="button" className="button outline" onClick={() => { const example = {objective:"project", horizon:"long", liquidity:"no", reserve:"yes", debt:"no", loss:"medium"}; setAnswers(example); setAmount("10000"); setAllocation((scenarioTemplate(example) ?? [30,40,30]).map(String)); setEdited(false); }}>{es ? "Restablecer ejemplo ficticio" : "Reset fictional example"}</button>
       <div className="goals-fields">
         {question(
           "objective",

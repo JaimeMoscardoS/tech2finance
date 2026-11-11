@@ -7,31 +7,31 @@ async function openPractice(page: Page, url = '/') {
   await expect(page.getByRole('heading', {name: 'Aprende haciendo preguntas.'})).toBeFocused();
 }
 
-test('real server compares annual contributions and sends the chosen case to the tutor', async ({page}) => {
+test('real server compares monthly contributions and sends the chosen case to the tutor', async ({page}) => {
   const simulations: unknown[] = [];
   page.on('request', req => { if (req.url().endsWith('/api/simulations') && req.method() === 'POST') simulations.push(req.postDataJSON()); });
-  await openPractice(page, 'http://127.0.0.1:5177/');
+  await openPractice(page, 'http://127.0.0.1:5194/');
   await page.getByLabel('Instrumento A').selectOption('caixabank-monetario-estandar');
   await page.getByLabel('Importe inicial (€)').fill('500');
   await page.getByLabel(/Aportación periódica/).fill('100');
   await page.getByRole('button', {name:'Comparar ejemplos'}).click();
   const results=page.locator('.practice-result-card');
   await expect(results).toHaveCount(2);
-  await expect(results.nth(1)).toContainText('1048,55');
-  await expect(results.nth(1)).toContainText('1000,00');
-  await expect(results.nth(1)).toContainText('48,55');
+  await expect(results.nth(1)).toContainText('1700,75');
+  await expect(results.nth(1)).toContainText('1700,00');
+  await expect(results.nth(1)).toContainText('0,75');
   expect(simulations).toEqual(expect.arrayContaining([
-    {instrumentId:'caixabank-monetario-estandar',initial:500,recurringContribution:0,periods:5},
-    {instrumentId:'caixabank-monetario-estandar',initial:500,recurringContribution:100,periods:5},
+    {instrumentId:'caixabank-monetario-estandar',initial:500,recurringContribution:0,periods:12},
+    {instrumentId:'caixabank-monetario-estandar',initial:500,recurringContribution:100,periods:12},
   ]));
   const tutorRequest = page.waitForRequest(req => req.url().endsWith('/api/tutor') && req.method() === 'POST');
   await page.getByRole('button',{name:'Preguntar sobre este ejemplo'}).click();
   await page.locator('#chat-input').fill('¿Cuánto he aportado?');
   await page.getByRole('button',{name:'Enviar pregunta'}).click();
   const body=(await tutorRequest).postDataJSON();
-  expect(body.context.simulation).toEqual({instrumentId:'caixabank-monetario-estandar',initial:500,recurringContribution:100,periods:5});
+  expect(body.context.simulation).toEqual({instrumentId:'caixabank-monetario-estandar',initial:500,recurringContribution:100,periods:12});
   expect(body.context.instrumentId).toBe('caixabank-monetario-estandar');
-  await expect(page.locator('.message.assistant').last()).toContainText('1000');
+  await expect(page.locator('.message.assistant').last()).toContainText('1700');
 });
 
 test('local practice completes three concepts and clears results after editing', async ({page}) => {

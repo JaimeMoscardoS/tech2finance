@@ -129,7 +129,7 @@ test("DEMO cost basis equals units x month-0 price for every fund (same base as 
   // hand-checked literals: 40*100, 140*50, 520*12.5, 280*20, 350*8
   assert.deepEqual(demoPositions.map((x) => x.costBasisEur), [4000, 7000, 6500, 5600, 2800]);
   const p = buildDemoPortfolio(); close(p.totalCost, 25900); close(p.valueSeries[0], 25900);
-  assert.ok(demoFunds.every((f) => f.equityWeight >= 0 && f.equityWeight <= 1));
+  assert.ok(demoFunds.every((f) => f.equityWeight != null && f.equityWeight >= 0 && f.equityWeight <= 1));
   assert.deepEqual(demoFunds.map((f) => f.equityWeight), [0, 0, 0.4, 1, 1]);
 });
 
@@ -137,7 +137,7 @@ test("DEMO data is fictional and well-formed", () => {
   const ids = new Set(demoFunds.map((f) => f.id));
   assert.equal(ids.size, demoFunds.length);
   for (const f of demoFunds) {
-    assert.equal(f.monthlyReturnsPct.length, 36); assert.ok(f.startPrice > 0); assert.ok(f.riskLevel >= 1 && f.riskLevel <= 7);
+    assert.equal(f.monthlyReturnsPct.length, 36); assert.ok(f.startPrice > 0); assert.ok(f.riskLevel != null && f.riskLevel >= 1 && f.riskLevel <= 7); assert.ok(f.ter != null && f.ter > 0); assert.notEqual(f.assetClass, "unknown");
     assert.doesNotMatch(f.id + f.name + f.manager, /\b[A-Z]{2}[0-9A-Z]{9}[0-9]\b/); // sin ISIN
     assert.match(f.name, /Ejemplo/);
   }
@@ -165,9 +165,9 @@ test("agent facts come from computed data", () => {
   const p = buildDemoPortfolio(); const f = deriveAgentFacts(p);
   const eq = p.byAssetClass.find((g) => g.key === "equity")!.weight * 100;
   const mixed = p.positions.find((r) => r.fund.id === "demo-mixto")!.weight * 100;
-  close(f.equityWeightPct, eq);
+  close(f.equityWeightPct!, eq);
   // look-through exposure = pure equity funds + 40 % of the mixed fund
-  close(f.equityExposurePct, eq + 0.4 * mixed);
+  close(f.equityExposurePct!, eq + 0.4 * mixed);
   close(f.scenarios[0].portfolioImpactPct!, (-10 * (eq + 0.4 * mixed)) / 100); close(f.scenarios[1].portfolioImpactPct!, (-20 * (eq + 0.4 * mixed)) / 100);
   assert.ok(f.scenarios.every((s) => Number.isFinite(s.portfolioImpactPct!) && s.portfolioImpactPct! > -100));
   assert.equal(f.topName, p.positions.reduce((a, b) => (b.weight > a.weight ? b : a)).fund.name);

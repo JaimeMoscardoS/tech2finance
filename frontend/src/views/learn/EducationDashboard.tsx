@@ -76,10 +76,11 @@ export default function EducationDashboard({ language, level, theme: _theme, onG
   const [offset, setOffset] = useState(0);
   const concept = concepts[(dayIndex() + offset) % concepts.length];
   const portfolio = useMemo(() => buildDemoPortfolio(), []);
-  const costRows = useMemo(() => demoFunds.map((f) => ({
-    fund: f, annual: (f.ter / 100) * 10000,
+  // Solo fondos DEMO ficticios con TER supuesto (un TER desconocido no se trata como 0).
+  const costRows = useMemo(() => demoFunds.flatMap((f) => f.ter == null ? [] : [{
+    fund: f, ter: f.ter, annual: (f.ter / 100) * 10000,
     ten: runScenario({ initial: 10000, monthly: 0, years: 10 }, { id: f.id, kind: "constant", grossAnnualPct: 4, costAnnualPct: f.ter }).costEur,
-  })), []);
+  }]), []);
 
   const conceptCard = (
     <article className="dash-card edu-concept">
@@ -99,12 +100,12 @@ export default function EducationDashboard({ language, level, theme: _theme, onG
             <th scope="col">{t.fund}</th>{full && <th scope="col">{t.cls}</th>}<th scope="col">{t.risk}</th><th scope="col" className="is-num">{t.ter}</th>
             <th scope="col" className="is-num">{t.cost10k}</th>{full && <th scope="col" className="is-num">{t.cost10y}</th>}
           </tr></thead>
-          <tbody>{costRows.map(({ fund, annual, ten }) => (
+          <tbody>{costRows.map(({ fund, ter, annual, ten }) => (
             <tr key={fund.id}>
               <th scope="row">{fund.name}</th>
               {full && <td>{assetClassNames[language][fund.assetClass]}</td>}
               <td><MetricBar label={`${t.risk}: ${fund.name}`} value={fund.riskLevel} language={language} /></td>
-              <td className="is-num">{pct(fund.ter, language, 2)}</td>
+              <td className="is-num">{pct(ter, language, 2)}</td>
               <td className="is-num">{eur(annual, language)}</td>
               {full && <td className="is-num">{eur(ten, language)}</td>}
             </tr>

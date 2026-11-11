@@ -82,3 +82,9 @@
   .fd-field input, .fd-field select { min-width: 100%; }
   .fd-field { flex: 1 1 100%; }
 }
+
+.fd__source { margin: 12px 0 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); font-size: .86rem; color: var(--ink); }
+.fd__source h3 { margin: 0 0 6px; font-size: .95rem; }
+.fd__source p { margin: 4px 0; }
+.fd__source a { color: var(--accent-text, var(--accent)); text-decoration: underline; text-underline-offset: 2px; }
+.fd-real { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: 999px; font-size: .72rem; font-weight: 800; letter-spacing: .06em; color: var(--ink); background: var(--accent-soft); border: 1px solid var(--accent); line-height: 1.5; vertical-align: middle; }

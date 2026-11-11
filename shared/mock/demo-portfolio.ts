@@ -15,8 +15,9 @@
  * - La serie empieza en el mes 0; las etiquetas son relativas (M0, M1...) para no inferir fechas.
  */
 
-export type AssetClass = "money_market" | "fixed_income" | "mixed" | "equity";
-export type Region = "europe" | "global" | "emerging";
+/** «unknown»: sin dato publicado (fondos reales cuya clase no consta en el catálogo); nunca se deduce. */
+export type AssetClass = "money_market" | "fixed_income" | "mixed" | "equity" | "unknown";
+export type Region = "europe" | "global" | "emerging" | "unknown";
 export type Currency = "EUR" | "USD";
 
 export type DemoFund = {
@@ -28,14 +29,14 @@ export type DemoFund = {
   /** Divisa de exposición principal del fondo (ficticia). */
   currency: Currency;
   /** Nivel de riesgo del producto de 1 (menor) a 7 (mayor); ficticio y fijo, no depende del nivel de la interfaz. */
-  riskLevel: 1 | 2 | 3 | 4 | 5 | 6 | 7;
-  /** Gastos corrientes anuales supuestos, en %. */
-  ter: number;
+  riskLevel: 1 | 2 | 3 | 4 | 5 | 6 | 7 | null;
+  /** Gastos corrientes anuales supuestos, en %. null = sin dato (nunca 0). */
+  ter: number | null;
   /**
    * Exposición a renta variable del fondo, de 0 a 1 (supuesto ficticio): renta variable pura = 1,
    * mixto prudente = 0,4, renta fija y monetario = 0. Se usa en el escenario de sensibilidad.
    */
-  equityWeight: number;
+  equityWeight: number | null;
   /** Precio por participación en el mes 0 (ficticio). */
   startPrice: number;
   /** Rentabilidades mensuales en % (36 meses). */
