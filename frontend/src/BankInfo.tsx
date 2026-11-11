@@ -1,18 +1,25 @@
 import type { BankProduct, BankProfile } from './catalog';
 import type { Language } from './copy';
+import { Info } from 'lucide-react';
 import './bank-info.css';
 
 export function ProductCosts({ product, profile, language }: { product?: BankProduct; profile: BankProfile; language: Language }) {
  const es = language === 'es';
- if (!product) return <div className="bank-costs"><strong>{es ? 'Referencia externa' : 'External reference'}</strong><p>{es ? 'Consulta las condiciones en la fuente del producto; no se aplican las comisiones ficticias de BancoT2F.' : 'Check the product source for its terms; fictional BancoT2F fees do not apply.'}</p></div>;
+ if (!product) return <div className="bank-costs bank-costs--external"><div className="bank-costs__heading"><strong>{es ? 'Referencia externa' : 'External reference'}</strong></div><div className="bank-costs__notice"><Info size={17} aria-hidden="true" /><p>{es ? 'Consulta las condiciones en la fuente del producto; no se aplican las comisiones ficticias de BancoT2F.' : 'Check the product source for its terms; fictional BancoT2F fees do not apply.'}</p></div></div>;
  const pct = (n: number) => new Intl.NumberFormat(es ? 'es-ES' : 'en-GB', {minimumFractionDigits:2, maximumFractionDigits:2}).format(n / 100) + ' %';
  const money = (n: number) => new Intl.NumberFormat(es ? 'es-ES' : 'en-GB', {style:'currency',currency:'EUR'}).format(n);
  return <div className="bank-costs">
-  <strong>{es ? 'Condiciones ficticias del producto' : 'Fictional product terms'}</strong>
-  <p>{es ? 'Mínimo inicial' : 'Initial minimum'}: {money(product.minimumInitialEur)} · {es ? 'Aportación mínima' : 'Recurring minimum'}: {money(product.minimumRecurringEur)}</p>
-  <p>{es ? 'Gastos anuales' : 'Annual ongoing charges'}: {product.fees.annualOngoingBps === null ? (es ? 'No definidos' : 'Not defined') : pct(product.fees.annualOngoingBps)} · {es ? 'Por orden' : 'Per order'}: {money(product.fees.orderFixedEur)}</p>
-  <p>{es ? 'Entrada' : 'Entry'}: {pct(product.fees.entryBps)} · {es ? 'Salida' : 'Exit'}: {pct(product.fees.exitBps)} · {es ? 'Custodia anual' : 'Annual custody'}: {pct(product.fees.custodyAnnualBps)}</p>
-  <small>{profile.calculationNotice[language]}</small>
+  <div className="bank-costs__heading"><strong>{es ? 'Condiciones del producto' : 'Product terms'}</strong><span className="bank-costs__badge">{es ? 'Ficticias' : 'Fictional'}</span></div>
+  <dl className="bank-costs__grid">
+   <div className="bank-costs__annual"><dt>{es ? 'Gastos anuales' : 'Annual ongoing charges'}</dt><dd>{product.fees.annualOngoingBps === null ? (es ? 'No definidos' : 'Not defined') : pct(product.fees.annualOngoingBps)}</dd></div>
+   <div><dt>{es ? 'Mínimo inicial' : 'Initial minimum'}</dt><dd>{money(product.minimumInitialEur)}</dd></div>
+   <div><dt>{es ? 'Aportación mínima' : 'Recurring minimum'}</dt><dd>{money(product.minimumRecurringEur)}</dd></div>
+   <div><dt>{es ? 'Por orden' : 'Per order'}</dt><dd>{money(product.fees.orderFixedEur)}</dd></div>
+   <div><dt>{es ? 'Entrada' : 'Entry'}</dt><dd>{pct(product.fees.entryBps)}</dd></div>
+   <div><dt>{es ? 'Salida' : 'Exit'}</dt><dd>{pct(product.fees.exitBps)}</dd></div>
+   <div><dt>{es ? 'Custodia anual' : 'Annual custody'}</dt><dd>{pct(product.fees.custodyAnnualBps)}</dd></div>
+  </dl>
+  <div className="bank-costs__notice"><Info size={17} aria-hidden="true" /><p>{profile.calculationNotice[language]}</p></div>
  </div>;
 }
 

@@ -43,6 +43,10 @@ El modo local funciona sin backend; el modo servidor usa las mismas reglas del t
 
 ## Componentes y fuentes
 
+Para cambios de interfaz, aplica la [skill frontend-design del proyecto](../.agents/skills/frontend-design/SKILL.md), que incluye criterios para presentar información financiera.
+
+Las condiciones de producto en Explorar y el simulador organizan etiquetas e importes en una lista, destacan los gastos anuales y mantienen visible el aviso de que las comisiones ficticias no se descuentan. Un gasto anual desconocido aparece como «No definidos» y los productos externos muestran su propio aviso. Se usan los mismos datos en español e inglés, en móvil y escritorio y con ambos temas.
+
 `src/CountUp.tsx` procede de [React Bits](https://github.com/DavidHDev/react-bits), componente CountUp. Su licencia se conserva en `REACT-BITS-LICENSE.md`. La animación respeta la preferencia de movimiento reducido definida por el navegador cuando la gestiona el componente; la interfaz también incluye reglas de movimiento reducido.
 
 El gráfico usa Recharts 3 y ofrece vistas de capital y variación del instrumento, navegación interactiva y una tabla de datos alternativa. Las cifras de la cartera de ejemplo son ficticias y no dependen del resultado del simulador.
