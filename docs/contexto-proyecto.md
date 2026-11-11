@@ -124,7 +124,7 @@ Una noticia que coincide con una caída no demuestra por sí misma que la haya c
 
 El tutor del servidor puede recibir los hechos calculados de la cartera histórica mostrada en Inicio y Mi cartera: periodo, capital aportado, valor, beneficio, rentabilidad simple y posiciones ficticias. Los valores liquidativos proceden de CNMV; las participaciones son DEMO y las causas de los movimientos no se conocen por estos datos. Si falla la construcción o la interfaz muestra la alternativa ficticia, se omite la cartera del contexto del servidor; la interfaz comunica solo la variante visual, no importes.
 
-En esta rama el tutor funciona con reglas o con Claude cuando está configurado, sin sustitución silenciosa ante errores. El dictado puede usar procesamiento local o ElevenLabs; el usuario inicia el micrófono y el chat escrito permite revisar el texto antes de enviarlo. Las etiquetas identifican el proveedor de la respuesta. Los detalles y límites están en [contratos](contratos.md#conversación-voz-y-análisis).
+En esta rama el tutor funciona con reglas o con Claude cuando está configurado, sin sustitución silenciosa ante errores. El dictado puede usar procesamiento local o ElevenLabs; el usuario inicia el micrófono y el chat escrito permite revisar el texto antes de enviarlo. Las etiquetas identifican el proveedor de la respuesta. Para ElevenLabs se normalizan cantidades, porcentajes y fechas en una copia hablada sin alterar lo mostrado; la voz local solo expande EUR. Los detalles y límites están en [contratos](contratos.md#conversación-voz-y-análisis).
 
 La arquitectura de esta rama es:
 

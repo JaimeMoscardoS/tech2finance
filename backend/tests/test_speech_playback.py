@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from backend.app import app
 from backend import speech_playback as playback
+from backend.speech_text import normalize_speech
 
 
 @pytest.fixture(autouse=True)
@@ -70,3 +71,25 @@ def test_oversized_and_timeout(monkeypatch):
     monkeypatch.setattr(playback, 'TRANSPORT', httpx.MockTransport(timeout))
     response = client.post('/api/speech/synthesize', json={'text': 'hola', 'language': 'es'})
     assert response.status_code == 503 and 'test-secret' not in response.text
+
+
+@pytest.mark.parametrize(('language', 'source', 'expected'), [
+    ('es', '25000 EUR; 28175.75 EUR; 3175.75 EUR; 12.7 %; 2019-12-31.', 'veinticinco mil euros; veintiocho mil ciento setenta y cinco euros con setenta y cinco céntimos; tres mil ciento setenta y cinco euros con setenta y cinco céntimos; doce coma siete por ciento; treinta y uno de diciembre de dos mil diecinueve.'),
+    ('en', '25,000 EUR; 28,175.75 EUR; -3,175.01 EUR; 12.70%; 2019-12-31.', 'twenty five thousand euros; twenty eight thousand one hundred seventy five euros and seventy five cents; minus three thousand one hundred seventy five euros and one cent; twelve point seven zero percent; December thirty one, two thousand nineteen.'),
+    ('es', '1.234,01 €; 21 EUR; 0,02 EUR; -0,5%; Fondo bolsa 2, estrategia 0-50.', 'mil doscientos treinta y cuatro euros con un céntimo; veintiún euros; cero euros con dos céntimos; menos cero coma cinco por ciento; Fondo bolsa 2, estrategia 0-50.'),
+    ('es', '28 175,75 EUR', 'veintiocho mil ciento setenta y cinco euros con setenta y cinco céntimos'),
+    ('en', '28\u202f175.75 EUR', 'twenty eight thousand one hundred seventy five euros and seventy five cents'),
+])
+def test_financial_speech_payload_is_normalized_without_changing_request(monkeypatch, language, source, expected):
+    submitted = {'text': source, 'language': language}
+    def vendor(request):
+        assert json.loads(request.content)['text'] == expected
+        return httpx.Response(200, content=b'ID3audio', headers={'content-type': 'audio/mpeg'})
+    monkeypatch.setattr(playback, 'TRANSPORT', httpx.MockTransport(vendor))
+    response = TestClient(app).post('/api/speech/synthesize', json=submitted)
+    assert response.status_code == 200
+    assert submitted['text'] == source
+
+
+def test_unsupported_precision_and_invalid_dates_are_not_reinterpreted():
+    assert normalize_speech('0.123 EUR, 2020-02-30', 'en') == '0.123 euros, 2020-02-30'

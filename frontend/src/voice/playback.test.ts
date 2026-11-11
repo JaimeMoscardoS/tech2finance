@@ -78,12 +78,13 @@ test('a stale preparation cannot clear the current session timeout', async () =>
 test('stopping local playback reports idle once and ignores late events', async () => {
  const oldWindow = (globalThis as any).window, oldUtterance = globalThis.SpeechSynthesisUtterance;
  let utterance: any;
- class FakeUtterance { voice: any; lang = ''; onstart: any; onend: any; constructor(_text: string) { utterance = this; } }
+ class FakeUtterance { voice: any; lang = ''; onstart: any; onend: any; text: string; constructor(text: string) { this.text = text; utterance = this; } }
  (globalThis as any).window = {speechSynthesis:{paused:false,cancel(){},getVoices(){return [{localService:true,lang:'en-US'}];},speak(value:any){value.onstart();}}};
  globalThis.SpeechSynthesisUtterance = FakeUtterance as unknown as typeof SpeechSynthesisUtterance;
  try {
   const states: string[] = [];
-  await speak('local', 'hello', 'en', state => states.push(state));
+  await speak('local', 'hello 25 EUR', 'en', state => states.push(state));
+  assert.equal(utterance.text, 'hello 25 euros');
   stopPlayback(); utterance.onend();
   assert.deepEqual(states, ['starting', 'speaking', 'idle']);
  } finally { stopPlayback(); (globalThis as any).window = oldWindow; globalThis.SpeechSynthesisUtterance = oldUtterance; }

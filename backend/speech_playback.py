@@ -9,6 +9,7 @@ from collections import deque
 import httpx
 
 from backend.providers import ProviderError
+from backend.speech_text import normalize_speech
 
 TRANSPORT = None
 _slots = threading.BoundedSemaphore(4)
@@ -41,7 +42,7 @@ async def synthesize(text, language):
     if not _slots.acquire(blocking=False):
         raise ProviderError('speech_provider_error')
     try:
-        payload = {'text': text, 'model_id': model, 'voice_settings': {'stability': 0.55, 'similarity_boost': 0.75}}
+        payload = {'text': normalize_speech(text, language), 'model_id': model, 'voice_settings': {'stability': 0.55, 'similarity_boost': 0.75}}
         if model == 'eleven_flash_v2_5':
             payload['language_code'] = language
         try:

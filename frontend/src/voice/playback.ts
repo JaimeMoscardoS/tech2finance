@@ -2,6 +2,7 @@ import { speakLocal, stopBrowserVoice, type VoiceLanguage, type VoiceState } fro
 import type { DataMode } from './dictation.ts';
 
 type Status = (state: VoiceState, detail: string) => void;
+const localPronunciation = (text: string) => text.replace(/\bEUR\b/gi, 'euros');
 let generation = 0;
 let controller: AbortController | undefined;
 let audio: HTMLAudioElement | undefined;
@@ -25,7 +26,7 @@ export async function speak(mode: DataMode, text: string, language: VoiceLanguag
   const id = generation;
   const guard: Status = (state, message) => { if (id === generation) { if (state === 'idle' || state === 'error') currentStatus = undefined; status(state, message); } };
   if (!text.trim() || text.length > 3000) { guard('error', language === 'es' ? 'El texto debe tener entre 1 y 3000 caracteres.' : 'Text must be between 1 and 3000 characters.'); return; }
-  if (mode === 'local') { currentStatus = status; speakLocal(text, language, guard); return; }
+  if (mode === 'local') { currentStatus = status; speakLocal(localPronunciation(text), language, guard); return; }
   const failed = language === 'es' ? 'No se pudo reproducir la respuesta. Puedes leer el texto.' : 'Could not play the answer. You can read the text.';
   const pending = language === 'es' ? 'Preparando voz…' : 'Preparing voice…';
   const playing = language === 'es' ? 'Reproduciendo respuesta.' : 'Playing answer.';
@@ -41,7 +42,7 @@ export async function speak(mode: DataMode, text: string, language: VoiceLanguag
     const config: unknown = await health.json();
     if (id !== generation) return;
     if (!config || typeof config !== 'object' || !('ttsProvider' in config)) throw new Error('config');
-    if (config.ttsProvider === 'browser_local') { if (timer) clearTimeout(timer); timer = undefined; controller = undefined; speakLocal(text, language, guard); return; }
+    if (config.ttsProvider === 'browser_local') { if (timer) clearTimeout(timer); timer = undefined; controller = undefined; speakLocal(localPronunciation(text), language, guard); return; }
     if (config.ttsProvider !== 'elevenlabs') throw new Error('config');
     const response = await fetch('/api/speech/synthesize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text, language}), signal: abort.signal, cache: 'no-store' });
     if (!response.ok || !response.headers.get('content-type')?.toLowerCase().startsWith('audio/mpeg')) throw new Error('audio');
