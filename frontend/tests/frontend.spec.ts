@@ -74,7 +74,7 @@ test('English navigation, assistant and simulated portfolio are translated', asy
   await expect(page.getByText('Explore the available information and its limits. These are not recommendations.')).toBeVisible();
   await page.getByRole('button', { name: 'My portfolio', exact: true }).click();
   await page.getByRole('button', { name: 'Worried about the decline?' }).click();
-  await page.getByText('View figures, episodes and sources').click(); await expect(page.getByText(/past recovery does not guarantee another/)).toBeVisible();
+  await expect(page.getByText(/no one can guarantee whether or when it will recover/)).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Open assistant' }).click();
   await expect(page.getByText('LOCAL MODE · RULE-BASED RESPONSES')).toBeVisible();
@@ -341,7 +341,7 @@ test('decline explanations use observed series without inventing a current crisi
  await page.getByLabel('Tiempo de práctica').selectOption('3');
  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await page.getByRole('button',{name:'Entender las caídas'}).click();
- let dialog=page.getByRole('dialog',{name:'Tomemos un momento'}); await dialog.getByText('Ver cifras, episodios y fuentes').click();
+ let dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
  await expect(dialog).toContainText('2020-03-31');
  await expect(dialog).toContainText('2020-03-11');
  await expect(dialog.getByText(/causa es desconocida/i)).toBeVisible();

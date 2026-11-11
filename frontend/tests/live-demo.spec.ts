@@ -5,7 +5,7 @@ for (const mode of ['local', 'server'] as const) for (const language of ['es', '
     await page.addInitScript(({mode, language}) => { localStorage.setItem('t2f-data-mode', mode); localStorage.setItem('t2f-language', language); }, {mode, language});
     await page.goto('/');
     await page.getByRole('button', {name: language === 'es' ? 'Probar una caída' : 'Try a decline'}).click();
-    const pause = page.getByRole('dialog', {name: language === 'es' ? 'Tomemos un momento' : 'Let’s take a moment'}); await pause.getByText(language === 'es' ? 'Ver cifras, episodios y fuentes' : 'View figures, episodes and sources').click();
+    const pause = page.getByRole('dialog', {name: language === 'es' ? 'Tomemos un momento' : 'Let’s take a moment'});
     await expect(pause).toContainText(language === 'es' ? '25,54 %' : '25.54 %');
     await expect(pause).toContainText('2020-03-11');
     await expect(pause).toContainText(language === 'es' ? 'no demuestra' : 'does not establish');

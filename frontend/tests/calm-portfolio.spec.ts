@@ -44,9 +44,9 @@ test('dialog traps focus with details closed and open and restores the trigger',
  await page.addInitScript(()=>localStorage.setItem('t2f-data-mode','local')); await page.goto('/');
  const card=page.getByRole('button',{name:/¿Te preocupa la caída\?/}); await card.focus(); await page.keyboard.press('Enter');
  const dialog=page.getByRole('dialog',{name:'Tomemos un momento'}); const close=dialog.getByRole('button',{name:'Cerrar',exact:true});
- await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab'); await expect(dialog.locator('summary').last()).toBeFocused();
+ await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab'); await expect(dialog.getByRole('button',{name:'Continuar en la demo'})).toBeFocused();
  await page.keyboard.press('Tab'); await expect(close).toBeFocused();
- await dialog.getByText('Ver cifras, episodios y fuentes').click(); await close.focus(); await page.keyboard.press('Shift+Tab');
+ await dialog.getByText('Añadir contexto (opcional)').click(); await close.focus(); await page.keyboard.press('Shift+Tab');
  await expect.poll(()=>page.evaluate(()=>document.activeElement?.closest('[role=dialog]') !== null)).toBe(true);
  await page.keyboard.press('Tab'); await expect(close).toBeFocused(); await page.keyboard.press('Escape'); await expect(card).toBeFocused();
 });
@@ -66,4 +66,35 @@ for (const mode of ['local','server'] as const) test(`concern and liquidity cont
  if(request){const body=(await request).postDataJSON(); expect(body.context.decision.needsLiquidity).toBe('yes'); expect(body.context.decision.goal).toBe('Proyecto editado');}
  await expect(assistant.locator('.message.assistant').last()).toContainText(/liquidez|dinero/i);
  await expect(assistant.locator('.message.assistant').last()).toContainText(/comprensible.*preocupación/i);
+});
+
+for (const mode of ['local','server'] as const) test(`historical explanation is immediately available in ${mode}`, async ({page}) => {
+ await page.addInitScript(mode=>localStorage.setItem('t2f-data-mode',mode),mode); await page.goto('/');
+ await page.getByRole('button',{name:/¿Te preocupa la caída\?/}).click();
+ const dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
+ await expect(dialog.getByRole('heading',{name:'Qué está pasando y por qué puede pasar'})).toBeVisible();
+ await expect(dialog.locator('.anti-panic__explanation')).toContainText('25,54 %');
+ await expect(dialog.locator('.anti-panic__explanation')).toContainText('2020-03-31');
+ await expect(dialog.locator('.anti-panic__explanation')).toContainText('ejemplo histórico');
+ await expect(dialog.locator('.anti-panic__explanation')).toContainText('no una explicación comprobada');
+ await expect(dialog.locator('.anti-panic__story')).toContainText('2020-03-11');
+ await expect(dialog.locator('.anti-panic__story')).toContainText('no demuestra');
+ await expect(dialog.getByRole('link',{name:'Fuente original'})).toHaveAttribute('href',/who\.int/);
+ await expect(dialog.getByRole('link',{name:/CNMV/})).toBeVisible();
+});
+
+for (const scenario of ['zero','insufficient'] as const) test(`no unsupported crisis or event for ${scenario}`, async ({page}) => {
+ await page.addInitScript(()=>localStorage.setItem('t2f-data-mode','server'));
+ await page.route('**/api/declines',async route=>{
+  const response=await route.fetch(); const body=await response.json(); delete body.historicalContext; body.episodes=[];
+  if(scenario==='zero'){body.currentDrawdownPercent=0; body.maxDrawdownPercent=0;}
+  else {body.status='insufficient_data'; body.observationCount=1; body.latestLabel=null; body.latestValue=null; body.peakValue=null; body.currentDrawdownPercent=null; body.maxDrawdownPercent=null;}
+  await route.fulfill({response,json:body});
+ });
+ await page.goto('/'); await page.getByRole('button',{name:/¿Te preocupa la caída\?/}).click();
+ const dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
+ await expect(dialog.locator('.anti-panic__explanation')).toContainText(scenario==='zero'?'no se muestra una caída':'no hay suficientes observaciones');
+ await expect(dialog.locator('.anti-panic__explanation')).toContainText('No hay un acontecimiento público verificado');
+ await expect(dialog.locator('.anti-panic__story')).toHaveCount(0);
+ await expect(dialog).not.toContainText('2020-03-11');
 });

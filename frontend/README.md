@@ -4,7 +4,7 @@
 
 Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, comparar ejemplos y entender una caída. Ofrece tres niveles, español e inglés, temas claro y oscuro y voz local opcional. La demo no conecta cuentas ni realiza operaciones.
 
-La tarjeta «¿Te preocupa la caída?» abre una explicación educativa con acceso al tutor escrito y de voz. El contexto ficticio se carga opcionalmente, es editable y deja la liquidez sin indicar. Los datos y fuentes del análisis se consultan en el desplegable. Objetivos contiene un perfil ficticio editable y restablecible; simulador y práctica usan importes de ejemplo sobre fuentes identificadas.
+La tarjeta «¿Te preocupa la caída?» abre una explicación educativa con el dato observado, factores generales y el acontecimiento público disponible, sus fuentes y límites, sin desplegar. El tutor escrito y de voz sigue accesible. El contexto ficticio se carga opcionalmente, es editable y deja la liquidez sin indicar. Objetivos contiene un perfil ficticio editable y restablecible; simulador y práctica usan importes de ejemplo sobre fuentes identificadas.
 
 ## Datos y simulación
 
