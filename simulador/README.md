@@ -2,9 +2,9 @@
 
 ## Qué es
 
-Biblioteca educativa Python 3.11+ sin dependencias externas y CLI JSON para reproducir series importadas, comparar dos decisiones virtuales, calcular escenarios hipotéticos y describir caídas observadas. La muestra incluida es **ficticia**, no un histórico real. No hay servidor ni conexión al frontend.
+Biblioteca educativa Python 3.11+ sin dependencias externas y CLI JSON para reproducir series importadas, comparar dos decisiones virtuales, calcular escenarios hipotéticos y describir caídas observadas. La muestra incluida es **ficticia**, no un histórico real. El backend FastAPI lo expone solo para los cinco instrumentos ficticios (`POST /api/game/compare`); el frontend aún no lo consume.
 
-El servidor de la API usa `simulador.periodic.replay` como cálculo autoritativo de su demo periódica; el motor histórico y su CLI descritos abajo son independientes. El modo local TypeScript conserva su cálculo de demo sin versión asociada y no comparte la versión de cálculo del servidor. Las pruebas [golden](fixtures/golden-periodic-v1.json) añaden casos aritméticos independientes, pero no certifican todas las finanzas. La reproducción y los límites del conjunto congelado se documentan en [03-data](../docs/workstreams/03-data.md).
+El servidor de la API usa `simulador.periodic.replay` como cálculo autoritativo de `/api/simulations`; el motor histórico (`compare`) se sirve por separado en `/api/game/compare`, solo para instrumentos ficticios y con series sintéticas generadas en el backend a partir de sus rentabilidades mensuales. Ambos calculadores difieren legítimamente en el momento de la aportación (replay: aportación al inicio del periodo 1 junto con la inicial; motor: inicial en el mes 0 y mensuales desde el mes 1), por lo que sus resultados no coinciden. La CLI sigue siendo independiente. El modo local TypeScript conserva su cálculo de demo sin versión asociada y no comparte la versión de cálculo del servidor. Las pruebas [golden](fixtures/golden-periodic-v1.json) añaden casos aritméticos independientes, pero no certifican todas las finanzas. La reproducción y los límites del conjunto congelado se documentan en [03-data](../docs/workstreams/03-data.md).
 
 ## Ejecución
 

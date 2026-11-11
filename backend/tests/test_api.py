@@ -216,3 +216,43 @@ def test_bridge_rejects_excess_concurrency():
 
 def test_unknown_host_is_rejected():
     assert client.get("/api/health", headers={"host": "attacker.example"}).status_code == 400
+
+
+GAME = {"instrumentId": "demo-equity", "initial": 500, "monthly": 50, "months": 12, "sellMonth": 6, "buyFeeRate": 0, "sellFeeRate": 0}
+
+
+def test_game_compare_ok():
+    response = client.post("/api/game/compare", json=GAME)
+    assert response.status_code == 200
+    body = response.json()
+    assert {"hold", "sell", "provenance"} <= set(body)
+    assert body["dataKind"] == "fictional" and len(body["hold"]["timeline"]) == 13
+
+
+def test_game_rejects_excluded_and_invalid_requests():
+    excluded = client.post("/api/game/compare", json=GAME | {"instrumentId": "caixabank-monetario-estandar"})
+    assert excluded.status_code == 422 and excluded.json()["error"]["code"] == "game_unavailable"
+    assert client.post("/api/game/compare", json=GAME | {"sellMonth": 13}).status_code == 422
+    assert client.post("/api/game/compare", json=GAME | {"extra": 1}).status_code == 422
+    unknown = client.post("/api/game/compare", json=GAME | {"instrumentId": "unknown"})
+    assert unknown.status_code == 404 and unknown.json()["error"]["code"] == "unknown_instrument"
+
+
+def test_game_edge_months_and_no_dates():
+    import json
+    import re
+    for sell_month in (0, 12):
+        response = client.post("/api/game/compare", json=GAME | {"sellMonth": sell_month})
+        assert response.status_code == 200
+        body = response.json()
+        body.pop("provenance")  # datasetVersion embeds a build date
+        assert not re.search(r"\d{4}-\d{2}-\d{2}", json.dumps(body))
+
+
+def test_game_rejects_bad_values_and_unavailable_banks():
+    assert client.post("/api/game/compare", json=GAME | {"initial": 0, "monthly": 0}).status_code == 422
+    for change in ({"months": True}, {"months": 2.5}, {"buyFeeRate": 0.06}, {"sellFeeRate": -0.01}):
+        assert client.post("/api/game/compare", json=GAME | change).status_code == 422
+    for identifier in ("bbva-mi-inversion-bolsa", "santander-rf-ahorro"):
+        response = client.post("/api/game/compare", json=GAME | {"instrumentId": identifier})
+        assert response.status_code == 422 and response.json()["error"]["code"] == "game_unavailable"
