@@ -32,6 +32,7 @@ Cada cambio debe actualizar el contexto y la documentación afectados en el mism
 
 - `t2f-01-diseno`: Diseña experiencias bancarias sencillas, pantallas y jerarquía visual para tres niveles, juego y pausa, con criterios claros y sin implementar.
 - `t2f-01-accesibilidad`: Revisa navegación por teclado, contraste, lector de pantalla, estados y experiencia de voz con evidencia real.
+- `ui-designer` (solo Claude, `.claude/agents/ui-designer.md`): Rediseña e implementa páginas, paneles interactivos y componentes del frontend aplicando `frontend-design`; compila, prueba y verifica el resultado visual. Su revisión corresponde a `t2f-01-frontend-reviewer` o `t2f-01-accesibilidad`.
 
 ### 2
 

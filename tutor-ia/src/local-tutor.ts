@@ -1,6 +1,7 @@
 import type { TutorProvider, TutorRequest, TutorReply, SimulationFacts } from './types.ts';
 import { safeSources } from './decline.ts';
 import { bankAnswer } from './bank-profile.ts';
+import { conceptLevelNote, declineLevelNote, decisionLevelNote, pageHint } from './level-notes.ts';
 
 export const MAX_MESSAGE_LENGTH = 1500;
 export const MAX_HISTORY_MESSAGES = 8;
@@ -18,6 +19,7 @@ const validFacts = (s: SimulationFacts | undefined): s is SimulationFacts => !!s
 function detect(message: string): string {
   const m = message.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   if (/ignore|ignora|system prompt|api.?key|secret|password/.test(m)) return 'unknown';
+  if (/(fondo|fund).*\betf\b|\betf\b.*(fondo|fund)/.test(m) && /diferen|differ|compar|\bvs\b/.test(m)) return 'fund_etf';
   if (/caus|noticia|news|contexto|why.*(fall|drop)|por que.*(ca|baj)/.test(m)) return 'causes';
   if (/liquid|horizon|horizonte|plazo|vender|sell|mantener|hold/.test(m)) return 'decision';
   if (/drawdown|caida|caido|bajada|recuper|recovery|drop/.test(m)) return 'decline';
@@ -78,6 +80,7 @@ export function createLocalTutorProvider(): TutorProvider {
     if (calm && calmOutsideScope(normalized, context?.instrument?.name, context?.decline?.basisName)) return { text: en ? 'The requested instrument or future decline is not available in this context.' : 'El instrumento o la caída futura solicitados no están disponibles en este contexto.', language: lang, mode: 'local', provider: 'local', intent: 'unknown', sources: [] };
     const concepts: Record<string, [string, string]> = {
       fund: ['Un fondo reúne el dinero de varios partícipes e invierte según una estrategia; su valor puede bajar.', 'A fund pools investors’ money under a strategy; its value can fall.'],
+      fund_etf: ['Un fondo tradicional se suscribe y reembolsa con la gestora a su valor liquidativo; un ETF cotiza en bolsa como una acción, con precio de mercado y posible diferencial. Ambos pueden perder valor y tienen costes distintos.', 'A traditional fund is subscribed and redeemed with the manager at its net asset value; an ETF trades on an exchange like a share, with a market price and a possible spread. Both can lose value and have different costs.'],
       etf: ['Un ETF es un fondo que cotiza en bolsa. Su precio y los costes dependen del producto y de la operación.', 'An ETF is an exchange-traded fund. Its price and costs depend on the product and trade.'],
       stock: ['Una acción representa una parte de una empresa; su precio puede subir o bajar.', 'A share represents part ownership of a company; its price can rise or fall.'],
       diversification: ['Diversificar reparte la exposición entre inversiones. Puede reducir riesgos específicos, pero no evita pérdidas.', 'Diversification spreads exposure across investments. It can reduce specific risks, but cannot prevent losses.'],
@@ -87,6 +90,7 @@ export function createLocalTutorProvider(): TutorProvider {
     if (concepts[intent]) {
       text = concepts[intent][en ? 1 : 0];
       if (context?.level === 'beginner' && intent === 'diversification') text += en ? ' Think of using several baskets.' : ' Es como repartir objetos en varias cestas.';
+      text += conceptLevelNote(intent, context?.level, en);
     } else if (intent === 'result' && definition) {
       text = en ? 'Return describes the change in value of an investment over a period; it can be negative and depends on the measurement and costs.' : 'La rentabilidad describe la variación de valor de una inversión en un periodo; puede ser negativa y depende de cómo se mida y de los costes.';
       intent = 'unknown';
@@ -121,8 +125,10 @@ export function createLocalTutorProvider(): TutorProvider {
       text = context?.instrument?.dataKind === 'historical_nav' ? (en ? 'Monthly closing NAVs published by CNMV; past performance does not predict future results.' : 'Valores liquidativos de cierre mensual publicados por la CNMV; el pasado no predice resultados futuros.') : context?.instrument?.dataKind === 'annual_published_returns' ? (en ? 'This reconstruction uses published annual returns; it is not a daily NAV series.' : 'Esta reconstrucción usa rentabilidades anuales publicadas; no es una serie diaria de valor liquidativo.') : context?.instrument?.dataKind === 'fictional' ? (en ? 'These are fictional example data.' : 'Son datos ficticios de ejemplo.') : (en ? 'There is no connected history to explain.' : 'No hay histórico conectado para explicar.');
     } else if (intent === 'decline') {
       const d = context?.decline;
-      if (!d || d.status !== 'ok' || !Number.isFinite(d.currentDrawdownPercent) || !Number.isFinite(d.maxDrawdownPercent) || typeof d.latestLabel !== 'string') text = en ? 'There are not enough valid observations to analyse a decline.' : 'No hay observaciones válidas suficientes para analizar una caída.';
+      if (!d) text = en ? 'Maximum drawdown is the largest percentage drop from a peak to a later low within the observed period; volatility describes how much the value varies. Both are computed on past data and do not predict the future.' : 'La caída máxima (drawdown) es la mayor bajada porcentual desde un máximo hasta un mínimo posterior en el periodo observado; la volatilidad describe cuánto varía el valor. Ambas se calculan sobre datos pasados y no predicen el futuro.';
+      else if (d.status !== 'ok' || !Number.isFinite(d.currentDrawdownPercent) || !Number.isFinite(d.maxDrawdownPercent) || typeof d.latestLabel !== 'string') text = en ? 'There are not enough valid observations to analyse a decline.' : 'No hay observaciones válidas suficientes para analizar una caída.';
       else text = en ? `At ${d.latestLabel}, the observed decline from the peak is ${fmt(d.currentDrawdownPercent!)}%; the largest observed decline is ${fmt(d.maxDrawdownPercent!)}%. An observed recovery does not guarantee a future recovery.` : `En ${d.latestLabel}, la caída observada desde el máximo es del ${fmt(d.currentDrawdownPercent!)}%; la mayor caída observada es del ${fmt(d.maxDrawdownPercent!)}%. Una recuperación observada no garantiza una recuperación futura.`;
+      if (!d || d.status === 'ok') text += declineLevelNote(context?.level, en);
     } else if (intent === 'causes') {
       const demo = context?.decline?.demoContext;
       text = demo?.sourceKind === 'synthetic_demo' ? `${demo.explanation[lang]} ${en ? 'Fictional BancoT2F script, not verified news; no comparable cases are available.' : 'Guion ficticio BancoT2F, no son noticias verificadas; no hay casos comparables.'}` : (en ? 'The cause is unknown from the available data. There are no verified news or comparable cases here.' : 'La causa es desconocida con los datos disponibles. Aquí no hay noticias verificadas ni casos comparables.');
@@ -144,9 +150,13 @@ export function createLocalTutorProvider(): TutorProvider {
       else if (decision?.needsLiquidity === 'unknown') parts.push(en ? 'Your liquidity need is not yet known.' : 'Tu necesidad de liquidez todavía no se conoce.');
       if (calm && decision?.needsLiquidity === 'yes') parts.push(en ? 'Consider when and how much money you need; that need can matter when weighing a sale.' : 'Valora cuándo y cuánto dinero necesitas; esa necesidad puede ser relevante al valorar una venta.');
       parts.push(en ? 'Consider your goal, time horizon and whether you need liquidity. A long horizon does not guarantee recovery. You can sell, hold or seek professional advice; the decision is yours.' : 'Ten en cuenta tu objetivo, horizonte y necesidad de liquidez. Un plazo largo no garantiza la recuperación. Puedes vender, mantener o consultar a un profesional; la decisión es tuya.');
-      text = parts.join(' ');
+      text = parts.join(' ') + decisionLevelNote(context?.level, en);
     }
-    else text = en ? 'This local tutor uses predefined explanations. Ask about funds, risk, costs, the simulation or an observed decline.' : 'Este tutor local utiliza explicaciones predefinidas. Pregunta por fondos, riesgo, costes, la simulación o una caída observada.';
+    else {
+      text = en ? 'This local tutor uses predefined explanations. Ask about funds, risk, costs, the simulation or an observed decline.' : 'Este tutor local utiliza explicaciones predefinidas. Pregunta por fondos, riesgo, costes, la simulación o una caída observada.';
+      const hint = pageHint(context?.page, context?.level, en);
+      if (hint) text = hint + ' ' + text;
+    }
     const sources = calm ? [] : intent === 'decline' || intent === 'causes' ? safeSources(context?.decline?.sources) : safeSources(context?.instrument?.sources);
     if (request.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     return { text: text.slice(0, 3000), language: lang, mode: 'local', provider: 'local', intent, sources };

@@ -1,0 +1,8 @@
+{
+  "caixabank-monetario-estandar": {"es":"Fondo monetario", "en":"Money market fund"},
+  "santander-rf-ahorro": {"es":"Fondo ahorro", "en":"Savings fund"},
+  "bbva-mi-inversion-bolsa-acumulacion": {"es":"Fondo bolsa", "en":"Equity fund"},
+  "santander-renta-fija-a": {"es":"Fondo renta fija", "en":"Fixed income fund"},
+  "bbva-estrategia-0-50": {"es":"Fondo estrategia 0-50", "en":"Strategy 0-50 fund"},
+  "bbva-mi-inversion-bolsa": {"es":"Fondo bolsa", "en":"Equity fund"}
+}

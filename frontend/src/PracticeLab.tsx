@@ -7,17 +7,18 @@ import type { annualHistory as historyType } from './annual-history';
 import { buildExperiment, explainComparison, type Lesson, type PracticeSettings, type ExperimentPair } from './practice-domain';
 import InvestmentChart from './LazyInvestmentChart';
 import './practice-lab.css';
+import type { Level } from './types/level';
 
 type Props = {
   language: Language;
-  level?: 'beginner' | 'intermediate' | 'advanced';
+  level?: Level;
   instruments: Instrument[];
   annualHistory: typeof historyType;
   mode: 'server' | 'local';
   calculate: (spec: SimulationSpec, signal: AbortSignal) => Promise<ServerSimulation>;
   onActiveResult: (value: { spec: SimulationSpec; result: ServerSimulation } | null) => void;
   onExit: () => void;
-  openAssistant: () => void;
+  openAssistant: (question?: string) => void;
 };
 
 const words = {
@@ -94,6 +95,6 @@ export default function PracticeLab({ language, level = 'beginner', instruments,
       </form></div>
     <div role="status" aria-live="polite" className="sr-only">{status === 'pending' ? (language === 'es' ? 'Calculando la comparación.' : 'Calculating the comparison.') : status === 'success' ? (language === 'es' ? 'Comparación lista.' : 'Comparison ready.') : status === 'invalidated' ? (language === 'es' ? 'La comparación anterior se ha borrado. Vuelve a comparar.' : 'The previous comparison was cleared. Compare again.') : ''}</div>
     {comparison && explanation && <section className="practice-results" aria-labelledby="practice-result-title"><div className="practice-section-heading"><div><span className="practice-eyebrow">02 / {t.result}</span><h2 id="practice-result-title">{t.result}</h2><p>{t.resultIntro}</p></div></div><div className="practice-result-grid">{comparison.results.map((result, i) => { const spec = i === 0 ? comparison.pair.baseline : comparison.pair.alternative; const item = instruments.find(x => x.instrumentId === spec.instrumentId); const subtitle = lesson === 'contributions' ? (i === 0 ? t.noContribution : t.withContribution) : lesson === 'horizon' ? `${spec.periods} ${t.months}` : item?.name[language]; return <article key={i} className={`practice-result-card ${selected === i ? 'is-active' : ''}`}><div className="practice-result-top"><div><span>0{i + 1} / {i === 0 ? t.scenarioA : t.scenarioB}</span><h3>{subtitle}</h3></div></div><dl><div><dt>{t.capital}</dt><dd>{money(result.value)}</dd></div><div><dt>{t.contributed}</dt><dd>{money(result.contributed)}</dd></div><div><dt>{t.profit}</dt><dd>{money(result.profit)}</dd></div></dl><p className="practice-source"><strong>{t.source}:</strong> {item?.name[language]} · {item?.dataStatus === 'annual_history' ? t.historical : t.noSource}{item?.sourceDate && ` · ${t.sourceDate}: ${item.sourceDate}`}{item?.sourceUrl && <> · <a href={item.sourceUrl} target="_blank" rel="noreferrer">{language === 'es' ? 'Fuente CNMV' : 'CNMV source'}</a></>}</p><InvestmentChart compact language={language} title={`${t.chart} · ${i === 0 ? t.scenarioA : t.scenarioB}`} description={t.chartDescription} data={result.timeline.map(p => ({ label: p.date ?? (p.period === 0 ? t.start : `${t.period} ${p.period}`), value: p.value, contributed: p.contributed, returnPercent: p.instrumentReturnPercent }))} /><button type="button" className="practice-select" aria-pressed={selected === i} onClick={() => selectResult(i as 0 | 1)}>{selected === i ? <Check size={16} /> : <ArrowRight size={16} />}{selected === i ? t.active : t.select}</button></article>; })}</div>
-      <div className="practice-insight"><div><span>03 / {t.insight}</span><h3>{t.insight}</h3>{explanation.text.map((line, i) => <p key={i}>{line}</p>)}<p>{explanation.limitation}</p>{level !== 'beginner' && <p>{t.detail}</p>}<p>{t.compareNote}</p><button type="button" onClick={openAssistant}><MessageCircle size={16} />{t.ask}</button></div><div className="practice-question"><span>{t.question}</span><h3>{t.questions[index]}</h3><div><button type="button" aria-pressed={answer === true} onClick={() => setAnswer(true)}>{t.yes}</button><button type="button" aria-pressed={answer === false} onClick={() => { setAnswer(false); setCompleted(old => old.includes(lesson) ? old : [...old, lesson]); }}>{t.no}</button></div>{answer !== null && <p role="status">{answer ? t.incorrect : t.correct[index]}</p>}</div></div></section>}
+      <div className="practice-insight"><div><span>03 / {t.insight}</span><h3>{t.insight}</h3>{explanation.text.map((line, i) => <p key={i}>{line}</p>)}<p>{explanation.limitation}</p>{level !== 'beginner' && <p>{t.detail}</p>}<p>{t.compareNote}</p><button type="button" onClick={() => openAssistant(language === 'es' ? 'Explícame el ejemplo seleccionado.' : 'Explain the selected example to me.')}><MessageCircle size={16} />{t.ask}</button></div><div className="practice-question"><span>{t.question}</span><h3>{t.questions[index]}</h3><div><button type="button" aria-pressed={answer === true} onClick={() => setAnswer(true)}>{t.yes}</button><button type="button" aria-pressed={answer === false} onClick={() => { setAnswer(false); setCompleted(old => old.includes(lesson) ? old : [...old, lesson]); }}>{t.no}</button></div>{answer !== null && <p role="status">{answer ? t.incorrect : t.correct[index]}</p>}</div></div></section>}
   </div>;
 }

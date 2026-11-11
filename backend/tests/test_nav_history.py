@@ -42,7 +42,7 @@ def test_annual_frequency_propagates_through_api_and_tutor(monkeypatch):
     from fastapi.testclient import TestClient
     from backend.app import app
     captured = {}
-    def reply(payload):
+    def reply(payload, *, rules_only=False):
         captured.update(payload['context'])
         return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
     monkeypatch.setattr('backend.app.reply', reply)
@@ -132,9 +132,12 @@ def test_portfolio_decline_and_simulation_share_historical_basis():
     simulation = run_simulation(portfolio)
     context = build_tutor_context({'page': 'portfolio', 'level': 'beginner', 'language': 'es'})
     decline = analyze_decline({'basis': 'portfolio_demo', 'language': 'es'})
-    assert context['portfolio']['value'] == simulation['value']
     assert decline['latestLabel'] == simulation['timeline'][-1]['date']
     assert decline['latestValue'] == pytest.approx(simulation['value'])
+    # El tutor de Inicio/«Mi cartera» describe la cartera mostrada (NAV CNMV), la misma que analiza portfolio_cnmv.
+    shown = analyze_decline({'basis': 'portfolio_cnmv', 'language': 'es'})
+    assert context['portfolio']['value'] == pytest.approx(shown['latestValue'])
+    assert context['portfolio']['initial'] == 25000
 
 
 @pytest.mark.parametrize('path', ['nav-history.json', 'snapshots/cnmv-nav-2019-2025.1/nav-history.json',
@@ -161,3 +164,21 @@ def test_decline_context_is_dated_and_never_future():
     assert after['historicalContext']['events'][0]['date'] == '2020-03-11'
     assert after['causesStatus'] == 'unknown'
     assert 'demoContext' not in after
+
+
+def test_cnmv_portfolio_decline_matches_frontend_series():
+    # Mismas cifras que frontend/src/portfolio-real.test.ts (recalculadas aparte): 5 fondos x 5.000 € DEMO,
+    # coste 25.000 €, valor final 28.175,7467 €, caída máxima 8,7857 % entre 2019-12 y 2020-03.
+    decline = analyze_decline({'basis': 'portfolio_cnmv', 'language': 'es'})
+    assert decline['dataKind'] == 'historical_nav'
+    assert decline['observationCount'] == 73
+    assert decline['latestLabel'] == '2025-12'
+    assert decline['latestValue'] == pytest.approx(28175.7467, abs=1e-3)
+    assert decline['maxDrawdownPercent'] == pytest.approx(8.7857, abs=1e-3)
+    assert decline['episodes'][0]['peakLabel'] == '2019-12' and decline['episodes'][0]['troughLabel'] == '2020-03'
+    assert decline['sources'][0]['url'].startswith('https://www.cnmv.es/')
+    assert decline['causesStatus'] == 'unknown'
+    assert any(event['date'] == '2020-03-11' for event in decline['historicalContext']['events'])
+    from backend.domain import DomainError
+    with pytest.raises(DomainError):
+        analyze_decline({'basis': 'portfolio_cnmv', 'language': 'es', 'periods': 3})

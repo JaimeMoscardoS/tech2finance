@@ -6,9 +6,11 @@ import type { Language } from "./copy";
 import type { Catalog } from "./server-api";
 import "./funds-explorer.css";
 import GoalsPanel from "./GoalsPanel";
+import { annualPeriods } from "./annual-periods";
+import { LEVELS, LEVEL_LABELS, type Level } from "./types/level";
 import manifest from "../../shared/data-manifest.json";
+import NavLineChart from "./components/NavLineChart";
 
-type Level = "beginner" | "intermediate" | "advanced";
 type Props = {
   language: Language;
   level: Level;
@@ -75,9 +77,8 @@ export default function FundsExplorer({
   const visibleFunds = bankFunds
     .filter(
       (i) =>
-        i.name[language]
-          .toLocaleLowerCase()
-          .includes(search.toLocaleLowerCase()) &&
+        [i.name[language], i.officialName?.[language] ?? ""].some(name =>
+          name.toLocaleLowerCase().includes(search.toLocaleLowerCase())) &&
         (filterKnown === "all" ||
           (filterKnown === "known"
             ? i.dataStatus === "fictional" && !!examples[i.instrumentId]
@@ -188,7 +189,7 @@ export default function FundsExplorer({
     if (!nav.length) return;
     const quote = (value: string | number | null) => `"${String(value ?? '').replace(/"/g, '""')}"`;
     const header = ['instrument_id','name','isin','currency','date','nav','rate_percent','source','dataset_version','dataset_sha256','nav_history_sha256'];
-    const csv = [header.join(','), ...nav.map((row,index) => [i.instrumentId,i.name[language],i.identifier,i.currency,row.date,row.nav,index ? (Number(row.nav)/Number(nav[index-1].nav)-1)*100 : '',navHistory.source.indexUrl,navHistory.datasetVersion,manifest.datasetSha256,manifest.navHistorySha256].map(quote).join(','))].join('\r\n');
+    const csv = [header.join(','), ...nav.map((row,index) => [i.instrumentId,(i.officialName ?? i.name)[language],i.identifier,i.currency,row.date,row.nav,index ? (Number(row.nav)/Number(nav[index-1].nav)-1)*100 : '',navHistory.source.indexUrl,navHistory.datasetVersion,manifest.datasetSha256,manifest.navHistorySha256].map(quote).join(','))].join('\r\n');
     const url = URL.createObjectURL(
       new Blob([csv], { type: "text/csv;charset=utf-8" }),
     );
@@ -293,6 +294,19 @@ export default function FundsExplorer({
                 </details>
               </>
             ) : (
+              i.dataStatus === "historical_nav" ? (
+                <>
+                  <NavLineChart rows={navHistory.instruments.find(h => h.isin === i.identifier && h.eligible)?.monthly ?? []} language={language} label={historyLabel(i)} />
+                  <details>
+                    <summary>{es ? "Ver cifras" : "View figures"}</summary>
+                    <table className="mini-values">
+                      <caption>{historyLabel(i)}</caption>
+                      <thead><tr><th scope="col">{es ? "Mes" : "Month"}</th><th scope="col">{es ? "Variación" : "Change"}</th></tr></thead>
+                      <tbody>{rows.map((row) => <tr key={row.label}><th scope="row">{row.label}</th><td>{percent(row.rate)}</td></tr>)}</tbody>
+                    </table>
+                  </details>
+                </>
+              ) : (
               <div className="annual-bars">
                 {rows.map((row) => (
                   <div className="annual-row" key={row.label}>
@@ -313,6 +327,7 @@ export default function FundsExplorer({
                   </div>
                 ))}
               </div>
+              )
             )}
             {compact && (
               <p>
@@ -416,8 +431,8 @@ export default function FundsExplorer({
       <div className="fund-level">
         <span>{es ? "Nivel de detalle" : "Detail level"}</span>
         <div role="group" aria-label={es ? "Nivel de detalle" : "Detail level"}>
-          {(["beginner", "intermediate", "advanced"] as Level[]).map(
-            (item, index) => (
+          {LEVELS.map(
+            (item) => (
               <button
                 key={item}
                 type="button"
@@ -431,11 +446,7 @@ export default function FundsExplorer({
                   }
                 }}
               >
-                {
-                  (es
-                    ? ["Principiante", "Intermedio", "Avanzado"]
-                    : ["Beginner", "Intermediate", "Advanced"])[index]
-                }
+                {LEVEL_LABELS[es ? "es" : "en"][item]}
               </button>
             ),
           )}
@@ -471,8 +482,8 @@ export default function FundsExplorer({
           </strong>
           <p>
             {es
-              ? "Pregunta al asistente por reglas sobre el fondo seleccionado. La voz usa funciones locales del dispositivo cuando están disponibles."
-              : "Ask the rule-based assistant about the selected fund. Voice uses local device features when available."}
+              ? "Pregunta al asistente sobre el fondo seleccionado."
+              : "Ask the assistant about the selected fund."}
           </p>
         </div>
         <div>
@@ -732,6 +743,7 @@ export default function FundsExplorer({
             <ProductCosts product={bankProfile?.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />
             <details>
               <summary>{es ? "Ver detalles" : "View details"}</summary>
+              <p>{es ? "Denominación oficial" : "Official name"}: {(selected.officialName ?? selected.name)[language]}</p>
               <p>
                 {es ? "Gestora" : "Manager"}: {selected.dataStatus === "fictional" ? (es ? "No especificada" : "Not specified") : (selected.manager || unavailable)}{" "}
                 · ISIN: {selected.identifier ?? unavailable}
@@ -894,6 +906,7 @@ export default function FundsExplorer({
                   ? "Composición, índice de referencia y condiciones de liquidez: no disponibles. Los cierres mensuales y sus fechas proceden de la CNMV."
                   : "Composition, benchmark and liquidity conditions are unavailable. Monthly closes and dates come from CNMV."}
               </p>
+              <p>{es ? "Denominación oficial" : "Official name"}: {(selected.officialName ?? selected.name)[language]}</p>
               <p>
                 {es ? "Gestora" : "Manager"}: {selected.dataStatus === "fictional" ? (es ? "No especificada" : "Not specified") : (selected.manager || unavailable)}{" "}
                 · ISIN: {selected.identifier ?? unavailable}
@@ -1016,6 +1029,7 @@ export default function FundsExplorer({
             </span>
             <h2>{selected.name[language]}</h2>
             <dl className="fund-identity">
+              <div><dt>{es ? "Denominación oficial" : "Official name"}</dt><dd>{(selected.officialName ?? selected.name)[language]}</dd></div>
               <div>
                 <dt>{es ? "Tipo" : "Type"}</dt>
                 <dd>{type(selected)}</dd>

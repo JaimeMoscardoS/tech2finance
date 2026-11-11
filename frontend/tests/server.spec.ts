@@ -16,7 +16,7 @@ test('real server calculates monthly contributions, decline and contextual tutor
   await page.getByRole('button',{name:/Preguntar al asistente/i}).click();
   await page.locator('#chat-input').fill('¿Cuánto he aportado?'); await page.getByRole('button',{name:'Enviar pregunta'}).click();
   await expect(page.locator('.message.assistant').last()).toContainText('1700');
-  await expect(page.locator('.assistant-banner')).toContainText('SERVIDOR DE DEMO');
+  await expect(page.locator('.assistant-banner')).toContainText('Servidor de demo');
   const followup = page.waitForRequest(req => req.url().endsWith('/api/tutor') && req.method() === 'POST');
   await page.locator('#chat-input').fill('Y la ganancia?'); await page.getByRole('button',{name:'Enviar pregunta'}).click();
   const payload = (await followup).postDataJSON(); expect(payload.history.length).toBe(2); expect(payload.history[1].intent).toBeTruthy();
@@ -30,7 +30,7 @@ test('real server calculates monthly contributions, decline and contextual tutor
 test('server unavailable requires explicit local choice', async ({page}) => {
   await page.route('**/api/catalog', route => route.abort()); await page.goto('/');
   await expect(page.getByText(/No se pudo completar/)).toBeVisible(); await expect(page.getByRole('button',{name:'Usar demo local'})).toBeVisible();
-  await page.getByRole('button',{name:'Usar demo local'}).click(); await expect(page.getByRole('heading',{name:/Invertir empieza/})).toBeVisible();
+  await page.getByRole('button',{name:'Usar demo local'}).click(); await expect(page.getByRole('heading',{name:/Resumen de tu cartera/})).toBeVisible();
 });
 
 test('late server simulation cannot replace newer choice', async ({page}) => {

@@ -26,7 +26,7 @@ import "./simulator-journey.css";
 const TimeMachine = lazy(() => import("./TimeMachine"));
 
 export type FieldError = "initial" | "monthly" | "annual" | "amounts" | "general" | null;
-type Level = "beginner" | "intermediate" | "advanced";
+import type { Level } from "./types/level";
 export type ViewResult = SimulationResult & {
   instrumentId: string;
   initial: number;
@@ -64,9 +64,11 @@ type Props = {
   setError: Dispatch<SetStateAction<FieldError>>;
   selectInstrument: (item: Instrument) => void;
   run: (event: FormEvent) => void;
-  openAssistant: () => void;
+  openAssistant: (question?: string) => void;
   openSimulationDecline: () => void;
   euro: (value: number) => string;
+  /** Dentro de la página «Simulador» (que ya tiene su h1): la introducción del recorrido no repite el h1. */
+  embedded?: boolean;
 };
 type Step = 1 | 2 | 3;
 const DEBOUNCE_MS = 400;
@@ -75,7 +77,7 @@ const MINUS = "−";
 export default function Simulator({
   t, language, level, mode, navHistory, prechosen = false, example = false, onRevealed, selected, bankProfile, instruments, result, error,
   initial, monthly, months, maxMonths, contributionFrequency, setContributionFrequency, setInitial, setMonthly,
-  setMonths, setResult, setError, selectInstrument, run, openAssistant, openSimulationDecline, euro,
+  setMonths, setResult, setError, selectInstrument, run, openAssistant, openSimulationDecline, euro, embedded,
 }: Props) {
   const j = journeyCopy[language];
   const tm = tmCopy[language];
@@ -257,7 +259,7 @@ export default function Simulator({
         <div className="result-help">
           <MessageCircle size={23} aria-hidden="true" />
           <div><strong>{t.explainResult}</strong><p>{j.helpText}</p></div>
-          <button className="button dark" type="button" onClick={openAssistant}>{j.explain}<ArrowRight size={17} /></button>
+          <button className="button dark" type="button" onClick={() => openAssistant(language === "es" ? "¿Qué significa este resultado?" : "What does this result mean?")}>{j.explain}<ArrowRight size={17} /></button>
         </div>
         <button className="button outline decline-trigger" type="button" onClick={openSimulationDecline}><TrendingDown size={17} />{j.declines}</button>
       </div>
@@ -269,7 +271,7 @@ export default function Simulator({
 
   return (
     <>
-      <PageIntro title={t.simTitle} description={j.pageIntro} />
+      <PageIntro title={t.simTitle} description={j.pageIntro} embedded={embedded} />
 
       <div className="journey" data-level={level}>
         <nav className="jr-stepper" aria-label={j.navLabel}>
@@ -540,11 +542,11 @@ function reducedMotion() {
   try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; }
 }
 
-function PageIntro({ title, description }: { title: string; description: string }) {
+function PageIntro({ title, description, embedded }: { title: string; description: string; embedded?: boolean }) {
   return (
-    <div className="page-heading internal">
+    <div className={`page-heading internal${embedded ? " embedded" : ""}`}>
       <div>
-        <h1>{title}</h1>
+        {!embedded && <h1>{title}</h1>}
         <p>{description}</p>
       </div>
     </div>

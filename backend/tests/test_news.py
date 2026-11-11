@@ -34,6 +34,20 @@ def test_trigger_recovery_strict_and_language_identity(monkeypatch):
     assert client.post('/api/decline-events', json={'decline':SPEC, 'url':'https://attacker.example'}).status_code == 422
     assert client.post('/api/decline-events', json={'decline':SPEC | {'periods':1}}).json()['status'] == 'not_triggered'
 
+def test_news_receives_official_identity_not_display_alias(monkeypatch):
+    import importlib
+    from datetime import date
+    captured = []
+    async def fake(report, *, identity=(), **kwargs):
+        captured.append(identity)
+        return news.envelope(date(2020, 1, 1), date(2020, 3, 31), 'empty')
+    monkeypatch.setattr(importlib.import_module('backend.app'), 'get_news', fake)
+    response = client.post('/api/decline-events', json={'decline': SPEC})
+    assert response.status_code == 200
+    assert response.json()['report']['basisName'] == 'Fondo bolsa 2'
+    assert any('BBVA MI INVERSION BOLSA' in value for value in captured[0])
+    assert not any('Fondo bolsa' in value for value in captured[0])
+
 def test_date_mismatch_redirect_and_size(monkeypatch):
     def mismatched(request):
         result = response(request)

@@ -1,19 +1,24 @@
 import { pickFund, reveal, finishReplay } from './journey';
 ﻿import { test, expect } from '@playwright/test';
 import data from '../../shared/demo-data.json' with {type:'json'};
+import { fundDisplayNames } from '../src/fund-names';
+import type { Instrument } from '../src/catalog';
+// Los fondos se muestran con su nombre genérico (alias de main, PR #33); el nombre oficial queda en el detalle.
+const displayNames=fundDisplayNames(data.instruments as unknown as Instrument[]);
 for(const mode of ['local','server'] as const) test(`real study cases, portfolio and decline in ${mode}`,async({page})=>{
  await page.addInitScript(mode=>localStorage.setItem('t2f-data-mode',mode),mode);await page.goto('/');
  await expect(page.locator('.demo-badge')).toContainText('Sin dinero real');
  await page.getByRole('button',{name:'Explorar',exact:true}).click();
  const selector=page.locator('.beginner-guide select').last();
  await expect(selector.locator('option')).toHaveCount(5);
- for(const id of data.demoStudyInstrumentIds){await selector.selectOption(id);const item=data.instruments.find(i=>i.instrumentId===id)!;await expect(page.locator('.beginner-card h2')).toHaveText(item.name.es);await expect(page.locator('.beginner-card')).toContainText('No disponible');}
+ for(const id of data.demoStudyInstrumentIds){await selector.selectOption(id);const item=data.instruments.find(i=>i.instrumentId===id)!;await expect(page.locator('.beginner-card h2')).toHaveText(displayNames.get(item.instrumentId)?.es ?? item.name.es);await expect(page.locator('.beginner-card')).toContainText('No disponible');}
  await page.getByRole('button',{name:'Intermedio',exact:true}).click();await expect(page.locator('.compare-picker input')).toHaveCount(5);
  await page.getByRole('button',{name:'Avanzado',exact:true}).click();await expect(page.locator('.technical-inspector')).toContainText('ISIN');
  await page.getByRole('button',{name:'Inicio',exact:true}).click();await page.getByRole('button',{name:'Probar una caída'}).click();
  const dialog=page.getByRole('dialog',{name:'Tomemos un momento'});await expect(dialog).toContainText('25,54 %');await expect(dialog).toContainText('2020-03-31');await expect(dialog).toContainText('2020-03-11');await expect(dialog).toContainText('no demuestra');await expect(dialog).not.toContainText('13,10');
  await dialog.getByRole('button',{name:'Continuar en la demo'}).click();await finishReplay(page);await expect(page.locator('.sim-result')).toContainText('744,62');
- await page.getByRole('button',{name:'Mi cartera',exact:true}).click();await expect(page.locator('.large-portfolio')).toContainText('744,62');await expect(page.locator('.large-portfolio')).toContainText('2020-03-31');
+ // Mi cartera (diseño por nivel) se construye con los NAV reales CNMV: valor calculado 28.176 € (coste DEMO 25.000 €: 5 fondos x 5.000 €), periodo 2019-12-31 a 2025-12-31 y recuadro de origen.
+ await page.getByRole('button',{name:'Mi cartera',exact:true}).click();await page.getByText('Origen de los datos').click();await expect(page.getByText('de dic 2019 a dic 2025 (72 meses)', {exact:false})).toBeVisible();await expect(page.getByText('28.176 €').first()).toBeVisible();
 });
 test('obsolete catalogue response is rejected and local recovery is explicit',async({page})=>{
  await page.route('**/api/catalog',async route=>{const r=await route.fetch();const json=await r.json();json.schemaVersion='1.0';await route.fulfill({response:r,json})});await page.addInitScript(()=>localStorage.setItem('t2f-data-mode','server'));await page.goto('/');await expect(page.getByRole('heading',{name:'No se pudo cargar el catálogo'})).toBeVisible();await page.getByRole('button',{name:'Usar demo local'}).click();await expect(page.locator('.demo-badge')).toBeVisible();

@@ -16,6 +16,16 @@ Copiloto de inversión para una aplicación bancaria simulada: interfaz adaptabl
 - En sesiones Codex, el agente principal `gpt-6.1-sol` solo orquesta, lee, revisa y verifica; no escribe archivos. Toda escritura del proyecto, incluidos código, documentación, configuración, pruebas, correcciones y textos de pull requests, se delega a un ejecutor o especialista `gpt-6.1-terra` con `model_reasoning_effort = "high"`. Planificadores y revisores Sol trabajan en solo lectura. Si Terra con esfuerzo high no está disponible, comunicar el bloqueo de escritura y no sustituirlo silenciosamente.
 - En sesiones Claude, Sonnet ejecuta y Opus planifica y revisa; los revisores no editan. Esta distribución de agentes de desarrollo no cambia el modelo del tutor de la aplicación.
 
+## Rediseño del dashboard (aprobado, en curso en la rama `mejora-ui`)
+
+Detalle, tokens de color comprobados (WCAG AA), paneles por nivel y fases en [docs/diseno-dashboard.md](docs/diseno-dashboard.md). Decisiones:
+
+- Niveles Básico, Intermedio y Avanzado. «Principiante» pasa a «Básico» solo en el texto visible; el identificador interno sigue siendo `beginner`. Tipo `Level` único.
+- Temas claro y oscuro en los tres niveles (6 combinaciones) con variables CSS; el tema lo elige el usuario. Avanzado claro: barra lateral y cabecera azul marino oscuro y fondo gris.
+- Datos de ejemplo ficticios y realistas en `shared/mock/`, siempre con etiqueta DEMO y sin paneles vacíos; sin nombres, ISIN ni precios reales; separados de los datos publicados; métricas calculadas por código probado.
+- Secciones Fondos/Inversiones, Educación (con práctica del Test MiFID) y Simulación/Juego en cada nivel. Panel del agente de IA en el dashboard en los tres niveles, educativo y sin órdenes ni asesoramiento personalizado, además del Tutor.
+- Estilo futurista con Recharts, `lucide-react` y `motion` existentes; sin nuevas librerías de gráficas.
+
 ## Revisión de pull requests grandes
 
 Un pull request es grande a efectos de esta regla cuando introduce una funcionalidad completa, modifica varios componentes o contratos compartidos, o cambia cálculos financieros, seguridad o flujos principales. El responsable indica por qué requiere revisión; un cambio pequeño no necesita esta revisión ampliada.

@@ -12,8 +12,8 @@ const questions = {
  en:['What is BancoT2F?','What are the demo account terms?','How much does this fund cost?','Is that deducted?','What loss does the result show?','Why did it fall?','What was the return of 2022?',"Why can't I simulate it?",'What will I earn next year?','I need liquidity; should I hold?','What am I seeing?','Are all products on the platform from BancoT2F?'],
 };
 const expectations = {
- es:[[/ficticia/i],[/0 EUR/i,/condiciones.*no están disponibles/i,/sin cuenta real/i],[/no hay información disponible/i],[/no hay información|no dispone|no puedo/i],[/744,62/,/-255,38/,/-25,54%/],[/causa.*desconocida/i,/no hay noticias/i],[/rentabilidad anual.*no está disponible/i],[/no tiene histórico/i],[/no permite predecir/i],[/necesitas liquidez/i,/decisión es tuya/i],[/catálogo/i,/CAIXABANK MONETARIO/i],[/otras entidades/i,/procedencia/i]],
- en:[[/fictional/i],[/EUR 0/i,/terms are unavailable/i,/no real account/i],[/not available/i],[/not available|do not have|cannot/i],[/744\.62/,/-255\.38/,/-25\.54%/],[/cause is unknown/i,/no verified news/i],[/annual return.*not available/i],[/no available history/i],[/not.*predictable/i],[/need liquidity/i,/decision is yours/i],[/catalogue/i,/CAIXABANK MONETARIO/i],[/other institutions/i,/provenance/i]],
+ es:[[/ficticia/i],[/0 EUR/i,/condiciones.*no están disponibles/i,/sin cuenta real/i],[/no hay información disponible/i],[/no hay información|no dispone|no puedo/i],[/744,62/,/-255,38/,/-25,54%/],[/causa.*desconocida/i,/no hay noticias/i],[/rentabilidad anual.*no está disponible/i],[/no tiene histórico/i],[/no permite predecir/i],[/necesitas liquidez/i,/decisión es tuya/i],[/catálogo/i,/Fondo monetario/i],[/otras entidades/i,/procedencia/i]],
+ en:[[/fictional/i],[/EUR 0/i,/terms are unavailable/i,/no real account/i],[/not available/i],[/not available|do not have|cannot/i],[/744\.62/,/-255\.38/,/-25\.54%/],[/cause is unknown/i,/no verified news/i],[/annual return.*not available/i],[/no available history/i],[/not.*predictable/i],[/need liquidity/i,/decision is yours/i],[/catalogue/i,/Money market fund/i],[/other institutions/i,/provenance/i]],
 };
 
 for (const language of ['es','en'] as const) test(`GUI rehearsal ${language}: twelve grounded questions`, async ({page}) => {
@@ -25,7 +25,7 @@ for (const language of ['es','en'] as const) test(`GUI rehearsal ${language}: tw
  const open=async()=>nav(t.open);
  const simulator=async()=>nav(t.sim);
  const selectExternal=async (bank:'bbva'|'caixabank', instrument:string)=>{await page.goto(bank==='bbva'?'http://127.0.0.1:5196/':'http://127.0.0.1:5194/');if(language==='en')await page.getByRole('button',{name:'English',exact:true}).click();await simulator();await pickFund(page,instrument);};
- const chooseFund=async()=>{await nav(t.explore);await page.locator('.beginner-guide select').last().selectOption('caixabank-monetario-estandar');await expect(page.locator('.beginner-card h2')).toContainText('CAIXABANK MONETARIO');await open();};
+ const chooseFund=async()=>{await nav(t.explore);await page.locator('.beginner-guide select').last().selectOption('caixabank-monetario-estandar');await expect(page.locator('.beginner-card h2')).toContainText(language === 'es' ? 'Fondo monetario' : 'Money market fund');await open();};
  const runSimulation=async()=>{await simulator();await pickFund(page,'bbva-mi-inversion-bolsa-acumulacion');await page.getByLabel(t.initial).fill('1000');await page.getByLabel(t.monthly).fill('0');await page.getByLabel(t.period).fill('3');await reveal(page);await finishReplay(page);await expect(page.locator('.sim-values')).toContainText(language==='es'?'744,62':'744.62');await open();};
  for(let i=0;i<12;i++) {
   let requestBody: any, answer='';
@@ -36,7 +36,7 @@ for (const language of ['es','en'] as const) test(`GUI rehearsal ${language}: tw
    if(i===4||i===5) await runSimulation();
    if(i===6){await selectExternal('caixabank','caixabank-monetario-estandar');await page.getByLabel(t.initial).fill('1000');await page.getByLabel(t.monthly).fill('0');await reveal(page);await finishReplay(page);await expect(page.locator('.sim-values')).toContainText('999');await open();}
    if(i===7){await page.goto('http://127.0.0.1:5196/');if(language==='en')await page.getByRole('button',{name:'English',exact:true}).click();await nav(t.explore);await page.locator('.beginner-guide select').last().selectOption('bbva-mi-inversion-bolsa');await simulator();await expect(page.locator('input[name="jr-fund"][value="bbva-mi-inversion-bolsa"]')).toBeDisabled();await open();}
-   if(i===9){await nav(t.portfolio);await page.getByRole('button',{name:t.pause}).click();const pause=page.getByRole('dialog',{name:language==='es'?'Tomemos un momento':'Let’s take a moment'});await expect(pause).toContainText(language==='es'?'25,54':'25.54');await pause.getByText(t.context).click();await pause.getByLabel(t.liquidity).selectOption('yes');await pause.getByRole('button',{name:t.ask}).click();}
+   if(i===9){await nav(t.portfolio);await page.getByRole('button',{name:language==='es'?'Entender una caída':'Understand a decline'}).click();const pause=page.getByRole('dialog',{name:language==='es'?'Tomemos un momento':'Let’s take a moment'});await expect(pause).toContainText(language==='es'?'8,79':'8.79');await pause.getByText(t.context).click();await pause.getByLabel(t.liquidity).selectOption('yes');await pause.getByRole('button',{name:t.ask}).click();}
    const input=page.getByLabel(t.question);await input.fill(questions[language][i]);
    const req=page.waitForRequest(r=>r.url().endsWith('/api/tutor') && r.method()==='POST');
    const res=page.waitForResponse(r=>r.url().endsWith('/api/tutor') && r.request().method()==='POST');

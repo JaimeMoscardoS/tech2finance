@@ -4,11 +4,13 @@
 
 El perfil de la entidad ficticia y sus tarifas informativas se documenta en [BancoT2F](../docs/banco-t2f.md); la [batería de demo](../presentacion/demo-banco-t2f.md) debe verificarse sobre la integración final.
 
-API de demostración con FastAPI para el catálogo de práctica, las simulaciones, el análisis de caídas y el tutor contextual. Usa los datos locales de `shared/demo-data.json` y el motor Python del repositorio. El tutor aplica las reglas TypeScript existentes mediante un proceso Node local: no es un modelo de lenguaje.
+API de demostración con FastAPI para el catálogo de práctica, las simulaciones, el análisis de caídas y el tutor contextual. Usa los datos locales de `shared/demo-data.json` y el motor Python del repositorio. El tutor aplica las reglas TypeScript existentes mediante un proceso Node local. Opcionalmente, un modelo de Claude redacta la respuesta (ver más abajo); sin clave no se usa ningún modelo.
 
 Por defecto la demo consulta el archivo público de comunicados del BCE cuando se activa el umbral de caída. El análisis detallado puede configurarse para llamar a Sonnet desde el servidor; requiere una clave de API y su prueba real está pendiente. La aplicación no usa base de datos ni autenticación, no conecta cuentas ni realiza operaciones. Las series activas proceden de valores liquidativos CNMV descargados y versionados; la recuperación histórica no garantiza una recuperación futura y el usuario conserva la decisión.
 
-Para el proveedor opcional, configurar en el entorno del servidor `T2F_ANALYSIS_PROVIDER=anthropic` y `ANTHROPIC_API_KEY`; `T2F_ANTHROPIC_MODEL` permite elegir otra versión Sonnet y por defecto usa `claude-sonnet-5-5`. No subir claves ni ponerlas en el frontend. Las noticias del archivo público del BCE funcionan por defecto sin clave; seleccionar `T2F_NEWS_PROVIDER=off` y `T2F_ANALYSIS_PROVIDER=demo` para evitar llamadas externas. El contrato de detección, fuentes y límites está en [contratos](../docs/contratos.md#detección-y-noticias).
+Para el proveedor opcional, configurar en el entorno del servidor `T2F_ANALYSIS_PROVIDER=anthropic` y `ANTHROPIC_API_KEY`; `T2F_ANTHROPIC_MODEL` permite elegir otra versión Sonnet y por defecto usa `claude-sonnet-5-5`. No subir claves ni ponerlas en el frontend.
+
+Tutor del chat con Claude: con `ANTHROPIC_API_KEY` se selecciona automáticamente `anthropic`, salvo override `T2F_TUTOR_PROVIDER`. La configuración explícita sin clave y los fallos devuelven error; el endpoint no cambia silenciosamente a reglas. Se excluye `decision.goal` del contexto y se sustituye en la respuesta por reglas enviada al proveedor; el texto libre puede aparecer si el usuario lo escribe en su pregunta o historial. La llamada tiene plazo de 35 s, la interfaz espera 45 s y las pruebas reales de este adaptador están pendientes. El módulo `backend.tutor_bridge.reply()` conserva por compatibilidad el adaptador anterior de PR 36, con fallback por reglas, pero el endpoint usa su opción interna `rules_only` y solo llama al proveedor nuevo una vez. Véase [contrato](../docs/contratos.md#conversación-voz-y-análisis). Las noticias del BCE funcionan por defecto; usar `T2F_NEWS_PROVIDER=off` y `T2F_ANALYSIS_PROVIDER=demo` para ejecución sin noticias ni análisis externo.
 
 ## Requisitos y arranque
 
@@ -68,13 +70,13 @@ Todas las peticiones y respuestas con cuerpo usan JSON. Los campos desconocidos 
 
 | Ruta | Entrada | Respuesta |
 | --- | --- | --- |
-| `GET /api/health` | Sin cuerpo. | `status`, `mode`, `tutorProvider`, `externalProviders` y `newsProvider`; indican configuración, no disponibilidad. |
+| `GET /api/health` | Sin cuerpo. | `status`, `mode`, `tutorProvider` (`server_rules` o `anthropic`), `externalProviders` (también verdadero con el tutor `anthropic`) y `newsProvider`; indican configuración, no disponibilidad. |
 | `POST /api/decline-events` | `{decline: DeclineSpec}`. | Valoración del umbral, informe y noticias BCE con estado explícito. |
 | `GET /api/catalog` | Sin cuerpo. | `schemaVersion`, `banks`, `instruments` y `annualHistory`, con procedencia y disponibilidad de datos. |
 | `POST /api/simulations` | `{ "instrumentId": "bbva-mi-inversion-bolsa-acumulacion", "initial": 500, "recurringContribution": 50, "periods": 1 }` | Resultado con fechas de NAV, aportaciones, fuentes y versiones de datos y cálculo. `startDate` opcional debe coincidir con un cierre observado. |
 | `POST /api/game/compare` | `{ "instrumentId": "bbva-mi-inversion-bolsa-acumulacion", "initial": 500, "monthly": 50, "months": 12, "sellMonth": 6, "buyFeeRate": 0, "sellFeeRate": 0 }`. | Comparación educativa mantener/vender con fechas de programación y ejecución reales; el frontend aún no consume este endpoint. |
-| `POST /api/declines` | `{ "basis": "instrument", "language": "es", "instrumentId": "bbva-mi-inversion-bolsa-acumulacion", "periods": 3 }`; para cartera, `{ "basis": "portfolio_demo", "language": "es" }`. | Caída observada, fuentes y límites; evento OMS solo dentro de su periodo, sin atribución causal. |
-| `POST /api/tutor` | Pregunta y contexto de pantalla, con especificación opcional de simulación o caída. | Texto, idioma, intención y fuentes; `mode: "api"` y `provider: "server_rules"` identifican el tutor por reglas. |
+| `POST /api/declines` | `{ "basis": "instrument", "language": "es", "instrumentId": "bbva-mi-inversion-bolsa-acumulacion", "periods": 3 }`; para la cartera de estudio, `{ "basis": "portfolio_demo", "language": "es" }`; para la cartera mostrada en Inicio y «Mi cartera» (NAV CNMV, participaciones DEMO), `{ "basis": "portfolio_cnmv", "language": "es" }`. | Caída observada, fuentes y límites; evento OMS solo dentro de su periodo, sin atribución causal. |
+| `POST /api/tutor` | Pregunta y contexto de pantalla, con especificación opcional de simulación o caída. | Texto, idioma, intención y fuentes; `mode: "api"` y `provider` (`server_rules` o `anthropic`) identifican quién respondió. |
 
 En simulación, `initial` y `recurringContribution` admiten números finitos entre 0 y 10⁹ EUR. Los periodos mensuales se limitan a los cierres observados disponibles (máximo 72 desde la fecha inicial). Cada aportación se suma tras la variación del NAV en el cierre correspondiente. La muestra anual anterior se conserva aparte y no se interpola.
 
@@ -101,3 +103,8 @@ Desde la raíz, con el entorno instalado y Node disponible:
 ```
 
 Las cifras siguientes son anteriores a `POST /api/game/compare` y no se han actualizado (`test_api.py` no se ejecuta sin FastAPI instalado). La ejecución de integración local del 10 de noviembre de 2026 pasó 44 pruebas del backend, incluido el puente real a Node, con una advertencia de deprecación de Starlette sobre TestClient y HTTPX. Consulta los [contratos entre áreas](../docs/contratos.md) y el [contexto de integración](../docs/backend-contexto.md) para los acuerdos y límites del proyecto.
+
+
+## Conversación y transcripción opcionales
+
+En el entorno del servidor, `ANTHROPIC_API_KEY` activa automáticamente el chat Anthropic y `ELEVENLABS_API_KEY` activa ElevenLabs para dictado. Reinicia el servidor tras definirlas. Para forzar los modos locales usa `T2F_TUTOR_PROVIDER=server_rules` y `T2F_SPEECH_PROVIDER=browser_local`; se pueden seleccionar explícitamente `anthropic` y `elevenlabs`. No guardes claves en el repositorio ni en el navegador. El análisis detallado se configura por separado con `T2F_ANALYSIS_PROVIDER=anthropic`; `T2F_ANTHROPIC_MODEL` es opcional. La clave configurada no demuestra acceso válido. Contratos, errores, límites y estado de pruebas: [conversación y voz](../docs/contratos.md#conversación-voz-y-análisis).

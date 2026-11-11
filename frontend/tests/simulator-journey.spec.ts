@@ -4,10 +4,11 @@ import { BBVA, CAIXA, SANTANDER, finishReplay, pickFund, reveal, startAndFinish,
 const openSimulator = async (page: Page, url = '/') => {
   await page.goto(url);
   const menu = page.getByRole('button', { name: /^(Abrir menú|Open menu)$/ });
-  // Wait for the app to render before deciding whether the mobile menu has to be opened (avoids a race under load).
-  await expect(menu.or(page.getByRole('button', { name: /^(Simulador|Simulator)$/ }).first())).toBeVisible();
+  const nav = page.getByRole('button', { name: /^(Simulador|Simulator)$/ });
+  // Espera a que la cabecera esté lista: en móvil la navegación está en el menú plegado.
+  await expect(menu.or(nav.first())).toBeVisible();
   if (await menu.isVisible()) await menu.click();
-  await page.getByRole('button', { name: /^(Simulador|Simulator)$/ }).first().click();
+  await nav.first().click();
 };
 const overflow = (page: Page) => page.evaluate(() => Math.max(document.documentElement.scrollWidth - document.documentElement.clientWidth, document.body.scrollWidth - window.innerWidth));
 const local = (page: Page) => page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
@@ -277,11 +278,11 @@ test('guide adapts to the level: advanced collapses it behind a toggle', async (
   await openSimulator(page);
   const guide = page.locator('.jr-guide');
   await expect(guide).toContainText('Cada tarjeta muestra cómo cambió su valor mes a mes');
-  await page.getByRole('button', { name: /Detalle: Principiante/ }).click();
+  await page.getByRole('button', { name: /Nivel: Básico/ }).click();
   await page.getByRole('button', { name: 'Intermedio', exact: true }).click();
   await expect(guide).toContainText('Elige un fondo para empezar.');
   await expect(guide).not.toContainText('Cada tarjeta muestra');
-  await page.getByRole('button', { name: /Detalle: Intermedio/ }).click();
+  await page.getByRole('button', { name: /Nivel: Intermedio/ }).click();
   await page.getByRole('button', { name: 'Avanzado', exact: true }).click();
   const toggle = guide.getByRole('button', { name: 'Mostrar guía' });
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');

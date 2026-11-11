@@ -3,6 +3,7 @@ from copy import deepcopy
 import math
 from .provenance import load_verified_dataset, read_json, ROOT
 from .nav_history import NavHistoryError, select_nav, replay_nav
+from .fund_names import display_name
 
 _DATA, _PROVENANCE = load_verified_dataset()
 _NAV = read_json(ROOT / 'nav-history.json')
@@ -57,9 +58,41 @@ def run_simulation(spec):
     return result
 
 
+# Cartera «Mi cartera» con NAV reales CNMV y participaciones DEMO. Debe coincidir con
+# frontend/src/portfolio-real.ts (buildRealPortfolio): mismos fondos (elegibles, en EUR, con más de un NAV;
+# como máximo MAX_REAL_FUNDS en el orden del dataset), fechas comunes consecutivas y compra única DEMO.
+MAX_REAL_FUNDS = 6
+MIN_REAL_POINTS = 13
+DEMO_AMOUNT_PER_FUND_EUR = 5000
+
+
+def cnmv_portfolio_series():
+    usable = [i for i in _NAV['instruments'] if i.get('eligible') and i.get('currency') == 'EUR' and len(i.get('monthly', [])) > 1][:MAX_REAL_FUNDS]
+    if not usable:
+        raise DomainError('missing_history', 422, 'Portfolio history is unavailable')
+    common = [row['date'] for row in usable[0]['monthly']]
+    for inst in usable[1:]:
+        dates = {row['date'] for row in inst['monthly']}
+        common = [d for d in common if d in dates]
+    month = lambda d: int(d[:4]) * 12 + int(d[5:7])
+    if len(common) < MIN_REAL_POINTS or any(month(b) != month(a) + 1 for a, b in zip(common, common[1:])):
+        raise DomainError('missing_history', 422, 'Portfolio history is unavailable')
+    values = [0.0] * len(common)
+    for inst in usable:
+        by_date = {row['date']: float(row['nav']) for row in inst['monthly']}
+        navs = [by_date[d] for d in common]
+        if any(not math.isfinite(v) or v <= 0 for v in navs):
+            raise DomainError('missing_history', 422, 'Portfolio history is unavailable')
+        units = DEMO_AMOUNT_PER_FUND_EUR / navs[0]
+        for k, nav in enumerate(navs):
+            values[k] += units * nav
+    return common, values
+
+
 def analyze_decline(spec):
     try:
         basis, language = spec['basis'], spec['language']
+        event_range = None
         if language not in ('es', 'en'):
             raise ValueError
         if basis == 'portfolio_demo':
@@ -70,12 +103,22 @@ def analyze_decline(spec):
             name = 'Cartera de ejemplo' if language == 'es' else 'Sample portfolio'
             labels = [row['date'] for row in result['timeline']]
             kind, sources = 'historical_nav', result['sources']
+        elif basis == 'portfolio_cnmv':
+            if 'instrumentId' in spec or 'periods' in spec:
+                raise ValueError
+            dates, values = cnmv_portfolio_series()
+            event_range = (dates[0], dates[-1])
+            labels = [d[:7] for d in dates]
+            name = 'Mi cartera (NAV CNMV; participaciones DEMO)' if language == 'es' else 'My portfolio (CNMV NAVs; DEMO holdings)'
+            kind = 'historical_nav'
+            # Misma etiqueta que el análisis local de la pausa (App.tsx): fuente y periodo.
+            sources = [{'label': f"CNMV · {'valores liquidativos mensuales' if language == 'es' else 'monthly net asset values'} {dates[0]} – {dates[-1]}", 'url': _NAV['source']['indexUrl']}]
         elif basis == 'instrument':
             inst = _instrument(spec['instrumentId'])
             result = run_simulation({'instrumentId': inst['instrumentId'], 'initial': 100, 'recurringContribution': 0, 'periods': spec['periods'], 'startDate': spec.get('startDate')})
             values = result['points']
             labels = [row['date'] for row in result['timeline']]
-            name, sources = inst['name'][language], _source(inst, language)
+            name, sources = display_name(inst, language, _DATA['instruments']), _source(inst, language)
             kind = 'historical_nav'
         else:
             raise ValueError
@@ -107,7 +150,8 @@ def analyze_decline(spec):
         report['episodes'].append(episode(None))
     report['peakValue'] = peak
     report['currentDrawdownPercent'] = (1 - values[-1] / peak) * 100
-    events = [event for event in _NAV['events'] if labels[0] <= event['date'] <= labels[-1]]
+    first, last = event_range or (labels[0], labels[-1])
+    events = [event for event in _NAV['events'] if first <= event['date'] <= last]
     if events:
         report['historicalContext'] = {'events': deepcopy(events)}
     return report
@@ -116,7 +160,7 @@ def analyze_decline(spec):
 def build_tutor_context(context):
     try:
         page, level, language = context['page'], context['level'], context['language']
-        if page not in ('home', 'explore', 'simulator', 'portfolio') or level not in ('beginner', 'intermediate', 'advanced') or language not in ('es', 'en'):
+        if page not in ('home', 'explore', 'simulator', 'portfolio', 'learn', 'game') or level not in ('beginner', 'intermediate', 'advanced') or language not in ('es', 'en'):
             raise ValueError
         allowed = {'page', 'level', 'language', 'bankId', 'instrumentId', 'simulation', 'decline', 'decision'}
         if set(context) - allowed:
@@ -139,7 +183,7 @@ def build_tutor_context(context):
             result['bank'] = deepcopy(_DATA['bankProfile'])
         if page in ('explore', 'simulator') and ids:
             inst = _instrument(ids[0])
-            result['instrument'] = {'id': ids[0], 'name': inst['name'][language], 'currency': inst['currency'],
+            result['instrument'] = {'id': ids[0], 'name': display_name(inst, language, _DATA['instruments']), 'currency': inst['currency'],
                                     'dataKind': inst['dataStatus'], 'sources': _source(inst, language)}
             product = next((p for p in _DATA['bankProfile']['products'] if p['instrumentId'] == ids[0]), None) if bank_id == _DATA['bankProfile']['bankId'] else None
             if product is not None:
@@ -156,8 +200,15 @@ def build_tutor_context(context):
                              annualReturns=[{'year': r['year'], 'ratePercent': r['rate'] * 100} for r in _DATA['annualHistory']['returns']])
             result['simulation'] = facts
         if page in ('home', 'portfolio'):
-            portfolio = run_simulation(_DATA['portfolioExample'])
-            result['portfolio'] = {'name': 'Cartera de ejemplo' if language == 'es' else 'Sample portfolio', 'value': portfolio['value'], 'initial': _DATA['portfolioExample']['initial'], 'dataKind': 'historical_nav'}
+            # Misma cartera que muestran Inicio y «Mi cartera» (NAV CNMV, participaciones DEMO); si no hay datos, la de ejemplo.
+            try:
+                _dates, values = cnmv_portfolio_series()
+                usable_count = round(values[0] / DEMO_AMOUNT_PER_FUND_EUR)
+                result['portfolio'] = {'name': 'Mi cartera (NAV CNMV; participaciones DEMO)' if language == 'es' else 'My portfolio (CNMV NAVs; DEMO holdings)',
+                                       'value': values[-1], 'initial': usable_count * DEMO_AMOUNT_PER_FUND_EUR, 'dataKind': 'historical_nav'}
+            except DomainError:
+                portfolio = run_simulation(_DATA['portfolioExample'])
+                result['portfolio'] = {'name': 'Cartera de ejemplo' if language == 'es' else 'Sample portfolio', 'value': portfolio['value'], 'initial': _DATA['portfolioExample']['initial'], 'dataKind': 'historical_nav'}
         if decline:
             result['decline'] = analyze_decline(decline)
         if 'decision' in context:

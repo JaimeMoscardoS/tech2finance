@@ -1,7 +1,7 @@
 import type { BankProfile, BankProduct } from '../../shared/bank-profile.ts';
 export type Language = 'es' | 'en';
 export type KnowledgeLevel = 'beginner' | 'intermediate' | 'advanced';
-export type Page = 'home' | 'explore' | 'simulator' | 'portfolio';
+export type Page = 'home' | 'explore' | 'simulator' | 'portfolio' | 'learn';
 export type DataKind = 'fictional' | 'annual_published_returns' | 'missing_history' | 'historical_nav' | 'unsupported_distributions';
 export type SourceRef = { label: string; url: string; checkedAt?: string };
 export type Observation = { label: string; value: number };
@@ -17,5 +17,5 @@ export type DeclineReport = { historicalContext?:{events:HistoricalEvent[]}; sta
 export type TutorContext = { page: Page; level: KnowledgeLevel; language: Language; bank?: BankProfile; instrument?: InstrumentContext; simulation?: SimulationFacts; portfolio?: PortfolioFacts; decline?: DeclineReport; decision?: DecisionContext };
 export type TutorHistoryMessage = { role: 'user' | 'assistant'; text: string; intent?: string };
 export type TutorRequest = { message: string; history?: readonly TutorHistoryMessage[]; context: TutorContext; signal?: AbortSignal };
-export type TutorReply = { text: string; language: Language; mode: 'local' | 'api'; provider: string; intent: string; sources: SourceRef[] };
+export type TutorReply = { text: string; language: Language; mode: 'local' | 'api'; provider: string; model?: string; intent: string; sources: SourceRef[] };
 export type TutorProvider = { readonly id: string; reply(request: TutorRequest): Promise<TutorReply> };

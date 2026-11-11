@@ -2,13 +2,15 @@
 
 ## Qué es
 
-Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, comparar ejemplos y entender una caída. Ofrece tres niveles, español e inglés, temas claro y oscuro y voz local opcional. La demo no conecta cuentas ni realiza operaciones.
+Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, comparar ejemplos y entender una caída. Ofrece tres niveles, español e inglés, temas claro y oscuro y voz opcional. La demo no conecta cuentas ni realiza operaciones.
+
+Los alias visibles proceden de `shared/fund-aliases.json` y se resuelven antes de filtrar el catálogo. Los nombres repetidos reciben un número estable según el identificador, incluso cuando una clase no es elegible. Los detalles conservan la denominación oficial y el CSV exporta ese nombre; los alias no modifican las fuentes ni describen la composición o el riesgo.
 
 La tarjeta «¿Te preocupa la caída?» abre un análisis detallado de seis apartados junto a los datos y fuentes observados. En modo local se identifica como demostración por reglas; en modo servidor solo se identifica como IA cuando el proveedor y modelo están confirmados por la respuesta. Al fallar muestra el error y permite reintentar sin ocultar las observaciones. El contexto editable se aplica al análisis con un botón explícito, no al escribir. El tutor escrito y de voz sigue accesible. La configuración y la prueba real del proveedor son independientes de esta interfaz.
 
 El selector de detalle de la cabecera se expande con Motion; permite volver, elegir un nivel o cerrarlo con Escape o pulsando fuera. Respeta la preferencia de movimiento reducido y mantiene el nivel global durante la sesión. Para comprobarlo: `npx playwright test -c playwright.level.config.ts`.
 
-El botón «Hablar con IA» inicia el dictado local y muestra una barra no modal. La respuesta se lee con voz local disponible; «Ver respuesta» y «Escribir» se abren solo al solicitarlos. El componente y su comprobación se describen en [componentes de interfaz](../docs/ui-components.md).
+El botón «Hablar con IA» abre la barra no modal y comienza el dictado. En modo servidor se usa el proveedor de voz seleccionado en el backend; si ElevenLabs está configurado, el audio se envía allí y se avisa en pantalla. La respuesta se lee con voz local disponible. «Ver respuesta» y «Escribir» se abren al solicitarlos. Véase [componentes de interfaz](../docs/ui-components.md).
 
 ## Datos y simulación
 
@@ -60,7 +62,70 @@ npx playwright test
 
 Arranca el backend conforme a [su README](../backend/README.md). La API local de demo no utiliza autenticación; por defecto el análisis funciona por reglas y puede configurarse para usar Anthropic. Vite reenvía `/api` al puerto 8000 por defecto; `T2F_BACKEND_PORT` permite otro puerto. Playwright requiere Chrome y acepta `T2F_PYTHON` para seleccionar el Python con dependencias. `VITE_BANK_ID` admite `demo`, `caixabank`, `bbva` y `santander`; una entidad desconocida produce un error. El filtro de interfaz no sustituye autorización del servidor.
 
-El tutor funciona por reglas, no utiliza LLM ni proveedores de voz remotos. El dictado y la lectura dependen de capacidades locales del dispositivo y conservan alternativa escrita. El gráfico ofrece tabla accesible y navegación por teclado. La comprobación con lectores de pantalla físicos sigue pendiente. El componente CountUp procede de React Bits; su licencia figura en `REACT-BITS-LICENSE.md`.
+## Tutor local, voz y pausa
+
+El inicio organiza el recorrido en fondos, práctica guiada y cartera ficticia. El fondo seleccionado sirve de contexto para el tutor. El selector **Detalle** cambia la profundidad de la explicación, no el riesgo. **Conexión** permite cambiar entre servidor de demo y demo local sin cambio automático ante errores.
+
+El botón de voz de la barra inicia un turno; desde la pausa se abre el panel y se pulsa Hablar. El micrófono no vuelve a activarse automáticamente tras la respuesta. El dictado del panel se envía al finalizar el turno; en el chat se mantiene editable hasta pulsar Enviar. Sin capacidad o permiso de voz se puede escribir. Cambiar idioma, contexto o modo cancela el turno y la petición pendiente.
+
+En la cartera ficticia, **Entender una caída** analiza los puntos de ejemplo; en un resultado válido del simulador, **Entender las caídas** analiza la evolución del instrumento sin las aportaciones. Se muestran los episodios observados y sus límites, sin atribuir causas verificadas; el guion ficticio identificado se limita al escenario de seis meses de T2F Equilibrio. El objetivo, horizonte y necesidad de liquidez son opcionales y no constituyen una evaluación de idoneidad. La persona puede cerrar y continuar en la demo en cualquier momento.
+
+## Práctica guiada
+
+Desde la tarjeta de práctica de inicio o el enlace del simulador se pueden comparar dos ejemplos: cambiar las aportaciones de un mismo instrumento, comparar plazos de una serie ficticia sin aportaciones o comparar dos activos ficticios con condiciones iguales. Los importes, periodos e instrumentos son editables. El ejemplo histórico anual mantiene cinco años y las aportaciones se suman al cierre; los fondos sin histórico no están disponibles. Las comparaciones muestran capital, aportaciones, ganancia o pérdida, procedencia y límites, sin predecir resultados ni demostrar diversificación.
+
+Cada pareja se calcula en el modo seleccionado. Al editar una entrada, cambiar de lección o de modo se descartan los resultados anteriores; si falla el servidor se muestra el error y no se calcula silenciosamente en local. Se puede seleccionar A o B para preguntar al tutor sobre ese ejemplo. La prueba conceptual es opcional y no puntúa por obtener ganancias. El laboratorio no compra ni vende activos y no utiliza dinero real.
+
+El modo local funciona sin backend ni solicitudes de voz externas y responde por reglas. En modo servidor, el tutor puede usar reglas o Anthropic Sonnet según la configuración; la interfaz identifica el proveedor declarado en la respuesta validada. El dictado puede utilizar ElevenLabs si está configurado y seleccionado en el servidor; la lectura sigue usando voces locales. Véanse [contratos](../docs/contratos.md) y [configuración del backend](../backend/README.md). Las credenciales permanecen en el servidor. La conexión real a proveedores queda pendiente de configurar y comprobar.
+
+## Componentes y fuentes
+
+Para cambios de interfaz, aplica la [skill frontend-design del proyecto](../.agents/skills/frontend-design/SKILL.md), que incluye criterios para presentar información financiera.
+
+Las condiciones de producto en Explorar y el simulador organizan etiquetas e importes en una lista, destacan los gastos anuales y mantienen visible el aviso de que las comisiones ficticias no se descuentan. Un gasto anual desconocido aparece como «No definidos» y los productos externos muestran su propio aviso. Se usan los mismos datos en español e inglés, en móvil y escritorio y con ambos temas.
+
+La presentación de BancoT2F en Inicio separa el mantenimiento ficticio mensual, los límites de la demo y sus servicios; el aviso completo sobre comisiones permanece visible y las preguntas frecuentes se pueden desplegar.
+
+`src/CountUp.tsx` procede de [React Bits](https://github.com/DavidHDev/react-bits), componente CountUp. Su licencia se conserva en `REACT-BITS-LICENSE.md`. La animación respeta la preferencia de movimiento reducido definida por el navegador cuando la gestiona el componente; la interfaz también incluye reglas de movimiento reducido.
+
+Cada nivel tiene una paleta distinta en temas claro y oscuro (tokens en `src/styles/tokens.css`, aplicados con `data-level` y `data-theme` en `<html>`; el tipo `Level` único está en `src/types/level.ts` y «Principiante» se muestra como «Básico», con id interno `beginner`); el nivel no indica riesgo. El gráfico usa Recharts 3 y ofrece vistas de capital y variación del instrumento, navegación interactiva y una tabla alternativa. Los segmentos verdes, rojos y grises indican si la serie mostrada sube, baja o no cambia respecto al punto anterior; el capital incluye aportaciones y no representa por sí solo el rendimiento del mercado. En las barras anuales el color indica el signo de la rentabilidad de ese año. Las etiquetas y la tabla también expresan los cambios sin depender del color. Las cifras de la cartera de ejemplo son ficticias y no dependen del resultado del simulador.
+
+Consulta las [instrucciones del área](AGENTS.md), el [contexto](../docs/contexto-proyecto.md) y los [contratos](../docs/contratos.md).
+
+## Componentes del dashboard y datos DEMO (fase 2, rama `mejora-ui`)
+
+- Componentes base en `src/components/dashboard/` (importables desde `index.ts`): `KpiRow`/`KpiCard`, `SparkCard`, `DonutCard`, `FundTable`, `EvolutionChart`, `PeriodSelector`, `StatusChip`/`DeltaChip`, `MetricBar`, `DemoBadge`, `Section` y `AgentPanel`. Solo usan tokens (`--cat-1..6`, `--chart-*`, `--amber*`); los gráficos llevan tramas, valores en texto o tabla de datos, y subida/bajada con signo e icono además del color; respetan `prefers-reduced-motion`. `AgentPanel` es educativo y sin LLM real: texto de ejemplo marcado DEMO, sin órdenes ni asesoramiento.
+- Datos ficticios en `../shared/mock/demo-portfolio.ts` (solo entradas); las métricas (variación, pesos, volatilidad, drawdown, Sharpe, escenarios) se calculan en `src/dashboard-metrics.ts` y `src/dashboard-portfolio.ts`, con pruebas en `src/dashboard-metrics.test.ts`.
+- La página temporal `/componentes` y su galería se retiraron en la fase 6; los componentes se ven en las vistas reales (Inicio, Mi cartera, Educación, Simulador en `src/views/`; el Simulador fusiona `views/simulator/SimulatorPage.tsx`, `ScenarioLab.tsx` y `Simulator.tsx`).
+- El nivel elegido se guarda en `localStorage` (`t2f-level`, validado con `src/preferences.ts`; valor inválido o almacenamiento bloqueado vuelve a Básico).
+- Pruebas: `tests/dashboard-views.spec.ts` (Inicio, Test MiFID con foco, Simulador por nivel con errores asociados, pausa de venta, contraste del hover, 320 px y contraste AA en las 6 combinaciones; ayudas en `tests/helpers/`) y `tests/chart-colors.spec.ts`.
+
+## Contrato de servidor
+
+`GET /api/catalog` carga bancos e instrumentos; `/api/simulations`, `/api/declines` y `/api/tutor` devuelven cálculos, informes y respuestas. El servidor reconstruye el contexto financiero. Las peticiones se cancelan al cambiar contexto; el tutor admite hasta 45 segundos y otras solicitudes diez. El dictado servidor consulta `/api/health` y obtiene un token de un solo uso mediante `/api/speech/token`. Las pruebas Playwright requieren Chrome y un backend de prueba.
+
+Si el catálogo tarda o falla, la pantalla de recuperación mantiene idioma y tema disponibles y permite elegir expresamente la demo local; un fallo no cambia de modo automáticamente. En error se puede reintentar la carga. Al llegar el catálogo se traslada el foco al contenido principal si estaba en la pantalla de recuperación. Las solicitudes anteriores se cancelan al cambiar de modo y el reintento de operación se descarta cuando cambian sus entradas o contexto. `npx playwright test tests/recovery.spec.ts` comprueba estos recorridos; las pruebas con lectores de pantalla físicos siguen pendientes.
+
+
+En Explorar, los tres niveles presentan una guía inicial, una comparación seleccionable de hasta tres fondos o un panel técnico por fondo. Los filtros usan datos presentes; los riesgos, costes y plazos de los tres fondos ficticios son supuestos educativos, no se aplican en los cálculos de la simulación y no describen productos reales. La documentación legal no está incorporada; la ficha oficial es una fuente, no un documento precontractual verificado. El panel avanzado permite descargar las observaciones disponibles en CSV. Para la serie anual identificada, las rentabilidades acumuladas y anualizadas de 1, 3 y 5 años se calculan componiendo las cifras anuales redondeadas disponibles; no son predicciones, no incluyen impuestos ni costes externos, y no se muestran si la serie es inválida o insuficiente.
+
+
+La entidad se configura al arrancar o compilar el frontend mediante `VITE_BANK_ID` (identificadores del catálogo: `demo`, `caixabank`, `bbva`, `santander`; por defecto `demo`). Ejemplo en Linux/macOS: `VITE_BANK_ID=caixabank npm run dev`; en PowerShell: `$env:VITE_BANK_ID="caixabank"; npm run dev`. Una entidad inexistente muestra un error de configuración. El filtro es de interfaz, no una barrera de autorización del servidor; una integración real necesitaría control de acceso en backend. El laboratorio deshabilita lecciones sin series compatibles.
+
+La guía de objetivos es un ejercicio local de plantillas educativas editables, condicionado por las respuestas y la preferencia de fluctuación; no evalúa idoneidad ni recomienda productos. Las respuestas permanecen en la pantalla y no se envían al tutor. La comparación avanzada muestra hasta tres series seleccionadas con la misma frecuencia, etiquetas de periodo y procedencia, en gráficos separados con escala común. En el simulador, el botón de ayuda junto al resultado abre el asistente con el resultado válido actual.
+
+La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inversión». La cabecera identifica el modo demo sin dinero real; las fuentes, limitaciones y costes siguen visibles donde aportan contexto.
+
+El tutor local funciona por reglas; el servidor puede usar Anthropic si está configurado. El dictado puede enviarse a ElevenLabs en modo servidor, con aviso previo, y la lectura utiliza voces locales. Se conserva la alternativa escrita. El gráfico ofrece tabla accesible y navegación por teclado. La comprobación con lectores de pantalla físicos sigue pendiente. El componente CountUp procede de React Bits; su licencia figura en `REACT-BITS-LICENSE.md`.
+
+## Integración con `main` (selector de nivel, simulador único y pausa)
+
+- **Interfaz final**: Inicio es `HomeDashboard` (más BankInfo y los accesos de práctica, «¿Te preocupa la caída?» y «Probar una caída»); Mi cartera es `FundsDashboard` + `AgentPanelSection` + banner/pausa; los tres reciben la misma cartera (`portfolio`). La página antigua de cartera/inicio de `main` (PageIntro, `large-portfolio`, tarjetas de acción) se descartó; se conservó su funcionalidad útil: el acceso «calm» que abre `openPortfolioDecline`, el análisis detallado de caídas, `navHistory`, `hostBankId` y los datos `historical_nav` en simulador y práctica. El Simulador muestra su título encima de las pestañas.
+- **Selector de nivel**: `src/LevelSelector.tsx` (de `main`) usa los tokens y temas del dashboard y ocupa el lugar del botón «Detalle». Selectores accesibles: botón `.level-button` (`aria-expanded`, `aria-controls="level-options"`), grupo `.level-menu` (`role="group"`, `aria-label` «Detalle»; `inert` cerrado), botón «Volver» y botones Básico/Intermedio/Avanzado con `aria-pressed`. Escape devuelve el foco al botón; respeta `prefers-reduced-motion`. `localStorage` `t2f-level` y `data-level` en `<html>` no cambian. Las etiquetas visibles son Básico/Intermedio/Avanzado.
+- **Simulador único** (`views/simulator/SimulatorPage.tsx`): un solo h1 «Simulador» (con la etiqueta ILUSTRATIVO) y, por nivel, los escenarios DEMO (`ScenarioLab`) y el recorrido guiado de 3 pasos de `main` (`Simulator.tsx` con `embedded`, que no repite su h1; el paso 3 es «¿Y si vendo?»). Básico: escenario guiado y recorrido; Intermedio: recorrido y comparación de escenarios y plazos; Avanzado: escenarios, plazos y costes y recorrido. Los hijos llevan clave para no perder el estado del recorrido al cambiar de nivel. Corrección en `simulator-journey.css`: el campo numérico ya no impone su ancho intrínseco y cabe en 320 px.
+- **Pausa** (`AntiPanicPanel`): lógica de `main` (análisis detallado con `DetailedDeclinePanel`, contexto histórico público, escenario ficticio identificado) con la profundidad por nivel de la rama. Nunca bloquea ni retrasa la venta; menciona liquidez, horizonte y objetivo; las noticias son contexto y no prueban causalidad. La pausa de cartera (Inicio y Mi cartera) analiza la cartera mostrada (`buildRealPortfolio`, construida una sola vez en `App.tsx`): con servidor envía `{basis:"portfolio_cnmv"}` y el backend reconstruye la misma serie, así que se muestra el análisis detallado y el tutor recibe la misma caída; sin servidor, análisis local de esa serie (`dataKind` `historical_nav`, fuente CNMV con URL y periodo). Sin datos reales, la serie DEMO (`fictional`). «Probar una caída» usa la serie de estudio `portfolio_demo`.
+- **Pruebas Playwright**: `npx playwright test` (169 pruebas). Configuraciones extra: `playwright.level.config.ts` (selector de nivel), `playwright.shiny.config.ts` (voz; necesita `T2F_BACKEND_PORT=8111` porque su vite no pasa por `start-vite.mjs`) y `calm.playwright.config.ts` (sin `webServer`: requiere vite en 5187 con `VITE_BANK_ID=demo` y el backend en 8111).
+- **Asistente**: preguntas sugeridas por página y nivel más las de caída; en el servidor `learn` se envía como `home`.
 
 ### Detección automática y contexto del BCE
 

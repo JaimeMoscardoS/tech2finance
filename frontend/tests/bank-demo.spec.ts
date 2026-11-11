@@ -13,7 +13,7 @@ for (const mode of ['local', 'server'] as const) for (const bank of ['caixabank'
   await expect(page.locator('.breadcrumb')).not.toContainText('BancoT2F');
   await expect(page.getByRole('button', {name: /Probar una caída/})).toHaveCount(0);
   await page.getByRole('button',{name:'Explorar',exact:true}).click();
-  await expect(page.locator('.beginner-card h2')).toContainText(bank === 'caixabank' ? 'CAIXABANK' : 'BBVA');
+  await expect(page.locator('.beginner-card h2')).toContainText(bank === 'caixabank' ? 'Fondo monetario' : 'Fondo bolsa 2');
   await page.getByRole('button',{name:'Abrir asistente'}).click();
   const dialog = page.getByRole('dialog',{name:'Tu asistente'});
   await dialog.getByLabel('Tu pregunta').fill('¿Cuánto cuesta este fondo?');
@@ -33,6 +33,7 @@ test('bank identity and product costs follow the selected fund across views', as
  await page.route('**/api/tutor', async route => { tutorRequests.push(route.request().postDataJSON()); await route.continue(); });
  await page.goto('/');
  await expect(page.locator('.bank-info__maintenance dd')).toContainText('0,00');
+ await page.getByText('Conoce BancoT2F').click();
  await page.getByText('Preguntas frecuentes').click();
  await page.getByText('¿Qué es BancoT2F?').click();
  await expect(page.getByText('BancoT2F es el banco de este entorno de demostración.')).toBeVisible();
