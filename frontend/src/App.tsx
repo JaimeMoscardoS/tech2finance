@@ -11,6 +11,7 @@ import {
   Mic,
   MessageCircle,
   Moon,
+  Pause,
   Sun,
   TrendingDown,
   Wallet,
@@ -154,9 +155,13 @@ export default function App() {
     const items = () =>
       Array.from(
         panel?.querySelectorAll<HTMLElement>(
-          "button, a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
+          "button, a[href], input, select, textarea, summary, [tabindex]:not([tabindex='-1'])",
         ) ?? [],
-      ).filter((item) => !item.matches(":disabled") && !item.closest("[inert]") && item.getClientRects().length > 0 && getComputedStyle(item).visibility !== "hidden");
+      ).filter((item) => {
+        const closedDetails = item.closest('details:not([open])');
+        const hiddenByDetails = closedDetails && item !== closedDetails.querySelector('summary');
+        return !hiddenByDetails && !item.closest('[inert]') && item.getClientRects().length > 0 && getComputedStyle(item).visibility !== 'hidden' && !item.matches(':disabled') && (item.tabIndex >= 0 || item.matches('summary:not([tabindex="-1"])'));
+      });
     items()[0]?.focus();
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -612,7 +617,7 @@ export default function App() {
                   <span>{language === "es" ? "Ver cartera" : "View portfolio"}<ArrowRight size={14} /></span>
                 </button>
               </div>
-
+              <button type="button" className="calm-card" onClick={openPortfolioDecline} disabled={!portfolioResult}><span className="action-icon mint"><Pause size={21}/></span><span><strong>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}</strong><small>{language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options."}</small></span><ArrowRight size={19}/></button>
             </>
           )}
           {page === "explore" && <FundsExplorer hostBankId={configuredBank} navHistory={catalog.navHistory} language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { selectInstrument(item); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
@@ -674,6 +679,7 @@ export default function App() {
                     </div>
                     <span className="pill">{t.examplePortfolioLabel}</span>
                   </div>
+                <button type="button" className="calm-card" onClick={openPortfolioDecline} disabled={!portfolioResult}><span className="action-icon mint"><Pause size={21}/></span><span><strong>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}</strong><small>{language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options."}</small></span><ArrowRight size={19}/></button>
                   <InvestmentChart
                     compact
                     language={language}
@@ -697,15 +703,9 @@ export default function App() {
                     <span>{t.illustrativeHorizon}</span>
                     <strong>{t.longTerm}</strong>
                   </div>
-                  <button
-                    className="button outline full"
-                    onClick={openPortfolioDecline}
-                  >
-                    <TrendingDown size={17} />
-                    {t.understandFall}
-                  </button>
                 </section>
               </div>
+
               <div className="section-head">
                 <div>
                   <span className="kicker">{t.insidePortfolio}</span>

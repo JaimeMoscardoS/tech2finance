@@ -491,6 +491,7 @@ export default function FundsExplorer({
               {es ? "Buscar fondo" : "Search funds"}
               <input
                 value={search}
+                placeholder={es ? "Ej.: BBVA" : "E.g. BBVA"}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </label>
@@ -582,6 +583,7 @@ export default function FundsExplorer({
               {es ? "Buscar por nombre" : "Search by name"}
               <input
                 value={search}
+                placeholder={es ? "Ej.: BBVA" : "E.g. BBVA"}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </label>

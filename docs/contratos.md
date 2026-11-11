@@ -31,6 +31,8 @@ El juego histórico no es una previsión: documentar qué activo representa cada
 
 ## Conversación y voz propuesta
 
+La pausa permite cargar un objetivo y horizonte ficticios en el contexto `decision`, sin responder automáticamente a `needsLiquidity`; sus valores editados se transmiten como contexto de la consulta. No se modifica el contrato HTTP ni se envían cifras calculadas desde el cliente. El perfil ficticio de Objetivos es independiente y permanece en el frontend.
+
 En esta rama hay una alternativa local implementada: [`TutorProvider` y los tipos](../tutor-ia/src/types.ts) reciben pregunta limitada, historial acotado y contexto explícito, y devuelven texto por reglas, intención y fuentes. La interfaz conserva texto y contexto de cada respuesta; no invoca un modelo. La pausa usa `analyzeDecline` sobre observaciones del instrumento sin flujos o sobre la cartera ficticia. El informe incluye caída observada, episodios y fuentes; causas y comparables no están disponibles.
 
 El informe puede añadir `historicalContext` con el evento público de la OMS fechado el 11 de marzo de 2020, solo si cae dentro de la serie observada. Su fuente es verificable y no demuestra la causa de la variación del fondo. El servidor rechaza hechos enviados por el cliente; `causesStatus` permanece `unknown`.

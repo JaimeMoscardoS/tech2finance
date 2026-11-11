@@ -74,6 +74,8 @@ Cada resultado presenta su procedencia y condiciones. Estas comparaciones no usa
 
 ## Pausa antes de vender
 
+En esta rama, una tarjeta visible en inicio y junto al saldo de cartera abre una pausa con explicación inmediata de las fluctuaciones y acceso escrito o por voz al tutor por reglas. El informe muestra directamente el dato observado, los factores generales posibles, los acontecimientos públicos disponibles con su fuente y la advertencia de que no acreditan una causa. Cifras, episodios y fuentes se muestran sin desplegar. El contexto opcional permite cargar un objetivo y plazo ficticios editables; la necesidad de liquidez comienza sin indicar. Objetivos de aprendizaje incluye un perfil ficticio editable y restablecible. Los importes son ejemplos, mientras los históricos CNMV conservan su procedencia real.
+
 Esta función busca dar contexto cuando el usuario ve una caída o inicia una venta dentro de la demo. Puede mostrar cuánto ha cambiado la cartera ficticia, qué objetivo y horizonte se habían indicado, y la información disponible para entender el movimiento. También puede preguntar si el usuario necesita el dinero pronto.
 
 El asistente no debe bloquear la decisión ni presionar al usuario para conservar la inversión. Puede mostrar episodios pasados cuando existan datos comparables, explicando sus límites; la recuperación de un caso histórico no garantiza una recuperación futura. Si el usuario necesita liquidez o cambian sus circunstancias, esas necesidades deben poder considerarse sin que el sistema imponga una respuesta.

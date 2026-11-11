@@ -32,6 +32,20 @@ function detect(message: string): string {
   return 'unknown';
 }
 
+const declineWords = '\\b(?:caid\\w*|bajad\\w*|bajando|caer|perdid\\w*|drop\\w*|fall\\w*|fell|declin\\w*|loss(?:es)?)\\b';
+const declinePattern = new RegExp(declineWords);
+const declineTargetPattern = new RegExp(`${declineWords}\\s+(?:de|del|of)\\s+(.+)`);
+function calmOutsideScope(message: string, activeName?: string, basisName?: string): boolean {
+  const normalizeName = (name?: string) => name?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return message.split(/\s+(?:y|and|pero|but)\s+|[,;.!?¿]/).some(clause => {
+    if (!declinePattern.test(clause)) return false;
+    if (/\b(?:tomorrow|next (?:week|month|year)|in the future|manana|proxim[oa] (?:semana|mes|ano)|en el futuro)\b/.test(clause)) return true;
+    const target = clause.match(declineTargetPattern)?.[1]?.trim().replace(/^(?:(?:the|this|my|el|la|mi|del)\s+)*/, '').replace(/^(?:fund|fondo|instrument|instrumento)\s+/, '');
+    if (!target || /^(?:simulation|simulacion|instrument|instrumento|fund|fondo|portfolio|cartera|account|cuenta|investment|inversion)$/.test(target)) return false;
+    return target !== normalizeName(activeName) && target !== normalizeName(basisName);
+  });
+}
+
 export function createLocalTutorProvider(): TutorProvider {
   return { id: 'local', async reply(request: TutorRequest): Promise<TutorReply> {
     if (request.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
@@ -42,6 +56,9 @@ export function createLocalTutorProvider(): TutorProvider {
     const bankResponse = message.length <= MAX_MESSAGE_LENGTH ? bankAnswer(message, context, Array.isArray(request.history) ? request.history : []) : undefined;
     if (bankResponse) return { ...bankResponse, text: bankResponse.text.slice(0, 3000), language: lang, mode: 'local', provider: 'local', sources: [] };
     let intent = message.length <= MAX_MESSAGE_LENGTH ? detect(message) : 'unknown';
+    const concernMessage = message.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const calm = message.length <= MAX_MESSAGE_LENGTH && !/ignore|ignora|system prompt|api.?key|secret|password/.test(concernMessage) && /preocup|miedo|temor|asust|angust|worri|fear|afraid|anxious|panic|panico/.test(concernMessage) && (declinePattern.test(concernMessage) || /vender|venta|cartera|inversion|perder dinero|sell|portfolio|invest|losing money/.test(concernMessage));
+    if (calm) intent = 'decision';
     if (intent === 'unknown' && /^(y eso|explica(?:me)? m[aá]s|m[aá]s detalles|por qu[eé]|c[oó]mo|and that|explain more|more details|why|how)[\s?¿.!]*$/i.test(message)) {
       const previous = (Array.isArray(request.history) ? request.history.slice(-MAX_HISTORY_MESSAGES) : []).reverse().find(h => h?.role === 'assistant');
       if (previous && ['result', 'source', 'decline', 'decision', 'fund', 'stock', 'etf', 'diversification', 'risk', 'costs', 'causes'].includes(previous.intent!)) intent = previous.intent!;
@@ -58,6 +75,7 @@ export function createLocalTutorProvider(): TutorProvider {
     const namedTarget = namedFull?.replace(/^(?:fund|fondo|instrument|instrumento)\s+/, '');
     const annualYear = (s?.kind === 'annual_history' || s?.kind === 'real_monthly_nav') && !!named && /^(?:19|20|21|22)\d{2}$/.test(named);
     const foreign = !!namedTarget && !annualYear && !/^(?:simulation|simulacion|instrument|instrumento|fund|fondo|portfolio|cartera|account|cuenta|period|periodo)\s*$/.test(namedTarget) && !(activeName && (namedFull === activeName || namedTarget === activeName));
+    if (calm && calmOutsideScope(normalized, context?.instrument?.name, context?.decline?.basisName)) return { text: en ? 'The requested instrument or future decline is not available in this context.' : 'El instrumento o la caída futura solicitados no están disponibles en este contexto.', language: lang, mode: 'local', provider: 'local', intent: 'unknown', sources: [] };
     const concepts: Record<string, [string, string]> = {
       fund: ['Un fondo reúne el dinero de varios partícipes e invierte según una estrategia; su valor puede bajar.', 'A fund pools investors’ money under a strategy; its value can fall.'],
       etf: ['Un ETF es un fondo que cotiza en bolsa. Su precio y los costes dependen del producto y de la operación.', 'An ETF is an exchange-traded fund. Its price and costs depend on the product and trade.'],
@@ -112,16 +130,24 @@ export function createLocalTutorProvider(): TutorProvider {
     else if (intent === 'decision') {
       const decision = context?.decision;
       const parts: string[] = [];
+      if (calm) {
+        const d = context?.decline;
+        parts.push(en ? 'It is understandable to feel worried when investments fall. Values fluctuate, and taking a moment to review the situation can help before an impulsive decision.' : 'Es comprensible sentir preocupación cuando una inversión baja. Los valores fluctúan y tomarse un momento para revisar la situación puede ayudar antes de decidir impulsivamente.');
+        if (!d || d.status !== 'ok' || !Number.isFinite(d.currentDrawdownPercent) || !Number.isFinite(d.maxDrawdownPercent) || typeof d.latestLabel !== 'string') parts.push(en ? 'There are not enough valid observations to analyse this decline.' : 'No hay observaciones válidas suficientes para analizar esta caída.');
+        parts.push(en ? 'In general, changes in expectations, interest rates or company results can affect investments; the cause of this movement is unknown from the available data.' : 'En general, los cambios de expectativas, tipos de interés o resultados empresariales pueden afectar a las inversiones; la causa de este movimiento es desconocida con los datos disponibles.');
+        if (d?.demoContext?.sourceKind === 'synthetic_demo') parts.push(en ? 'Any BancoT2F scenario is a fictional script, not verified news.' : 'El escenario BancoT2F es un guion ficticio, no una noticia verificada.');
+      }
       if (typeof decision?.goal === 'string' && decision.goal.trim() && decision.goal.length <= 200) parts.push(en ? `Your stated goal: ${decision.goal.trim()}.` : `Tu objetivo indicado: ${decision.goal.trim()}.`);
       if (typeof decision?.horizonYears === 'number' && Number.isFinite(decision.horizonYears) && decision.horizonYears >= 0 && decision.horizonYears <= 100) parts.push(en ? `Your stated horizon: ${fmt(decision.horizonYears)} years.` : `Tu horizonte indicado: ${fmt(decision.horizonYears)} años.`);
       if (decision?.needsLiquidity === 'yes') parts.push(en ? 'You indicated that you need liquidity.' : 'Has indicado que necesitas liquidez.');
       else if (decision?.needsLiquidity === 'no') parts.push(en ? 'You indicated that you do not need liquidity.' : 'Has indicado que no necesitas liquidez.');
       else if (decision?.needsLiquidity === 'unknown') parts.push(en ? 'Your liquidity need is not yet known.' : 'Tu necesidad de liquidez todavía no se conoce.');
+      if (calm && decision?.needsLiquidity === 'yes') parts.push(en ? 'Consider when and how much money you need; that need can matter when weighing a sale.' : 'Valora cuándo y cuánto dinero necesitas; esa necesidad puede ser relevante al valorar una venta.');
       parts.push(en ? 'Consider your goal, time horizon and whether you need liquidity. A long horizon does not guarantee recovery. You can sell, hold or seek professional advice; the decision is yours.' : 'Ten en cuenta tu objetivo, horizonte y necesidad de liquidez. Un plazo largo no garantiza la recuperación. Puedes vender, mantener o consultar a un profesional; la decisión es tuya.');
       text = parts.join(' ');
     }
     else text = en ? 'This local tutor uses predefined explanations. Ask about funds, risk, costs, the simulation or an observed decline.' : 'Este tutor local utiliza explicaciones predefinidas. Pregunta por fondos, riesgo, costes, la simulación o una caída observada.';
-    const sources = intent === 'decline' || intent === 'causes' ? safeSources(context?.decline?.sources) : safeSources(context?.instrument?.sources);
+    const sources = calm ? [] : intent === 'decline' || intent === 'causes' ? safeSources(context?.decline?.sources) : safeSources(context?.instrument?.sources);
     if (request.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     return { text: text.slice(0, 3000), language: lang, mode: 'local', provider: 'local', intent, sources };
   } };

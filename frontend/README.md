@@ -4,6 +4,8 @@
 
 Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, comparar ejemplos y entender una caída. Ofrece tres niveles, español e inglés, temas claro y oscuro y voz local opcional. La demo no conecta cuentas ni realiza operaciones.
 
+La tarjeta «¿Te preocupa la caída?» abre una explicación educativa con el dato observado, factores generales y el acontecimiento público disponible, sus fuentes y límites, sin desplegar. El tutor escrito y de voz sigue accesible. El contexto ficticio se carga opcionalmente, es editable y deja la liquidez sin indicar. Objetivos contiene un perfil ficticio editable y restablecible; simulador y práctica usan importes de ejemplo sobre fuentes identificadas.
+
 El selector de detalle de la cabecera se expande con Motion; permite volver, elegir un nivel o cerrarlo con Escape o pulsando fuera. Respeta la preferencia de movimiento reducido y mantiene el nivel global durante la sesión. Para comprobarlo: `npx playwright test -c playwright.level.config.ts`.
 
 El botón «Hablar con IA» inicia el dictado local y muestra una barra no modal. La respuesta se lee con voz local disponible; «Ver respuesta» y «Escribir» se abren solo al solicitarlos. El componente y su comprobación se describen en [componentes de interfaz](../docs/ui-components.md).

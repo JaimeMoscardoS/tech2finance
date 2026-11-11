@@ -21,7 +21,7 @@ test('pause dialog handles keyboard focus and escape', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await page.getByRole('button', { name: 'Mi cartera', exact: true }).click();
-  const trigger = page.getByRole('button', { name: /Entender una caída/ });
+  const trigger = page.getByRole('button', { name: /¿Te preocupa la caída\?/ });
   await trigger.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -73,8 +73,8 @@ test('English navigation, assistant and simulated portfolio are translated', asy
   await page.getByRole('button', { name: 'Explore', exact: true }).click();
   await expect(page.getByText('Explore the available information and its limits. These are not recommendations.')).toBeVisible();
   await page.getByRole('button', { name: 'My portfolio', exact: true }).click();
-  await page.getByRole('button', { name: 'Understand a decline' }).click();
-  await expect(page.getByText(/past recovery does not guarantee another/)).toBeVisible();
+  await page.getByRole('button', { name: 'Worried about the decline?' }).click();
+  await expect(page.getByText(/no one can guarantee whether or when it will recover/)).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Open assistant' }).click();
   await expect(page.getByText('LOCAL MODE · RULE-BASED RESPONSES')).toBeVisible();
@@ -213,7 +213,7 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await phone.getByRole('button',{name:'Abrir menú'}).click();
  await expect(phone.locator('main')).toHaveAttribute('inert','');
  await phone.getByRole('button',{name:'Mi cartera',exact:true}).click();
- await phone.getByRole('button',{name:'Entender una caída'}).click();
+ await phone.getByRole('button',{name:'¿Te preocupa la caída?'}).click();
  const modal=phone.getByRole('dialog');
  expect(await modal.evaluate(el=>el.scrollHeight>el.clientHeight)).toBeTruthy();
  await modal.getByRole('button',{name:'Continuar en la demo'}).scrollIntoViewIfNeeded();
@@ -341,18 +341,18 @@ test('decline explanations use observed series without inventing a current crisi
  await page.getByLabel('Tiempo de práctica').selectOption('3');
  await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await page.getByRole('button',{name:'Entender las caídas'}).click();
- let dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});
+ let dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
  await expect(dialog).toContainText('2020-03-31');
  await expect(dialog).toContainText('2020-03-11');
  await expect(dialog.getByText(/causa es desconocida/i)).toBeVisible();
- await dialog.getByText('Tu contexto (opcional)').click();
+ await dialog.getByText('Añadir contexto (opcional)').click();
  await dialog.getByLabel('Objetivo (opcional)').fill('Ejemplo educativo');
  await dialog.getByLabel('¿Necesitas liquidez pronto? (opcional)').selectOption('yes');
  await dialog.getByRole('button',{name:'Preguntar al asistente'}).click();
  await expect(page.getByRole('dialog',{name:'Tu asistente'})).toBeVisible();
  await page.keyboard.press('Escape'); await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
- await page.getByRole('button',{name:'Entender una caída'}).click();
- dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});
+ await page.getByRole('button',{name:'¿Te preocupa la caída?'}).click();
+ dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
  await expect(dialog).toContainText('2020-03-31');
  await expect(dialog).toContainText('25,54 %');
  await dialog.getByRole('button',{name:'Continuar en la demo'}).click();
@@ -417,7 +417,7 @@ test('local panels fit desktop and mobile in both themes', async ({browser}) => 
   await page.keyboard.press('Escape');
   if(width===320){await page.getByRole('button',{name:'Open menu'}).click();await page.getByRole('button',{name:'My portfolio',exact:true}).click();}
   else await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
-  await page.getByRole('button',{name:width===320?'Understand a decline':'Entender una caída'}).click();
+  await page.getByRole('button',{name:width===320?'Worried about the decline?':'¿Te preocupa la caída?'}).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   const overflow = await page.evaluate(()=>({screen:window.innerWidth,document:document.documentElement.scrollWidth,items:[...document.querySelectorAll('body *')].filter(el=>el.getBoundingClientRect().right>innerWidth+1).map(el=>`${el.tagName}.${el.className}`)}));
   await page.screenshot({path:`test-results/local-decline-${width}.png`});

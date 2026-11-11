@@ -10,7 +10,7 @@ for(const mode of ['local','server'] as const) test(`real study cases, portfolio
  await page.getByRole('button',{name:'Intermedio',exact:true}).click();await expect(page.locator('.compare-picker input')).toHaveCount(5);
  await page.getByRole('button',{name:'Avanzado',exact:true}).click();await expect(page.locator('.technical-inspector')).toContainText('ISIN');
  await page.getByRole('button',{name:'Inicio',exact:true}).click();await page.getByRole('button',{name:'Probar una caída'}).click();
- const dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});await expect(dialog).toContainText('25,54 %');await expect(dialog).toContainText('2020-03-31');await expect(dialog).toContainText('2020-03-11');await expect(dialog).toContainText('no demuestra');await expect(dialog).not.toContainText('13,10');
+ const dialog=page.getByRole('dialog',{name:'Tomemos un momento'});await expect(dialog).toContainText('25,54 %');await expect(dialog).toContainText('2020-03-31');await expect(dialog).toContainText('2020-03-11');await expect(dialog).toContainText('no demuestra');await expect(dialog).not.toContainText('13,10');
  await dialog.getByRole('button',{name:'Continuar en la demo'}).click();await expect(page.locator('.sim-result')).toContainText('744,62');
  await page.getByRole('button',{name:'Mi cartera',exact:true}).click();await expect(page.locator('.large-portfolio')).toContainText('744,62');await expect(page.locator('.large-portfolio')).toContainText('2020-03-31');
 });
