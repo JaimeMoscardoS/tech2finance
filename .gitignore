@@ -26,4 +26,5 @@ Thumbs.db
 # Frontend test and TypeScript artifacts
 playwright-report/
 test-results/
+test-results-shiny/
 *.tsbuildinfo
