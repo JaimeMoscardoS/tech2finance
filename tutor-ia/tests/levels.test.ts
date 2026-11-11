@@ -4,7 +4,7 @@ import { createLocalTutorProvider, suggestedQuestions } from '../src/index.ts';
 import type { KnowledgeLevel, Language, Page, TutorContext } from '../src/types.ts';
 
 const levels: KnowledgeLevel[] = ['beginner', 'intermediate', 'advanced'];
-const pages: Page[] = ['home', 'explore', 'simulator', 'portfolio', 'learn', 'game'];
+const pages: Page[] = ['home', 'explore', 'simulator', 'portfolio', 'learn'];
 const ctx = (page: Page, level: KnowledgeLevel, language: Language = 'es'): TutorContext => ({ page, level, language });
 const ask = (message: string, context: TutorContext) => createLocalTutorProvider().reply({ message, context });
 
@@ -21,18 +21,18 @@ test('concept answers differ by level and get longer from basic to advanced', as
 test('advanced decline answer states assumptions; no level promises recovery or pressures to hold', async () => {
   const decline = { status: 'ok', basisName: 'x', dataKind: 'fictional', observationCount: 4, latestLabel: '3', latestValue: 90, peakValue: 100, currentDrawdownPercent: 10, maxDrawdownPercent: 20, episodes: [], sources: [], causesStatus: 'unknown', comparablesStatus: 'not_available', limitations: [] } as const;
   for (const level of levels) for (const language of ['es', 'en'] as const) {
-    const r = await ask(language === 'es' ? 'qué significa esta caída' : 'what does this drawdown mean', { ...ctx('game', level, language), decline });
+    const r = await ask(language === 'es' ? 'qué significa esta caída' : 'what does this drawdown mean', { ...ctx('simulator', level, language), decline });
     assert.equal(r.intent, 'decline');
     assert.doesNotMatch(r.text, /seguro que se recupera|will recover|deberías mantener|you should hold/i);
     if (level === 'advanced') assert.match(r.text, /Supuestos|Assumptions/);
   }
-  const d = await ask('qué hago, vender o mantener', ctx('game', 'advanced'));
+  const d = await ask('qué hago, vender o mantener', ctx('simulator', 'advanced'));
   assert.equal(d.intent, 'decision'); assert.match(d.text, /decisión es tuya/); assert.match(d.text, /causalidad/);
-  const b = await ask('sell or hold?', ctx('game', 'beginner', 'en'));
+  const b = await ask('sell or hold?', ctx('simulator', 'beginner', 'en'));
   assert.match(b.text, /the decision is yours/); assert.match(b.text, /decide now or later/);
 });
 
-test('every page including learn and game gets level-specific orientation and suggestions', async () => {
+test('every page including learn gets level-specific orientation and suggestions', async () => {
   for (const page of pages) for (const language of ['es', 'en'] as const) {
     const texts = new Set<string>();
     for (const level of levels) {

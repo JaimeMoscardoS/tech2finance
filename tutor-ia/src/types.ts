@@ -1,7 +1,7 @@
 import type { BankProfile, BankProduct } from '../../shared/bank-profile.ts';
 export type Language = 'es' | 'en';
 export type KnowledgeLevel = 'beginner' | 'intermediate' | 'advanced';
-export type Page = 'home' | 'explore' | 'simulator' | 'portfolio' | 'learn' | 'game';
+export type Page = 'home' | 'explore' | 'simulator' | 'portfolio' | 'learn';
 export type DataKind = 'fictional' | 'annual_published_returns' | 'missing_history';
 export type SourceRef = { label: string; url: string; checkedAt?: string };
 export type Observation = { label: string; value: number };

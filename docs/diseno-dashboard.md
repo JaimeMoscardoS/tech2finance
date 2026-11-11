@@ -16,7 +16,7 @@ Dashboard de inversión claro, moderno y futurista, con tarjetas y gráficas int
    - Separados de los datos reales o publicados (`annual_history`), que conservan su fuente y fecha; no se mezclan en la misma serie ni comparación.
    - Las métricas (volatilidad, drawdown, Sharpe, rentabilidades por periodo, exposición) se **calculan con código verificable y probado** a partir de las series ficticias; no se escriben a mano. El Sharpe indica el tipo libre de riesgo supuesto.
    - «Operaciones recientes» son movimientos simulados de la demo, no operaciones reales.
-5. **Secciones en cada nivel**: Fondos/Inversiones, Educación y Simulación/Juego, adaptadas al nivel.
+5. **Secciones en cada nivel**: Fondos/Inversiones, Educación y Simulador (sección única), adaptadas al nivel.
 6. **Panel del agente de IA dentro del dashboard** en los tres niveles, además del Tutor: resumen en Básico, observaciones y puntos a revisar en Intermedio, análisis con escenarios y supuestos en Avanzado. Límite: contenido educativo y general sobre la cartera DEMO; no órdenes de compra o venta ni asesoramiento personalizado. Las reglas y cifras salen del código; el LLM solo explica.
 7. **Test MiFID** (Educación, fase 4; contenido aparte): práctica educativa del test de conveniencia e idoneidad, con preguntas típicas, opciones, por qué se pregunta, explicación y puntuación, adaptada por nivel. En preguntas de conocimiento se muestra la respuesta correcta; en las de situación personal, horizonte o tolerancia al riesgo no hay respuesta «buena»: se explica que debe responderse con sinceridad y qué implica cada opción. Se identifica como práctica, no como evaluación real.
 8. **Estilo futurista**: tarjetas con bordes suaves, degradados sutiles, brillo ligero en oscuro y transiciones con `motion` al cambiar nivel, periodo o tema, respetando `prefers-reduced-motion`.
@@ -51,7 +51,7 @@ Icono «T2» como SVG autocontenido (`frontend/src/components/BrandMark.tsx`, mi
 |---|---|---|---|
 | Fondos / Inversiones | 3 KPIs (valor, resultado € y %, riesgo), 1 gráfica con 3 periodos, tarjetas de fondo explicadas, pocos botones | KPIs, gráfica con selector completo, donut de diversificación, tabla de fondos | Barra de KPIs; gráfica principal multiserie con selector de periodo; mapa de calor de rentabilidad mensual; exposición geográfica; drawdown, Sharpe y volatilidad; donuts por activo, divisa y producto; tabla de posiciones con filtros y orden; operaciones recientes |
 | Educación | Concepto del día, glosario, Test MiFID básico | Rutas cortas, riesgo y costes, Test MiFID | Asignación de activos, métricas de riesgo, costes (TER) y comparación de fondos, Test MiFID completo |
-| Simulación / Juego | Guiado en un paso, una gráfica | Parámetros, resultado y comparación de periodos | Escenarios múltiples, tabla de resultados, costes y condiciones |
+| Simulador (sección única) | Juego guiado arriba (1.000 € · 5 años · equilibrado, 50/100/200 €, KPIs, gráfica, «Explícame esta simulación»); debajo «Prueba con un producto del catálogo» (simulador de producto) | Simulador de producto primero; después «Comparar escenarios y plazos» (parámetros, KPIs con coste, gráfica, tabla de plazos) | Escenarios, plazos y costes (parámetros, KPIs con costes, gráfica, tabla de 4 escenarios, plazos, condiciones y costes); debajo producto con histórico publicado, fuentes y costes |
 | Agente IA (dashboard) | Resumen | Observaciones y puntos a revisar | Análisis con escenarios y supuestos |
 | Tutor | Explicación simple y preguntas sugeridas | Más contexto | Detalle técnico, supuestos y límites |
 
@@ -76,7 +76,7 @@ shared/mock/                      carteras y series DEMO
 1. Tokens y temas (6 combinaciones), tipo `Level` único, renombrado visible a «Básico», tests ajustados. Revisor: `t2f-01-accesibilidad`.
 2. Componentes base del dashboard y datos DEMO en `shared/mock/` con cálculo de métricas probado. Revisores: `t2f-01-frontend-reviewer` y `t2f-03-revisor-matematico` para las métricas.
 3. Fondos / Inversiones por nivel. Revisores: `t2f-01-frontend-reviewer` y `t2f-04-revisor-fundamentos` para los textos.
-4. Educación (incluido Test MiFID) y Simulación / Juego por nivel. Revisores: `t2f-04-revisor-fundamentos` y `t2f-03-revisor-matematico` si toca cálculos.
+4. Educación (incluido Test MiFID) y Simulador por nivel. Revisores: `t2f-04-revisor-fundamentos` y `t2f-03-revisor-matematico` si toca cálculos.
 5. Agente IA en el dashboard, Tutor por profundidad y pausa. Revisor: `t2f-04-tutor-reviewer`.
 6. Pulido, transiciones, retirada de CSS antiguo y documentación. Revisor: `t2f-05-qa`.
 
@@ -150,9 +150,9 @@ Las PR grandes siguen la revisión ampliada del `CLAUDE.md` (nota mínima 8/10, 
 - Test MiFID: el foco pasa a la leyenda de la nueva pregunta y al encabezado del resultado (acción del usuario, sin depender del montaje); sin `role=status` en el resultado.
 - Recharts: `accessibilityLayer` desactivado (donut con `rootTabIndex=-1`); el gráfico es `role=img` con nombre y la alternativa es la tabla de datos; sin paradas de tabulación sin nombre.
 - Inicio: panel del asistente sin `aria-live`; foco al encabezado al abrir y de vuelta al botón al cerrar.
-- Simulación: un único mensaje de error con `id`, `aria-describedby` en campos con `aria-invalid`, sin doble `role=alert`; escenario del gráfico marcado con «(en el gráfico)» y `aria-current`.
+- Simulador (escenarios): un único mensaje de error con `id`, `aria-describedby` en campos con `aria-invalid`, sin doble `role=alert`; escenario del gráfico marcado con «(en el gráfico)» y `aria-current`.
 - Gráfica multiserie (Avanzado): fondos con colores sin `--chart-2`, `--cat-1..3` y guiones propios; ninguno con el trazo continuo de la cartera.
-- `minmax(min(100%, …))` en las rejillas; sin desborde a 320 px en Inicio, Mi cartera, Educación y Simulación en los 3 niveles (prueba Playwright).
+- `minmax(min(100%, …))` en las rejillas; sin desborde a 320 px en Inicio, Mi cartera, Educación y Simulador en los 3 niveles (prueba Playwright).
 - Un `h1` por vista (oculto visualmente en Inicio y Mi cartera) sin saltos de encabezado (`EvolutionChart`, `DonutCard` y el formulario admiten nivel de encabezado).
 - Bajos: intensidad máxima del mapa de calor 40 %, `min-height` 24 px en botones de orden y `summary`, sin hover en botones deshabilitados.
 - Retirados `/componentes` (página, CSS y `tests/components.spec.ts`; lo útil migró a `tests/dashboard-views.spec.ts`) y las reglas de `style.css` y `level-colors.css` cuyas clases ya no usa ningún código.
@@ -168,4 +168,15 @@ Las PR grandes siguen la revisión ampliada del `CLAUDE.md` (nota mínima 8/10, 
 - Precio USD mostrado en € sin tipo de cambio (nota); fondos y gestoras solo en español.
 - Hechos con fechas de 2026 frente a series relativas (M0…M36).
 - No probado con lector de pantalla ni con teclado real (solo comprobaciones automáticas).
-- **Limitación servidor / `learn` y `game`**: el backend no acepta esas páginas del tutor; el cliente envía `home`. Parche propuesto, sin aplicar, en [propuestas/backend-learn-game.patch](propuestas/backend-learn-game.patch).
+- **Limitación servidor / `learn`**: el backend no acepta esa página del tutor; el cliente envía `home` (`game` ya no existe, ver fusión del Simulador). Parche propuesto, sin aplicar, en [propuestas/backend-learn-game.patch](propuestas/backend-learn-game.patch).
+
+## Fusión «Simulador» y «Simulación» (11-11-2026, rama `mejora-ui`, sin commit)
+
+**Implementado y comprobado**: las páginas `"simulator"` y `"game"` eran duplicadas y se fusionaron en una sola sección **Simulador** (`page === "simulator"`); `"game"` se eliminó de `Page`, de la navegación, de `HomeDashboard` (la tarjeta duplicada se retiró y la del Simulador menciona los escenarios ilustrativos DEMO) y del tutor del cliente.
+- `views/simulator/SimulatorPage.tsx` compone el orden por nivel; `views/simulator/ScenarioLab.tsx` (antes `views/game/SimulationDashboard.tsx`, cálculos intactos en `game-scenarios.ts`) son los bloques de escenarios DEMO; `Simulator.tsx` (producto del catálogo) se conserva y recibe `embedded` para bajar su título a h3 cuando va bajo un h2. Un único `h1` por página.
+- **Básico**: encabezado «Simulador» con etiqueta ILUSTRATIVO, «Abrir práctica guiada», juego guiado con «Explícame esta simulación», y debajo «Prueba con un producto del catálogo». **Intermedio**: simulador de producto y después «Comparar escenarios y plazos». **Avanzado**: escenarios, plazos y costes (tabla de 4 escenarios, plazos, condiciones y costes) y debajo el producto con histórico publicado, fuentes y costes. «Abrir práctica guiada» (PracticeLab) está en los tres niveles.
+- Los escenarios ilustrativos (DEMO, supuestos ficticios) están en secciones y etiquetas separadas de los datos publicados y calculados del catálogo. Los hijos llevan `key` para que, al cambiar de nivel, el estado del simulador de producto no se pierda.
+- Decisiones de texto: los campos del laboratorio se llaman «Capital inicial», «Ahorro mensual» y el grupo «Ahorro al mes» para no chocar con las etiquetas del simulador de producto («Importe inicial», «Aportación mensual»); el botón guiado dice «Explícame esta simulación» para distinguirlo de «Explícame este resultado» del producto.
+- **Limitación**: «Explícame esta simulación» abre el asistente con el contexto del simulador de producto; el tutor no recibe los parámetros del escenario DEMO. La limitación de servidor ahora solo afecta a `learn` (el cliente envía `home`).
+- **Comprobado**: `tsc -b` y build correctos, 106 pruebas unitarias, Playwright completo 98 superadas, 0 fallidas. Pruebas nuevas por nivel en `tests/dashboard-views.spec.ts`; `chart-colors.spec.ts` ahora espera 4 tarjetas de destino en Inicio.
+- **Pendiente**: el tipo `Page` de `tutor-ia/src/types.ts` aún puede contener `'game'` (lo cambia otro agente); revisión del área (accesibilidad y fundamentos); no revisado visualmente en móvil ni con lector de pantalla tras la fusión (solo prueba de 320 px sin desborde).

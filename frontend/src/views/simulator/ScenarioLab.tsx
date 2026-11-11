@@ -1,11 +1,11 @@
-import { FlaskConical, Info } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useId, useMemo, useState } from "react";
-import { DemoBadge, EvolutionChart, KpiCard, KpiRow, PeriodSelector, Section, type EvolutionPoint } from "../../components/dashboard/index.ts";
+import { EvolutionChart, KpiCard, KpiRow, PeriodSelector, Section, type EvolutionPoint } from "../../components/dashboard/index.ts";
 import type { Lang } from "../../components/dashboard/copy.ts";
 import { eur, pct, signedEur, signedPct } from "../../components/dashboard/format.ts";
 import { MAX_YEARS, SCENARIOS, compareHorizons, runAll, runScenario, validateParams, type ScenarioDef, type SimParams } from "../../game-scenarios.ts";
-import type { Level, Theme } from "../../types/level.ts";
-import "./game.css";
+import type { Level } from "../../types/level.ts";
+import "./simulator.css";
 
 type Bi = { es: string; en: string };
 const names: Record<string, { name: Bi; desc: Bi }> = {
@@ -17,9 +17,9 @@ const names: Record<string, { name: Bi; desc: Bi }> = {
 
 const tx = {
   es: {
-    title: "Simulación", subtitle: "Simulación ilustrativa con supuestos ficticios (DEMO). No predice ni garantiza rendimientos y no usa datos reales.",
-    guided: "Elige cuánto ahorrarías al mes", guidedDesc: "Inversión inicial de 1.000 € durante 5 años en un escenario equilibrado ilustrativo.", monthlyGroup: "Aportación mensual",
-    params: "Parámetros", initial: "Importe inicial (€)", monthly: "Aportación mensual (€)", years: "Años", scenario: "Escenario", yearsUnit: (n: number) => `${n} ${n === 1 ? "año" : "años"}`,
+    title: "Escenarios ilustrativos", subtitle: "Simulación ilustrativa con supuestos ficticios (DEMO). No predice ni garantiza rendimientos y no usa datos reales.",
+    guided: "Elige cuánto ahorrarías al mes", guidedDesc: "Inversión inicial de 1.000 € durante 5 años en un escenario equilibrado ilustrativo.", monthlyGroup: "Ahorro al mes",
+    params: "Parámetros del escenario", initial: "Capital inicial (€)", monthly: "Ahorro mensual (€)", years: "Años", scenario: "Escenario", yearsUnit: (n: number) => `${n} ${n === 1 ? "año" : "años"}`,
     contributed: "Aportado", finalValue: "Valor final ilustrativo", result: "Resultado", resultPct: "Rentabilidad simple", costs: "Costes restados (aprox.)",
     chart: "Evolución ilustrativa", year: (n: number) => `Año ${n}`, series: "Valor simulado", compare: "Lo aportado",
     horizons: "Comparación de periodos", horizonsDesc: "El mismo escenario evaluado a distintos plazos.", horizon: "Plazo", value: "Valor",
@@ -30,13 +30,14 @@ const tx = {
       "El coste anual se descuenta de forma proporcional cada mes. No se incluyen impuestos, comisiones de compra o venta ni inflación.",
       "El ciclo con caídas repite 12 rendimientos mensuales ficticios; no corresponde a ningún mercado.",
     ],
+    explain: "Explícame esta simulación", compareTitle: "Comparar escenarios y plazos", compareDesc: "Mismos importes con supuestos ficticios DEMO, a distintos plazos.", fullTitle: "Escenarios, plazos y costes", fullDesc: "Cuatro escenarios ficticios DEMO con costes y condiciones.",
     invalidAmount: "Introduce importes entre 0 y 1.000.000.000 €.", invalidYears: `Indica un número entero de años entre 1 y ${MAX_YEARS}.`, invalidZero: "Indica un importe inicial o una aportación mensual mayores que cero.",
     note: "Ilustrativo: no es una predicción.", inChart: "en el gráfico", pickScenario: "Escenario del gráfico", errorChart: "No se puede calcular con estos valores.",
   },
   en: {
-    title: "Simulation", subtitle: "Illustrative simulation with fictional assumptions (DEMO). It neither predicts nor guarantees returns and uses no real data.",
-    guided: "Choose how much you would save each month", guidedDesc: "Initial investment of 1,000 € over 5 years in an illustrative balanced scenario.", monthlyGroup: "Monthly contribution",
-    params: "Parameters", initial: "Initial amount (€)", monthly: "Monthly contribution (€)", years: "Years", scenario: "Scenario", yearsUnit: (n: number) => `${n} ${n === 1 ? "year" : "years"}`,
+    title: "Illustrative scenarios", subtitle: "Illustrative simulation with fictional assumptions (DEMO). It neither predicts nor guarantees returns and uses no real data.",
+    guided: "Choose how much you would save each month", guidedDesc: "Initial investment of 1,000 € over 5 years in an illustrative balanced scenario.", monthlyGroup: "Saving per month",
+    params: "Scenario parameters", initial: "Starting capital (€)", monthly: "Monthly saving (€)", years: "Years", scenario: "Scenario", yearsUnit: (n: number) => `${n} ${n === 1 ? "year" : "years"}`,
     contributed: "Contributed", finalValue: "Illustrative final value", result: "Result", resultPct: "Simple return", costs: "Costs deducted (approx.)",
     chart: "Illustrative evolution", year: (n: number) => `Year ${n}`, series: "Simulated value", compare: "Amount contributed",
     horizons: "Period comparison", horizonsDesc: "The same scenario evaluated over different terms.", horizon: "Term", value: "Value",
@@ -47,6 +48,7 @@ const tx = {
       "The annual cost is deducted proportionally each month. Taxes, buy or sell fees and inflation are not included.",
       "The cycle with falls repeats 12 fictional monthly returns; it corresponds to no market.",
     ],
+    explain: "Explain this simulation", compareTitle: "Compare scenarios and terms", compareDesc: "Same amounts under fictional DEMO assumptions, over different terms.", fullTitle: "Scenarios, terms and costs", fullDesc: "Four fictional DEMO scenarios with costs and conditions.",
     invalidAmount: "Enter amounts between 0 and 1,000,000,000 €.", invalidYears: `Enter a whole number of years between 1 and ${MAX_YEARS}.`, invalidZero: "Enter an initial amount or a monthly contribution greater than zero.",
     note: "Illustrative: not a prediction.", inChart: "in the chart", pickScenario: "Chart scenario", errorChart: "Cannot compute with these values.",
   },
@@ -59,7 +61,7 @@ function chartData(r: ReturnType<typeof runScenario>, label: (n: number) => stri
   return r.yearly.map((y) => ({ label: label(y.year), value: y.value, compare: y.contributed }));
 }
 
-export default function SimulationDashboard({ language, level }: { language: Lang; level: Level; theme?: Theme }) {
+export default function ScenarioLab({ language, level, onExplain }: { language: Lang; level: Level; onExplain?: () => void }) {
   const t = tx[language];
   const uid = useId();
   const [monthlyChoice, setMonthlyChoice] = useState("100");
@@ -104,7 +106,7 @@ export default function SimulationDashboard({ language, level }: { language: Lan
       title={t.chart} description={`${names[def.id].name[language]}: ${names[def.id].desc[language]}`}
       data={main ? chartData(main, t.year) : []} seriesName={t.series} compareName={t.compare}
       changePct={main?.sim.simpleReturnPercent ?? null} demo language={language}
-      error={errText ?? (!main ? t.errorChart : undefined)} errorAlert={!errText} headingLevel={level === "beginner" ? 3 : 2}
+      error={errText ?? (!main ? t.errorChart : undefined)} errorAlert={!errText} headingLevel={3}
     />
   );
 
@@ -112,7 +114,7 @@ export default function SimulationDashboard({ language, level }: { language: Lan
 
   const form = (
     <form className="dash-card sim-form" onSubmit={(e) => e.preventDefault()} noValidate aria-label={t.params}>
-      <h2>{t.params}</h2>
+      <h3>{t.params}</h3>
       <div className="sim-form__grid">
         <label htmlFor={`${uid}-i`}>{t.initial}<input id={`${uid}-i`} type="number" inputMode="decimal" min={0} step="any" value={initial} onChange={(e) => setInitial(e.target.value)} aria-invalid={amountBad} aria-describedby={amountBad ? errId : undefined} /></label>
         <label htmlFor={`${uid}-m`}>{t.monthly}<input id={`${uid}-m`} type="number" inputMode="decimal" min={0} step="any" value={monthly} onChange={(e) => setMonthly(e.target.value)} aria-invalid={amountBad} aria-describedby={amountBad ? errId : undefined} /></label>
@@ -129,36 +131,34 @@ export default function SimulationDashboard({ language, level }: { language: Lan
 
   return (
     <div className={`sim sim--${level}`}>
-      <header className="sim__head">
-        <h1><FlaskConical size={22} aria-hidden="true" /> {t.title} <DemoBadge language={language} label={language === "es" ? "ILUSTRATIVO" : "ILLUSTRATIVE"} /></h1>
-        <p><Info size={15} aria-hidden="true" /> {t.subtitle}</p>
-      </header>
-
       {level === "beginner" && (
         <Section title={t.guided} description={t.guidedDesc} demo language={language}
           actions={<PeriodSelector label={t.monthlyGroup} options={monthlyOptions} value={monthlyChoice} onChange={setMonthlyChoice} />}>
           {kpis}
           {chart}
+          {onExplain && <div className="sim-explain"><button type="button" className="button dark" onClick={onExplain}>{t.explain}<ArrowRight size={17} aria-hidden="true" /></button></div>}
         </Section>
       )}
 
       {level === "intermediate" && (
-        <>
+        <Section title={t.compareTitle} description={t.subtitle} demo language={language}>
+          <div className="sim-stack">
           {form}
           {kpis}
           {chart}
-          <Section title={t.horizons} description={t.horizonsDesc} demo language={language}>
+          <Section level={3} title={t.horizons} description={t.horizonsDesc} demo language={language}>
             {computed && <HorizonTable rows={computed.horizons} language={language} t={t} />}
           </Section>
-        </>
+        </div></Section>
       )}
 
       {level === "advanced" && (
-        <>
+        <Section title={t.fullTitle} description={t.subtitle} demo language={language}>
+          <div className="sim-stack">
           {form}
           {kpis}
           {chart}
-          <Section title={t.scenarios} description={t.scenariosDesc} demo language={language}>
+          <Section level={3} title={t.scenarios} description={t.scenariosDesc} demo language={language}>
             {computed ? (
               <div className="dash-card">
                 <div className="dash-funds__scroll" role="region" aria-label={t.scenarioTable} tabIndex={0}>
@@ -184,13 +184,13 @@ export default function SimulationDashboard({ language, level }: { language: Lan
               </div>
             ) : <p className="dash-state">{errText ?? t.errorChart}</p>}
           </Section>
-          <Section title={t.horizons} description={t.horizonsDesc} demo language={language}>
+          <Section level={3} title={t.horizons} description={t.horizonsDesc} demo language={language}>
             {computed && <HorizonTable rows={computed.horizons} language={language} t={t} />}
           </Section>
-          <Section title={t.conditions} language={language}>
+          <Section level={3} title={t.conditions} language={language}>
             <ul className="dash-card sim-conditions">{t.conditionsList.map((c) => <li key={c}>{c}</li>)}</ul>
           </Section>
-        </>
+        </div></Section>
       )}
       {level !== "advanced" && <p className="sim-foot">{t.conditionsList[0]}</p>}
     </div>

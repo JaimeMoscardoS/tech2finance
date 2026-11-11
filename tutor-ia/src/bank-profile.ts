@@ -76,7 +76,7 @@ export function bankAnswer(message: string, context: TutorContext, history: read
     return names.length && names.every(Boolean) ? {intent: 'bank_services', text: `${en ? 'Services' : 'Servicios'}: ${names.join(', ')}.`} : unavailable();
   }
   if (page) {
-    const labels = en ? {home:'home', explore:'catalogue', simulator:'simulator', portfolio:'sample portfolio', learn:'learning', game:'game'} : {home:'inicio', explore:'catálogo', simulator:'simulador', portfolio:'cartera de ejemplo', learn:'educación', game:'juego'};
+    const labels = en ? {home:'home', explore:'catalogue', simulator:'simulator', portfolio:'sample portfolio', learn:'learning'} : {home:'inicio', explore:'catálogo', simulator:'simulador', portfolio:'cartera de ejemplo', learn:'educación'};
     const selected = (context.page === 'explore' || context.page === 'simulator') ? (text(context.instrument?.name) ? (en ? ` Selected instrument: ${context.instrument.name}.` : ` Instrumento seleccionado: ${context.instrument.name}.`) : (en ? ' No instrument selected.' : ' No hay instrumento seleccionado.')) : '';
     const hint = pageHint(context.page, context.level, en);
     return {intent: 'bank_page', text: `${hint ? hint + ' ' : ''}${localized(bank.name, lang)}: ${labels[context.page] ?? (en ? 'page unavailable' : 'pantalla no disponible')}. ${localized(bank.description, lang)}${selected}`};

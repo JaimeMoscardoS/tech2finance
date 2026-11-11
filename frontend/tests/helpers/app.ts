@@ -17,9 +17,9 @@ export async function openApp(page: Page, { level = 'beginner', theme = 'light',
   await page.waitForSelector(`html[data-level="${level}"][data-theme="${theme}"]`);
 }
 
-export const NAV = { es: { home: 'Inicio', portfolio: 'Mi cartera', learn: 'Educación', game: 'Simulación' }, en: { home: 'Home', portfolio: 'My portfolio', learn: 'Education', game: 'Simulation' } } as const;
+export const NAV = { es: { home: 'Inicio', portfolio: 'Mi cartera', learn: 'Educación', simulator: 'Simulador' }, en: { home: 'Home', portfolio: 'My portfolio', learn: 'Education', simulator: 'Simulator' } } as const;
 
-export async function goTo(page: Page, view: 'home' | 'portfolio' | 'learn' | 'game', lang: 'es' | 'en' = 'es') {
+export async function goTo(page: Page, view: 'home' | 'portfolio' | 'learn' | 'simulator', lang: 'es' | 'en' = 'es') {
   if (view === 'home') return;
   const item = page.getByRole('button', { name: NAV[lang][view], exact: true }).first();
   // En pantallas estrechas la navegación está en el menú lateral plegado.

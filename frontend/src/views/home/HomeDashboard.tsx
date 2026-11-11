@@ -1,4 +1,4 @@
-import { Calculator, GraduationCap, Gamepad2, HelpCircle, MessageCircle, Search, Wallet, type LucideIcon } from "lucide-react";
+import { Calculator, GraduationCap, HelpCircle, MessageCircle, Search, Wallet, type LucideIcon } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { demoFacts } from "../../../../shared/mock/demo-facts.ts";
 import { demoHome } from "../../../../shared/mock/demo-home.ts";
@@ -11,7 +11,7 @@ import { HOME_PERIODS, goalProgress, lastMonthChangePct, planStatus, selectFacts
 import type { Level } from "../../types/level.ts";
 import "./home.css";
 
-type Page = "explore" | "simulator" | "portfolio" | "learn" | "game";
+type Page = "explore" | "simulator" | "portfolio" | "learn";
 type Lang = "es" | "en";
 
 /** Fecha ficticia de consulta de los hechos DEMO (los hechos posteriores no se muestran). */
@@ -25,10 +25,9 @@ const periodLabel: Record<Lang, Record<HomePeriod, string>> = {
 
 const services: { page: Page; icon: LucideIcon; es: [string, string]; en: [string, string] }[] = [
   { page: "explore", icon: Search, es: ["Explorar", "Conoce los fondos y sus características."], en: ["Explore", "Learn about funds and their features."] },
-  { page: "simulator", icon: Calculator, es: ["Simulador", "Prueba escenarios con supuestos claros."], en: ["Simulator", "Try scenarios with clear assumptions."] },
+  { page: "simulator", icon: Calculator, es: ["Simulador", "Prueba un producto o escenarios ilustrativos DEMO con supuestos claros; no es una previsión."], en: ["Simulator", "Try a product or illustrative DEMO scenarios with clear assumptions; not a forecast."] },
   { page: "portfolio", icon: Wallet, es: ["Mi cartera", "Revisa tus posiciones de ejemplo."], en: ["My portfolio", "Review your sample positions."] },
   { page: "learn", icon: GraduationCap, es: ["Educación", "Aprende conceptos paso a paso."], en: ["Education", "Learn concepts step by step."] },
-  { page: "game", icon: Gamepad2, es: ["Simulación", "Simulación ilustrativa con rentabilidades ficticias DEMO; no es una previsión ni usa datos de mercado."], en: ["Simulation", "Illustrative simulation with fictional DEMO returns; not a forecast and uses no market data."] },
 ];
 
 const copy = {

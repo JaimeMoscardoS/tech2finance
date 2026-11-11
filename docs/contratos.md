@@ -81,4 +81,4 @@ En esta rama, el cliente envía el identificador del fondo seleccionado al tutor
 
 ### Páginas del tutor (rama `mejora-ui`)
 
-El tipo `Page` del tutor en el cliente admite `learn` y `game` además de `home`, `explore`, `simulator` y `portfolio`. El backend solo acepta las cuatro originales, por lo que el cliente envía `home` al servidor en `learn` y `game`. **Backend pendiente**: el parche propuesto está en [propuestas/backend-learn-game.patch](propuestas/backend-learn-game.patch) y no se ha aplicado (`backend/` pertenece al área 2).
+El tipo `Page` del tutor en el cliente admite `learn` además de `home`, `explore`, `simulator` y `portfolio`. El backend solo acepta las cuatro originales, por lo que el cliente envía `home` al servidor en `learn`. La antigua página `game` se fusionó en `simulator` y ya no existe en `Page`. **Backend pendiente**: el parche propuesto está en [propuestas/backend-learn-game.patch](propuestas/backend-learn-game.patch) y no se ha aplicado (`backend/` pertenece al área 2).

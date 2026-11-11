@@ -59,9 +59,9 @@ Consulta las [instrucciones del área](AGENTS.md), el [contexto](../docs/context
 
 - Componentes base en `src/components/dashboard/` (importables desde `index.ts`): `KpiRow`/`KpiCard`, `SparkCard`, `DonutCard`, `FundTable`, `EvolutionChart`, `PeriodSelector`, `StatusChip`/`DeltaChip`, `MetricBar`, `DemoBadge`, `Section` y `AgentPanel`. Solo usan tokens (`--cat-1..6`, `--chart-*`, `--amber*`); los gráficos llevan tramas, valores en texto o tabla de datos, y subida/bajada con signo e icono además del color; respetan `prefers-reduced-motion`. `AgentPanel` es educativo y sin LLM real: texto de ejemplo marcado DEMO, sin órdenes ni asesoramiento.
 - Datos ficticios en `../shared/mock/demo-portfolio.ts` (solo entradas); las métricas (variación, pesos, volatilidad, drawdown, Sharpe, escenarios) se calculan en `src/dashboard-metrics.ts` y `src/dashboard-portfolio.ts`, con pruebas en `src/dashboard-metrics.test.ts`.
-- La página temporal `/componentes` y su galería se retiraron en la fase 6; los componentes se ven en las vistas reales (Inicio, Mi cartera, Educación, Simulación en `src/views/`).
+- La página temporal `/componentes` y su galería se retiraron en la fase 6; los componentes se ven en las vistas reales (Inicio, Mi cartera, Educación, Simulador en `src/views/`; el Simulador fusiona `views/simulator/SimulatorPage.tsx`, `ScenarioLab.tsx` y `Simulator.tsx`).
 - El nivel elegido se guarda en `localStorage` (`t2f-level`, validado con `src/preferences.ts`; valor inválido o almacenamiento bloqueado vuelve a Básico).
-- Pruebas: `tests/dashboard-views.spec.ts` (Inicio, Test MiFID con foco, Simulación con errores asociados, pausa de venta, contraste del hover, 320 px y contraste AA en las 6 combinaciones; ayudas en `tests/helpers/`) y `tests/chart-colors.spec.ts`.
+- Pruebas: `tests/dashboard-views.spec.ts` (Inicio, Test MiFID con foco, Simulador por nivel con errores asociados, pausa de venta, contraste del hover, 320 px y contraste AA en las 6 combinaciones; ayudas en `tests/helpers/`) y `tests/chart-colors.spec.ts`.
 
 ## Contrato de servidor
 

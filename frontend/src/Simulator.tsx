@@ -52,6 +52,8 @@ type Props = {
   openAssistant: () => void;
   openSimulationDecline: () => void;
   euro: (value: number) => string;
+  /** Anidado bajo un h2 de «Simulador»: el título de la introducción baja a h3 para mantener un único h1. */
+  embedded?: boolean;
 };
 export default function Simulator({
   t,
@@ -79,6 +81,7 @@ export default function Simulator({
   openAssistant,
   openSimulationDecline,
   euro,
+  embedded,
 }: Props) {
   return (
     <>
@@ -86,6 +89,7 @@ export default function Simulator({
         label={t.configure}
         title={t.simTitle}
         description={t.simIntro}
+        embedded={embedded}
       />
       <div className="info-banner">
         <FlaskConical size={20} />
@@ -434,16 +438,19 @@ function PageIntro({
   label,
   title,
   description,
+  embedded,
 }: {
   label: string;
   title: string;
   description: string;
+  embedded?: boolean;
 }) {
+  const Heading = embedded ? "h3" : "h1";
   return (
-    <div className="page-heading internal">
+    <div className={`page-heading internal${embedded ? " embedded" : ""}`}>
       <div>
         <div className="eyebrow">{label}</div>
-        <h1>{title}</h1>
+        <Heading>{title}</Heading>
         <p>{description}</p>
       </div>
     </div>

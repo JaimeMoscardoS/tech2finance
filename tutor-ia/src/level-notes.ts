@@ -74,9 +74,9 @@ const pageHints: Record<Page, Record<KnowledgeLevel, Pair>> = {
     advanced: ['Estás en el catálogo: compara condiciones, costes y series; revisa siempre la fuente y el tipo de dato.', 'You are in the catalogue: compare terms, costs and series; always check the source and data type.'],
   },
   simulator: {
-    beginner: ['Estás en el simulador: prueba qué habría pasado con una aportación de ejemplo.', 'You are in the simulator: try what would have happened with a sample contribution.'],
-    intermediate: ['Estás en el simulador: cambia aportación y plazo y compara el valor final con lo aportado.', 'You are in the simulator: change the contribution and term and compare final value with the amount contributed.'],
-    advanced: ['Estás en el simulador: el resultado depende de la serie usada, el momento de las aportaciones y los costes; no es una previsión.', 'You are in the simulator: the result depends on the series used, contribution timing and costs; it is not a forecast.'],
+    beginner: ['Estás en el simulador: practicas con escenarios ilustrativos de rentabilidades ficticias DEMO (no son una previsión ni datos de mercado) y con un producto del catálogo, que usa su serie ficticia o histórica publicada con fuente. No hay dinero real.', 'You are in the simulator: you practise with illustrative scenarios of fictional DEMO returns (not a forecast or market data) and with a catalogue product, which uses its fictional or published sourced series. There is no real money.'],
+    intermediate: ['Estás en el simulador: cambia aportación y plazo y compara el valor final con lo aportado. Los escenarios usan rentabilidades ficticias DEMO (ni previsión ni datos de mercado); el producto del catálogo usa su serie ficticia o histórica publicada con fuente.', 'You are in the simulator: change the contribution and term and compare final value with the amount contributed. Scenarios use fictional DEMO returns (neither a forecast nor market data); the catalogue product uses its fictional or published sourced series.'],
+    advanced: ['Estás en el simulador: el resultado es sensible a los supuestos, al momento de las aportaciones y a los costes. Los escenarios son rentabilidades ficticias DEMO (no son previsión ni datos de mercado); el producto usa su serie ficticia o histórica anual publicada con fuente.', 'You are in the simulator: the result is sensitive to assumptions, contribution timing and costs. Scenarios are fictional DEMO returns (not a forecast or market data); the product uses its fictional or published sourced annual series.'],
   },
   portfolio: {
     beginner: ['Estás en la cartera de ejemplo: lo que tiene, cuánto vale y qué peso tiene cada parte.', 'You are on the sample portfolio: what it holds, what it is worth and each part’s weight.'],
@@ -87,11 +87,6 @@ const pageHints: Record<Page, Record<KnowledgeLevel, Pair>> = {
     beginner: ['Estás en Educación: lecciones cortas para entender lo básico.', 'You are in Learning: short lessons to understand the basics.'],
     intermediate: ['Estás en Educación: lecciones y práctica, incluida la práctica del test de conveniencia e idoneidad (educativa, no es una evaluación real).', 'You are in Learning: lessons and practice, including the appropriateness and suitability test practice (educational, not a real assessment).'],
     advanced: ['Estás en Educación: material técnico y práctica del test MiFID, que es educativa y no sustituye al test real del banco.', 'You are in Learning: technical material and MiFID test practice, which is educational and does not replace the bank’s real test.'],
-  },
-  game: {
-    beginner: ['Estás en la simulación: practicas con una simulación ilustrativa con rentabilidades ficticias DEMO; no es una previsión ni usa datos de mercado, y no hay dinero real.', 'You are in the simulation: you practise with an illustrative simulation using fictional DEMO returns; it is not a forecast and uses no market data, and there is no real money.'],
-    intermediate: ['Estás en la simulación: eliges importe, plazo y escenario y ves un resultado ilustrativo con rentabilidades ficticias DEMO; es un ejercicio, no una previsión ni datos de mercado.', 'You are in the simulation: you choose amount, term and scenario and see an illustrative result with fictional DEMO returns; it is an exercise, not a forecast or market data.'],
-    advanced: ['Estás en la simulación: el resultado es sensible a los supuestos y al escenario elegido (rentabilidades ficticias DEMO, costes simplificados); no es una previsión ni usa datos de mercado.', 'You are in the simulation: the result is sensitive to the assumptions and the chosen scenario (fictional DEMO returns, simplified costs); it is not a forecast and uses no market data.'],
   },
 };
 export const pageHint = (page: Page | undefined, level: KnowledgeLevel | undefined, en: boolean): string => {
@@ -116,10 +111,9 @@ const q = {
 const questions: Record<Page, Record<KnowledgeLevel, readonly Pair[]>> = {
   home: { beginner: [q.fund, q.risk, q.seeing], intermediate: [q.diversify, q.costs, q.seeing], advanced: [q.metrics, q.limits, q.costs] },
   explore: { beginner: [q.fund, q.etf, q.risk], intermediate: [q.fundEtf, q.costs, q.diversify], advanced: [q.scale, q.costs, q.source] },
-  simulator: { beginner: [q.sim, q.result, q.ret], intermediate: [q.result, q.source, q.costs], advanced: [q.result, q.source, q.sim] },
+  simulator: { beginner: [q.sim, q.result, q.ret], intermediate: [q.result, q.fall, q.source], advanced: [q.result, q.dd, q.source] },
   portfolio: { beginner: [q.fund, q.diversify, q.seeing], intermediate: [q.diversify, q.risk, q.costs], advanced: [q.metrics, q.limits, q.source] },
   learn: { beginner: [q.fund, q.etf, q.risk], intermediate: [q.diversify, q.costs, q.risk], advanced: [q.metrics, q.limits, q.costs] },
-  game: { beginner: [q.ret, q.risk, q.seeing], intermediate: [q.fall, q.diversify, q.source], advanced: [q.dd, q.source, q.risk] },
 };
 export function suggestedQuestions(page: Page, level: KnowledgeLevel, language: Language, hasDecline = false): string[] {
   const en = language === 'en';

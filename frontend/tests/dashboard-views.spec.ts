@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { LEVELS, THEMES, goTo, openApp } from './helpers/app';
 import { lowContrast } from './helpers/contrast';
 
-// Vistas del dashboard rediseñado (Inicio, Mi cartera, Educación, Simulación) con datos DEMO.
+// Vistas del dashboard rediseñado (Inicio, Mi cartera, Educación, Simulador) con datos DEMO.
 
 test.describe('Inicio', () => {
   test('KPIs, etiqueta DEMO y un solo h1', async ({ page }) => {
@@ -100,39 +100,68 @@ test.describe('Educación y Test MiFID', () => {
   });
 });
 
-test.describe('Simulación', () => {
-  test('escenario ilustrativo y un solo mensaje de error vinculado a los campos', async ({ page }) => {
-    await openApp(page, { level: 'intermediate' });
-    await goTo(page, 'game');
+test.describe('Simulador', () => {
+  test('Básico: juego guiado arriba, práctica accesible y simulador de producto debajo', async ({ page }) => {
+    await openApp(page, { level: 'beginner' });
+    await goTo(page, 'simulator');
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Simulador');
+    await expect(page.getByRole('heading', { name: 'Elige cuánto ahorrarías al mes' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Evolución ilustrativa' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Abrir práctica guiada' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Explícame esta simulación' })).toBeVisible();
+    const guided = await page.getByRole('heading', { name: 'Elige cuánto ahorrarías al mes' }).boundingBox();
+    const catalog = await page.getByRole('heading', { name: 'Prueba con un producto del catálogo' }).boundingBox();
+    expect(guided!.y).toBeLessThan(catalog!.y);
+    await page.getByRole('group', { name: 'Ahorro al mes' }).getByRole('button', { name: /200/ }).click();
+    await expect(page.getByRole('group', { name: 'Ahorro al mes' }).getByRole('button', { name: /200/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByLabel('Importe inicial')).toBeVisible();
+    await expect(page.getByRole('combobox', { name: /^Escenario/ })).toHaveCount(0);
+  });
+
+  test('Intermedio: simulador de producto primero y comparación de escenarios y plazos después, con un único mensaje de error vinculado a los campos', async ({ page }) => {
+    await openApp(page, { level: 'intermediate' });
+    await goTo(page, 'simulator');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.getByLabel('Importe inicial')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Abrir práctica guiada' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Comparar escenarios y plazos' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Evolución ilustrativa' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Comparación de periodos', exact: true })).toBeVisible();
     await expect(page.getByText('Equilibrado: Supone 4 % bruto anual')).toBeVisible();
-    await expect(page.getByLabel('Escenario')).toBeVisible();
-    await page.getByLabel('Importe inicial (€)').fill('0');
-    await page.getByLabel('Aportación mensual (€)').fill('0');
-    const alert = page.getByRole('alert');
+    await expect(page.getByRole('combobox', { name: /^Escenario/ })).toBeVisible();
+    await page.getByLabel('Capital inicial (€)').fill('0');
+    await page.getByLabel('Ahorro mensual (€)').fill('0');
+    const alert = page.locator('.sim-error');
     await expect(alert).toHaveCount(1);
     await expect(alert).toContainText('mayores que cero');
     const id = await alert.getAttribute('id');
     expect(id).toBeTruthy();
-    for (const label of ['Importe inicial (€)', 'Aportación mensual (€)']) {
+    for (const label of ['Capital inicial (€)', 'Ahorro mensual (€)']) {
       const field = page.getByLabel(label);
       await expect(field).toHaveAttribute('aria-invalid', 'true');
       await expect(field).toHaveAttribute('aria-describedby', id!);
     }
-    await expect(page.getByLabel('Años')).toHaveAttribute('aria-invalid', 'false');
-    await page.getByLabel('Años').fill('0');
-    await expect(page.getByLabel('Años')).toHaveAttribute('aria-describedby', id!);
+    await expect(page.getByRole('spinbutton', { name: 'Años' })).toHaveAttribute('aria-invalid', 'false');
+    await page.getByRole('spinbutton', { name: 'Años' }).fill('0');
+    await expect(page.getByRole('spinbutton', { name: 'Años' })).toHaveAttribute('aria-describedby', id!);
   });
 
-  test('Avanzado marca el escenario del gráfico con texto y aria-current, no solo con color', async ({ page }) => {
+  test('Avanzado: tabla de escenarios marcada con texto y aria-current, plazos, condiciones y producto debajo', async ({ page }) => {
     await openApp(page, { level: 'advanced' });
-    await goTo(page, 'game');
+    await goTo(page, 'simulator');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole('heading', { name: 'Condiciones y costes' })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Comparación de periodos', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Abrir práctica guiada' })).toBeVisible();
     const current = page.locator('.sim-table tr[aria-current="true"]');
     await expect(current).toHaveCount(1);
     await expect(current).toContainText('(en el gráfico)');
-    await page.locator('.sim-form select').selectOption('dynamic');
+    await page.locator('.sim-form select').first().selectOption('dynamic');
     await expect(current).toContainText('Dinámico');
+    const scenarios = await page.getByRole('heading', { name: 'Escenarios múltiples' }).boundingBox();
+    const catalog = await page.getByRole('heading', { name: /Producto del catálogo/ }).boundingBox();
+    expect(scenarios!.y).toBeLessThan(catalog!.y);
   });
 });
 
@@ -169,7 +198,7 @@ test.describe('Mi cartera', () => {
 });
 
 test.describe('Diseño adaptable y contraste', () => {
-  const views = ['home', 'portfolio', 'learn', 'game'] as const;
+  const views = ['home', 'portfolio', 'learn', 'simulator'] as const;
 
   test('sin desborde horizontal a 320 px en las cuatro vistas y los tres niveles', async ({ page }) => {
     test.setTimeout(120_000);

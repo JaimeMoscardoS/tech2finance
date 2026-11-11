@@ -20,3 +20,12 @@ html[data-level='advanced'] .sim-table th, html[data-level='advanced'] .sim-tabl
 .sim-current { font-weight: 700; color: var(--accent); white-space: nowrap; }
 .sim-conditions { margin: 0; padding-left: 36px; display: grid; gap: 8px; }
 .sim-foot { margin: 0; color: var(--muted); font-size: .84rem; }
+.sim-stack { display: grid; gap: 18px; }
+html[data-level='advanced'] .sim-stack { gap: 12px; }
+.sim-explain { margin-top: 14px; }
+.sim-page { display: grid; gap: 22px; color: var(--ink); }
+.sim-page__lead { margin: 6px 0 0; color: var(--muted); display: flex; gap: 6px; align-items: flex-start; }
+.sim-page__lead svg { flex: none; margin-top: 3px; }
+.sim-page__title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; font-size: clamp(1.4rem, 3vw, 1.8rem); }
+.sim-catalog > .dash-section__head { margin-bottom: 4px; }
+.page-heading.embedded h3 { font-size: 1.15rem; margin: 0; }

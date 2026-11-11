@@ -72,7 +72,7 @@ test('home destination cards use the neutral surface and readable text in all le
   for (const level of ['beginner','intermediate','advanced'] as const) {
    await openApp(page, {level, theme});
    const cards = page.locator('.home__service');
-   await expect(cards).toHaveCount(5);
+   await expect(cards).toHaveCount(4);
    const backgrounds = await cards.evaluateAll(els => els.map(el => getComputedStyle(el).backgroundColor));
    expect(new Set(backgrounds).size).toBe(1);
    const surface = await page.evaluate(() => { const probe = document.createElement('div'); probe.style.background = 'var(--surface)'; document.body.appendChild(probe); const c = getComputedStyle(probe).backgroundColor; probe.remove(); return c; });

@@ -7,7 +7,6 @@ import {
   ChevronDown,
   Compass,
   FlaskConical,
-  Gamepad2,
   GraduationCap,
   Grid2X2,
   LockKeyhole,
@@ -41,13 +40,13 @@ import Recovery from "./Recovery";
 import HomeDashboard from "./views/home/HomeDashboard.tsx";
 import FundsDashboard from "./views/funds/FundsDashboard.tsx";
 import EducationDashboard from "./views/learn/EducationDashboard.tsx";
-import SimulationDashboard from "./views/game/SimulationDashboard.tsx";
+import SimulatorPage from "./views/simulator/SimulatorPage.tsx";
 import { AgentPanelSection } from "./components/dashboard/AgentPanel.tsx";
 import { LEVELS, type Level, type Theme } from "./types/level";
 import { readStoredLevel, writeStoredLevel } from "./preferences";
 const PracticeLab = lazy(() => import("./PracticeLab"));
 
-type Page = "home" | "explore" | "simulator" | "portfolio" | "learn" | "game";
+type Page = "home" | "explore" | "simulator" | "portfolio" | "learn";
 function saved(key: string, options: string[], fallback: string) {
   try {
     const value = localStorage.getItem(key);
@@ -139,7 +138,6 @@ export default function App() {
     simulator: t.simulator,
     portfolio: t.portfolio,
     learn: t.learnNav,
-    game: t.gameNav,
   };
   const levelNames = {
     beginner: t.beginner,
@@ -262,7 +260,6 @@ export default function App() {
     { key: "simulator" as const, icon: FlaskConical },
     { key: "portfolio" as const, icon: Wallet },
     { key: "learn" as const, icon: GraduationCap },
-    { key: "game" as const, icon: Gamepad2 },
   ];
   const choose = (p: Page) => {
     retryAction.current = null; setServerError(false);
@@ -384,7 +381,7 @@ export default function App() {
   function openPortfolioDecline(){setPauseSell(true);void showDecline({basis:"portfolio_demo",language},()=>analyzeDecline({name:t.examplePortfolio,dataKind:"fictional",sources:[],observations:demoPortfolio.valueSeries.map((value,index)=>({label:demoPortfolio.labels[index],value}))}),true);}
   function openSimulationDecline(){if(!validResult)return;setPauseSell(false);void showDecline({basis:"instrument",language,instrumentId:selected.instrumentId,periods:validResult.kind === "annual_history" ? 5 : validResult.months},()=>withDemoDecline(analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}),selected.instrumentId,validResult.kind === "annual_history" ? 5 : validResult.months));}
   function askDecline(){if(!pause)return;setAssistantDecline(pause);setPause(null);assistantTriggerRef.current=pauseTriggerRef.current;setAssistant(true);}
-  const serverContext = {page:(page === "learn" || page === "game" ? "home" : page),level,language,bankId:configuredBank,...( (page === "explore" || page === "simulator") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline ? {...(declineSpec ? {decline:{...declineSpec,language}} : {}),decision} : {})};
+  const serverContext = {page:(page === "learn" ? "home" : page),level,language,bankId:configuredBank,...( (page === "explore" || page === "simulator") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline ? {...(declineSpec ? {decline:{...declineSpec,language}} : {}),decision} : {})};
   const serverContextKey = JSON.stringify(serverContext);
   const provider = useMemo(() => serverTutorProvider(serverContext), [serverContextKey]);
   const switchMode = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setCatalog(null); setResult(null); setMode(mode === "server" ? "local" : "server"); };
@@ -559,8 +556,8 @@ export default function App() {
           </>}
           {page === "explore" && <FundsExplorer language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { selectInstrument(item); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
           {page === "simulator" && (
-            practiceOpen ? <Suspense fallback={<p role="status">{language === "es" ? "Cargando práctica…" : "Loading practice…"}</p>}><PracticeLab language={language} level={level} instruments={instruments} annualHistory={catalog.annualHistory} mode={mode} calculate={calculatePractice} onActiveResult={setPracticeResult} onExit={() => choose("simulator")} openAssistant={openAssistant} /></Suspense> : <>
-            <button type="button" className="text-link history-shortcut" onClick={openPractice}>{language === "es" ? "Abrir práctica guiada" : "Open guided practice"}<ArrowRight size={15}/></button>
+            practiceOpen ? <Suspense fallback={<p role="status">{language === "es" ? "Cargando práctica…" : "Loading practice…"}</p>}><PracticeLab language={language} level={level} instruments={instruments} annualHistory={catalog.annualHistory} mode={mode} calculate={calculatePractice} onActiveResult={setPracticeResult} onExit={() => choose("simulator")} openAssistant={openAssistant} /></Suspense> : (
+            <SimulatorPage language={language} level={level} onExplain={openAssistant} onPractice={openPractice} product={(embedded) => (
             <Simulator
               {...{
                 t,
@@ -588,17 +585,18 @@ export default function App() {
                 openAssistant,
                 euro,
                 openSimulationDecline,
+                embedded,
               }}
             />
-            </>
+            )} />
+          )
           )}
           {page === "portfolio" && <>
             <div className="info-banner"><LockKeyhole size={19} /><span>{t.portfolioWarning}</span><button type="button" className="button outline" onClick={openPortfolioDecline}><TrendingDown size={17} />{t.understandFall}</button></div>
             <FundsDashboard language={language} level={level} theme={theme} onExplore={()=>choose("explore")} onSimulate={()=>choose("simulator")} onSell={openPortfolioDecline} />
             <AgentPanelSection level={level} language={language} />
           </>}
-          {page === "learn" && <EducationDashboard language={language} level={level} theme={theme} onGoSimulation={()=>choose("game")} />}
-          {page === "game" && <SimulationDashboard language={language} level={level} theme={theme} />}
+          {page === "learn" && <EducationDashboard language={language} level={level} theme={theme} onGoSimulation={()=>choose("simulator")} />}
           <footer>
             <span>© Tech2Finance · {t.footer}</span>
           </footer>
