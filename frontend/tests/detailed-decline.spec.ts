@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const ids = ['observed','context','mechanism','portfolio','decision','uncertainty'];
-const answer = (mode: 'demo'|'ai' = 'demo') => ({schemaVersion:'1.0',mode,provider:mode==='ai'?'anthropic':'local_rules',model:mode==='ai'?'claude-sonnet-5-5':null,language:'es',summary:'Resumen de prueba',sections:ids.map(id=>({id,title:`Sección ${id}`,paragraphs:[`Texto ${id}`],sourceIds:id==='context'?['who']:[]})),sources:[{id:'who',label:'OMS',url:'https://www.who.int/'}]});
+const answer = (mode: 'demo'|'ai' = 'demo') => ({schemaVersion:'1.0',mode,provider:mode==='ai'?'anthropic':'local_rules',model:mode==='ai'?'claude-sonnet-5-5':null,language:'es',summary:'Resumen de prueba',sections:ids.map(id=>({id,title:`Sección ${id}`,paragraphs:[`Texto ${id}`],sourceIds:id==='context'?['who']:[]})),sources:[{id:'who',label:'OMS',url:'https://www.who.int/'}],news:{status:'empty',provider:'ecb_archive',checkedAt:'2026-01-01T00:00:00Z',periodStart:'2019-12-31',periodEnd:'2020-03-31',items:[],limitations:[]}});
 const open = async (page: import('@playwright/test').Page) => {await page.goto('/'); await page.getByRole('button',{name:/¿Te preocupa la caída\?/}).click(); return page.getByRole('dialog',{name:'Tomemos un momento'});};
 
 test('local mode builds six sections without calling the analysis API', async ({page}) => {

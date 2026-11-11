@@ -68,3 +68,13 @@
   .anti-panic__actions { grid-template-columns: 1fr; }
   .anti-panic__actions .button { grid-column: auto; }
 }
+
+.news-context { margin: 20px 0; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-raised); }
+.news-context h3 { margin: 0 0 8px; color: var(--ink); font-size: 16px; }
+.news-context > p { margin: 8px 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.news-context summary { padding: 12px 0; color: var(--accent); font-weight: 700; cursor: pointer; }
+.news-context summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.news-context article { padding: 12px 0; border-top: 1px solid var(--border); }
+.news-context article span { display: inline-block; padding: 3px 8px; border-radius: 6px; background: var(--surface-tint); color: var(--ink); font-size: 11px; font-weight: 700; }
+.news-context article h4 { margin: 8px 0 4px; color: var(--ink); font-size: 14px; }
+.news-context article p, .news-context small { color: var(--muted); font-size: 13px; line-height: 1.5; }

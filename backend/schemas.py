@@ -106,3 +106,6 @@ class DeclineExplanationRequest(RequestModel):
     decline: DeclineSpec
     level: Literal['beginner', 'intermediate', 'advanced']
     decision: Decision | None = None
+
+class DeclineEventRequest(RequestModel):
+    decline: DeclineSpec

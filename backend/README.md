@@ -6,9 +6,9 @@ El perfil de la entidad ficticia y sus tarifas informativas se documenta en [Ban
 
 API de demostración con FastAPI para el catálogo de práctica, las simulaciones, el análisis de caídas y el tutor contextual. Usa los datos locales de `shared/demo-data.json` y el motor Python del repositorio. El tutor aplica las reglas TypeScript existentes mediante un proceso Node local: no es un modelo de lenguaje.
 
-Por defecto la demo no consulta proveedores externos. El análisis detallado puede configurarse para llamar a Sonnet desde el servidor; requiere una clave de API y su prueba real está pendiente. La aplicación no usa base de datos ni autenticación, no conecta cuentas ni realiza operaciones. Las series activas proceden de valores liquidativos CNMV descargados y versionados; la recuperación histórica no garantiza una recuperación futura y el usuario conserva la decisión.
+Por defecto la demo consulta el archivo público de comunicados del BCE cuando se activa el umbral de caída. El análisis detallado puede configurarse para llamar a Sonnet desde el servidor; requiere una clave de API y su prueba real está pendiente. La aplicación no usa base de datos ni autenticación, no conecta cuentas ni realiza operaciones. Las series activas proceden de valores liquidativos CNMV descargados y versionados; la recuperación histórica no garantiza una recuperación futura y el usuario conserva la decisión.
 
-Para el proveedor opcional, configurar en el entorno del servidor `T2F_ANALYSIS_PROVIDER=anthropic` y `ANTHROPIC_API_KEY`; `T2F_ANTHROPIC_MODEL` permite elegir otra versión Sonnet y por defecto usa `claude-sonnet-5-5`. No subir claves ni ponerlas en el frontend. El detalle de datos enviados, errores y límites figura en [contratos](../docs/contratos.md#análisis-detallado-de-caídas). Seleccionar `demo` para evitar llamadas externas.
+Para el proveedor opcional, configurar en el entorno del servidor `T2F_ANALYSIS_PROVIDER=anthropic` y `ANTHROPIC_API_KEY`; `T2F_ANTHROPIC_MODEL` permite elegir otra versión Sonnet y por defecto usa `claude-sonnet-5-5`. No subir claves ni ponerlas en el frontend. Las noticias del archivo público del BCE funcionan por defecto sin clave; seleccionar `T2F_NEWS_PROVIDER=off` y `T2F_ANALYSIS_PROVIDER=demo` para evitar llamadas externas. El contrato de detección, fuentes y límites está en [contratos](../docs/contratos.md#detección-y-noticias).
 
 ## Requisitos y arranque
 
@@ -68,7 +68,8 @@ Todas las peticiones y respuestas con cuerpo usan JSON. Los campos desconocidos 
 
 | Ruta | Entrada | Respuesta |
 | --- | --- | --- |
-| `GET /api/health` | Sin cuerpo. | `status: "ok"`, `mode: "demo"`, `tutorProvider: "server_rules"`, `externalProviders: false`. |
+| `GET /api/health` | Sin cuerpo. | `status`, `mode`, `tutorProvider`, `externalProviders` y `newsProvider`; indican configuración, no disponibilidad. |
+| `POST /api/decline-events` | `{decline: DeclineSpec}`. | Valoración del umbral, informe y noticias BCE con estado explícito. |
 | `GET /api/catalog` | Sin cuerpo. | `schemaVersion`, `banks`, `instruments` y `annualHistory`, con procedencia y disponibilidad de datos. |
 | `POST /api/simulations` | `{ "instrumentId": "bbva-mi-inversion-bolsa-acumulacion", "initial": 500, "recurringContribution": 50, "periods": 1 }` | Resultado con fechas de NAV, aportaciones, fuentes y versiones de datos y cálculo. `startDate` opcional debe coincidir con un cierre observado. |
 | `POST /api/game/compare` | `{ "instrumentId": "bbva-mi-inversion-bolsa-acumulacion", "initial": 500, "monthly": 50, "months": 12, "sellMonth": 6, "buyFeeRate": 0, "sellFeeRate": 0 }`. | Comparación educativa mantener/vender con fechas de programación y ejecución reales; el frontend aún no consume este endpoint. |

@@ -1,5 +1,10 @@
 """HTTP interface for the local, stateless demonstration."""
 
+import asyncio
+import hashlib
+import json
+import math
+import os
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,8 +14,9 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.domain import DomainError, analyze_decline, build_tutor_context, get_catalog, run_simulation
 from backend.domain.game import run_game
-from backend.schemas import DeclineSpec, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest
+from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest
 from backend.decline_explanations import AnalysisUnavailable, explain, provider
+from backend.news import get_news
 from backend.tutor_bridge import TutorUnavailable, reply
 
 MAX_BODY = 65536
@@ -105,7 +111,8 @@ async def analysis_error(_request: Request, exc: AnalysisUnavailable):
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "mode": "demo", "tutorProvider": "server_rules", "externalProviders": provider() == "anthropic"}
+    news_provider = os.environ.get('T2F_NEWS_PROVIDER', 'ecb_archive')
+    return {"status": "ok", "mode": "demo", "tutorProvider": "server_rules", "externalProviders": provider() == "anthropic" or news_provider == 'ecb_archive', "newsProvider": news_provider}
 
 
 @app.get("/api/catalog")
@@ -128,6 +135,32 @@ def decline(spec: DeclineSpec):
     return analyze_decline(spec.model_dump(mode="json", exclude_none=True))
 
 
+async def event_for(spec, report):
+    current = report.get('currentDrawdownPercent')
+    triggered = isinstance(current, (int, float)) and not isinstance(current, bool) and math.isfinite(current) and current >= 5
+    enabled = triggered and os.environ.get('T2F_NEWS_PROVIDER', 'ecb_archive') == 'ecb_archive'
+    catalog = get_catalog()
+    instrument_id = spec.get('instrumentId') or catalog['portfolioExample']['instrumentId']
+    instrument = next(i for i in catalog['instruments'] if i['instrumentId'] == instrument_id)
+    identity = tuple(dict.fromkeys([instrument['identifier'], *instrument['name'].values()]))
+    reason = 'The observed decline does not reach the threshold.' if not triggered else 'External news is disabled by configuration.'
+    news = await get_news(report, enabled=enabled, identity=identity, disabled_reason=reason)
+    event_id = None
+    if triggered:
+        identity = {k: v for k, v in spec.items() if k != 'language'}
+        identity.update(latestLabel=report['latestLabel'], latestValue=report['latestValue'],
+                        peakValue=report['peakValue'], episodes=report['episodes'])
+        event_id = hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+    return {'schemaVersion': '1.0', 'status': 'triggered' if triggered else 'not_triggered',
+            'eventId': event_id, 'thresholdPercent': 5, 'report': report, 'news': news}
+
+
+@app.post('/api/decline-events')
+async def decline_event(request: DeclineEventRequest):
+    spec = request.decline.model_dump(mode='json', exclude_none=True)
+    return await event_for(spec, analyze_decline(spec))
+
+
 @app.post("/api/tutor")
 def tutor(request: TutorRequest):
     payload = request.model_dump(mode="json", exclude_none=True)
@@ -142,4 +175,10 @@ async def decline_explanation(request: DeclineExplanationRequest):
     payload = {"report": report, "language": request.decline.language, "level": request.level}
     if request.decision is not None:
         payload["decision"] = request.decision.model_dump(mode="json", exclude_none=True)
-    return await explain(payload)
+    try:
+        async with asyncio.timeout(55):
+            event = await event_for(spec, report)
+            payload['news'] = event['news']
+            return await explain(payload)
+    except TimeoutError:
+        raise AnalysisUnavailable('analysis_unavailable') from None
