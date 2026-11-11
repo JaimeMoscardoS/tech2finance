@@ -109,3 +109,13 @@ class DeclineExplanationRequest(RequestModel):
 
 class DeclineEventRequest(RequestModel):
     decline: DeclineSpec
+
+
+class TtsRequest(RequestModel):
+    text: Annotated[str, Field(min_length=1, max_length=1500)]
+
+    @model_validator(mode="after")
+    def not_blank(self):
+        if not self.text.strip():
+            raise ValueError("text must not be blank")
+        return self

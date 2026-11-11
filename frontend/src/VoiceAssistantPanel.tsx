@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Mic, Square, Volume2, X } from 'lucide-react';
 import { createLocalTutorProvider, MAX_MESSAGE_LENGTH, type TutorContext, type TutorProvider, type TutorReply, type TutorHistoryMessage } from '../../tutor-ia/src/index';
-import { speakLocal, startLocalDictation, stopBrowserVoice, type VoiceState } from './voice/browser-voice';
+import { startLocalDictation, stopBrowserVoice, type VoiceState } from './voice/browser-voice';
+import { speak } from './voice/server-voice';
 import { replyOrigin } from './reply-origin';
 import './voice-assistant.css';
 
 export type VoiceAssistantPanelProps = { open: boolean; onClose: () => void; context: TutorContext; panelRef: RefObject<HTMLElement | null>; provider?: TutorProvider; startToken?: number };
 const copy = {
- es: { title: 'Habla con tu asistente', subtitle: 'Una pregunta cada vez', close: 'Cerrar asistente de voz', local: 'RESPUESTAS LOCALES · POR REGLAS', server: 'SERVIDOR DE DEMO · REGLAS O IA (CLAUDE)', intro: 'Tu pregunta se procesará cuando termine el dictado.', privacy: 'El dictado y la lectura necesitan voz local disponible en este dispositivo.', talk: 'Hablar', cancel: 'Cancelar', listen: 'Escuchar respuesta', stop: 'Detener voz', heard: 'Tu pregunta', answer: 'Respuesta', pending: 'Preparando respuesta…', empty: 'No se detectó ninguna pregunta. Inténtalo de nuevo.', limit: 'La pregunta supera los 1500 caracteres. Inténtalo con una más corta.', error: 'No se pudo preparar la respuesta. Inténtalo de nuevo.', writeHelp: 'Para escribir, cierra esta ventana y abre Tu asistente.', sources: 'Fuentes' },
- en: { title: 'Talk to your assistant', subtitle: 'One question at a time', close: 'Close voice assistant', local: 'LOCAL RESPONSES · RULE-BASED', server: 'DEMO SERVER · RULES OR AI (CLAUDE)', intro: 'Your question is processed when dictation ends.', privacy: 'Dictation and playback require local voice to be available on this device.', talk: 'Talk', cancel: 'Cancel', listen: 'Listen to answer', stop: 'Stop voice', heard: 'Your question', answer: 'Answer', pending: 'Preparing answer…', empty: 'No question was detected. Try again.', limit: 'The question exceeds 1500 characters. Try a shorter one.', error: 'The answer could not be prepared. Try again.', writeHelp: 'To type, close this window and open Your assistant.', sources: 'Sources' },
+ es: { title: 'Habla con tu asistente', subtitle: 'Una pregunta cada vez', close: 'Cerrar asistente de voz', local: 'RESPUESTAS LOCALES · POR REGLAS', server: 'SERVIDOR DE DEMO · REGLAS O IA (CLAUDE)', intro: 'Tu pregunta se procesará cuando termine el dictado.', privacy: 'El dictado y la lectura necesitan voz local disponible en este dispositivo. Si el servidor de demo tiene ElevenLabs activado, el texto de la respuesta se envía a ElevenLabs para leerlo.', talk: 'Hablar', cancel: 'Cancelar', listen: 'Escuchar respuesta', stop: 'Detener voz', heard: 'Tu pregunta', answer: 'Respuesta', pending: 'Preparando respuesta…', empty: 'No se detectó ninguna pregunta. Inténtalo de nuevo.', limit: 'La pregunta supera los 1500 caracteres. Inténtalo con una más corta.', error: 'No se pudo preparar la respuesta. Inténtalo de nuevo.', writeHelp: 'Para escribir, cierra esta ventana y abre Tu asistente.', sources: 'Fuentes' },
+ en: { title: 'Talk to your assistant', subtitle: 'One question at a time', close: 'Close voice assistant', local: 'LOCAL RESPONSES · RULE-BASED', server: 'DEMO SERVER · RULES OR AI (CLAUDE)', intro: 'Your question is processed when dictation ends.', privacy: 'Dictation and playback require local voice to be available on this device. If the demo server has ElevenLabs enabled, the answer text is sent to ElevenLabs to be read aloud.', talk: 'Talk', cancel: 'Cancel', listen: 'Listen to answer', stop: 'Stop voice', heard: 'Your question', answer: 'Answer', pending: 'Preparing answer…', empty: 'No question was detected. Try again.', limit: 'The question exceeds 1500 characters. Try a shorter one.', error: 'The answer could not be prepared. Try again.', writeHelp: 'To type, close this window and open Your assistant.', sources: 'Sources' },
 } as const;
 type Phase = 'idle' | 'dictating' | 'pending' | 'speaking';
 
@@ -46,7 +47,7 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
    if (id !== generation.current || controller.signal.aborted) return;
    history.current = [...history.current, {role:'user' as const,text}, {role:'assistant' as const,text:result.text,intent:result.intent}].slice(-8);
    request.current = null; setReply(result); setPhase('speaking');
-   speakLocal(result.text, result.language, (voiceState, voiceMessage) => {
+   void speak(result.text, result.language, (voiceState, voiceMessage) => {
     if (id !== generation.current) return;
     setMessage(voiceMessage);
     if (voiceState === 'idle' || voiceState === 'error') setPhase('idle');
@@ -87,7 +88,7 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
  const play = () => {
   if (!reply) return;
   cancel(); const id = generation.current; setPhase('speaking');
-  speakLocal(reply.text, reply.language, (state, detail) => {
+  void speak(reply.text, reply.language, (state, detail) => {
    if (id !== generation.current) return;
    setMessage(detail); if (state === 'idle' || state === 'error') setPhase('idle');
   });

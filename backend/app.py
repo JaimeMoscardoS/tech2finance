@@ -5,21 +5,23 @@ import hashlib
 import json
 import math
 import os
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.domain import DomainError, analyze_decline, build_tutor_context, get_catalog, run_simulation
 from backend.domain.game import run_game
-from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest
+from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TtsRequest, TutorRequest
 from backend.decline_explanations import AnalysisUnavailable, explain, provider
 from backend.news import get_news
+from backend.voice_tts import TtsUnavailable, synthesize, voice_provider
 from backend.tutor_bridge import TutorUnavailable, reply, tutor_provider
 
 MAX_BODY = 65536
+ALLOWED_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 
 def error(status: int, code: str, message: str) -> JSONResponse:
@@ -63,7 +65,7 @@ class BodyLimit:
 app = FastAPI(title="Tech2Finance local demo", docs_url=None, redoc_url=None, openapi_url=None)
 app.add_middleware(BodyLimit)
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver"])
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
+app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
 
 @app.exception_handler(RequestValidationError)
@@ -104,6 +106,11 @@ async def unexpected_error(_request: Request, _exc: Exception):
     return error(500, "internal_error", "The request could not be processed.")
 
 
+@app.exception_handler(TtsUnavailable)
+async def tts_error(_request: Request, exc: TtsUnavailable):
+    return error(503, exc.code, "Voice synthesis is unavailable.")
+
+
 @app.exception_handler(AnalysisUnavailable)
 async def analysis_error(_request: Request, exc: AnalysisUnavailable):
     return error(503, exc.code, "Detailed analysis is unavailable.")
@@ -112,7 +119,32 @@ async def analysis_error(_request: Request, exc: AnalysisUnavailable):
 @app.get("/api/health")
 def health():
     news_provider = os.environ.get('T2F_NEWS_PROVIDER', 'ecb_archive')
-    return {"status": "ok", "mode": "demo", "tutorProvider": tutor_provider(), "externalProviders": provider() == "anthropic" or tutor_provider() == "anthropic" or news_provider == 'ecb_archive', "newsProvider": news_provider}
+    return {"status": "ok", "mode": "demo", "tutorProvider": tutor_provider(), "externalProviders": provider() == "anthropic" or tutor_provider() == "anthropic" or news_provider == 'ecb_archive' or voice_provider() == 'elevenlabs', "newsProvider": news_provider, "voiceProvider": voice_provider()}
+
+
+class ForbiddenOrigin(Exception):
+    pass
+
+
+@app.exception_handler(ForbiddenOrigin)
+async def forbidden_origin(_request: Request, _exc: ForbiddenOrigin):
+    return error(403, "forbidden_origin", "Request origin is not allowed.")
+
+
+def tts_guard(request: Request):
+    origin = request.headers.get("origin")
+    if (not request.headers.get("content-type", "").lower().startswith("application/json")
+            or request.headers.get("sec-fetch-site") == "cross-site"
+            or (origin is not None and origin not in ALLOWED_ORIGINS)):
+        raise ForbiddenOrigin()
+
+
+@app.post("/api/tts", dependencies=[Depends(tts_guard)])
+async def tts(spec: TtsRequest):
+    if voice_provider() != 'elevenlabs':
+        return error(503, "tts_disabled", "Voice synthesis is disabled.")
+    audio = await synthesize(spec.text)
+    return Response(content=audio, media_type="audio/mpeg", headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
 
 
 @app.get("/api/catalog")

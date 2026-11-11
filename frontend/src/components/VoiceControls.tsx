@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { localVoice, speakLocal, startLocalDictation, stopBrowserVoice, subscribeVoicesChanged, type VoiceLanguage, type VoiceState } from '../voice/browser-voice';
+import { localVoice, startLocalDictation, stopBrowserVoice, subscribeVoicesChanged, type VoiceLanguage, type VoiceState } from '../voice/browser-voice';
+import { speak, stopVoice } from '../voice/server-voice';
 import './VoiceControls.css';
 
 export interface VoiceControlsProps {
@@ -34,8 +35,8 @@ export default function VoiceControls({ text, language, speechLanguage = languag
   return <div className="voice-controls">
     <div className="voice-controls__actions">
       {text && <button type="button" disabled={disabled} aria-pressed={active && mode === 'speech'} onClick={() => {
-        if (active && mode === 'speech') { stopBrowserVoice(); return; }
-        speakLocal(text, speechLanguage, status('speech'));
+        if (active && mode === 'speech') { stopVoice(); return; }
+        void speak(text, speechLanguage, status('speech'));
       }}>{active && mode === 'speech' ? (spanish ? 'Detener lectura' : 'Stop reading') : (spanish ? 'Escuchar' : 'Listen')}</button>}
       {onTranscript && <button type="button" disabled={disabled} aria-pressed={active && mode === 'dictation'} onClick={() => {
         if (active && mode === 'dictation') { stopBrowserVoice(); return; }

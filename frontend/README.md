@@ -70,7 +70,7 @@ Desde la tarjeta de práctica de inicio o el enlace del simulador se pueden comp
 
 Cada pareja se calcula en el modo seleccionado. Al editar una entrada, cambiar de lección o de modo se descartan los resultados anteriores; si falla el servidor se muestra el error y no se calcula silenciosamente en local. Se puede seleccionar A o B para preguntar al tutor sobre ese ejemplo. La prueba conceptual es opcional y no puntúa por obtener ganancias. El laboratorio no compra ni vende activos y no utiliza dinero real.
 
-El modo local funciona sin backend; el modo servidor usa las mismas reglas del tutor mediante un proceso Node local. Ninguno es un LLM ni conecta Claude, ElevenLabs o un banco. Los contratos para futuras integraciones están en [contratos](../docs/contratos.md#conversación-y-voz-propuesta); cualquier clave futura debe permanecer en el servidor, fuera del navegador y de Git.
+El modo local funciona sin backend; el modo servidor usa las mismas reglas del tutor mediante un proceso Node local. Ninguno es un LLM ni conecta Claude o un banco; la lectura con ElevenLabs existe solo en la rama `feature/voz-elevenlabs` (probada con simulación, sin clave real) y por defecto se usa la voz del navegador. Los contratos para futuras integraciones están en [contratos](../docs/contratos.md#conversación-y-voz-propuesta); cualquier clave futura debe permanecer en el servidor, fuera del navegador y de Git.
 
 ## Componentes y fuentes
 

@@ -1,4 +1,4 @@
-/** Browser-only local voice. No network-backed recognition or remote voices are used. */
+/** Browser-only local voice and dictation. Optional server voice lives in server-voice.ts and registers its stop hook here. */
 export type VoiceLanguage = 'es' | 'en';
 export type VoiceState = 'idle' | 'starting' | 'speaking' | 'paused' | 'listening' | 'error';
 type Status = (state: VoiceState, message: string) => void;
@@ -18,6 +18,10 @@ let generation = 0;
 let activeRecognition: Recognition | undefined;
 let timer: ReturnType<typeof setTimeout> | undefined;
 let activeStatus: Status | undefined;
+let extraStopper: (() => void) | undefined;
+
+/** Lets another voice source (server audio) be stopped by stopBrowserVoice without a circular import. */
+export function registerVoiceStopper(fn: () => void): void { extraStopper = fn; }
 
 const messages = {
   es: { unavailable: 'Texto disponible; voz local no disponible.', tooLong: 'El texto supera el límite de 3000 caracteres.', starting: 'Preparando voz local.', speaking: 'Reproduciendo voz local.', paused: 'Lectura pausada.', listening: 'Escuchando en este dispositivo.', finished: 'Voz detenida.', failed: 'No se ha podido usar la voz local.', denied: 'Permiso de micrófono o voz denegado.', dictation: 'Dictado local no disponible; puedes escribir.' },
@@ -33,6 +37,7 @@ export function localVoice(voices: SpeechSynthesisVoice[], language: VoiceLangua
 /** Stop every active browser voice session, including pending availability checks. */
 export function stopBrowserVoice(): void {
   generation++;
+  extraStopper?.();
   if (timer) clearTimeout(timer);
   timer = undefined;
   const recognition = activeRecognition;

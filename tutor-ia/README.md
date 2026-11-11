@@ -30,4 +30,4 @@ Las comprobaciones son patrones y ejemplos finitos, no una prueba exhaustiva ni 
 
 ## Integraciones futuras
 
-El chat `TutorProvider` continúa por reglas. El adaptador opcional de Sonnet está en el servidor y solo se usa para el análisis detallado; ElevenLabs sigue pendiente. Las claves permanecen fuera del navegador y se conserva la opción textual.
+El chat `TutorProvider` continúa por reglas. El adaptador opcional de Sonnet está en el servidor y solo se usa para el análisis detallado; la lectura con ElevenLabs está implementada solo en la rama `feature/voz-elevenlabs`, probada con simulación y sin clave real. Las claves permanecen fuera del navegador y se conserva la opción textual.
