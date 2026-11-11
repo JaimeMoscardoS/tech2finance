@@ -233,12 +233,14 @@ test('a fund excluded from the challenge shows a note and an eligible-fund selec
   await expect(game.getByLabel('Mes de venta')).toBeVisible();
 });
 
-test('invalid amounts are announced through both fields and the CNMV reuse link is shown', async ({ page }) => {
+test('two zero amounts give the game error (and step 2 flags both fields), and the CNMV reuse link is shown', async ({ page }) => {
   const game = await openGame(page);
   await game.page().getByLabel('Importe inicial').fill('0');
   await game.page().getByLabel('Aportación mensual').fill('0');
   await compareButton(game).click();
   await expect(game.locator('#hsg-form-error')).toContainText('no pueden ser ambos 0');
+  await expect(game.page().getByLabel('Importe inicial')).toHaveAttribute('aria-invalid', 'true');
+  await expect(game.page().getByLabel('Aportación mensual')).toHaveAttribute('aria-invalid', 'true');
   await expect(game.getByText(/empieza en el primer cierre observado/)).toBeVisible();
   await game.page().getByLabel('Aportación mensual').fill('50');
   await compareButton(game).click();

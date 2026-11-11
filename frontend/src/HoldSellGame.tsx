@@ -52,7 +52,6 @@ const words = {
     chartLabel: (a: string, b: string, months: number, hold: string, sell: string, sellMonth: number) => `Gráfico de dos líneas del valor total, del ${a} al ${b} (${months} meses). Al final: si mantengo, ${hold}; si vendo en el mes ${sellMonth}, ${sell}.`,
     showTable: 'Ver tabla', hideTable: 'Ocultar tabla', tableCaption: 'Valor total por mes', colMonth: 'Mes', colDate: 'Fecha', colHold: 'Si mantengo', colSell: 'Si vendo', colContributed: 'Aportado',
     source: 'Datos y fuente', dataLabel: 'Valores liquidativos mensuales publicados por la CNMV', period: 'Periodo', sourceLink: 'Ficha de la fuente', legal: 'Condiciones de reutilización de la CNMV', realData: 'Datos históricos reales observados, no ficticios.',
-    summary: (fund: string, initial: string, monthly: string, months: string) => `Sigue tus pasos 1 y 2: ${fund}; inicial ${initial} €, aportación mensual ${monthly} €, ${months} meses.`,
     excluded: 'Este reto no usa este fondo; elige otro para jugar.', excludedHelp: 'Al elegir otro fondo, los pasos 1 y 2 también pasan a usarlo.', pickFund: 'Fondo para el reto',
     annualNotice: 'El reto usa aportación mensual. Ahora tienes elegida la aportación anual.', useMonthly: 'Usar aportación mensual',
     sellTitle: 'Mueve para elegir el mes de venta', sellValue: (month: number, date: string) => `Mes ${month}${date ? `, ${date}` : ''}`,
@@ -90,7 +89,6 @@ const words = {
     chartLabel: (a: string, b: string, months: number, hold: string, sell: string, sellMonth: number) => `Two-line chart of total value, from ${a} to ${b} (${months} months). At the end: if I hold, ${hold}; if I sell in month ${sellMonth}, ${sell}.`,
     showTable: 'View table', hideTable: 'Hide table', tableCaption: 'Total value by month', colMonth: 'Month', colDate: 'Date', colHold: 'If I hold', colSell: 'If I sell', colContributed: 'Contributed',
     source: 'Data and source', dataLabel: 'Monthly net asset values published by the CNMV', period: 'Period', sourceLink: 'Source page', legal: 'CNMV reuse conditions', realData: 'Real observed historical data, not fictional.',
-    summary: (fund: string, initial: string, monthly: string, months: string) => `Following your steps 1 and 2: ${fund}; initial ${initial} €, monthly contribution ${monthly} €, ${months} months.`,
     excluded: 'This challenge does not use this fund; pick another to play.', excludedHelp: 'When you pick another fund, steps 1 and 2 use it too.', pickFund: 'Fund for the challenge',
     annualNotice: 'The challenge uses a monthly contribution. You currently have the annual contribution selected.', useMonthly: 'Use monthly contribution',
     sellTitle: 'Move to choose the sale month', sellValue: (month: number, date: string) => `Month ${month}${date ? `, ${date}` : ''}`,
@@ -133,6 +131,7 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
   const request = useRef<AbortController | null>(null);
   const generation = useRef(0);
   const formRef = useRef<HTMLFormElement>(null);
+  const focusOutcome = useRef(false);
   const sellMonth = Number.isInteger(monthsNumber) ? Math.max(0, Math.min(sell, monthsNumber)) : sell;
 
   const invalidate = () => {
@@ -143,6 +142,12 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
   // Any change to what the exercise depends on (the journey's fund and amounts, the sale month, fees, language, mode, data) clears the previous comparison.
   useEffect(() => { invalidate(); return () => { generation.current++; request.current?.abort(); }; }, [language, mode, instruments, navHistory, instrument?.instrumentId, initial, monthly, months, frequency, sellMonth, buyFee, sellFee]);
   useEffect(() => { onRevealed?.(outcome !== null); }, [outcome]);
+  // The answer buttons disappear with the question: move focus to the results heading.
+  useEffect(() => {
+    if (!outcome || !focusOutcome.current) return;
+    focusOutcome.current = false;
+    requestAnimationFrame(() => document.getElementById('hsg-results-title')?.focus());
+  }, [outcome]);
 
   const maxMonths = maxFor(instrument);
   const dates = useMemo(() => gameDates(instrument, navHistory), [instrument, navHistory]);
@@ -161,7 +166,7 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
   const submit = async (event?: FormEvent, chosenGuess?: Guess) => {
     event?.preventDefault();
     invalidate();
-    if (chosenGuess) setGuess(chosenGuess);
+    if (chosenGuess) { setGuess(chosenGuess); focusOutcome.current = true; }
     let spec: GameSpec;
     try {
       spec = buildGameSpec({ initial: numberOf(initial), monthly: monthly.trim() === '' ? 0 : numberOf(monthly), months: monthsNumber, sellMonth, buyFeePercent: numberOf(buyFee), sellFeePercent: numberOf(sellFee) }, instrument, maxMonths);
@@ -207,6 +212,7 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
 
   const flagged = (field: GameField) => invalid === field;
   const describedBy = (field: GameField, ...ids: string[]) => [...ids, flagged(field) ? 'hsg-form-error' : ''].filter(Boolean).join(' ') || undefined;
+  const amountText = (raw: string) => (raw.trim() === '' ? money(0) : Number.isFinite(Number(raw)) ? money(Number(raw)) : raw);
   const sellDate = dates[sellMonth];
   const maxSell = Number.isInteger(monthsNumber) ? monthsNumber : maxMonths;
   const aria = (field: GameField) => ({ 'aria-invalid': flagged(field) ? true : undefined });
@@ -236,7 +242,7 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
     const { summary, response, spec } = o;
     const compact = (n: number) => new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }).format(n);
     return <div className="hsg-results" aria-labelledby="hsg-results-title" role="region">
-      <h3 id="hsg-results-title" className="hsg-results-title">{t.results}</h3>
+      <h3 id="hsg-results-title" className="hsg-results-title" tabIndex={-1}>{t.results}</h3>
       <div className="hsg-feedback" aria-live="polite">
         <p>{t.outcome(spec.sellMonth, money(summary.sell.value), money(summary.hold.value))}</p>
         {guess && (() => { const verdict = evaluateSellPrediction(guess, summary.sell.value, summary.hold.value); return <p>{t.yourGuess(t.short[guess])} {t.actual[verdict.actual]} <strong>{verdict.matched ? t.matched : t.missed}</strong></p>; })()}
@@ -288,12 +294,12 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
     <p className="hsg-notice hsg-note">{t.note}</p>
     <dl className="hsg-synced">
       <div><dt>{t.fund}</dt><dd>{instrument.name[language]} · {instrument.manager}</dd></div>
-      <div><dt>{t.initial}</dt><dd>{initial || '0'}</dd></div>
-      <div><dt>{t.monthly}</dt><dd>{monthly || '0'}</dd></div>
+      <div><dt>{t.initial}</dt><dd>{amountText(initial)}</dd></div>
+      <div><dt>{t.monthly}</dt><dd>{amountText(monthly)}</dd></div>
       <div><dt>{t.months}</dt><dd>{months}</dd></div>
     </dl>
     <p className="hsg-help">{t.periodOf(dateText(dates[0] ?? ''), dateText(dates[maxMonths] ?? ''))}. {t.startNote(dateText(dates[0] ?? ''))}</p>
-    <form ref={formRef} className="hsg-form" onSubmit={submit} noValidate aria-busy={busy}>
+    <form ref={formRef} className="hsg-form" onSubmit={event => { if (busy) { event.preventDefault(); return; } void submit(event); }} noValidate aria-busy={busy}>
       <div className="hsg-field hsg-slider"><label htmlFor="hsg-sell">{t.sellTitle}</label>
         <input id="hsg-sell" type="range" min={0} max={Math.max(0, maxSell)} step={1} value={sellMonth} aria-valuetext={t.sellValue(sellMonth, monthLabel(sellDate, language))} onChange={e => setSell(Number(e.target.value))} aria-describedby={describedBy('sellMonth', 'hsg-sell-help')} {...aria('sellMonth')} />
         <output htmlFor="hsg-sell" className="hsg-sell-value">{t.sellValue(sellMonth, monthLabel(sellDate, language))}</output>
@@ -313,9 +319,9 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
       {!outcome && <div className="hsg-predict" role="group" aria-labelledby="hsg-q">
         <p id="hsg-q" className="hsg-question">{t.question(sellMonth)}</p>
         <p className="hsg-help">{t.questionHelp}</p>
-        <div className="hsg-answers">{(['more', 'less', 'same'] as const).map(g => <button key={g} type="button" className="hsg-answer" disabled={busy} onClick={() => void submit(undefined, g)}>{t.answers[g]}</button>)}</div>
+        <div className="hsg-answers">{(['more', 'less', 'same'] as const).map(g => <button key={g} type="button" className="hsg-answer" aria-disabled={busy || undefined} onClick={() => { if (!busy) void submit(undefined, g); }}>{t.answers[g]}</button>)}</div>
       </div>}
-      <button className="hsg-run" type="submit" disabled={busy}>{busy ? t.running : t.run}<ArrowRight size={17} aria-hidden="true" /></button>
+      <button className="hsg-run" type="submit" aria-disabled={busy || undefined}>{busy ? t.running : t.run}<ArrowRight size={17} aria-hidden="true" /></button>
     </form>
     <div role="status" aria-live="polite" className="sr-only">{status === 'pending' ? t.pending : status === 'success' ? t.ready : status === 'invalidated' ? t.cleared : ''}</div>
     {outcome && renderResults(outcome)}

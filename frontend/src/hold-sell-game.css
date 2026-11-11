@@ -22,7 +22,7 @@ html[data-theme='dark'] .hsg { --hsg-hold: #e9eff6; --hsg-sell: #86b8dd; }
 .hsg-error { color: var(--error-ink) !important; font-weight: 600; }
 .hsg-run, .hsg-toggle { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 999px; font-weight: 700; cursor: pointer; }
 .hsg-run { justify-self: start; background: var(--accent); color: var(--action-ink); border: 1px solid var(--accent); }
-.hsg-run:disabled { opacity: .7; cursor: progress; }
+.hsg-run:disabled, .hsg-run[aria-disabled='true'] { opacity: .7; cursor: progress; }
 .hsg-toggle { margin-top: 12px; background: transparent; color: var(--accent); border: 1px solid var(--border); }
 .hsg-results { margin-top: 28px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 .hsg-results > * { min-width: 0; }
@@ -71,8 +71,8 @@ html[data-theme='dark'] .hsg { --hsg-hold: #e9eff6; --hsg-sell: #86b8dd; }
 .hsg-question { margin: 0 !important; font-size: 1.05rem !important; font-weight: 700; color: var(--ink) !important; }
 .hsg-answers { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; }
 .hsg-answer { min-height: 44px; padding: 10px 16px; color: var(--jc, var(--accent)); background: var(--surface); border: 1px solid var(--jc-line, var(--border)); border-radius: 999px; font-weight: 600; font-size: .9rem; text-align: left; }
-.hsg-answer:hover:not(:disabled) { background: var(--jc, var(--accent)); color: var(--jc-on, var(--action-ink)); }
-.hsg-answer:disabled { opacity: .7; cursor: progress; }
+.hsg-answer:hover:not(:disabled):not([aria-disabled='true']) { background: var(--jc, var(--accent)); color: var(--jc-on, var(--action-ink)); }
+.hsg-answer:disabled, .hsg-answer[aria-disabled='true'] { opacity: .7; cursor: progress; }
 .hsg-run { background: var(--jc, var(--accent)); color: var(--jc-on, var(--action-ink)); border-color: var(--jc, var(--accent)); }
 .hsg-feedback { padding: 14px 16px; background: var(--surface-raised); border-left: 5px solid var(--jc, var(--accent)); border-radius: 12px; }
 .hsg-feedback p { margin: 4px 0; color: var(--ink); max-width: 72ch; }

@@ -346,7 +346,7 @@ export default function FundsExplorer({
       <div className="fund-actions">
         <button
           className="button dark"
-          disabled={rowsFor(i).length === 0}
+          disabled={rowsFor(i).length === 0 || i.dataStatus !== "historical_nav"}
           onClick={() => onPractice(i)}
         >
           {es ? "Practicar con este fondo" : "Practise with this fund"}{" "}

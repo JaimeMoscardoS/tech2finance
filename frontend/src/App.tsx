@@ -81,6 +81,7 @@ export default function App() {
   const declineGeneration = useRef(0);
   const [declineSpec, setDeclineSpec] = useState<DeclineSpec | undefined>();
   const [demoLaunch, setDemoLaunch] = useState(false);
+  const [journeyRevealed, setJourneyRevealed] = useState(false);
   const [journeyFund, setJourneyFund] = useState<false | "fund" | "example">(false);
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [practiceResult, setPracticeResult] = useState<{spec: SimulationSpec; result: ServerSimulation} | null>(null);
@@ -360,7 +361,7 @@ export default function App() {
   function selectInstrument(item: Instrument) { declineGeneration.current++; declineRequest.current?.abort(); setSelectedId(item.instrumentId); setError(null); void calculate(item); }
   function run(e: FormEvent) { e.preventDefault(); void calculate(selected); }
   const source = selected.sourceUrl ? [{label:"CNMV",url:selected.sourceUrl,checkedAt:selected.sourceDate ?? undefined}] : [];
-  const validResult = page === "simulator" && !practiceOpen && result?.instrumentId === selected.instrumentId ? result : null;
+  const validResult = page === "simulator" && !practiceOpen && journeyRevealed && result?.instrumentId === selected.instrumentId ? result : null;
   const practiceInstrument = practiceResult && instruments.find(item => item.instrumentId === practiceResult.spec.instrumentId);
   const tutorInstrument = page === "explore"
     ? instruments.find(item => item.instrumentId === selectedId)
@@ -622,7 +623,7 @@ export default function App() {
               <button type="button" className="calm-card" onClick={openPortfolioDecline} disabled={!portfolioResult}><span className="action-icon mint"><Pause size={21}/></span><span><strong>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}</strong><small>{language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options."}</small></span><ArrowRight size={19}/></button>
             </>
           )}
-          {page === "explore" && <FundsExplorer hostBankId={configuredBank} navHistory={catalog.navHistory} language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { selectInstrument(item); setJourneyFund("fund"); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
+          {page === "explore" && <FundsExplorer hostBankId={configuredBank} navHistory={catalog.navHistory} language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { if (item.dataStatus !== "historical_nav") return; selectInstrument(item); setJourneyFund("fund"); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
           {page === "simulator" && (
             practiceOpen ? <Suspense fallback={<p role="status">{language === "es" ? "Cargando práctica…" : "Loading practice…"}</p>}><PracticeLab language={language} level={level} instruments={instruments} annualHistory={catalog.annualHistory} mode={mode} calculate={calculatePractice} onActiveResult={setPracticeResult} onExit={() => choose("simulator")} openAssistant={openAssistant} /></Suspense> : <>
             <button type="button" className="text-link history-shortcut" onClick={openPractice}>{language === "es" ? "Abrir práctica guiada" : "Open guided practice"}<ArrowRight size={15}/></button>
@@ -635,23 +636,20 @@ export default function App() {
                 navHistory: catalog.navHistory,
                 prechosen: journeyFund !== false,
                 example: journeyFund === "example",
+                onRevealed: setJourneyRevealed,
                 selected,
                 bankProfile: configuredBank === "demo" ? catalog.bankProfile : undefined,
-                banks: catalog.banks,
                 instruments,
-                history: catalog.annualHistory,
                 result,
                 error,
                 initial,
                 monthly,
-                annual,
                 months,
                 contributionFrequency,
                 setContributionFrequency,
                 maxMonths: Math.max(0, (catalog.navHistory.instruments.find(h => h.isin === selected.identifier && h.eligible)?.monthly.length ?? 1) - 1),
                 setInitial,
                 setMonthly,
-                setAnnual,
                 setMonths,
                 setResult,
                 setError,

@@ -10,8 +10,7 @@ import {
   MessageCircle,
   TrendingDown,
 } from "lucide-react";
-import { annualHistory } from "./annual-history";
-import { type Bank, type Instrument, type BankProfile } from "./catalog";
+import { type Instrument, type BankProfile } from "./catalog";
 import { ProductCosts } from "./BankInfo";
 import { copy, type Language } from "./copy";
 import { MAX_SIMULATION_AMOUNT, type SimulationResult } from "./simulation-types";
@@ -24,7 +23,7 @@ import "./simulator-journey.css";
 
 const HoldSellGame = lazy(() => import("./HoldSellGame"));
 
-export type FieldError = "initial" | "monthly" | "annual" | "general" | null;
+export type FieldError = "initial" | "monthly" | "annual" | "amounts" | "general" | null;
 type Level = "beginner" | "intermediate" | "advanced";
 export type ViewResult = SimulationResult & {
   instrumentId: string;
@@ -43,23 +42,21 @@ type Props = {
   prechosen?: boolean;
   /** True when the app opened the simulator with a ready-made example (result already requested): no prediction is asked. */
   example?: boolean;
-  banks: Bank[];
+  /** Reports whether step 2 has been revealed, so the tutor only receives a result the user has seen. */
+  onRevealed?: (revealed: boolean) => void;
   bankProfile?: BankProfile;
   instruments: Instrument[];
-  history: typeof annualHistory;
   selected: Instrument;
   result: ViewResult | null;
   error: FieldError;
   initial: string;
   monthly: string;
-  annual: string;
   months: string;
   maxMonths: number;
   contributionFrequency: "monthly" | "annual";
   setContributionFrequency: Dispatch<SetStateAction<"monthly" | "annual">>;
   setInitial: Dispatch<SetStateAction<string>>;
   setMonthly: Dispatch<SetStateAction<string>>;
-  setAnnual: Dispatch<SetStateAction<string>>;
   setMonths: Dispatch<SetStateAction<string>>;
   setResult: Dispatch<SetStateAction<ViewResult | null>>;
   setError: Dispatch<SetStateAction<FieldError>>;
@@ -74,7 +71,7 @@ const DEBOUNCE_MS = 400;
 const MINUS = "−";
 
 export default function Simulator({
-  t, language, level, mode, navHistory, prechosen = false, example = false, selected, bankProfile, instruments, result, error,
+  t, language, level, mode, navHistory, prechosen = false, example = false, onRevealed, selected, bankProfile, instruments, result, error,
   initial, monthly, months, maxMonths, contributionFrequency, setContributionFrequency, setInitial, setMonthly,
   setMonths, setResult, setError, selectInstrument, run, openAssistant, openSimulationDecline, euro,
 }: Props) {
@@ -87,11 +84,15 @@ export default function Simulator({
   const [pickedId, setPickedId] = useState(selected.instrumentId);
   useEffect(() => setPickedId(selected.instrumentId), [selected.instrumentId]);
   const [guideOpen, setGuideOpen] = useState(level !== "advanced");
+  const [quiet, setQuiet] = useState(false);
+  const [gameSeen, setGameSeen] = useState(false);
+  useEffect(() => { if (gameRevealed) setGameSeen(true); }, [gameRevealed]);
   useEffect(() => setGuideOpen(level !== "advanced"), [level]);
 
   const [exampleShown] = useState(example);
   const revealed = guess !== null || exampleShown;
   const unlocked: Step = chosen ? (revealed ? 3 : 2) : 1;
+  useEffect(() => { onRevealed?.(revealed); return () => onRevealed?.(false); }, [revealed]);
   const cap = Math.min(72, maxMonths);
   const dates = useMemo(() => gameDates(selected, navHistory), [selected, navHistory]);
   const monthsNumber = Number(months);
@@ -106,7 +107,10 @@ export default function Simulator({
   const immediate = useRef(false);
   const pendingSelect = useRef<Instrument | null>(null);
 
-  const edit = (apply: () => void) => { apply(); setResult(null); setError(null); };
+  const requestedKey = useRef<string | null>(null);
+  const keyFor = (id: string, i = initial, m = monthly, n = months, f = contributionFrequency) => `${id}|${i}|${m}|${n}|${f}`;
+  const edit = (apply: () => void) => { apply(); requestedKey.current = null; setResult(null); setError(null); };
+  const focusResult = useRef(false);
   const money = (n: number) => new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
   const signedEuro = (n: number) => `${n > 0 ? "+" : ""}${euro(n)}`;
 
@@ -114,16 +118,17 @@ export default function Simulator({
   const chooseFund = (item: Instrument) => {
     setChosen(true);
     setPickedId(item.instrumentId);
+    setQuiet(false);
     setCurrent(c => (c === 1 ? 2 : c));
     const itemCap = monthsFor(item);
     if (itemCap > 0 && Number(months) > itemCap) {
       pendingSelect.current = item;
       edit(() => setMonths(String(itemCap)));
-    } else selectInstrument(item);
+    } else { requestedKey.current = keyFor(item.instrumentId); selectInstrument(item); }
   };
   useEffect(() => {
     const item = pendingSelect.current;
-    if (item && Number(months) <= monthsFor(item)) { pendingSelect.current = null; selectInstrument(item); }
+    if (item && Number(months) <= monthsFor(item)) { pendingSelect.current = null; requestedKey.current = keyFor(item.instrumentId); selectInstrument(item); }
   }, [months]);
   useEffect(() => { if (cap > 0 && monthsNumber > cap) setMonths(String(cap)); }, [cap, monthsNumber]);
   // First time the fund is chosen, bring step 2 into view without moving focus (the radio group keeps it).
@@ -136,8 +141,12 @@ export default function Simulator({
 
   const invalidField = (): FieldError => {
     const valid = (value: string, required: boolean) => (!required && !value.trim()) || (value.trim() !== "" && Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= MAX_SIMULATION_AMOUNT);
-    return !valid(initial, true) ? "initial" : !valid(monthly, false) ? "monthly" : null;
+    if (!valid(initial, true)) return "initial";
+    if (!valid(monthly, false)) return "monthly";
+    return Number(initial) + Number(monthly || 0) <= 0 ? "amounts" : null;
   };
+  // A language change aborts the request in flight (App), so forget what was requested and ask again if needed.
+  useEffect(() => { requestedKey.current = null; }, [language]);
   // Live updates: validate at once; recalculate only when valid, after a pause, and only once the first result was revealed.
   useEffect(() => {
     if (!chosen) return;
@@ -147,28 +156,50 @@ export default function Simulator({
     if (invalid) { setError(invalid); return; }
     if (!revealed || resultRef.current) return;
     if (exampleShown && !seenResult.current) return; // the app is still computing the ready-made example
-    const timer = setTimeout(() => runRef.current({ preventDefault() {} } as FormEvent), delay);
+    const key = keyFor(selected.instrumentId);
+    const timer = setTimeout(() => {
+      if (resultRef.current || requestedKey.current === key) return;
+      requestedKey.current = key;
+      runRef.current({ preventDefault() {} } as FormEvent);
+    }, delay);
     return () => clearTimeout(timer);
-  }, [initial, monthly, months, contributionFrequency, chosen, revealed]);
+  }, [initial, monthly, months, contributionFrequency, chosen, revealed, language]);
+
+  // After the answer the focused button disappears: move focus to the result heading.
+  useEffect(() => {
+    if (!revealed || !focusResult.current) return;
+    focusResult.current = false;
+    requestAnimationFrame(() => document.getElementById("jr-result-title")?.focus({ preventScroll: false }));
+  }, [revealed]);
 
   const answer = (value: Guess) => {
     if (error || invalidField()) return;
     immediate.current = true;
+    focusResult.current = true;
+    if (!resultRef.current) requestedKey.current = null;
+    setQuiet(false);
     setGuess(value);
   };
 
   const goTo = (step: Step) => {
     if (step > unlocked) return;
+    setQuiet(false);
     setCurrent(step);
-    requestAnimationFrame(() => {
-      const heading = document.getElementById(`jr-h-${step}`);
+    // Step 3 loads lazily: wait (a few frames at most) for its heading before moving focus.
+    let frames = 0;
+    const settle = () => {
+      const heading = document.getElementById(step === 3 ? "hsg-title" : `jr-h-${step}`);
+      if (!heading && frames++ < 90) { requestAnimationFrame(settle); return; }
       document.getElementById(`jr-step-${step}`)?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
       heading?.focus({ preventScroll: true });
-    });
+    };
+    requestAnimationFrame(settle);
   };
 
   const detail = level === "advanced" ? "short" : level === "intermediate" ? "short" : "full";
-  const guideKey = current === 1 ? (chosen ? "s1back" : "s1") : current === 2 ? (revealed ? "s2post" : "s2pre") : gameRevealed ? "s3post" : "s3pre";
+  const guideKey = current === 1 ? (chosen ? "s1back" : "s1") : current === 2 ? (revealed ? "s2post" : "s2pre") : gameSeen ? "s3post" : "s3pre";
+  // Moving between steps by focus or click only updates the display: it is not announced.
+  const track = (n: Step) => { if (n <= unlocked && n !== current) { setQuiet(true); setCurrent(n); } };
   const guideText = j.guide[guideKey][detail];
 
   const barPart = (r: ViewResult) => {
@@ -222,7 +253,7 @@ export default function Simulator({
           <Lightbulb size={20} aria-hidden="true" />
           <div className="jr-guide-body">
             <strong>{j.guideLabel}</strong>
-            <div aria-live="polite" aria-atomic="true" id="jr-guide-text">{guideOpen && <p>{guideText}</p>}</div>
+            <div aria-live={quiet ? "off" : "polite"} aria-atomic="true" id="jr-guide-text">{guideOpen && <p>{guideText}</p>}</div>
           </div>
           {level === "advanced" && (
             <button type="button" className="jr-guide-toggle" aria-expanded={guideOpen} aria-controls="jr-guide-text" onClick={() => setGuideOpen(open => !open)}>
@@ -231,11 +262,11 @@ export default function Simulator({
           )}
         </div>
 
-        <section id="jr-step-1" className="jr-step jr-c1" aria-labelledby="jr-h-1">
+        <section id="jr-step-1" className="jr-step jr-c1" aria-labelledby="jr-h-1" onFocusCapture={() => track(1)} onClickCapture={() => track(1)}>
           <p className="jr-step-label">{j.stepOf(1)}</p>
           <h2 id="jr-h-1" tabIndex={-1}>{j.s1Title}</h2>
           <p className="jr-intro">{j.s1Intro}</p>
-          <p className="jr-source-note"><FlaskConical size={16} aria-hidden="true" /><span>{selected.dataStatus === "historical_nav" ? j.banner : selected.dataStatus === "fictional" ? t.simWarning : selected.dataStatus === "annual_history" ? t.historyIntro : t.missingHistory}</span></p>
+          <p className="jr-source-note"><FlaskConical size={16} aria-hidden="true" /><span>{!chosen || selected.dataStatus === "historical_nav" ? j.banner : selected.dataStatus === "fictional" ? t.simWarning : selected.dataStatus === "annual_history" ? t.historyIntro : t.missingHistory}</span></p>
           <div className="jr-funds" role="radiogroup" aria-label={t.instrument}>
             {cards.map(({ item, metrics }) => {
               const usable = item.dataStatus === "historical_nav" && metrics.values.length > 1;
@@ -290,7 +321,7 @@ export default function Simulator({
         </section>
 
         {unlocked >= 2 && (
-          <section id="jr-step-2" className="jr-step jr-c2" aria-labelledby="jr-h-2">
+          <section id="jr-step-2" className="jr-step jr-c2" aria-labelledby="jr-h-2" onFocusCapture={() => track(2)} onClickCapture={() => track(2)}>
             <p className="jr-step-label">{j.stepOf(2)}</p>
             <h2 id="jr-h-2" tabIndex={-1}>{j.s2Title}</h2>
             <p className="jr-intro">{j.s2Intro}</p>
@@ -302,7 +333,7 @@ export default function Simulator({
                     type="button"
                     className="jr-preset"
                     aria-pressed={matchesPreset(p, initial, monthly) && contributionFrequency === "monthly"}
-                    onClick={() => edit(() => { setInitial(String(p.initial)); setMonthly(String(p.monthly)); setContributionFrequency("monthly"); })}
+                    onClick={() => { if (initial === String(p.initial) && monthly === String(p.monthly) && contributionFrequency === "monthly") return; edit(() => { setInitial(String(p.initial)); setMonthly(String(p.monthly)); setContributionFrequency("monthly"); }); }}
                   >
                     {p.id === "lump" ? j.lump(money(p.initial)) : j.gradual(money(p.monthly))}
                   </button>
@@ -314,7 +345,7 @@ export default function Simulator({
                   <span className="jr-field">
                     <input
                       type="number" inputMode="decimal" min="0" max={MAX_SIMULATION_AMOUNT} step="any"
-                      aria-invalid={error === "initial"} aria-describedby={error === "initial" ? "sim-error" : undefined}
+                      aria-invalid={error === "initial" || error === "amounts"} aria-describedby={error === "initial" || error === "amounts" ? "sim-error" : undefined}
                       value={initial} required
                       onChange={e => edit(() => setInitial(e.target.value))}
                     />
@@ -326,7 +357,7 @@ export default function Simulator({
                   <span className="jr-field">
                     <input
                       type="number" inputMode="decimal" min="0" max={MAX_SIMULATION_AMOUNT} step="any"
-                      aria-invalid={error === "monthly"} aria-describedby={error === "monthly" ? "sim-error" : undefined}
+                      aria-invalid={error === "monthly" || error === "amounts"} aria-describedby={error === "monthly" || error === "amounts" ? "sim-error" : undefined}
                       value={monthly}
                       onChange={e => edit(() => setMonthly(e.target.value))}
                     />
@@ -336,7 +367,7 @@ export default function Simulator({
               </div>
               {error && (
                 <p id="sim-error" className="error" role="alert">
-                  {error === "initial" ? t.initial : error === "annual" ? t.annualContribution : error === "monthly" ? t.monthly : t.invalid}: {t.amountError}
+                  {error === "amounts" ? j.bothZero : <>{error === "initial" ? t.initial : error === "annual" ? t.annualContribution : error === "monthly" ? t.monthly : t.invalid}: {t.amountError}</>}
                 </p>
               )}
               <div className="jr-slider">
@@ -385,12 +416,12 @@ export default function Simulator({
             {revealed && (
               <div className="sim-result" aria-busy={!currentResult && !error}>
                 <div className="jr-result-head">
-                  <h3>{j.resultTitle}</h3>
+                  <h3 id="jr-result-title" tabIndex={-1}>{j.resultTitle}</h3>
                   <span className="pill">{j.pill}</span>
                 </div>
                 <p><strong>{selected.name[language]}</strong> · {j.manager}: {selected.manager}</p>
                 <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-                  {currentResult ? `${t.resultUpdated}: ${euro(currentResult.value)}, ${t.totalPaid}: ${euro(currentResult.contributed)}.` : ""}
+                  {currentResult ? `${t.resultUpdated}: ${euro(currentResult.value)}, ${t.totalPaid}: ${euro(currentResult.contributed)}.${verdict && guess ? ` ${j.yourGuess(j.answers[guess])} ${actualText} ${verdict.matched ? j.matched : j.missed}` : ""}` : ""}
                 </span>
                 {!currentResult ? (
                   <div role="status" className="jr-pending" style={lastHeight.current ? { minHeight: lastHeight.current } : undefined}>
@@ -398,7 +429,7 @@ export default function Simulator({
                   </div>
                 ) : (
                   <div ref={resultBody}>
-                    <div className="jr-feedback" aria-live="polite">
+                    <div className="jr-feedback">
                       <p className="jr-fact">{j.fact(euro(currentResult.value), euro(currentResult.contributed), signedEuro(currentResult.profit))}</p>
                       {verdict && guess && (
                         <p>{j.yourGuess(j.answers[guess])} {actualText} <strong>{verdict.matched ? j.matched : j.missed}</strong></p>
@@ -466,7 +497,7 @@ export default function Simulator({
         )}
 
         {unlocked >= 3 && (
-          <section id="jr-step-3" className="jr-step jr-c3" aria-label={j.steps[2]}>
+          <section id="jr-step-3" className="jr-step jr-c3" aria-label={j.steps[2]} onFocusCapture={() => track(3)} onClickCapture={() => track(3)}>
             <Suspense fallback={<p role="status">{language === "es" ? "Cargando ejercicio…" : "Loading exercise…"}</p>}>
               <HoldSellGame
                 language={language} level={level} mode={mode} instruments={instruments} navHistory={navHistory}
