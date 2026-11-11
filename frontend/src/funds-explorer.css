@@ -715,3 +715,9 @@ html .fund-help button + button { color:var(--ink); background:var(--surface); }
  .fund-chart--compact { margin-top:8px; padding-top:8px; }
 }
 .institution-label { margin:8px 0 14px; color:var(--muted); font-size:13px; }.filter-disclosure { margin:12px 0; }.filter-disclosure summary { cursor:pointer; min-height:44px; font-weight:700; }.beginner-guide input { min-width:0; width:100%; min-height:44px; background:var(--surface); color:var(--ink); border:1px solid var(--border); border-radius:8px; padding:8px; }
+
+.nav-line { display: grid; gap: .5rem; margin: .5rem 0; }
+.nav-line__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
+.nav-line__head p { margin: 0; color: var(--muted); }
+.nav-line__head strong { color: var(--ink); }
+.nav-line__plot { height: 200px; min-width: 0; }

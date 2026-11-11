@@ -29,16 +29,18 @@ test('levels change appearance in both themes while chart meanings remain fixed'
  }
  await page.goto('http://127.0.0.1:5194/'); await page.getByRole('button',{name:'Explorar',exact:true}).click();
  await levels.getByRole('button',{name:'Intermedio',exact:true}).click();
- await expect(page.locator('.annual-row .negative')).toHaveCount(28);
- await expect(page.locator('.annual-row .positive')).toHaveCount(44);
- await expect(page.locator('.annual-row').first()).toContainText('-0,01');
+ // Explorar muestra una línea compacta (NavLineChart) y la tabla mensual completa en «Ver cifras».
+ const rows = page.locator('.fund-chart').first().locator('.mini-values tbody tr');
+ await expect(rows).toHaveCount(72);
+ await expect(rows.first()).toContainText('-0,01');
+ await expect(page.locator('.fund-chart .nav-line').first()).toBeVisible();
 });
 
 test('Mi cartera chart: area gradient, DEMO label, data table alternative and no unnamed tab stops', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode','local'));
  await page.goto('/'); await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
  const chart = page.locator('.dash-evo').first();
- await expect(chart.locator('.dash-demo').first()).toBeVisible();
+ await expect(page.locator('.dash-section__head .dash-demo').first()).toBeVisible();
  await expect(chart.locator('linearGradient stop[stop-color="var(--chart-line)"]').first()).toBeAttached();
  await expect(chart.locator('.dash-evo__last')).toContainText('€');
  // El gráfico es una imagen con nombre; la alternativa es la tabla de datos y no hay paradas de tabulación dentro del SVG.
@@ -67,21 +69,14 @@ test('single observation shows a neutral point', async ({page}) => {
  await expect(page.getByRole('cell',{name:'Starting point'})).toBeVisible();
 });
 
-test('home destination cards use the neutral surface and readable text in all levels and themes', async ({page}) => {
+test('home assistant buttons are large touch targets in all levels and themes', async ({page}) => {
  for (const theme of ['light','dark'] as const) {
   for (const level of ['beginner','intermediate','advanced'] as const) {
    await openApp(page, {level, theme});
-   const cards = page.locator('.home__service');
-   await expect(cards).toHaveCount(4);
-   const backgrounds = await cards.evaluateAll(els => els.map(el => getComputedStyle(el).backgroundColor));
-   expect(new Set(backgrounds).size).toBe(1);
-   const surface = await page.evaluate(() => { const probe = document.createElement('div'); probe.style.background = 'var(--surface)'; document.body.appendChild(probe); const c = getComputedStyle(probe).backgroundColor; probe.remove(); return c; });
-   expect(backgrounds[0]).toBe(surface);
-   const contrasts = await cards.evaluateAll(els => {
-    const luminance = (color: string) => color.match(/\d+/g)!.slice(0,3).map(Number).map(v => v/255).map(v => v <= .04045 ? v/12.92 : ((v+.055)/1.055)**2.4).reduce((sum,v,i) => sum + v * [.2126,.7152,.0722][i],0);
-    return els.flatMap(card => ['strong','span'].filter(selector => card.querySelector(selector)).map(selector => { const bg = luminance(getComputedStyle(card).backgroundColor), fg = luminance(getComputedStyle(card.querySelector(selector)!).color); return (Math.max(bg,fg)+.05)/(Math.min(bg,fg)+.05); }));
-   });
-   for (const contrast of contrasts) expect(contrast).toBeGreaterThanOrEqual(4.5);
+   const cards = page.locator('.home__assist button');
+   await expect(cards).toHaveCount(2);
+   const heights = await cards.evaluateAll(els => els.map(el => el.getBoundingClientRect().height));
+   for (const h of heights) expect(h).toBeGreaterThanOrEqual(44);
   }
  }
 });

@@ -266,11 +266,11 @@ test('guide adapts to the level: advanced collapses it behind a toggle', async (
   await openSimulator(page);
   const guide = page.locator('.jr-guide');
   await expect(guide).toContainText('Cada tarjeta muestra cómo cambió su valor mes a mes');
-  await page.getByRole('button', { name: /Detalle: Básico/ }).click();
+  await page.getByRole('button', { name: /Nivel: Básico/ }).click();
   await page.getByRole('button', { name: 'Intermedio', exact: true }).click();
   await expect(guide).toContainText('Elige un fondo para empezar.');
   await expect(guide).not.toContainText('Cada tarjeta muestra');
-  await page.getByRole('button', { name: /Detalle: Intermedio/ }).click();
+  await page.getByRole('button', { name: /Nivel: Intermedio/ }).click();
   await page.getByRole('button', { name: 'Avanzado', exact: true }).click();
   const toggle = guide.getByRole('button', { name: 'Mostrar guía' });
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');

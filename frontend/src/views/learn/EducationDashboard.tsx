@@ -1,10 +1,10 @@
 import { ArrowRight, BookOpen, Compass, Lightbulb, Shuffle } from "lucide-react";
 import { useMemo, useState } from "react";
-import { demoFunds, DEMO_NOTE } from "../../../../shared/mock/demo-portfolio.ts";
+import { DEMO_NOTE } from "../../../../shared/mock/demo-portfolio.ts";
 import { DemoBadge, DonutCard, KpiCard, KpiRow, MetricBar, Section } from "../../components/dashboard/index.ts";
 import { assetClassNames, type Lang } from "../../components/dashboard/copy.ts";
 import { eur, num, pct } from "../../components/dashboard/format.ts";
-import { buildDemoPortfolio } from "../../dashboard-portfolio.ts";
+import { buildDemoPortfolio, type DemoPortfolio } from "../../dashboard-portfolio.ts";
 import { runScenario } from "../../game-scenarios.ts";
 import type { Level, Theme } from "../../types/level.ts";
 import MifidPractice from "./MifidPractice.tsx";
@@ -52,35 +52,36 @@ const tx = {
     daily: "Concepto del día", another: "Otro concepto", glossary: "Glosario básico", paths: "Rutas cortas", pathsDesc: "Tres recorridos de unos minutos.",
     goSim: "Probar en la simulación", riskCosts: "Riesgo y costes", riskCostsDesc: "Riesgo del producto (1 a 7) y coste anual de cada fondo DEMO sobre 10.000 €.",
     fund: "Fondo", cls: "Clase", risk: "Riesgo", ter: "TER", cost10k: "Coste anual / 10.000 €", cost10y: "Coste en 10 años",
-    allocation: "Asignación de activos", allocationDesc: "Reparto por clase de activo de la cartera DEMO de ejemplo.",
+    allocation: "Asignación de activos", allocationDesc: "Reparto por clase de activo de tu cartera (la misma de «Mi cartera»).",
     riskMetrics: "Métricas de riesgo", vol: "Volatilidad anual", dd: "Caída máxima", sharpe: "Ratio de Sharpe", metricsNote: "Calculadas sobre rentabilidades mensuales DEMO; no son datos reales ni predicen nada.",
     costsCompare: "Costes (TER) y comparación de fondos", costsNote: "Coste en 10 años: 10.000 € sin aportaciones con una rentabilidad bruta supuesta del 4 % anual (supuesto ilustrativo, no previsión), restando solo el TER.",
-    equity: "Exposición a renta variable", avgRisk: "Riesgo medio ponderado", na: "n. d.",
+    equity: "Exposición a renta variable", avgRisk: "Riesgo medio ponderado", na: "sin dato",
   },
   en: {
     title: "Education", subtitle: "Learn at your own pace with educational content; it is not advice or a recommendation.",
     daily: "Concept of the day", another: "Another concept", glossary: "Basic glossary", paths: "Short paths", pathsDesc: "Three routes of a few minutes each.",
     goSim: "Try it in the simulation", riskCosts: "Risk and costs", riskCostsDesc: "Product risk (1 to 7) and annual cost of each DEMO fund on 10,000 €.",
     fund: "Fund", cls: "Class", risk: "Risk", ter: "TER", cost10k: "Annual cost / 10,000 €", cost10y: "Cost over 10 years",
-    allocation: "Asset allocation", allocationDesc: "Split by asset class of the sample DEMO portfolio.",
+    allocation: "Asset allocation", allocationDesc: "Split by asset class of your portfolio (the same as in “My portfolio”).",
     riskMetrics: "Risk metrics", vol: "Annual volatility", dd: "Maximum drawdown", sharpe: "Sharpe ratio", metricsNote: "Computed from DEMO monthly returns; not real data and predicting nothing.",
     costsCompare: "Costs (TER) and fund comparison", costsNote: "Cost over 10 years: 10,000 € with no contributions at an assumed 4% gross annual return (illustrative assumption, not a forecast), deducting only the TER.",
-    equity: "Equity exposure", avgRisk: "Weighted average risk", na: "n/a",
+    equity: "Equity exposure", avgRisk: "Weighted average risk", na: "no data",
   },
 } as const;
 
 function dayIndex() { const d = new Date(); return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(d.getFullYear(), 0, 0)) / 86400000); }
 
-export default function EducationDashboard({ language, level, theme: _theme, onGoSimulation }: { language: Lang; level: Level; theme?: Theme; onGoSimulation?: () => void }) {
+export default function EducationDashboard(props: { language: Lang; level: Level; theme?: Theme; portfolio?: DemoPortfolio; onGoSimulation?: () => void }) {
+  const { language, level, onGoSimulation } = props;
   const t = tx[language];
   const [offset, setOffset] = useState(0);
   const concept = concepts[(dayIndex() + offset) % concepts.length];
-  const portfolio = useMemo(() => buildDemoPortfolio(), []);
+  const portfolio = useMemo(() => props.portfolio ?? buildDemoPortfolio(), [props.portfolio]);
   // Solo fondos DEMO ficticios con TER supuesto (un TER desconocido no se trata como 0).
-  const costRows = useMemo(() => demoFunds.flatMap((f) => f.ter == null ? [] : [{
+  const costRows = useMemo(() => portfolio.positions.map((r) => r.fund).flatMap((f) => f.ter == null ? [] : [{
     fund: f, ter: f.ter, annual: (f.ter / 100) * 10000,
     ten: runScenario({ initial: 10000, monthly: 0, years: 10 }, { id: f.id, kind: "constant", grossAnnualPct: 4, costAnnualPct: f.ter }).costEur,
-  }]), []);
+  }]), [portfolio]);
 
   const conceptCard = (
     <article className="dash-card edu-concept">
@@ -172,7 +173,7 @@ export default function EducationDashboard({ language, level, theme: _theme, onG
       )}
 
       {level === "advanced" && conceptCard}
-      <MifidPractice key={level} language={language} level={level} />
+      <div data-tour="mifid"><MifidPractice key={level} language={language} level={level} /></div>
     </div>
   );
 }

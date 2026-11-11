@@ -9,6 +9,7 @@ import GoalsPanel from "./GoalsPanel";
 import { annualPeriods } from "./annual-periods";
 import { LEVELS, LEVEL_LABELS, type Level } from "./types/level";
 import manifest from "../../shared/data-manifest.json";
+import NavLineChart from "./components/NavLineChart";
 
 type Props = {
   language: Language;
@@ -293,6 +294,19 @@ export default function FundsExplorer({
                 </details>
               </>
             ) : (
+              i.dataStatus === "historical_nav" ? (
+                <>
+                  <NavLineChart rows={navHistory.instruments.find(h => h.isin === i.identifier && h.eligible)?.monthly ?? []} language={language} label={historyLabel(i)} />
+                  <details>
+                    <summary>{es ? "Ver cifras" : "View figures"}</summary>
+                    <table className="mini-values">
+                      <caption>{historyLabel(i)}</caption>
+                      <thead><tr><th scope="col">{es ? "Mes" : "Month"}</th><th scope="col">{es ? "Variación" : "Change"}</th></tr></thead>
+                      <tbody>{rows.map((row) => <tr key={row.label}><th scope="row">{row.label}</th><td>{percent(row.rate)}</td></tr>)}</tbody>
+                    </table>
+                  </details>
+                </>
+              ) : (
               <div className="annual-bars">
                 {rows.map((row) => (
                   <div className="annual-row" key={row.label}>
@@ -313,6 +327,7 @@ export default function FundsExplorer({
                   </div>
                 ))}
               </div>
+              )
             )}
             {compact && (
               <p>

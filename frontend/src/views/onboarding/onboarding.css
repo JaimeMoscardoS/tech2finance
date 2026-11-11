@@ -1,0 +1,27 @@
+.onb-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, #050a18 55%, transparent); }
+.onb-dialog { width: min(100%, 30rem); display: grid; gap: 1rem; padding: 1.5rem; border-radius: 20px; background: var(--surface); color: var(--ink); border: 1px solid var(--card-border); box-shadow: 0 24px 60px rgba(0, 0, 0, .3); }
+.onb-dialog h2 { margin: 0; font-size: 1.35rem; }
+.onb-options { display: grid; gap: .6rem; }
+.onb-option { display: grid; gap: .2rem; min-height: 56px; padding: .8rem 1rem; text-align: left; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.onb-option strong { font-size: 1.02rem; }
+.onb-option span { color: var(--muted); font-size: .88rem; }
+.onb-option:hover { border-color: var(--accent); background: var(--accent-soft); }
+.onb-hint { margin: 0; color: var(--muted); font-size: .88rem; }
+.onb-skip { justify-self: end; min-height: 44px; padding: .4rem 1rem; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--ink); font: inherit; cursor: pointer; }
+.onb-option:focus-visible, .onb-skip:focus-visible, .tour button:focus-visible, .tour__card:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.tour { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+.tour__spot { position: fixed; border-radius: 18px; border: 3px solid var(--accent); box-shadow: 0 0 0 9999px color-mix(in srgb, #050a18 45%, transparent); transition: top .3s ease, left .3s ease, width .3s ease, height .3s ease; }
+.tour__card { pointer-events: auto; position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); width: min(calc(100% - 32px), 28rem); display: grid; gap: .5rem; padding: 1.1rem 1.25rem; border-radius: 18px; background: var(--surface); color: var(--ink); border: 1px solid var(--card-border); box-shadow: 0 18px 48px rgba(0, 0, 0, .35); }
+.tour__card h2 { margin: 0; font-size: 1.15rem; }
+.tour__card p { margin: 0; line-height: 1.5; }
+.tour__count { color: var(--muted); font-size: .8rem; font-weight: 600; }
+.tour__actions { display: flex; gap: .5rem; align-items: center; margin-top: .25rem; }
+.tour__actions button { display: inline-flex; align-items: center; gap: .3rem; min-height: 44px; padding: .4rem .9rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.tour__actions button:disabled { opacity: .45; cursor: default; }
+.tour__primary { background: var(--accent) !important; color: var(--on-accent, #fff) !important; border-color: var(--accent) !important; font-weight: 700 !important; }
+.tour__close { margin-left: auto; min-width: 44px; justify-content: center; }
+@media (prefers-reduced-motion: reduce) { .tour__spot { transition: none; } }
+.present-button { display: inline-flex; align-items: center; gap: .35rem; min-height: 40px; padding: .3rem .75rem; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--ink); font: inherit; font-size: .85rem; cursor: pointer; }
+.present-button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (max-width: 640px) { .present-button span { display: none; } .present-button { min-width: 44px; min-height: 44px; justify-content: center; } }

@@ -202,3 +202,28 @@ Se fusiona `origin/main` en la rama sin descartar el diseño por nivel. Detalle 
 - **Pendiente**: revisión visual en móvil y con lector de pantalla.
 - **Cambios de comportamiento hechos al probar** (mínimos): el botón superior del asistente se llama «Tu asistente» (antes repetía «Abrir asistente» de la barra lateral y chocaba por nombre accesible); el contenido de «¿Y si vendo?» solo se monta con su pestaña activa (evita etiquetas de formulario duplicadas y ocultas con las del simulador de producto); al cerrar la pausa, si el disparador ya no existe (p. ej. «Probar una caída» cambia de página), el foco pasa al contenido principal en lugar de perderse.
 - **Cifras de pruebas** (calculadas por la app y contrastadas con un cálculo independiente sobre `shared/nav-history.json`; las mismas en `frontend/src/portfolio-real.test.ts` y `backend/tests/test_nav_history.py`): cartera con NAV CNMV 2019-12-31 a 2025-12-31 (73 observaciones, 72 meses), 5 fondos × 5.000 € DEMO: coste 25.000 €, valor 28.175,75 € (28.176 €), caída máxima 8,79 % (pico 2019-12, mínimo 2020-03; recuperación 2021-07). Las cifras 744,62 / 25,54 % de `main` son las de la simulación de ejemplo y la serie `portfolio_demo` («Probar una caída»).
+
+
+## Mejoras para el jurado (rama `mejoras-jurado`, 11-11-2026)
+
+**Implementado**
+- **Una sola cartera**: App construye `shownPortfolio` (valores liquidativos CNMV; DEMO solo como respaldo sin datos) y la pasan Inicio, «Mi cartera», Educación (asignación, métricas y tabla TER) y el asistente. Mismas cifras en todas las vistas.
+- **Perfiles DEMO** (`shared/mock/demo-fund-profiles.ts`, por `instrumentId`): clase, región, riesgo 1-7, TER y exposición a renta variable supuestos según el tipo de fondo, inyectados por `buildRealPortfolio(nav, info)` (`info[isin].profile`). Exposición geográfica, divisa, mapa de calor y operaciones (la compra única DEMO al inicio de la serie) ya no salen vacíos.
+- **Objetivo DEMO**: `monthsTotal: 120`; los meses transcurridos se calculan con la serie (72 con CNMV 2019-12 – 2025-12).
+- **Inicio**: resumen de cartera y, al lado (≥ 1180 px; debajo en móvil), el asistente con botones grandes «¿Qué estoy viendo?» y «¿Cómo van las cosas?», más «Probar una caída» y «¿Te preocupa la caída?». Se eliminan la lista de accesos (duplicaba la barra lateral) y los enlaces sueltos; «Conoce BancoT2F» es un `<details>` al final.
+- **Simulador**: primero «Recorrido en 3 pasos con fondos reales» (con título), después los escenarios ilustrativos DEMO y el acceso a la práctica.
+- **Menos ruido**: un `<details class="dash-origin">` «Origen de los datos» en Inicio y Mi cartera; una etiqueta DEMO por sección (no por KPI ni gráfica); KPI «Último mes» sin chip que repetía el valor; «Conexión · Servidor de demo» solo en desarrollo (`import.meta.env.DEV`).
+- **Lenguaje**: `monthLabel` («mar 2020»), `axisEur` («26,5 mil €» en una línea), «sin dato» en lugar de «n. d.»/«No disponible», meses Ene…Dic en el mapa de calor con año real, sin «NAV» en textos visibles de las vistas tocadas.
+- **Explorar**: `NavLineChart` (línea base 100 con 1A/3A/Máx) sustituye a las 72 barras; la tabla sigue en «Ver cifras».
+- **Básico**: una frase por bloque en el asistente de Inicio y en las tarjetas de fondo.
+- **Cabecera**: «Nivel: Básico».
+- **IA real**: `POST /api/insights` (backend `insights.py`, pruebas `backend/tests/test_insights.py`); cliente `frontend/src/insights.ts` (`insightFacts`, `useInsight` con caché y respaldo). Se retira «Esta fase no usa IA real».
+- **Bienvenida** (`views/onboarding/WelcomeDialog.tsx`): 3 opciones que fijan el nivel, línea explicativa y «Saltar»; `localStorage` `t2f-welcome-done`. No aparece en navegadores automatizados salvo `?welcome=1`.
+- **Modo presentación** (`PresentationTour.tsx`): botón «Presentar» en la cabecera o `?demo=1`; 5 pasos (resumen → asistente → «Probar una caída» → Simulador «¿Y si vendo?» (o el recorrido si el paso 3 aún no está desbloqueado) → Test MiFID), con foco resaltado, Siguiente/Anterior, flechas y Esc.
+- **Visual**: progresión clara en tema claro (fondo `#F6F9FD` → `#EDF1F7` → `#E1E7EF`; cabecera blanca → azulada con filo marino → marino); KPIs de igual altura; más aire; botones táctiles ≥ 44 px en las piezas nuevas.
+
+**Decisiones**: los perfiles DEMO de fondos reales se marcan DEMO y se explican en «Origen de los datos» (no son datos del folleto); el modelo no escribe cifras (las muestra el código al lado); la bienvenida no se fuerza en pruebas automatizadas.
+
+**Contraste** (fórmula WCAG, 11-11-2026): texto, secundario, acento, positivo y negativo ≥ 4,63:1 sobre `#EDF1F7`, `#E3EAF5` y `#E1E7EF`.
+
+**Pendiente**: prueba con modelo real (solo proveedor simulado en pruebas); revisión ampliada del PR; pruebas Playwright específicas de bienvenida y presentación.

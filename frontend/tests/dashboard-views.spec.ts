@@ -11,7 +11,9 @@ test.describe('Inicio', () => {
     await expect(page.locator('.dash-kpi')).toHaveCount(3);
     await expect(page.locator('.dash-demo').first()).toBeVisible();
     // Inicio usa la misma cartera que «Mi cartera»: NAV reales CNMV y participaciones DEMO, dicho explícitamente.
-    await expect(page.getByText(/Valores liquidativos mensuales reales \(CNMV, 2019-12-31 – 2025-12-31\); participaciones, efectivo y objetivo son DEMO/).first()).toBeVisible();
+    const origin = page.locator('details.dash-origin').first();
+    await origin.locator('summary').click();
+    await expect(origin).toContainText('Valores liquidativos mensuales reales (CNMV, dic 2019 – dic 2025). Participaciones, efectivo y objetivo son DEMO');
     await expect(page.locator('.dash-kpi__value').first()).toContainText('€');
   });
 
@@ -103,7 +105,7 @@ test.describe('Educación y Test MiFID', () => {
 
 test.describe('Simulador', () => {
   // El producto del catálogo es el recorrido guiado de 3 pasos de main (paso 3: «¿Y si vendo?»); su paso 1 es #jr-h-1.
-  test('Básico: juego guiado arriba, práctica accesible y recorrido de producto debajo', async ({ page }) => {
+  test('Básico: recorrido de producto arriba, juego guiado DEMO y práctica debajo', async ({ page }) => {
     await openApp(page, { level: 'beginner' });
     await goTo(page, 'simulator');
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
@@ -114,7 +116,7 @@ test.describe('Simulador', () => {
     await expect(page.getByRole('button', { name: 'Explícame esta simulación' })).toBeVisible();
     const guided = await page.getByRole('heading', { name: 'Elige cuánto ahorrarías al mes' }).boundingBox();
     const catalog = await page.locator('#jr-h-1').boundingBox();
-    expect(guided!.y).toBeLessThan(catalog!.y);
+    expect(catalog!.y).toBeLessThan(guided!.y);
     await page.getByRole('group', { name: 'Ahorro al mes' }).getByRole('button', { name: /200/ }).click();
     await expect(page.getByRole('group', { name: 'Ahorro al mes' }).getByRole('button', { name: /200/ })).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('.journey')).toBeVisible();
@@ -131,7 +133,7 @@ test.describe('Simulador', () => {
     await expect(page.getByRole('button', { name: 'Abrir práctica guiada' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Comparar escenarios y plazos' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Evolución ilustrativa' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Comparación de periodos', exact: true })).toBeVisible();
+    await expect(page.locator('div[role=region][aria-label="Comparación de periodos"]')).toBeVisible();
     await expect(page.getByText('Equilibrado: Supone 4 % bruto anual')).toBeVisible();
     await expect(page.getByRole('combobox', { name: /^Escenario/ })).toBeVisible();
     await page.getByLabel('Capital inicial (€)').fill('0');
@@ -151,12 +153,12 @@ test.describe('Simulador', () => {
     await expect(page.getByRole('spinbutton', { name: 'Años' })).toHaveAttribute('aria-describedby', id!);
   });
 
-  test('Avanzado: tabla de escenarios marcada con texto y aria-current, plazos, condiciones y recorrido de producto debajo', async ({ page }) => {
+  test('Avanzado: recorrido de producto arriba; tabla de escenarios con aria-current, plazos y condiciones debajo', async ({ page }) => {
     await openApp(page, { level: 'advanced' });
     await goTo(page, 'simulator');
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
     await expect(page.getByRole('heading', { name: 'Condiciones y costes' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Comparación de periodos', exact: true })).toBeVisible();
+    await expect(page.locator('div[role=region][aria-label="Comparación de periodos"]')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Abrir práctica guiada' })).toBeVisible();
     const current = page.locator('.sim-table tr[aria-current="true"]');
     await expect(current).toHaveCount(1);
@@ -165,7 +167,7 @@ test.describe('Simulador', () => {
     await expect(current).toContainText('Dinámico');
     const scenarios = await page.getByRole('heading', { name: 'Escenarios múltiples' }).boundingBox();
     const catalog = await page.locator('#jr-h-1').boundingBox();
-    expect(scenarios!.y).toBeLessThan(catalog!.y);
+    expect(catalog!.y).toBeLessThan(scenarios!.y);
   });
 });
 
