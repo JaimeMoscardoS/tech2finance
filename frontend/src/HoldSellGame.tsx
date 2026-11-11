@@ -13,7 +13,7 @@ type Props = {
   level: Level;
   mode: 'server' | 'local';
   instruments: Instrument[];
-  navHistory: Pick<NavHistory, 'instruments'>;
+  navHistory: Pick<NavHistory, 'instruments' | 'source'>;
   /** Initial state only: later changes in the simulator do not overwrite what the user typed here. */
   defaults: { instrumentId: string; initial: string; monthly: string; months: string };
 };
@@ -31,6 +31,7 @@ const words = {
     sellHelp: (months: number) => `Entre 0 y ${months}. El mes 0 es el primer cierre.`,
     closeOf: (month: string, date: string) => `Cierre del mes ${month}: ${date}`,
     periodOf: (a: string, b: string) => `Periodo: ${a} – ${b}`,
+    startNote: (a: string) => `El ejercicio siempre empieza en el primer cierre observado (${a}) y cubre hasta 72 meses; elegir otro mes de inicio queda pendiente.`,
     fees: 'Comisiones (opcional)', feesHelp: 'Comisiones del ejercicio, entre 0 y 5 % de cada operación y aparte de los costes ya incluidos en el valor liquidativo. No se incluyen impuestos.', buyFee: 'Comisión de compra (%)', sellFee: 'Comisión de venta (%)',
     run: 'Comparar mantener y vender', running: 'Calculando…',
     pending: 'Calculando la comparación.', ready: 'Comparación lista.', cleared: 'La comparación anterior se ha borrado. Vuelve a comparar.',
@@ -41,7 +42,7 @@ const words = {
     chartTitle: 'Valor total en cada mes', holdLine: 'Si mantengo', sellLine: 'Si vendo', sellMarker: (month: number) => `Venta · mes ${month}`, monthAxis: 'Mes', euroAxis: 'Euros',
     chartLabel: (a: string, b: string, months: number, hold: string, sell: string, sellMonth: number) => `Gráfico de dos líneas del valor total, del ${a} al ${b} (${months} meses). Al final: si mantengo, ${hold}; si vendo en el mes ${sellMonth}, ${sell}.`,
     showTable: 'Ver tabla', hideTable: 'Ocultar tabla', tableCaption: 'Valor total por mes', colMonth: 'Mes', colDate: 'Fecha', colHold: 'Si mantengo', colSell: 'Si vendo', colContributed: 'Aportado',
-    source: 'Datos y fuente', dataLabel: 'Valores liquidativos mensuales publicados por la CNMV', period: 'Periodo', sourceLink: 'Ficha de la fuente', realData: 'Datos históricos reales observados, no ficticios.',
+    source: 'Datos y fuente', dataLabel: 'Valores liquidativos mensuales publicados por la CNMV', period: 'Periodo', sourceLink: 'Ficha de la fuente', legal: 'Condiciones de reutilización de la CNMV', realData: 'Datos históricos reales observados, no ficticios.',
     assumptions: 'Supuestos', engine: 'Motor de cálculo', dataset: 'Versión de los datos', unitNote: 'Participaciones virtuales fraccionarias del valor liquidativo; no son órdenes reales.',
   },
   en: {
@@ -56,6 +57,7 @@ const words = {
     sellHelp: (months: number) => `Between 0 and ${months}. Month 0 is the first close.`,
     closeOf: (month: string, date: string) => `Close of month ${month}: ${date}`,
     periodOf: (a: string, b: string) => `Period: ${a} – ${b}`,
+    startNote: (a: string) => `The exercise always starts at the first observed close (${a}) and covers up to 72 months; choosing another start month is pending.`,
     fees: 'Fees (optional)', feesHelp: 'Exercise fees, between 0 and 5% of each transaction and separate from costs already included in the net asset value. Taxes are not included.', buyFee: 'Purchase fee (%)', sellFee: 'Sale fee (%)',
     run: 'Compare holding and selling', running: 'Calculating…',
     pending: 'Calculating the comparison.', ready: 'Comparison ready.', cleared: 'The previous comparison was cleared. Compare again.',
@@ -66,7 +68,7 @@ const words = {
     chartTitle: 'Total value each month', holdLine: 'If I hold', sellLine: 'If I sell', sellMarker: (month: number) => `Sale · month ${month}`, monthAxis: 'Month', euroAxis: 'Euros',
     chartLabel: (a: string, b: string, months: number, hold: string, sell: string, sellMonth: number) => `Two-line chart of total value, from ${a} to ${b} (${months} months). At the end: if I hold, ${hold}; if I sell in month ${sellMonth}, ${sell}.`,
     showTable: 'View table', hideTable: 'Hide table', tableCaption: 'Total value by month', colMonth: 'Month', colDate: 'Date', colHold: 'If I hold', colSell: 'If I sell', colContributed: 'Contributed',
-    source: 'Data and source', dataLabel: 'Monthly net asset values published by the CNMV', period: 'Period', sourceLink: 'Source page', realData: 'Real observed historical data, not fictional.',
+    source: 'Data and source', dataLabel: 'Monthly net asset values published by the CNMV', period: 'Period', sourceLink: 'Source page', legal: 'CNMV reuse conditions', realData: 'Real observed historical data, not fictional.',
     assumptions: 'Assumptions', engine: 'Calculation engine', dataset: 'Data version', unitNote: 'Fractional virtual units of the net asset value; they are not real orders.',
   },
 } as const;
@@ -154,12 +156,13 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
   if (mode === 'local') return <section className="hsg" aria-labelledby="hsg-title">{heading}<p className="hsg-notice" role="status">{t.local}</p></section>;
   if (!instrument) return <section className="hsg" aria-labelledby="hsg-title">{heading}<p className="hsg-notice" role="status">{t.noFunds}</p></section>;
 
-  const describedBy = (field: GameField, ...ids: string[]) => [...ids, invalid === field ? 'hsg-form-error' : ''].filter(Boolean).join(' ') || undefined;
+  const flagged = (field: GameField) => invalid === field || (invalid === 'amounts' && (field === 'initial' || field === 'monthly'));
+  const describedBy = (field: GameField, ...ids: string[]) => [...ids, flagged(field) ? 'hsg-form-error' : ''].filter(Boolean).join(' ') || undefined;
   const sellNumber = numberOf(fields.sellMonth);
   const sellDate = Number.isInteger(sellNumber) ? dates[sellNumber] : undefined;
   const monthsNumber = numberOf(fields.months);
   const closeDate = Number.isInteger(monthsNumber) ? dates[monthsNumber] : undefined;
-  const aria = (field: GameField) => ({ 'aria-invalid': invalid === field || (field === 'initial' && invalid === 'amounts') || (field === 'monthly' && invalid === 'amounts') ? true : undefined });
+  const aria = (field: GameField) => ({ 'aria-invalid': flagged(field) ? true : undefined });
 
   const renderCard = (kind: 'hold' | 'sell', o: Outcome) => {
     const side = o.summary[kind];
@@ -198,8 +201,8 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
                 return <div className="hsg-tooltip"><strong>{t.monthAxis} {row.month} · {dateText(row.date)}</strong><span>{t.holdLine}: {money(row.hold)}</span><span>{t.sellLine}: {money(row.sell)}</span><span>{t.colContributed}: {money(row.contributed)}</span></div>;
               }} />
               <ReferenceLine x={spec.sellMonth} stroke="var(--ink)" strokeDasharray="2 3" label={{ value: t.sellMarker(spec.sellMonth), position: spec.sellMonth > spec.months / 2 ? 'insideTopRight' : 'insideTopLeft', fill: 'var(--ink)', fontSize: 12, fontWeight: 600 }} />
-              <Line type="linear" dataKey="hold" name={t.holdLine} stroke="var(--accent)" strokeWidth={3} dot={false} activeDot={{ r: 5 }} isAnimationActive={false} />
-              <Line type="linear" dataKey="sell" name={t.sellLine} stroke="var(--amber)" strokeWidth={3} strokeDasharray="8 5" dot={false} activeDot={{ r: 5 }} isAnimationActive={false} />
+              <Line type="linear" dataKey="hold" name={t.holdLine} stroke="var(--hsg-hold)" strokeWidth={3} dot={false} activeDot={{ r: 5 }} isAnimationActive={false} />
+              <Line type="linear" dataKey="sell" name={t.sellLine} stroke="var(--hsg-sell)" strokeWidth={3} strokeDasharray="8 5" dot={false} activeDot={{ r: 5 }} isAnimationActive={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -213,6 +216,7 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
         <p><strong>{instrument.name[language]}</strong> · {instrument.manager}</p>
         <p>{t.dataLabel}. {t.realData}</p>
         <p>{t.period}: {dateText(summary.periodStart)} – {dateText(summary.periodEnd)}{instrument.sourceUrl && <> · <a href={instrument.sourceUrl} target="_blank" rel="noreferrer">{t.sourceLink}</a></>}</p>
+        {/^https:\/\//.test(navHistory.source?.legalUrl ?? '') && <p><a href={navHistory.source.legalUrl} target="_blank" rel="noreferrer">{t.legal}</a></p>}
         <h4>{t.assumptions}</h4>
         <ul>{response.assumptions.map((text, i) => <li key={i}>{localizeAssumption(text, language)}</li>)}</ul>
         {level === 'advanced' && <dl className="hsg-technical"><div><dt>{t.engine}</dt><dd>{response.engine}</dd></div><div><dt>{t.dataset}</dt><dd>{response.provenance.datasetVersion}</dd></div><div><dt>{t.units}</dt><dd>{t.unitNote}</dd></div></dl>}
@@ -227,8 +231,8 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
     <form ref={formRef} className="hsg-form" onSubmit={submit} noValidate aria-busy={busy}>
       <div className="hsg-fields">
         <div className="hsg-field hsg-wide"><label htmlFor="hsg-fund">{t.fund}</label>
-          <select id="hsg-fund" value={instrument.instrumentId} onChange={e => changeFund(e.target.value)} aria-describedby="hsg-fund-help" {...aria('instrument')}>{eligible.map(i => <option key={i.instrumentId} value={i.instrumentId}>{i.name[language]} · {i.manager}</option>)}</select>
-          <small id="hsg-fund-help">{t.periodOf(dateText(dates[0] ?? ''), dateText(dates[maxMonths] ?? ''))}</small>
+          <select id="hsg-fund" value={instrument.instrumentId} onChange={e => changeFund(e.target.value)} aria-describedby={describedBy('instrument', 'hsg-fund-help')} {...aria('instrument')}>{eligible.map(i => <option key={i.instrumentId} value={i.instrumentId}>{i.name[language]} · {i.manager}</option>)}</select>
+          <small id="hsg-fund-help">{t.periodOf(dateText(dates[0] ?? ''), dateText(dates[maxMonths] ?? ''))}. {t.startNote(dateText(dates[0] ?? ''))}</small>
         </div>
         <div className="hsg-field"><label htmlFor="hsg-initial">{t.initial}</label><input id="hsg-initial" type="number" inputMode="decimal" min={0} max={1000000000} step="any" value={fields.initial} onChange={e => edit({ initial: e.target.value })} aria-describedby={describedBy('initial', 'hsg-initial-help')} {...aria('initial')} /><small id="hsg-initial-help">{t.initialHelp}</small></div>
         <div className="hsg-field"><label htmlFor="hsg-monthly">{t.monthly}</label><input id="hsg-monthly" type="number" inputMode="decimal" min={0} max={1000000000} step="any" value={fields.monthly} onChange={e => edit({ monthly: e.target.value })} aria-describedby={describedBy('monthly', 'hsg-monthly-help')} {...aria('monthly')} /><small id="hsg-monthly-help">{t.monthlyHelp}</small></div>

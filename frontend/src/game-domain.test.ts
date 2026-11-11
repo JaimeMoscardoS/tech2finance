@@ -1,12 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import legacy from '../../shared/snapshots/demo-2026-11-10.1/demo-data.json' with {type:'json'};
+import shared from '../../shared/demo-data.json' with {type:'json'};
 import sample from '../tests/fixtures/game-compare-santander-rf-ahorro.json' with {type:'json'};
 import type { Instrument } from './catalog.ts';
 import type { GameComparison, GameSpec } from './server-api.ts';
 import { GAME_ASSUMPTIONS, GameInputError, buildGameSpec, gameDefaults, gameInstruments, gameMaxMonths, localizeAssumption, summarizeGame, validateGame, type GameForm } from './game-domain.ts';
 
-const instruments = legacy.instruments as Instrument[];
+const instruments = shared.instruments as Instrument[];
 const santander = { instrumentId: 'santander-rf-ahorro', bankId: 'santander', dataStatus: 'historical_nav', identifier: 'ES0000000001' } as Instrument;
 const form: GameForm = { initial: 1000, monthly: 100, months: 3, sellMonth: 2, buyFeePercent: 1, sellFeePercent: 1 };
 const spec: GameSpec = { instrumentId: 'santander-rf-ahorro', initial: 1000, monthly: 100, months: 3, sellMonth: 2, buyFeeRate: 0.01, sellFeeRate: 0.01 };

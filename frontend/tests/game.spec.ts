@@ -135,6 +135,8 @@ test('375px viewport has no horizontal page overflow, with the table open', asyn
   await expect.poll(overflow, { timeout: 5000 }).toBeLessThanOrEqual(0);
   const box = await game.boundingBox();
   expect(box!.x + box!.width).toBeLessThanOrEqual(375);
+  await page.setViewportSize({ width: 320, height: 800 });
+  await expect.poll(overflow, { timeout: 5000 }).toBeLessThanOrEqual(0);
   await context.close();
 });
 
@@ -142,4 +144,91 @@ test('a CaixaBank-scoped app shows the no-funds message instead of the form', as
   const game = await openGame(page, 'http://127.0.0.1:5194/');
   await expect(game.getByText(/No hay fondos con histórico mensual verificado/)).toBeVisible();
   await expect(game.getByRole('button', { name: 'Comparar mantener y vender' })).toHaveCount(0);
+});
+
+const compareButton = (game: ReturnType<Page['locator']>) => game.getByRole('button', { name: /Comparar mantener y vender|Compare holding and selling/ });
+async function quickCase(game: ReturnType<Page['locator']>) {
+  await game.getByLabel('Fondo').selectOption(SANTANDER);
+  await game.getByLabel('Importe inicial (€)').fill('1000');
+  await game.getByLabel('Aportación mensual (€)').fill('100');
+  await game.getByLabel('Meses', { exact: true }).fill('3');
+  await game.getByLabel('Mes de venta').fill('2');
+}
+
+test('an HTTP 500 shows a generic alert and no results', async ({ page }) => {
+  await page.route('**/api/game/compare', route => route.fulfill({ status: 500, contentType: 'application/json', body: '{"error":{"code":"x","message":"boom"}}' }));
+  const game = await openGame(page);
+  await quickCase(game);
+  await compareButton(game).click();
+  await expect(game.getByRole('alert')).toContainText('No se ha podido completar la comparación');
+  await expect(game.locator('.hsg-card')).toHaveCount(0);
+});
+
+test('a tampered response (wrong provenance hash) is rejected', async ({ page }) => {
+  await page.route('**/api/game/compare', async route => {
+    const response = await route.fetch();
+    const body = await response.json();
+    body.provenance.datasetSha256 = '0'.repeat(64);
+    await route.fulfill({ response, json: body });
+  });
+  const game = await openGame(page);
+  await quickCase(game);
+  await compareButton(game).click();
+  await expect(game.getByRole('alert')).toBeVisible();
+  await expect(game.locator('.hsg-card')).toHaveCount(0);
+});
+
+test('a delayed response never renders after the user edits a field', async ({ page }) => {
+  await page.route('**/api/game/compare', async route => { await new Promise(r => setTimeout(r, 1200)); await route.continue().catch(() => {}); });
+  const game = await openGame(page);
+  await quickCase(game);
+  await compareButton(game).click();
+  await expect(game.getByRole('button', { name: 'Calculando…' })).toBeVisible();
+  await game.getByLabel('Importe inicial (€)').fill('900');
+  await page.waitForTimeout(2200);
+  await expect(game.locator('.hsg-card')).toHaveCount(0);
+  await expect(game.getByRole('button', { name: 'Comparar mantener y vender' })).toBeEnabled();
+});
+
+test('a delayed response never renders after switching language', async ({ page }) => {
+  await page.route('**/api/game/compare', async route => { await new Promise(r => setTimeout(r, 1200)); await route.continue().catch(() => {}); });
+  const game = await openGame(page);
+  await quickCase(game);
+  await compareButton(game).click();
+  await expect(game.getByRole('button', { name: 'Calculando…' })).toBeVisible();
+  await page.getByRole('button', { name: 'English' }).click();
+  await page.waitForTimeout(2200);
+  await expect(game.locator('.hsg-card')).toHaveCount(0);
+  await expect(game.getByRole('button', { name: 'Compare holding and selling' })).toBeEnabled();
+});
+
+test('changing the fund clamps months and sale month to its history', async ({ page }) => {
+  await page.route('**/api/catalog', async route => {
+    const response = await route.fetch();
+    const body = await response.json();
+    const series = body.navHistory.instruments.find((h: { isin: string }) => h.isin === 'ES0125269003');
+    series.monthly = series.monthly.slice(0, 25);
+    await route.fulfill({ response, json: body });
+  });
+  const game = await openGame(page);
+  await game.getByLabel('Fondo').selectOption(SANTANDER);
+  await game.getByLabel('Meses', { exact: true }).fill('60');
+  await game.getByLabel('Mes de venta').fill('50');
+  await game.getByLabel('Fondo').selectOption('bbva-mi-inversion-bolsa-acumulacion');
+  await expect(game.getByLabel('Meses', { exact: true })).toHaveValue('24');
+  await expect(game.getByLabel('Mes de venta')).toHaveValue('24');
+  await expect(game.getByText(/Entre 1 y 24 meses/)).toBeVisible();
+});
+
+test('invalid amounts are announced through both fields and the CNMV reuse link is shown', async ({ page }) => {
+  const game = await openGame(page);
+  await game.getByLabel('Importe inicial (€)').fill('0');
+  await game.getByLabel('Aportación mensual (€)').fill('0');
+  await compareButton(game).click();
+  await expect(game.getByLabel('Importe inicial (€)')).toHaveAttribute('aria-describedby', /hsg-form-error/);
+  await expect(game.getByLabel('Aportación mensual (€)')).toHaveAttribute('aria-describedby', /hsg-form-error/);
+  await expect(game.getByText(/siempre empieza en el primer cierre observado/)).toBeVisible();
+  await game.getByLabel('Aportación mensual (€)').fill('50');
+  await compareButton(game).click();
+  await expect(game.getByRole('link', { name: 'Condiciones de reutilización de la CNMV' })).toHaveAttribute('href', /^https:\/\//);
 });
