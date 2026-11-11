@@ -24,6 +24,12 @@ La idea puede ser útil para distintos perfiles de edad, pero no se ha demostrad
 
 ## La experiencia del usuario
 
+### Recorrido de caída para la demo
+
+En esta rama, el botón «Probar una caída» prepara T2F Equilibrio ficticio con 1.000 €, sin aportaciones y seis meses; abre la pausa informativa y permite desplegar dos noticias del guion y preguntar al tutor. La serie existente calcula 892,64 € finales, una pérdida de 107,36 € desde el inicio y una caída del 13,10 % desde el máximo. La explicación y las noticias son un supuesto narrativo, sin fechas ni fuentes reales; no prueban la causa de una caída real. Otros productos no heredan este relato. El servidor reconstruye el contexto a partir de la especificación y rechaza hechos enviados por el cliente. No hay proveedor de noticias ni modelo de lenguaje conectado.
+
+Para la demo, los controles y acciones del guion deben funcionar de principio a fin, sin botones decorativos; ante un fallo deben mostrar un error y permitir una recuperación o reintento real. La voz es opcional y queda fuera de ese recorrido obligatorio. Las noticias sintéticas deben estar etiquetadas y el asistente debe utilizar los mismos hechos del escenario. Esta es una condición de aceptación: las comprobaciones específicas del recorrido de caída no prueban por sí solas todos los controles de la aplicación.
+
 1. **Entrar y elegir nivel.** El usuario abre la sección ficticia de inversión y escoge principiante, intermedio o avanzado. Puede cambiarlo cuando quiera.
 2. **Explorar y preguntar.** Ve información de productos de ejemplo y pregunta al tutor qué significa un concepto o un dato de la pantalla. El tutor responde por texto y, si está disponible, por voz.
 3. **Practicar.** Introduce una cantidad y una aportación periódica ficticias. En la máquina del tiempo recorre un periodo histórico para observar subidas y caídas y comparar decisiones de juego. Debe quedar claro qué serie representa el gráfico y cuáles son los supuestos.

@@ -25,6 +25,15 @@
 .anti-panic__episodes > p, .anti-panic .anti-panic__notice { color: var(--muted); font-size: 14px; line-height: 1.5; }
 .anti-panic .anti-panic__sources { margin: 20px 0 10px; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .anti-panic__sources a + a { margin-left: 10px; }
+.anti-panic__story { margin: 20px 0; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-raised); }
+.anti-panic__story h3 { margin: 0 0 8px; color: var(--ink); font-size: 16px; }
+.anti-panic__story > p { margin: 8px 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+.anti-panic__story summary { padding: 12px 0; color: var(--accent); font-weight: 700; cursor: pointer; }
+.anti-panic__story summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.anti-panic__story article { padding: 12px 0; border-top: 1px solid var(--border); }
+.anti-panic__story article span { display: inline-block; padding: 3px 8px; border-radius: 6px; background: var(--surface-tint); color: var(--ink); font-size: 11px; font-weight: 700; }
+.anti-panic__story article h4 { margin: 8px 0 4px; color: var(--ink); font-size: 14px; }
+.anti-panic__story article p, .anti-panic__story small { color: var(--muted); font-size: 13px; line-height: 1.5; }
 .anti-panic .anti-panic__limits { margin: 18px 0; padding: 13px 14px; border-left: 3px solid var(--border); background: var(--surface-raised); color: var(--ink); font-size: 13px; line-height: 1.55; }
 .anti-panic__context { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .anti-panic__context summary { min-height: 48px; padding: 14px 2px; cursor: pointer; color: var(--ink); font-size: 14px; font-weight: 700; }

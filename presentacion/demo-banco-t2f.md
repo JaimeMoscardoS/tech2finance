@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Guion de tres minutos para presentar una entidad ficticia con Tech2Finance integrado. Las 24 preguntas literales se han ensayado en navegador y contrastado por API local, en ambos idiomas: [español](../docs/planning/evidence/banco-t2f/gui-rehearsal-es.json), [inglés](../docs/planning/evidence/banco-t2f/gui-rehearsal-en.json) y [matriz API](../docs/planning/evidence/banco-t2f/api-matrix.json). Las revisiones independientes R2 de núcleo e interfaz se superaron con 8,8/10 cada una; véase el [registro](../docs/planning/banco-t2f-ledger.md). El tutor es por reglas y reconoce formulaciones limitadas.
+Guion de tres minutos para presentar una entidad ficticia con Tech2Finance integrado. Las 24 preguntas originales se ensayaron en la versión anterior por navegador y API local, en ambos idiomas: [español](../docs/planning/evidence/banco-t2f/gui-rehearsal-es.json), [inglés](../docs/planning/evidence/banco-t2f/gui-rehearsal-en.json) y [matriz API](../docs/planning/evidence/banco-t2f/api-matrix.json). Aquellas revisiones independientes R2 de núcleo e interfaz se superaron con 8,8/10; véase el [registro](../docs/planning/banco-t2f-ledger.md). No acreditan el recorrido nuevo de noticias, que tiene cuatro pruebas específicas en navegador para local/servidor y español/inglés. El tutor es por reglas y reconoce formulaciones limitadas.
 
 ## Recorrido propuesto: tres minutos
 
@@ -10,7 +10,7 @@ Guion de tres minutos para presentar una entidad ficticia con Tech2Finance integ
 | --- | --- |
 | 0:00–0:30 | Inicio: «BancoT2F es una entidad ficticia. Tech2Finance acompaña dentro de esta demo educativa; no hay cuenta ni dinero real». Mostrar catálogo, práctica, tutor y pausa. |
 | 0:30–1:00 | Explorar → T2F Equilibrio: preguntar por el coste y después si se descuenta. El 0,75 % anual es informativo; el motor no lo resta. |
-| 1:00–1:45 | Simulador → Equilibrio, 1.000 EUR iniciales, aportación 0 y seis meses: mostrar el valor y la pérdida ficticios. Preguntar por la causa y señalar que no se conoce. |
+| 1:00–1:45 | Inicio → Probar una caída: T2F Equilibrio ficticio, 1.000 EUR, aportación 0 y seis meses. Abrir las noticias del guion y preguntar al tutor por la caída. Aclarar que sucesos y explicación son ficticios, no noticias reales ni una causa verificada. |
 | 1:45–2:15 | Seleccionar CaixaBank Monetario, 1.000 EUR, aportación anual 0, cinco años; consultar 2022. Es un producto externo con tasas publicadas, no una serie de BancoT2F ni una previsión. |
 | 2:15–2:45 | Cartera ficticia → pausa: mostrar la caída y la necesidad de liquidez. La pausa informa sin impedir la decisión ni garantizar recuperación. |
 | 2:45–3:00 | Volver al catálogo y dejar que la persona elija. No se tramitan órdenes. La voz es opcional y depende de capacidades locales disponibles; el texto es el recorrido principal. |
@@ -33,6 +33,8 @@ La columna «fuente» identifica los datos o la lógica contrastados por API. Pa
 | 10 | Mi cartera → Entender una caída → Tu contexto (opcional) → ¿Necesitas liquidez pronto? → Sí → Preguntar al asistente | Necesito liquidez, ¿debo mantener? / I need liquidity; should I hold? | Considerar liquidez y circunstancias; decidir corresponde al usuario, sin presión ni garantía. Cartera 1.093 EUR frente a 1.000 iniciales; caída máxima 2,70 % y actual 1,53 % son métricas distintas. | `portfolioPoints`; `/api/declines` con `basis=portfolio_demo` |
 | 11 | Explorar → T2F Equilibrio → Preguntar por este producto | ¿Qué estoy viendo? / What am I seeing? | Describir el contexto de exploración y producto disponible, sin inventar datos. | `instruments[instrumentId=demo-mixed]`; contexto de página del tutor |
 | 12 | Simulador → Entidad BBVA → instrumento `BBVA MI INVERSION BOLSA, FI` → Abrir asistente | ¿Todos los productos son de BancoT2F? / Are all products from BancoT2F? | No: los externos mantienen identidad y procedencia; el usuario decide qué explorar. | `bankProfile.faq[id=external_products]`; `instruments[].bankId` |
+
+Para el recorrido nuevo: desde Inicio pulsa «Probar una caída», despliega «Ver noticias del guion» y abre el asistente. Pregunta «¿Por qué ha caído?», «¿Qué noticias hay?» o «Necesito liquidez, ¿debo mantener?». El tutor explica el supuesto narrativo de tipos y beneficios, identifica que no son noticias verificadas y respeta la decisión del usuario. La cifra 13,10 % es desde el máximo; −10,74 % es desde el inicio. El caso 6 de la tabla conserva el ensayo anterior sin abrir la pausa, donde la causa sigue siendo desconocida.
 
 ## Cómo verificar
 

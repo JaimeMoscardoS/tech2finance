@@ -22,4 +22,4 @@ Los errores se devuelven como `{error:{code,message}}`; hay 404 para instrumento
 
 ## Ejecución y estado
 
-Seguir [frontend/README](../frontend/README.md) para instalar y arrancar ambos procesos y las pruebas. La rama implementa la integración local; su estado de pruebas y revisión se documenta en el PR. `/api/simulations` sigue usando `replay`; el motor histórico recibe solo las peticiones de `/api/game/compare`. No se han integrado noticias, comparables, Claude, ElevenLabs ni datos en tiempo real.
+Seguir [frontend/README](../frontend/README.md) para instalar y arrancar ambos procesos y las pruebas. La rama implementa la integración local; su estado de pruebas y revisión se documenta en el PR. `/api/simulations` sigue usando `replay`; el motor histórico recibe solo las peticiones de `/api/game/compare`. El guion local ficticio de seis meses se describe en [contratos](contratos.md); no hay proveedor de noticias, comparables, Claude, ElevenLabs ni datos en tiempo real.

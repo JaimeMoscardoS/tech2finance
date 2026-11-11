@@ -1,6 +1,8 @@
 """Demo-domain functions. No provider calls or client-supplied facts."""
 from copy import deepcopy
 import math
+import json
+from pathlib import Path
 
 from simulador.periodic import replay
 from .provenance import load_verified_dataset
@@ -115,6 +117,9 @@ def analyze_decline(spec):
         report['episodes'].append(episode(None))
     report['peakValue'] = peak
     report['currentDrawdownPercent'] = (1 - values[-1] / peak) * 100
+    scenario = json.loads((Path(__file__).resolve().parents[2] / 'shared' / 'decline-demo.json').read_text(encoding='utf-8'))
+    if basis == 'instrument' and spec['instrumentId'] == scenario['instrumentId'] and spec['periods'] == scenario['periods']:
+        report['demoContext'] = scenario
     return report
 
 

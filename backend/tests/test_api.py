@@ -13,6 +13,24 @@ VALID = {"instrumentId": "fictional", "initial": 100, "recurringContribution": 1
 CONTEXT = {"page": "home", "level": "beginner", "language": "es"}
 
 
+def test_scripted_decline_is_scoped_and_server_owned():
+    spec = {'basis': 'instrument', 'instrumentId': 'demo-mixed', 'periods': 6, 'language': 'es'}
+    result = client.post('/api/declines', json=spec)
+    assert result.status_code == 200
+    report = result.json()
+    assert report['causesStatus'] == 'unknown'
+    assert report['demoContext']['sourceKind'] == 'synthetic_demo'
+    assert report['currentDrawdownPercent'] == pytest.approx(13.09810375)
+    assert 'demoContext' not in client.post('/api/declines', json=spec | {'periods': 5}).json()
+    assert 'demoContext' not in client.post('/api/declines', json={'basis': 'portfolio_demo', 'language': 'es'}).json()
+    assert 'demoContext' not in client.post('/api/declines', json=spec | {'instrumentId': 'caixabank-monetario-estandar', 'periods': 5}).json()
+    context = CONTEXT | {'page': 'simulator', 'instrumentId': 'demo-mixed', 'decline': spec}
+    answer = client.post('/api/tutor', json={'message': '¿Por qué ha caído?', 'context': context})
+    assert answer.status_code == 200 and 'supuesto narrativo' in answer.json()['text']
+    assert client.post('/api/tutor', json={'message': 'hola', 'context': context | {'demoContext': report['demoContext']}}).status_code == 422
+    assert client.post('/api/declines', json=spec | {'demoContext': report['demoContext']}).status_code == 422
+
+
 def test_bank_context_and_untrusted_fields(monkeypatch):
     captured = {}
     def capture(payload):
