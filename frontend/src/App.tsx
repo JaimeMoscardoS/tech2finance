@@ -41,6 +41,7 @@ import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
 import Recovery from "./Recovery";
 import { LEVELS, type Level, type Theme } from "./types/level";
+import { readStoredLevel, writeStoredLevel } from "./preferences";
 const PracticeLab = lazy(() => import("./PracticeLab"));
 
 type Page = "home" | "explore" | "simulator" | "portfolio";
@@ -82,7 +83,7 @@ export default function App() {
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [practiceResult, setPracticeResult] = useState<{spec: SimulationSpec; result: ServerSimulation} | null>(null);
   const [page, setPage] = useState<Page>("home"),
-    [level, setLevel] = useState<Level>("beginner"),
+    [level, setLevel] = useState<Level>(() => readStoredLevel("beginner")),
     [levelOpen, setLevelOpen] = useState(false),
     [mobileNav, setMobileNav] = useState(false),
     [assistant, setAssistant] = useState(false),
@@ -161,6 +162,7 @@ export default function App() {
       localStorage.setItem("t2f-language", language);
       localStorage.setItem("t2f-theme", theme);
     } catch {}
+    writeStoredLevel(level);
   }, [language, theme, level]);
   useEffect(() => {
     if (!pause && !assistant && !voiceAssistant) return;

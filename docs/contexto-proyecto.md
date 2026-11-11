@@ -46,6 +46,8 @@ En esta rama, el inicio presenta accesos a fondos, práctica guiada y cartera fi
 | Intermedio | Mayor detalle sobre distribución, evolución, costes y comparación de alternativas. |
 | Avanzado | Más información técnica y parámetros cuando existan datos fiables y métricas implementadas. |
 
+Rediseño del dashboard en la rama `mejora-ui` (detalle en [diseno-dashboard.md](diseno-dashboard.md)): la fase 2 añade componentes base, una cartera ficticia DEMO en `shared/mock/` con métricas calculadas por código probado (coste y serie con la misma base, volatilidad y Sharpe solo con 12 o más meses, escenario de sensibilidad que cuenta la renta variable del fondo mixto, rentabilidades DEMO netas de gastos y sin tipo de cambio), el nivel recordado en `localStorage` y la página temporal `/componentes` (sin enlace en la navegación). Aún no está integrado en `main` y los paneles reales del dashboard no cambian hasta la fase 3.
+
 Cambian la presentación y la profundidad de la explicación. Los tres niveles comparten la misma base de datos y de cálculo; seleccionar principiante o avanzado no define la tolerancia al riesgo.
 
 ## Máquina del tiempo: aprender jugando

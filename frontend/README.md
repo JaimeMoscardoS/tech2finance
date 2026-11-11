@@ -55,6 +55,14 @@ Cada nivel tiene una paleta distinta en temas claro y oscuro (tokens en `src/sty
 
 Consulta las [instrucciones del área](AGENTS.md), el [contexto](../docs/contexto-proyecto.md) y los [contratos](../docs/contratos.md).
 
+## Componentes del dashboard y datos DEMO (fase 2, rama `mejora-ui`)
+
+- Componentes base en `src/components/dashboard/` (importables desde `index.ts`): `KpiRow`/`KpiCard`, `SparkCard`, `DonutCard`, `FundTable`, `EvolutionChart`, `PeriodSelector`, `StatusChip`/`DeltaChip`, `MetricBar`, `DemoBadge`, `Section` y `AgentPanel`. Solo usan tokens (`--cat-1..6`, `--chart-*`, `--amber*`); los gráficos llevan tramas, valores en texto o tabla de datos, y subida/bajada con signo e icono además del color; respetan `prefers-reduced-motion`. `AgentPanel` es educativo y sin LLM real: texto de ejemplo marcado DEMO, sin órdenes ni asesoramiento.
+- Datos ficticios en `../shared/mock/demo-portfolio.ts` (solo entradas); las métricas (variación, pesos, volatilidad, drawdown, Sharpe, escenarios) se calculan en `src/dashboard-metrics.ts` y `src/dashboard-portfolio.ts`, con pruebas en `src/dashboard-metrics.test.ts`.
+- Página **temporal** `/componentes` (`src/dashboard/ComponentsShowcase.tsx`, sin enlace en la navegación): cambia nivel, tema e idioma; admite `?level=&theme=&lang=`. Se retirará más adelante.
+- El nivel elegido se guarda en `localStorage` (`t2f-level`, validado con `src/preferences.ts`; valor inválido o almacenamiento bloqueado vuelve a Básico).
+- Pruebas: `tests/components.spec.ts` (6 combinaciones, contraste AA del texto visible a 1280 y 390 px, sin desbordes, interacción, persistencia). `T2F_SHOTS=<carpeta>` guarda capturas.
+
 ## Contrato de servidor
 
 `GET /api/catalog` carga bancos, instrumentos y muestra anual; `POST /api/simulations`, `/api/declines` y `/api/tutor` devuelven respectivamente resultados, informes y respuestas basadas en reglas. El cliente envía parámetros, no resultados financieros ni fuentes al tutor, y el servidor reconstruye el contexto. Las peticiones se cancelan al cambiar contexto y tienen un plazo de diez segundos. `shared/demo-data.json` es la fuente común de ejemplos. Las pruebas Playwright arrancan backend y Vite, requieren `.venv` con dependencias instaladas y aceptan `T2F_PYTHON` para seleccionar el intérprete.

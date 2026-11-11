@@ -1,6 +1,6 @@
 # Rediseño del dashboard por niveles
 
-Estado: **aprobado**; fase 1 implementada y comprobada en la rama `mejora-ui` (no integrada en `main`, sin revisión de accesibilidad todavía); fases 2 a 6 pendientes. Rama de trabajo: `mejora-ui`. Afecta sobre todo al área 1 (frontend); los datos de ejemplo tocan `shared/` y deben coordinarse.
+Estado: **aprobado**; fase 1 commiteada y comprobada; fase 2 implementada y comprobada en la rama `mejora-ui` sin commit (no integrada en `main`, sin revisiones todavía); fases 3 a 6 pendientes. Rama de trabajo: `mejora-ui`. Afecta sobre todo al área 1 (frontend); los datos de ejemplo tocan `shared/` y deben coordinarse.
 
 ## Objetivo
 
@@ -98,8 +98,32 @@ Las PR grandes siguen la revisión ampliada del `CLAUDE.md` (nota mínima 8/10, 
 
 **Pendiente de la fase 1**: revisión `t2f-01-accesibilidad`; comprobar otras vistas (Simulador, Mi cartera, modales, tutor, pausa) con el mismo recorrido; selector de nivel/tema recordado entre sesiones (el tema ya se guarda, el nivel no).
 
+## Estado de la fase 2 (rama `mejora-ui`, sin commit)
+
+**Implementado**
+- Componentes en `frontend/src/components/dashboard/`: KpiRow/KpiCard (lista de descripción), SparkCard, DonutCard (rellenos con trama sobre `--cat-1..6` y leyenda con porcentajes), FundTable (orden accesible con `aria-sort`, riesgo 1-7 con `role=meter` y valor visible, estados de carga/error/vacío), EvolutionChart (área degradada, línea discontinua de comparación, tooltip, último valor visible, tabla de datos), PeriodSelector, StatusChip/DeltaChip (icono y signo), MetricBar, DemoBadge, Section y AgentPanel (texto de ejemplo DEMO por nivel, sin LLM). Heatmap queda para la fase 3. Español e inglés.
+- `shared/mock/demo-portfolio.ts`: 5 fondos y un índice de referencia ficticios (nombres «… Ejemplo», sin ISIN ni precios reales), 36 rentabilidades mensuales fijadas como literales (generadas una vez con semilla), unidades y coste de compra (= unidades × precio del mes 0 en todos los fondos, 25.900 € en total, para que coste y serie compartan base) y una exposición ficticia a renta variable por fondo (`equityWeight`: monetario 0, bonos 0, mixto 0,4, global 1, emergentes 1). Rentabilidades DEMO netas de gastos y sin tipo de cambio (nota visible en `/componentes`, ES/EN). Etiquetas de mes relativas (M0…M36), sin fechas inferidas. No se mezcla con `annual_history`.
+- Métricas en código (`frontend/src/dashboard-metrics.ts`, `dashboard-portfolio.ts`): serie acumulada, variación por periodo, resultado € y %, pesos y agrupaciones, riesgo medio ponderado, volatilidad anualizada, máxima caída, Sharpe (tipo libre de riesgo supuesto 2 %), escenario de sensibilidad ilustrativo. Devuelven `null` cuando no están definidas o el resultado no sería finito (NaN/Infinity); `profitAndLoss`, `weights` y el escenario lanzan `RangeError` ante entradas inválidas. Volatilidad y Sharpe exigen al menos 12 rentabilidades mensuales (`MIN_MONTHLY_OBSERVATIONS`, parametrizable con `minObservations`; la UI muestra «n. d.») y Sharpe es `null` con volatilidad < 1e-9. Escenario: shock × Σ(valor × `equityWeight`) / total, con shock finito y > −100 (supuesto: toda la renta variable se mueve igual; sin divisa ni costes). Una cartera vacía devuelve métricas `null` sin error.
+- Nivel guardado en `localStorage` (`t2f-level`, `src/preferences.ts`) con validación y fallback a Básico.
+- Página temporal `/componentes` (nivel, tema, idioma; `?level=&theme=&lang=`), sin enlace en la navegación real; retirar en la fase 6.
+
+**Comprobado (11-11-2026)**: `npm run build`; 72 pruebas unitarias (15 nuevas, con valores calculados a mano: métricas, cartera DEMO, hechos del agente y persistencia); 101 pruebas Playwright (15 nuevas en `tests/components.spec.ts`: 6 combinaciones nivel/tema con contraste AA del texto visible y sin desborde horizontal a 1280 y 390 px, inglés, periodo y tooltip, orden de tabla, donut, AgentPanel por nivel, movimiento reducido, persistencia del nivel). Capturas de las 6 combinaciones a 1280 y 390 px.
+
+**Corrección tras la revisión matemática (nota 8/10)**: coste igualado a unidades × precio M0 en todos los fondos (mixto 6.500 en lugar de 6.800, global 5.600 en lugar de 7.000, emergentes 2.800 en lugar de 3.400); Sharpe `null` con volatilidad casi nula; sin NaN/Infinity; cartera vacía; mínimo de 12 meses; escenario con la parte de renta variable del mixto; pruebas con cartera mínima [200, 210, 199] (P&L −1 €, −0,5 %; volatilidad ≈ 25,08 %; Sharpe ≈ −0,1367), máxima caída −40 y Sharpe 2,0412414.
+
+**Pendientes de revisión matemática** (no implementados):
+- `returnsFromSeries` inventa 0 si el valor previo es ≤ 0.
+- Series de distinta longitud: `valueSeries.at(-1)` puede no coincidir con `totalValue`.
+- Sharpe con anualización aritmética (rf/12) sin documentar en la UI.
+- Mínimo de muestra más allá de los 12 meses (significación estadística).
+- Divisa: fondos USD sin tipo de cambio y TER sin uso (la nota visible lo cubre solo parcialmente).
+- Redondeo de pesos mostrados (método del mayor resto).
+- Stress sin modelado de divisa.
+
+**Pendiente de la fase 2**: revisiones `t2f-01-frontend-reviewer` y `t2f-03-revisor-matematico` (métricas); comprobar navegación por teclado y lector de pantalla con herramienta real; el contraste medido usa el color de fondo base (el degradado del tema oscuro en tarjetas añade como máximo un 7 % de acento); Heatmap; los componentes no se usan aún en el dashboard real (fase 3); la página `/componentes` está incluida también en la compilación de producción.
+
 ## Pendiente
 
 - Contenido del Test MiFID (se genera aparte).
 - Avisar al equipo: el rediseño cambia `App.tsx`, `FundsExplorer.tsx` y estilos compartidos, y añade `shared/mock/`.
-- Decidir si el nivel y el tema se recuerdan entre sesiones.
+- El nivel y el tema se recuerdan entre sesiones (decidido en la fase 2).
