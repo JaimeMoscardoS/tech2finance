@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { CartesianGrid, Line, LineChart, ReferenceDot, ReferenceLine, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import { Check, CircleHelp, Flag, Info, Lightbulb, Minus, Pause, Play, RotateCcw, SkipForward, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import type { Instrument } from './catalog';
@@ -21,7 +21,11 @@ type Props = {
   euro: (value: number) => string;
   /** Localized assumption text of the step 2 result, used when no sale was calculated. */
   assumption: string;
+  /** Final reveal of step 2 (final value, prediction check, tutor shortcuts): shown only inside the summary, after the last month. */
+  renderReveal?: () => ReactNode;
   onFinished?: (finished: boolean) => void;
+  /** True once the first month has been shown (and false again after a restart or unmount). */
+  onStarted?: (started: boolean) => void;
 };
 type Answer = { month: number; label: string; text: string; ok: boolean | null };
 type Sale = { month: number; summary: GameSummary; assumptions: string[] };
@@ -41,7 +45,7 @@ function useReducedMotion() {
   return reduced;
 }
 
-export default function TimeMachine({ language, mode, fund, instruments, navHistory, result, frequency, euro, assumption, onFinished }: Props) {
+export default function TimeMachine({ language, mode, fund, instruments, navHistory, result, frequency, euro, assumption, renderReveal, onFinished, onStarted }: Props) {
   const t = tmCopy[language];
   const locale = language === 'es' ? 'es-ES' : 'en-GB';
   const rows = result.timeline;
@@ -67,7 +71,8 @@ export default function TimeMachine({ language, mode, fund, instruments, navHist
   const summaryHeading = useRef<HTMLHeadingElement>(null);
   const finished = month === last && open === null;
   useEffect(() => { onFinished?.(finished); }, [finished]);
-  useEffect(() => () => { generation.current++; request.current?.abort(); onFinished?.(false); }, []);
+  useEffect(() => { onStarted?.(month > 0); }, [month > 0]);
+  useEffect(() => () => { generation.current++; request.current?.abort(); onFinished?.(false); onStarted?.(false); }, []);
 
   const dateText = (row: ReplayRow | undefined, index: number) => (row?.date ? monthLabel(row.date, language) || `${t.axisMonth} ${index}` : `${t.axisMonth} ${index}`);
   const signed = (n: number) => `${n > 0 ? '+' : ''}${euro(n)}`;
@@ -149,6 +154,7 @@ export default function TimeMachine({ language, mode, fund, instruments, navHist
   };
 
   const keep = (pause: PausePoint) => {
+    if (busy) return; // a sale is in flight: keeping now would race with its response
     record({ month: pause.month, label: t.kept(pause.month), text: '', ok: null });
     announce(t.kept(pause.month));
     closePause(pause);
@@ -286,8 +292,8 @@ export default function TimeMachine({ language, mode, fund, instruments, navHist
                   <div className="tm-options">
                     {!sale && !decisionBlock && (
                       <>
-                        <button type="button" className="tm-btn tm-primary" onClick={() => keep(open)}>{t.keep}</button>
-                        <button type="button" className="tm-btn tm-sell" aria-disabled={busy || undefined} onClick={() => void sell(open)}>{busy ? t.selling : t.sell}</button>
+                        <button type="button" className="tm-btn" aria-disabled={busy || undefined} onClick={() => keep(open)}>{t.keep}</button>
+                        <button type="button" className="tm-btn" aria-disabled={busy || undefined} onClick={() => void sell(open)}>{busy ? t.selling : t.sell}</button>
                       </>
                     )}
                     {(sale || decisionBlock) && <button type="button" className="tm-btn tm-primary" onClick={() => closePause(open)}>{t.cont}</button>}
@@ -311,7 +317,7 @@ export default function TimeMachine({ language, mode, fund, instruments, navHist
         </div>
         <div className="tm-plot" role="img" aria-label={t.chartLabel(month, euro(row.contributed), euro(holdValue), saleNow ? euro(saleNow.sell) : null)}>
           <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-            <LineChart data={data} margin={{ top: 16, right: 16, bottom: 6, left: 4 }}>
+            <LineChart data={data} accessibilityLayer={false} margin={{ top: 16, right: 16, bottom: 6, left: 4 }}>
               <CartesianGrid vertical={false} stroke="var(--jr-grid)" strokeDasharray="2 4" />
               <XAxis type="number" dataKey="month" domain={[0, last]} allowDecimals={false} stroke="var(--muted)" tick={{ fill: 'var(--muted)', fontSize: 12 }} />
               <YAxis stroke="var(--muted)" width={56} tick={{ fill: 'var(--muted)', fontSize: 12 }} tickFormatter={compact} domain={['auto', 'auto']} />
@@ -359,6 +365,7 @@ export default function TimeMachine({ language, mode, fund, instruments, navHist
               ? t.summarySold(sale.month, euro(sale.summary.series[last].sell), euro(sale.summary.series[last].hold))
               : t.summaryHeld(euro(row.contributed), euro(row.value), signed(row.profit))}
           </p>
+          {renderReveal?.()}
           <h4>{t.learnedTitle}</h4>
           <ul className="tm-learned">{learned.map((text, i) => <li key={i}><Lightbulb size={15} aria-hidden="true" />{text}</li>)}</ul>
           <details className="tm-more">

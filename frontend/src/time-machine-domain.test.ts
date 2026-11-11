@@ -36,13 +36,19 @@ test('no pause for a drop or a high when the instrument never falls', () => {
   assert.deepEqual(kinds, ['end']);
 });
 
-test('recovery is the first month the value is back at the contributed amount after being below it', () => {
+test('recovery is the first month back within 1 % of the contributed amount after being clearly below it', () => {
   const rows = rowsFrom([10, 9, 8.5, 9.5, 11, 12]);
-  const pauses = detectPausePoints(rows);
-  const recover = pauses.find(p => p.kinds.includes('recover'))!;
-  assert.ok(rows[recover.month].value + 0.005 >= rows[recover.month].contributed);
+  const recover = detectPausePoints(rows).find(p => p.kinds.includes('recover'))!;
+  assert.notEqual(standing(rows[recover.month]), 'less');
+  assert.ok(rows.slice(1, recover.month).every(r => standing(r) === 'less'));
   assert.ok(rows.slice(1, recover.month).some(r => r.value < r.contributed));
-  assert.ok(rows.slice(1, recover.month).every(r => r.value < r.contributed - 0.005));
+});
+
+test('a value 0.5 % under the contributed amount is "same", so it is not a recovery by itself and does not start a dip', () => {
+  const rows: ReplayRow[] = [10, 10, 10, 10].map((nav, i) => ({ period: i, date: null, nav: String(nav), value: 995, contributed: 1000, profit: -5, instrumentReturnPercent: 0 }));
+  assert.equal(detectPausePoints(rows).some(p => p.kinds.includes('recover')), false);
+  const dip = rows.map((r, i) => (i === 1 ? { ...r, value: 900, profit: -100 } : i === 2 ? { ...r, value: 995, profit: -5 } : r));
+  assert.equal(detectPausePoints(dip).find(p => p.kinds.includes('recover'))?.month, 2);
 });
 
 test('no recovery pause when the value was never below what was contributed', () => {

@@ -1,12 +1,12 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
-import { CAIXA, SANTANDER, startJourney } from './journey';
+import { CAIXA, SANTANDER, finishReplay, startJourney } from './journey';
 
 // Step 3 «Vive el recorrido»: month-by-month replay of the real NAV-based simulation of step 2.
 // Expected numbers are fetched from the backend Playwright starts (port 8111), never typed by hand.
 const BACKEND = 'http://127.0.0.1:8111';
 const CASE = { initial: 500, monthly: 50, months: 12 }; // journey defaults
-// Real pauses of SANTANDER (500 + 50/month, 12 months): drop in Mar 2020, back to contributed in month 8, new high in month 11, end.
-const PAUSES = [3, 8, 11, 12];
+// Real pauses of SANTANDER (500 + 50/month, 12 months): drop in Mar 2020, back to within 1 % of contributed in month 6, new high in month 11, end.
+const PAUSES = [3, 6, 11, 12];
 const EVIDENCE = process.env.T2F_EVIDENCE ? '../docs/planning/evidence/simulador-maquina-tiempo' : null;
 
 const eur = (n: number | string, locale = 'es-ES') => new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(Number(n));
@@ -15,6 +15,8 @@ const overflow = (page: Page) => page.evaluate(() => Math.max(document.documentE
 async function openSimulator(page: Page, url = '/') {
   await page.goto(url);
   const menu = page.getByRole('button', { name: /^(Abrir menú|Open menu)$/ });
+  // Wait for the app to render before deciding whether the mobile menu has to be opened (avoids a race under load).
+  await expect(menu.or(page.getByRole('button', { name: /^(Simulador|Simulator)$/ }).first())).toBeVisible();
   if (await menu.isVisible()) await menu.click();
   await page.getByRole('button', { name: /^(Simulador|Simulator)$/ }).first().click();
 }
@@ -87,13 +89,16 @@ test('months after the visible one never reach the DOM, the chart label or the t
   for (let m = 0; m <= 2; m++) {
     if (m > 0) await next(tm);
     await expect(tm).toContainText(`Mes ${m} de 12`);
-    const text = (await tm.evaluate(el => el.textContent ?? '')) + (await tm.locator('.tm-plot').getAttribute('aria-label'));
+    // The whole page content (steps 1 and 2 included), not only the replay, must not know the later months.
+    const text = (await page.locator('main.main').evaluate(el => el.textContent ?? '')) + (await tm.locator('.tm-plot').getAttribute('aria-label'));
     for (let future = m + 1; future < line.length; future++) {
       expect(text, `value of month ${future} visible at month ${m}`).not.toContain(eur(line[future].value));
       expect(text, `contributed of month ${future} visible at month ${m}`).not.toContain(eur(line[future].contributed));
     }
     expect(text).toContain(eur(line[m].value));
     await expect(tm.locator('.tm-table-wrap tbody tr')).toHaveCount(m + 1);
+    await expect(tm.locator('.tm-plot [tabindex]:not([tabindex="-1"])')).toHaveCount(0); // no Recharts keyboard layer that would read the chart point by point
+    await expect(tm.locator('.tm-plot svg[role], .tm-plot svg[aria-label]')).toHaveCount(0);
     // The drawn line never goes beyond the visible month: one point per visible month.
     if (m > 0) {
       const points = await tm.locator('.tm-plot .recharts-line-curve').first().getAttribute('d');
@@ -115,7 +120,7 @@ test('pause questions appear in the detected real months with neutral feedback f
   await expect(card).toBeVisible({ timeout: 8000 });
   await expect(tm).toContainText('Mes 3 de 12');
   await expect(card).toHaveAttribute('data-pause', '3');
-  await expect(card.locator('.tm-badge')).toContainText('Mayor caída del fondo');
+  await expect(card.locator('.tm-badge')).toContainText('Caída fuerte del fondo');
   await expect(card.locator('#tm-q-title')).toBeFocused();
   await expect(card.locator('#tm-q-title')).toHaveText(`Has puesto ${eur(line[3].contributed)} y vale ${eur(line[3].value)}: ¿ganas o pierdes?`);
   await expect(card).toContainText('cayó un 2,7 %');
@@ -136,9 +141,9 @@ test('pause questions appear in the detected real months with neutral feedback f
   await expect(card).toHaveCount(0);
   await expect(tm.getByRole('button', { name: 'Reproducir' })).toBeFocused();
 
-  // Month 8: back to what was contributed. Month 11: new all-time high. Month 12: the end and the summary.
+  // Month 6: back to within 1 % of what was contributed. Month 11: new all-time high. Month 12: the end and the summary.
   await tm.getByRole('button', { name: 'Reproducir' }).click();
-  await expect(card).toHaveAttribute('data-pause', '8', { timeout: 10000 });
+  await expect(card).toHaveAttribute('data-pause', '6', { timeout: 10000 });
   await expect(card.locator('.tm-badge')).toContainText('Vuelves a lo que pusiste');
   await card.getByRole('button', { name: /En ganancia|En tablas/ }).first().click();
   await card.getByRole('button', { name: 'Continuar' }).or(card.getByRole('button', { name: 'Mantener' })).click();
@@ -163,7 +168,7 @@ test('pause questions appear in the detected real months with neutral feedback f
   const chips = await summary.locator('.tm-learned li').count();
   expect(chips).toBeGreaterThanOrEqual(2);
   expect(chips).toBeLessThanOrEqual(3);
-  await expect(summary.locator('.tm-learned')).toContainText('mayor caída mensual fue 2,7 %');
+  await expect(summary.locator('.tm-learned')).toContainText('mayor caída mensual del periodo fue 2,7 %');
   // Answers are kept as a list, and the disclosure holds source, period and assumptions.
   await expect(tm.locator('.tm-answers li')).toHaveCount(7);
   await summary.getByText('Más información').click();
@@ -274,14 +279,17 @@ test('clicking Vender ahora while busy sends exactly one request', async ({ page
 });
 
 test('a late sale response never applies after the step 2 amounts change', async ({ page }) => {
-  await page.route('**/api/game/compare', async route => { await new Promise(r => setTimeout(r, 1200)); await route.continue().catch(() => {}); });
+  let served!: () => void;
+  const delivered = new Promise<void>(resolve => { served = resolve; });
+  await page.route('**/api/game/compare', async route => { await new Promise(r => setTimeout(r, 1200)); await route.continue().catch(() => {}); served(); });
   const tm = await start(page);
   await next(tm, 3);
   const card = tm.locator('.tm-card');
   await card.locator('.tm-option').first().click();
   await card.getByRole('button', { name: 'Vender ahora' }).click();
   await page.getByLabel('Aportación mensual').fill('60');
-  await page.waitForTimeout(2200);
+  await delivered; // the late response has been served; give React one frame to (wrongly) apply it
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const fresh = page.locator('#jr-step-3 .tm');
   await expect(fresh).toContainText('Mes 0 de 12');
   await expect(fresh.locator('.tm-answers')).toHaveCount(0);
@@ -313,7 +321,7 @@ test('English: controls, pause questions, sale and summary', async ({ page }) =>
   await tm.getByRole('button', { name: 'Next month' }).click();
   await tm.getByRole('button', { name: 'Next month' }).click();
   const card = tm.locator('.tm-card');
-  await expect(card.locator('.tm-badge')).toContainText('Largest fall of the fund');
+  await expect(card.locator('.tm-badge')).toContainText('Sharp fall of the fund');
   await expect(card.locator('#tm-q-title')).toHaveText(`You put in ${eur(line[3].contributed, 'en-GB')} and it is worth ${eur(line[3].value, 'en-GB')}: do you gain or lose?`);
   await card.getByRole('button', { name: 'I gain', exact: true }).click();
   await expect(card.locator('.tm-verdict')).toContainText(/It matches the data|It does not match the data/);
@@ -423,3 +431,98 @@ test('the Marea palette applies only inside the simulator journey and the app ke
   const outside = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--mr-teal').trim());
   expect(outside).toBe('');
 });
+
+test('Mantener while a sale is in flight is disabled and never mixes with the late sale response', async ({ page }) => {
+  let served!: () => void;
+  const delivered = new Promise<void>(resolve => { served = resolve; });
+  await page.route('**/api/game/compare', async route => { await new Promise(r => setTimeout(r, 1000)); await route.continue().catch(() => {}); served(); });
+  const tm = await start(page);
+  await next(tm, 3);
+  const card = tm.locator('.tm-card');
+  await card.locator('.tm-option').first().click();
+  await card.getByRole('button', { name: 'Vender ahora' }).click();
+  const keep = card.getByRole('button', { name: 'Mantener' });
+  await expect(keep).toHaveAttribute('aria-disabled', 'true');
+  await keep.click({ force: true });
+  await expect(card).toBeVisible(); // still in the pause: keeping was ignored while busy
+  await delivered;
+  // The sale was the user's only decision: it applies once, and there is no "kept" entry next to it.
+  await expect(card).toHaveCount(0);
+  await expect(tm.locator('.tm-legend')).toContainText('Tu decisión');
+  await expect(tm.locator('.tm-answers')).not.toContainText('decides mantener');
+});
+
+test('Mantener and Vender ahora look alike (neither is the highlighted choice)', async ({ page }) => {
+  const tm = await start(page);
+  await next(tm, 3);
+  const card = tm.locator('.tm-card');
+  await card.locator('.tm-option').first().click();
+  const classes = await Promise.all(['Mantener', 'Vender ahora'].map(name => card.getByRole('button', { name }).getAttribute('class')));
+  expect(classes[0]).toBe(classes[1]);
+  const style = await Promise.all(['Mantener', 'Vender ahora'].map(name => card.getByRole('button', { name }).evaluate(el => { const c = getComputedStyle(el); return [c.backgroundColor, c.color, c.borderTopColor].join('|'); })));
+  expect(style[0]).toBe(style[1]);
+});
+
+test('while the replay runs step 1 is collapsed to the chosen fund, and it can be expanded again', async ({ page }) => {
+  await openSimulator(page);
+  await startJourney(page);
+  await expect(page.locator('#jr-step-1 .jr-spark').first()).toBeVisible();
+  const tm = page.locator('#jr-step-3 .tm');
+  await next(tm);
+  const step1 = page.locator('#jr-step-1');
+  await expect(step1.locator('.jr-spark')).toHaveCount(0);
+  await expect(step1).not.toContainText('Mayor caída en el periodo');
+  await expect(step1.locator('.jr-collapsed')).toContainText('CAIXABANK');
+  await step1.getByRole('button', { name: 'Cambiar fondo' }).click();
+  await expect(page.locator('#jr-step-1 .jr-spark').first()).toBeVisible();
+});
+
+test('switching language mid-replay keeps the state and translates labels', async ({ page }) => {
+  const tm = await start(page);
+  const line = await simulation(page);
+  await next(tm, 3);
+  await tm.locator('.tm-option').first().click();
+  await tm.getByRole('button', { name: 'Mantener' }).click();
+  await next(tm);
+  await expect(tm).toContainText('Mes 4 de 12');
+  await page.getByRole('button', { name: 'English' }).click();
+  const en = page.locator('#jr-step-3 .tm');
+  await expect(en).toContainText('Month 4 of 12');
+  await expect(en.getByRole('button', { name: 'Next month' })).toBeVisible();
+  await expect(en.locator('.tm-big').first()).toContainText(eur(line[4].value, 'en-GB'));
+  await expect(en.locator('.tm-answers li')).toHaveCount(2); // the answer and the decision survive the switch
+  await expect(en.getByText('View table of visible months')).toBeVisible();
+});
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`pause, loss and summary states keep text contrast of at least 4.5:1 in ${theme} theme`, async ({ page }) => {
+    await page.addInitScript(theme => localStorage.setItem('t2f-theme', theme), theme);
+    let failSale = true;
+    await page.route('**/api/game/compare', route => (failSale ? route.fulfill({ status: 500, contentType: 'application/json', body: '{}' }) : route.continue()));
+    const tm = await start(page);
+    await next(tm, 3);
+    const measure = (selector: string) => page.evaluate(selector => {
+      const parse = (c: string) => { const m = c.match(/[\d.]+/g)!.map(Number); return { r: m[0], g: m[1], b: m[2], a: m[3] ?? 1 }; };
+      const lum = ({ r, g, b }: { r: number; g: number; b: number }) => { const f = (v: number) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+      const el = document.querySelector(selector)!;
+      let bg = { r: 255, g: 255, b: 255, a: 1 };
+      for (let e: Element | null = el; e; e = e.parentElement) { const c = parse(getComputedStyle(e).backgroundColor); if (c.a > 0.99) { bg = c; break; } }
+      const [a, b] = [lum(parse(getComputedStyle(el).color)), lum(bg)].sort((x, y) => y - x);
+      return (a + 0.05) / (b + 0.05);
+    }, selector);
+    await expect(tm.locator('.tm-gl.tm-down')).toBeVisible(); // month 3 is a loss at this point
+    expect(await measure('.tm-gl.tm-down dd'), `.tm-gl.tm-down dd in ${theme}`).toBeGreaterThanOrEqual(4.5);
+    expect(await measure('.tm-gl.tm-down dt'), `.tm-gl.tm-down dt in ${theme}`).toBeGreaterThanOrEqual(4.5);
+    await tm.locator('.tm-option').first().click();
+    expect(await measure('.tm-verdict'), `.tm-verdict in ${theme}`).toBeGreaterThanOrEqual(4.5);
+    await tm.getByRole('button', { name: 'Vender ahora' }).click();
+    await expect(tm.locator('.tm-error')).toBeVisible();
+    expect(await measure('.tm-error'), `.tm-error in ${theme}`).toBeGreaterThanOrEqual(4.5);
+    failSale = false;
+    await tm.getByRole('button', { name: 'Mantener' }).click();
+    await finishReplay(page);
+    for (const selector of ['.tm-learned li', '.tm-summary-text', '.tm-summary .jr-achievement', '.tm-answers li', '.tm-more summary']) {
+      expect(await measure(selector), `${selector} in ${theme}`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+}

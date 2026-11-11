@@ -18,7 +18,6 @@ export type PausePoint = {
   /** Monthly change of the instrument in percent, only for the "drop" reason. */
   dropPercent?: number;
 };
-const EPSILON = 0.005;
 const ORDER: Record<PauseKind, number> = { drop: 0, high: 1, recover: 2, end: 3 };
 
 /** Instrument level of each month: the NAV when every row has one, otherwise 1 + cumulative return. Null when unusable. */
@@ -39,7 +38,7 @@ export function monthlyChanges(rows: readonly ReplayRow[]): number[] {
  * Pause points from the real timeline, ordered by month:
  * - drop: the month with the largest monthly fall of the instrument (only if it actually fell);
  * - high: the first month after that fall in which the instrument exceeds every earlier level;
- * - recover: the first month in which the value is back at or above what was contributed after having been below it;
+ * - recover: the first month in which the value is back within 1 % of what was contributed (or above it) after having been clearly below it (same tolerance as `standing`);
  * - end: the last month.
  */
 export function detectPausePoints(rows: readonly ReplayRow[]): PausePoint[] {
@@ -65,9 +64,10 @@ export function detectPausePoints(rows: readonly ReplayRow[]): PausePoint[] {
       }
     }
   }
+  // "Below" and "back" use the same 1 % tolerance as `standing`: back means no longer clearly under what was contributed.
   let below = false;
   for (let i = 1; i <= last; i++) {
-    if (rows[i].value < rows[i].contributed - EPSILON) below = true;
+    if (standing(rows[i]) === 'less') below = true;
     else if (below) { add(i, 'recover'); break; }
   }
   add(last, 'end');

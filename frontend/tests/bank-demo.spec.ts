@@ -1,4 +1,4 @@
-import { pickFund, reveal } from './journey';
+import { pickFund, reveal, finishReplay } from './journey';
 import { test, expect } from '@playwright/test';
 
 for (const mode of ['local', 'server'] as const) for (const bank of ['caixabank', 'bbva'] as const) {
@@ -59,6 +59,7 @@ test('bank identity and product costs follow the selected fund across views', as
  await page.getByLabel('Aportación mensual').fill('0');
  await page.getByLabel('Tiempo de práctica').fill('6');
  await reveal(page);
+ await finishReplay(page);
  await expect(page.locator('.sim-values')).toContainText('1000,00');
 });
 

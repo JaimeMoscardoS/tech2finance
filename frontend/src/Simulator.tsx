@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction, type FormEvent } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -87,14 +87,18 @@ export default function Simulator({
   useEffect(() => setPickedId(selected.instrumentId), [selected.instrumentId]);
   const [guideOpen, setGuideOpen] = useState(level !== "advanced");
   const [quiet, setQuiet] = useState(false);
-  const [gameSeen, setGameSeen] = useState(false);
-  const onFinished = (finished: boolean) => { if (finished) setGameSeen(true); };
+  const [replayDone, setReplayDone] = useState(false);
+  // Step 1 folds into a one-line summary while a replay is under way (so its full-series sparklines are not on screen); a restart or a fund change unfolds it.
+  const [replayStarted, setReplayStarted] = useState(false);
+  const [step1Open, setStep1Open] = useState(false);
+  useEffect(() => { if (!replayStarted) setStep1Open(false); }, [replayStarted]);
   useEffect(() => setGuideOpen(level !== "advanced"), [level]);
 
   const [exampleShown] = useState(example);
   const revealed = guess !== null || exampleShown;
   const unlocked: Step = chosen ? (revealed ? 3 : 2) : 1;
-  useEffect(() => { onRevealed?.(revealed); return () => onRevealed?.(false); }, [revealed]);
+  // The tutor only receives the result once the replay is finished: before that the user has not lived it.
+  useEffect(() => { onRevealed?.(revealed && replayDone); return () => onRevealed?.(false); }, [revealed, replayDone]);
   const cap = Math.min(72, maxMonths);
   const dates = useMemo(() => gameDates(selected, navHistory), [selected, navHistory]);
   const monthsNumber = Number(months);
@@ -185,6 +189,7 @@ export default function Simulator({
 
   const goTo = (step: Step) => {
     if (step > unlocked) return;
+    if (step === 1) setStep1Open(true);
     setQuiet(false);
     setCurrent(step);
     // Step 3 loads lazily: wait (a few frames at most) for its heading before moving focus.
@@ -199,8 +204,10 @@ export default function Simulator({
   };
 
   const detail = level === "advanced" ? "short" : level === "intermediate" ? "short" : "full";
-  const guideKey = current === 1 ? (chosen ? "s1back" : "s1") : current === 2 ? (revealed ? "s2post" : "s2pre") : gameSeen ? "s3post" : "s3pre";
+  const guideKey = current === 1 ? (chosen ? "s1back" : "s1") : current === 2 ? (revealed ? "s2post" : "s2pre") : replayDone ? "s3post" : "s3pre";
   // Moving between steps by focus or click only updates the display: it is not announced.
+  // Pointer focus is not tracked here (the click that follows is): updating the guide on mouse down would shift the layout under the pointer and the click could miss.
+  const trackFocus = (event: { target: EventTarget }, n: Step) => { const el = event.target as Element; if (typeof el.matches === "function" && el.matches(":focus-visible")) track(n); };
   const track = (n: Step) => { if (n <= unlocked && n !== current) { setQuiet(true); setCurrent(n); } };
   const guideText = j.guide[guideKey][detail];
 
@@ -212,12 +219,50 @@ export default function Simulator({
     return { own: (own / total) * 100, delta: (delta / total) * 100, kind: (r.profit > 0.005 ? "gain" : r.profit < -0.005 ? "loss" : "none") as "gain" | "loss" | "none" };
   };
 
-  const resultBody = useRef<HTMLDivElement>(null);
-  const lastHeight = useRef(0);
-  useLayoutEffect(() => { if (currentResult && resultBody.current) lastHeight.current = resultBody.current.offsetHeight; });
 
   const verdict = currentResult && guess ? evaluatePrediction(guess, currentResult.profit, currentResult.contributed) : null;
   const actualText = verdict ? (verdict.actual === "more" ? j.actualMore : verdict.actual === "less" ? j.actualLess : j.actualSame) : "";
+
+  /** What step 2 used to show. It is rendered only inside the replay summary, once the whole journey has been lived. */
+  const renderReveal = () => {
+    if (!currentResult) return null;
+    const bar = barPart(currentResult);
+    return (
+      <div className="sim-result">
+        <h3>{j.resultTitle}</h3>
+        <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+          {`${t.resultUpdated}: ${euro(currentResult.value)}, ${t.totalPaid}: ${euro(currentResult.contributed)}.${verdict && guess ? ` ${j.yourGuess(j.answers[guess])} ${actualText} ${verdict.matched ? j.matched : j.missed}` : ""}`}
+        </span>
+        <div className="jr-feedback">
+          <p className="jr-fact">{j.fact(euro(currentResult.value), euro(currentResult.contributed), signedEuro(currentResult.profit))}</p>
+          {verdict && guess && <p>{j.yourGuess(j.answers[guess])} {actualText} <strong>{verdict.matched ? j.matched : j.missed}</strong></p>}
+        </div>
+        <dl className="sim-values">
+          <div><dt>{t.finalValue}</dt><dd><strong>{euro(currentResult.value)}</strong></dd></div>
+          <div><dt>{t.totalPaid}</dt><dd><strong>{euro(currentResult.contributed)}</strong></dd></div>
+          <div><dt>{t.delta}</dt><dd><strong>{euro(currentResult.profit)}</strong><small>{t.gainDefinition}</small></dd></div>
+        </dl>
+        {bar && (
+          <div className="jr-split" role="img" aria-label={j.barLabel(euro(Math.min(currentResult.value, currentResult.contributed)), euro(Math.abs(currentResult.profit)), bar.kind)}>
+            <span className="jr-split-own" style={{ width: `${bar.own}%` }} />
+            {bar.kind !== "none" && <span className={`jr-split-${bar.kind}`} style={{ width: `${bar.delta}%` }} />}
+            <span className="jr-split-legend" aria-hidden="true">
+              <span><i className="jr-key-own" />{j.ownMoney}</span>
+              {bar.kind === "gain" && <span><i className="jr-key-gain" />{j.gain}</span>}
+              {bar.kind === "loss" && <span><i className="jr-key-loss" />{j.loss}</span>}
+            </span>
+          </div>
+        )}
+        <p className="jr-achievement"><Award size={16} aria-hidden="true" />{j.achievement}</p>
+        <div className="result-help">
+          <MessageCircle size={23} aria-hidden="true" />
+          <div><strong>{t.explainResult}</strong><p>{j.helpText}</p></div>
+          <button className="button dark" type="button" onClick={openAssistant}>{j.explain}<ArrowRight size={17} /></button>
+        </div>
+        <button className="button outline decline-trigger" type="button" onClick={openSimulationDecline}><TrendingDown size={17} />{j.declines}</button>
+      </div>
+    );
+  };
 
   const cards = useMemo(() => instruments.map(item => ({ item, metrics: fundMetrics(navHistory, item.identifier) })), [instruments, navHistory]);
   const numberFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
@@ -264,66 +309,77 @@ export default function Simulator({
           )}
         </div>
 
-        <section id="jr-step-1" className="jr-step jr-c1" aria-labelledby="jr-h-1" onFocusCapture={() => track(1)} onClickCapture={() => track(1)}>
+        <section id="jr-step-1" className="jr-step jr-c1" aria-labelledby="jr-h-1" onFocusCapture={event => trackFocus(event, 1)} onClickCapture={() => track(1)}>
           <p className="jr-step-label">{j.stepOf(1)}</p>
           <h2 id="jr-h-1" tabIndex={-1}>{j.s1Title}</h2>
-          <p className="jr-intro">{j.s1Intro}</p>
-          <p className="jr-source-note"><FlaskConical size={16} aria-hidden="true" /><span>{!chosen || selected.dataStatus === "historical_nav" ? j.banner : selected.dataStatus === "fictional" ? t.simWarning : selected.dataStatus === "annual_history" ? t.historyIntro : t.missingHistory}</span></p>
-          <div className="jr-funds" role="radiogroup" aria-label={t.instrument}>
-            {cards.map(({ item, metrics }) => {
-              const usable = item.dataStatus === "historical_nav" && metrics.values.length > 1;
-              const checked = chosen && pickedId === item.instrumentId;
-              const points = sparklinePoints(metrics.values, 120, 36);
-              const id = `jr-fund-${item.instrumentId}`;
-              return (
-                <label key={item.instrumentId} className={`jr-fund${checked ? " is-checked" : ""}${usable ? "" : " is-disabled"}`}>
-                  <input
-                    type="radio"
-                    name="jr-fund"
-                    value={item.instrumentId}
-                    checked={checked}
-                    disabled={!usable}
-                    aria-labelledby={`${id}-name`}
-                    aria-describedby={`${id}-info`}
-                    onChange={() => chooseFund(item)}
-                  />
-                  <span className="jr-fund-card">
-                    <span className="jr-fund-name" id={`${id}-name`}>{item.name[language]} · {item.manager}</span>
-                    <span id={`${id}-info`} className="jr-fund-info">
-                      {item.assetClass !== "unknown" && <span className="jr-chip">{j.assetClass[item.assetClass]}</span>}
-                      {usable ? (
-                        <>
-                          {points && (
-                            <svg className="jr-spark" viewBox="0 0 120 36" aria-hidden="true" focusable="false"><polyline points={points} fill="none" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" /></svg>
-                          )}
-                          <dl className="jr-fund-facts">
-                            <div>
-                              <dt>{j.drawdown}</dt>
-                              <dd>{metrics.maxDrawdown === null ? j.drawdownNone : metrics.maxDrawdown === 0 ? "0 %" : `${MINUS}${numberFmt.format(Math.abs(metrics.maxDrawdown))} %`}</dd>
-                            </div>
-                          </dl>
-                          <small>{j.period(monthLabel(metrics.first, language), monthLabel(metrics.last, language))}</small>
-                          {level === "beginner" && <small>{j.drawdownHelp}</small>}
-                          {level === "advanced" && <small>{t.identifierLabel}: {item.identifier}{item.shareClass ? ` · ${t.classLabel}: ${item.shareClass}` : ""}</small>}
-                        </>
-                      ) : (
-                        <small>{t.missingHistory}</small>
-                      )}
-                    </span>
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-          {chosen && (
-            <div className="jr-costs">
-              <ProductCosts product={bankProfile?.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />
+          {replayStarted && !step1Open ? (
+            // While the replay runs the full-series sparklines and drawdowns are not on screen: only the chosen fund remains.
+            <div className="jr-collapsed">
+              <p><strong>{j.chosenFund}:</strong> {selected.name[language]} · {selected.manager}</p>
+              {/* Opens on pointer down too: the click itself can miss because the guide text above changes height as soon as the step 1 section takes focus. */}
+              <button type="button" className="button outline" onPointerDown={event => { if (event.button === 0) { setStep1Open(true); goTo(1); } }} onClick={() => { setStep1Open(true); goTo(1); }}>{j.changeFund}</button>
             </div>
+          ) : (
+            <>
+          <p className="jr-intro">{j.s1Intro}</p>
+            <p className="jr-source-note"><FlaskConical size={16} aria-hidden="true" /><span>{!chosen || selected.dataStatus === "historical_nav" ? j.banner : selected.dataStatus === "fictional" ? t.simWarning : selected.dataStatus === "annual_history" ? t.historyIntro : t.missingHistory}</span></p>
+            <div className="jr-funds" role="radiogroup" aria-label={t.instrument}>
+              {cards.map(({ item, metrics }) => {
+                const usable = item.dataStatus === "historical_nav" && metrics.values.length > 1;
+                const checked = chosen && pickedId === item.instrumentId;
+                const points = sparklinePoints(metrics.values, 120, 36);
+                const id = `jr-fund-${item.instrumentId}`;
+                return (
+                  <label key={item.instrumentId} className={`jr-fund${checked ? " is-checked" : ""}${usable ? "" : " is-disabled"}`}>
+                    <input
+                      type="radio"
+                      name="jr-fund"
+                      value={item.instrumentId}
+                      checked={checked}
+                      disabled={!usable}
+                      aria-labelledby={`${id}-name`}
+                      aria-describedby={`${id}-info`}
+                      onChange={() => chooseFund(item)}
+                    />
+                    <span className="jr-fund-card">
+                      <span className="jr-fund-name" id={`${id}-name`}>{item.name[language]} · {item.manager}</span>
+                      <span id={`${id}-info`} className="jr-fund-info">
+                        {item.assetClass !== "unknown" && <span className="jr-chip">{j.assetClass[item.assetClass]}</span>}
+                        {usable ? (
+                          <>
+                            {points && (
+                              <svg className="jr-spark" viewBox="0 0 120 36" aria-hidden="true" focusable="false"><polyline points={points} fill="none" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" /></svg>
+                            )}
+                            <dl className="jr-fund-facts">
+                              <div>
+                                <dt>{j.drawdown}</dt>
+                                <dd>{metrics.maxDrawdown === null ? j.drawdownNone : metrics.maxDrawdown === 0 ? "0 %" : `${MINUS}${numberFmt.format(Math.abs(metrics.maxDrawdown))} %`}</dd>
+                              </div>
+                            </dl>
+                            <small>{j.period(monthLabel(metrics.first, language), monthLabel(metrics.last, language))}</small>
+                            {level === "beginner" && <small>{j.drawdownHelp}</small>}
+                            {level === "advanced" && <small>{t.identifierLabel}: {item.identifier}{item.shareClass ? ` · ${t.classLabel}: ${item.shareClass}` : ""}</small>}
+                          </>
+                        ) : (
+                          <small>{t.missingHistory}</small>
+                        )}
+                      </span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            {chosen && (
+              <div className="jr-costs">
+                <ProductCosts product={bankProfile?.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />
+              </div>
+            )}
+            </>
           )}
         </section>
 
         {unlocked >= 2 && (
-          <section id="jr-step-2" className="jr-step jr-c2" aria-labelledby="jr-h-2" onFocusCapture={() => track(2)} onClickCapture={() => track(2)}>
+          <section id="jr-step-2" className="jr-step jr-c2" aria-labelledby="jr-h-2" onFocusCapture={event => trackFocus(event, 2)} onClickCapture={() => track(2)}>
             <p className="jr-step-label">{j.stepOf(2)}</p>
             <h2 id="jr-h-2" tabIndex={-1}>{j.s2Title}</h2>
             <p className="jr-intro">{j.s2Intro}</p>
@@ -417,89 +473,53 @@ export default function Simulator({
             )}
 
             {revealed && (
-              <div className="sim-result" aria-busy={!currentResult && !error}>
+              <div className="jr-ack" aria-busy={!currentResult && !error}>
                 <div className="jr-result-head">
-                  <h3 id="jr-result-title" tabIndex={-1}>{j.resultTitle}</h3>
+                  <h3 id="jr-result-title" tabIndex={-1}>{j.ackTitle}</h3>
                   <span className="pill">{j.pill}</span>
                 </div>
                 <p><strong>{selected.name[language]}</strong> · {j.manager}: {selected.manager}</p>
-                <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-                  {currentResult ? `${t.resultUpdated}: ${euro(currentResult.value)}, ${t.totalPaid}: ${euro(currentResult.contributed)}.${verdict && guess ? ` ${j.yourGuess(j.answers[guess])} ${actualText} ${verdict.matched ? j.matched : j.missed}` : ""}` : ""}
-                </span>
-                {!currentResult ? (
-                  <div role="status" className="jr-pending" style={lastHeight.current ? { minHeight: lastHeight.current } : undefined}>
+                <div className="jr-feedback" role="status" aria-live="polite" aria-atomic="true">
+                  {guess ? <p className="jr-fact">{j.yourGuess(j.answers[guess])}</p> : null}
+                  <p>{guess ? j.ackLater : j.ackExample}</p>
+                </div>
+                {!currentResult && (
+                  <div role="status" className="jr-pending">
                     <p>{error ? t.amountError : j.pending}</p>
                   </div>
-                ) : (
-                  <div ref={resultBody}>
-                    <div className="jr-feedback">
-                      <p className="jr-fact">{j.fact(euro(currentResult.value), euro(currentResult.contributed), signedEuro(currentResult.profit))}</p>
-                      {verdict && guess && (
-                        <p>{j.yourGuess(j.answers[guess])} {actualText} <strong>{verdict.matched ? j.matched : j.missed}</strong></p>
-                      )}
-                    </div>
-                    <dl className="sim-values">
-                      <div><dt>{t.finalValue}</dt><dd><strong>{euro(currentResult.value)}</strong></dd></div>
-                      <div><dt>{t.totalPaid}</dt><dd><strong>{euro(currentResult.contributed)}</strong></dd></div>
-                      <div><dt>{t.delta}</dt><dd><strong>{euro(currentResult.profit)}</strong><small>{t.gainDefinition}</small></dd></div>
-                    </dl>
-                    {(() => {
-                      const bar = barPart(currentResult);
-                      if (!bar) return null;
-                      return (
-                        <div className="jr-split" role="img" aria-label={j.barLabel(euro(Math.min(currentResult.value, currentResult.contributed)), euro(Math.abs(currentResult.profit)), bar.kind)}>
-                          <span className="jr-split-own" style={{ width: `${bar.own}%` }} />
-                          {bar.kind !== "none" && <span className={`jr-split-${bar.kind}`} style={{ width: `${bar.delta}%` }} />}
-                          <span className="jr-split-legend" aria-hidden="true">
-                            <span><i className="jr-key-own" />{j.ownMoney}</span>
-                            {bar.kind === "gain" && <span><i className="jr-key-gain" />{j.gain}</span>}
-                            {bar.kind === "loss" && <span><i className="jr-key-loss" />{j.loss}</span>}
-                          </span>
-                        </div>
-                      );
-                    })()}
-                    <p className="jr-achievement"><Award size={16} aria-hidden="true" />{j.achievement}</p>
-                    <div className="result-help">
-                      <MessageCircle size={23} aria-hidden="true" />
-                      <div><strong>{t.explainResult}</strong><p>{j.helpText}</p></div>
-                      <button className="button dark" type="button" onClick={openAssistant}>{j.explain}<ArrowRight size={17} /></button>
-                    </div>
-                    <details className="jr-more jr-info">
-                      <summary>{j.moreInfo}</summary>
-                      {currentResult.timeline[0]?.date && currentResult.timeline.at(-1)?.date && <p>{j.observed}: {currentResult.timeline[0].date} – {currentResult.timeline.at(-1)!.date}</p>}
-                      <div className="source-details">
-                        <p>
-                          {t.managerLabel}: {selected.manager}
-                          {selected.identifier && <> · {t.identifierLabel}: {selected.identifier}</>}
-                          {selected.shareClass && <> · {t.classLabel}: {selected.shareClass}</>}
-                          {selected.currency && <> · {selected.currency}</>}
-                        </p>
-                        {selected.sourceUrl && (
-                          <p>
-                            <a href={selected.sourceUrl} target="_blank" rel="noreferrer">CNMV <ArrowUpRight size={14} /></a> · {t.sourceChecked}: {selected.sourceDate}
-                          </p>
-                        )}
-                      </div>
-                      <div className="assumption"><CircleHelp size={16} /><span>{j.assumption}</span></div>
-                    </details>
-                    <button className="button outline decline-trigger" type="button" onClick={openSimulationDecline}><TrendingDown size={17} />{j.declines}</button>
-                    <button className="button dark jr-next" type="button" onClick={() => goTo(3)}>{j.goStep3}<ArrowRight size={16} /></button>
-                  </div>
                 )}
+                <details className="jr-more jr-info">
+                  <summary>{j.moreInfo}</summary>
+                  <div className="source-details">
+                    <p>
+                      {t.managerLabel}: {selected.manager}
+                      {selected.identifier && <> · {t.identifierLabel}: {selected.identifier}</>}
+                      {selected.shareClass && <> · {t.classLabel}: {selected.shareClass}</>}
+                      {selected.currency && <> · {selected.currency}</>}
+                    </p>
+                    {selected.sourceUrl && (
+                      <p>
+                        <a href={selected.sourceUrl} target="_blank" rel="noreferrer">CNMV <ArrowUpRight size={14} /></a> · {t.sourceChecked}: {selected.sourceDate}
+                      </p>
+                    )}
+                  </div>
+                  <div className="assumption"><CircleHelp size={16} /><span>{j.assumption}</span></div>
+                </details>
+                <button className="button dark jr-next" type="button" onClick={() => goTo(3)}>{j.goStep3}<ArrowRight size={16} /></button>
               </div>
             )}
           </section>
         )}
 
         {unlocked >= 3 && (
-          <section id="jr-step-3" className="jr-step jr-c3" aria-labelledby="tm-title" onFocusCapture={() => track(3)} onClickCapture={() => track(3)}>
+          <section id="jr-step-3" className="jr-step jr-c3" aria-labelledby="tm-title" onFocusCapture={event => trackFocus(event, 3)} onClickCapture={() => track(3)}>
             {currentResult ? (
               <Suspense fallback={<p role="status">{language === "es" ? "Cargando recorrido…" : "Loading journey…"}</p>}>
                 <TimeMachine
                   key={`${selected.instrumentId}|${currentResult.initial}|${currentResult.monthly}|${currentResult.months}|${contributionFrequency}|${currentResult.value}`}
                   language={language} mode={mode} fund={selected} instruments={instruments} navHistory={navHistory}
                   result={{ initial: currentResult.initial, monthly: currentResult.monthly, months: currentResult.months, timeline: currentResult.timeline }}
-                  frequency={contributionFrequency} euro={euro} assumption={j.assumption} onFinished={onFinished}
+                  frequency={contributionFrequency} euro={euro} assumption={j.assumption} onFinished={setReplayDone} onStarted={setReplayStarted} renderReveal={renderReveal}
                 />
               </Suspense>
             ) : (

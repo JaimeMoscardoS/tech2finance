@@ -2,7 +2,9 @@
    Marea: Azul noche #0E1B3D (text, headers), Turquesa electrico #00B3A4 (main action, "si mantengo"), Amarillo sol #FFC94D
    (moments, questions, achievements), Coral suave #FF7A66 (falls, always with an icon or text), Fondo #F3F7FB.
    Raw brand colours are used as fills; text and control boundaries use the darker *-ink / --jr-border tokens so that text is
-   >= 4.5:1 and control boundaries >= 3:1 against their surface in both themes (checked in tests). */
+   >= 4.5:1 for the selectors listed in tests/simulator-journey.spec.ts and tests/time-machine.spec.ts, and the borders of fund cards, fields,
+   details, secondary replay buttons, readout cards and the chart frame are >= 3:1 against their surface in both themes (checked there).
+   Primary (teal) button borders, line colours of the chart and decorative accents are not measured by tests. */
 .journey {
   --mr-night: #0E1B3D; --mr-teal: #00B3A4; --mr-sun: #FFC94D; --mr-coral: #FF7A66; --mr-bg: #F3F7FB;
   --ink: #0E1B3D; --muted: #3d4a6b; --surface: #ffffff; --surface-raised: #F3F7FB; --border: #c9d5e6; --focus: #0057b8;
@@ -120,7 +122,7 @@ html[data-theme='dark'] .journey {
 .jr-feedback { margin: 14px 0 0; padding: 14px 16px; background: var(--surface-raised); border-left: 5px solid var(--jc); border-radius: 12px; }
 .jr-feedback p { margin: 4px 0; color: var(--ink); font-size: .95rem; line-height: 1.55; }
 .jr-fact { font-weight: 700; }
-.sim-result .sim-values { margin: 18px 0 0; }
+
 .sim-result .sim-values > div { padding: 14px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: 14px; min-width: 0; }
 .sim-result .sim-values dt { font-size: .78rem; font-weight: 700; letter-spacing: 0; }
 .sim-result .sim-values dd { margin: 6px 0 0; }
@@ -175,3 +177,20 @@ html[data-theme='dark'] .journey {
   .jr-answer { transition: background-color .15s, transform .15s; }
   .jr-answer:hover:not([aria-disabled='true']) { transform: translateY(-1px); }
 }
+
+/* Step 2 acknowledgement (no result before the replay) and the collapsed step 1 shown while the replay runs. */
+.jr-ack { margin-top: 22px; min-width: 0; display: grid; gap: 12px; }
+.jr-ack .jr-result-head h3 { margin: 0; font-size: 1.15rem; color: var(--ink); }
+.jr-ack .jr-result-head h3:focus { outline: none; }
+.jr-ack .jr-result-head h3:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+.jr-ack .pill { background: var(--jc-soft); color: var(--jc); border: 1px solid var(--jc-line); }
+.jr-ack p { margin: 0; }
+.jr-ack .jr-feedback { margin: 0; }
+.jr-ack .jr-info { margin-top: 0; }
+.jr-ack .jr-next { margin-top: 0; width: fit-content; }
+.jr-collapsed { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.jr-collapsed p { margin: 0; color: var(--ink); font-size: .95rem; }
+.jr-collapsed .button { margin: 0; min-height: 44px; }
+.tm-summary .sim-result { display: grid; gap: 12px; min-width: 0; }
+.tm-summary .sim-result h3 { font-size: 1.05rem; }
+.tm-summary .sim-result > * { margin-top: 0; margin-bottom: 0; }

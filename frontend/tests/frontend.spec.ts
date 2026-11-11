@@ -1,5 +1,5 @@
 import { test, expect, devices } from '@playwright/test';
-import { BBVA, CAIXA, pickFund, reveal, startJourney } from './journey';
+import { BBVA, CAIXA, finishReplay, pickFund, reveal, startJourney } from './journey';
 
 test('users can explore, change level and run a labelled simulation', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
@@ -14,6 +14,7 @@ test('users can explore, change level and run a labelled simulation', async ({ p
   await page.getByLabel('Importe inicial').fill('100');
   await page.getByLabel('Aportación mensual').fill('');
   await reveal(page);
+  await finishReplay(page);
   await expect(page.locator('.sim-values strong').filter({hasText:'100,00 €'})).toBeVisible();
   await page.getByRole('button', { name: 'Abrir asistente' }).click();
   await expect(page.getByText(/MODO LOCAL/)).toBeVisible();
@@ -131,10 +132,12 @@ test('catalogue selection changes the example and preserves the selected real fu
  const panel=page.locator('.sim-result');
  await expect(page.locator('input[name="jr-fund"]:checked')).toHaveCount(0);
  await startJourney(page);
+ await finishReplay(page);
  await expect(panel.locator('.sim-values strong').first()).toBeVisible();
  const original=await panel.locator('.sim-values strong').first().textContent();
  await pickFund(page, BBVA);
  await expect(page.locator('input[name="jr-fund"]:checked')).toHaveValue(BBVA);
+ await finishReplay(page);
  await expect(panel.locator('.sim-values strong').first()).not.toHaveText(original!);
  const newValue=await panel.locator('.sim-values strong').first().textContent();
  await page.getByRole('button', {name:/Detalle: Principiante/}).click();
@@ -152,7 +155,9 @@ test('explore transfers the chosen real instrument', async ({page}) => {
  await page.getByRole('button',{name:'Practicar con este fondo'}).click();
  await expect(page.locator('input[name="jr-fund"]:checked')).toHaveValue(BBVA);
  await reveal(page);
- await expect(page.locator('.sim-result')).toContainText('BBVA MI INVERSION BOLSA ACUMULACION');
+ await expect(page.locator('.jr-ack')).toContainText('BBVA MI INVERSION BOLSA ACUMULACION');
+ await finishReplay(page);
+ await expect(page.locator('.tm-summary')).toBeVisible();
 });
 
 test('catalogue fits mobile in English dark mode', async ({browser}) => {
@@ -178,7 +183,8 @@ test('monthly NAV simulation preserves contributions and values across preferenc
  await startJourney(page);
  await page.getByLabel('Tiempo de práctica').fill('12');
  await page.getByLabel('Aportación mensual').fill('100');
- await expect(panel.getByText(/Has cambiado los datos/)).toBeVisible();
+ await expect(page.locator('.jr-ack').getByText(/Has cambiado los datos/)).toBeVisible();
+ await finishReplay(page);
  await expect(panel.locator('.sim-values strong').filter({hasText:'1700,75 €'})).toBeVisible();
  await expect(panel.locator('.sim-values strong').filter({hasText:'1700,00 €'})).toBeVisible();
  await page.getByRole('button',{name:'Abrir asistente'}).click();
@@ -188,7 +194,8 @@ test('monthly NAV simulation preserves contributions and values across preferenc
  await page.keyboard.press('Escape');
  await page.getByLabel('Aportación mensual').fill('0');
  await page.getByLabel('Importe inicial').fill('1000');
- await expect(panel.getByText(/Has cambiado los datos/)).toBeVisible();
+ await expect(page.locator('.jr-ack').getByText(/Has cambiado los datos/)).toBeVisible();
+ await finishReplay(page);
  await expect(panel.locator('.sim-values strong').filter({hasText:'999,70 €'})).toBeVisible();
  await page.getByRole('button',{name:/Detalle: Principiante/}).click();
  await page.getByRole('button',{name:'Avanzado',exact:true}).click();
@@ -234,6 +241,7 @@ test('monthly deposits and the replay table stay consistent across preferences',
  await page.getByLabel('Tiempo de práctica').fill('12');
  await page.getByLabel('Aportación mensual').fill('50');
  await reveal(page);
+ await finishReplay(page);
  const panel=page.locator('.sim-result');
  await expect(panel.locator('.sim-values strong').nth(0)).toHaveText('1100,30 €');
  await expect(panel.locator('.sim-values strong').nth(1)).toHaveText('1100,00 €');
@@ -242,11 +250,6 @@ test('monthly deposits and the replay table stay consistent across preferences',
  // The chart and its table / percentage view moved out of the step 2 result: the step 3 replay has its own table of visible months.
  await expect(panel.locator('.investment-chart')).toHaveCount(0);
  const tm=page.locator('#jr-step-3 .tm');
- for(let i=0;i<12;i++){
-  await tm.getByRole('button',{name:'Siguiente mes'}).click();
-  const skip=tm.getByRole('button',{name:'Seguir sin responder'});
-  if(i<11&&await skip.count()) await skip.click();
- }
  await expect(tm).toContainText('Mes 12 de 12');
  await tm.getByText('Ver tabla de los meses visibles').click();
  const rows=tm.getByRole('table').locator('tbody tr');
@@ -261,7 +264,7 @@ test('monthly deposits and the replay table stay consistent across preferences',
  await page.getByRole('button',{name:'English'}).click();
  await expect(panel.locator('.sim-values strong').nth(0)).toHaveText('€1,100.30');
  await page.getByLabel('Monthly contribution').fill('75');
- await expect(panel.getByText(/Your inputs changed/)).toBeVisible();
+ await expect(page.locator('.jr-ack').getByText(/Your inputs changed/)).toBeVisible();
  await expect(panel.locator('.investment-chart')).toHaveCount(0);
 
 });
@@ -305,7 +308,7 @@ test('local tutor grounds results, keeps previous messages and excludes dirty re
   await page.goto('http://127.0.0.1:5194/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
  await pickFund(page);
  await page.getByLabel('Tiempo de práctica').fill('12');
- await page.getByLabel('Aportación mensual').fill('50'); await reveal(page);
+ await page.getByLabel('Aportación mensual').fill('50'); await reveal(page); await finishReplay(page);
  await page.getByRole('button',{name:'Abrir asistente'}).click();
  const dialog=page.getByRole('dialog',{name:'Tu asistente'});
  await dialog.getByLabel('Tu pregunta').fill('¿Cuál es el resultado?'); await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
@@ -355,6 +358,7 @@ test('decline explanations use observed series without inventing a current crisi
  await pickFund(page, BBVA);
  await page.getByLabel('Tiempo de práctica').fill('3');
  await reveal(page);
+ await finishReplay(page);
  await page.getByRole('button',{name:'Entender las caídas'}).click();
  let dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
  await expect(dialog).toContainText('2020-03-31');
