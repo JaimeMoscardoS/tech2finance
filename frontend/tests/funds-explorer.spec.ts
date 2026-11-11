@@ -1,3 +1,4 @@
+import { BBVA, pickFund } from './journey';
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
@@ -16,7 +17,7 @@ test('three distinct layouts retain the selected fund and show truthful chart da
 });
 
 test('server tutor receives the selected fund across detail modes', async ({page}) => {
- await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click(); await page.getByLabel('Instrumento').selectOption('bbva-mi-inversion-bolsa-acumulacion'); await page.getByRole('button',{name:'Explorar',exact:true}).click();
+ await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click(); await pickFund(page, BBVA); await page.getByRole('button',{name:'Explorar',exact:true}).click();
  await page.getByRole('group',{name:'Nivel de detalle'}).getByRole('button',{name:'Avanzado'}).click();
  await page.getByRole('button',{name:'Abrir asistente'}).click(); await page.locator('#chat-input').fill('¿Qué es este fondo?'); const request = page.waitForRequest(req => req.url().endsWith('/api/tutor') && req.method() === 'POST'); await page.getByRole('button',{name:'Enviar pregunta'}).click();
  expect((await request).postDataJSON().context).toMatchObject({page:'explore',instrumentId:'bbva-mi-inversion-bolsa-acumulacion'}); await expect(page.locator('.message.assistant').last()).toBeVisible();

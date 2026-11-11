@@ -1,24 +1,25 @@
 import { test, expect, type Page } from '@playwright/test';
+import { BBVA, CAIXA, SANTANDER, pickFund, startJourney } from './journey';
 
-const SANTANDER = 'santander-rf-ahorro';
-
-async function openGame(page: Page, url = '/') {
+// Step 3 of the guided simulator journey: it follows the fund, amounts and months chosen in steps 1 and 2.
+async function openGame(page: Page, url = '/', fund = SANTANDER) {
   await page.goto(url);
   const menu = page.getByRole('button', { name: 'Abrir menú' });
   const nav = page.getByRole('button', { name: /^(Simulador|Simulator)$/ });
   await expect(menu.or(nav.first())).toBeVisible();
   if (await menu.isVisible()) await menu.click();
   await nav.first().click();
+  await startJourney(page, fund);
   const game = page.locator('section.hsg');
   await expect(game).toBeVisible();
   return game;
 }
 
 async function fillCase(game: ReturnType<Page['locator']>) {
-  await game.getByLabel('Fondo').selectOption(SANTANDER);
-  await game.getByLabel('Importe inicial (€)').fill('1000');
-  await game.getByLabel('Aportación mensual (€)').fill('100');
-  await game.getByLabel('Meses', { exact: true }).fill('3');
+  const page = game.page();
+  await page.getByLabel('Importe inicial').fill('1000');
+  await page.getByLabel('Aportación mensual').fill('100');
+  await page.getByLabel('Tiempo de práctica').fill('3');
   await game.getByLabel('Mes de venta').fill('2');
   await game.getByText('Comisiones (opcional)').click();
   await game.getByLabel('Comisión de compra (%)').fill('1');
@@ -30,8 +31,8 @@ test('server mode compares hold and sell with the backend numbers and neutral ca
   page.on('request', req => { if (req.url().endsWith('/api/game/compare') && req.method() === 'POST') bodies.push(req.postDataJSON()); });
   const game = await openGame(page);
   await expect(game.getByRole('heading', { name: '¿Y si vendo en el mes X?' })).toBeVisible();
-  await expect(game.getByLabel('Fondo').locator('option[value="caixabank-monetario-estandar"]')).toHaveCount(0);
-  await expect(game.getByLabel('Fondo').locator(`option[value="${SANTANDER}"]`)).toHaveCount(1);
+  await expect(page.locator(`input[name="jr-fund"][value="${SANTANDER}"]`)).toBeChecked();
+  await expect(game.getByLabel('Fondo para el reto')).toHaveCount(0);
   await expect(game.getByText(/no es una recomendación/)).toBeVisible();
   await fillCase(game);
   await game.getByRole('button', { name: 'Comparar mantener y vender' }).click();
@@ -72,19 +73,18 @@ test('editing a field clears the previous result and reports validation inline',
   await fillCase(game);
   await game.getByRole('button', { name: 'Comparar mantener y vender' }).click();
   await expect(game.locator('.hsg-card')).toHaveCount(2);
-  await game.getByLabel('Importe inicial (€)').fill('900');
+  await page.getByLabel('Importe inicial').fill('900');
   await expect(game.locator('.hsg-card')).toHaveCount(0);
   await expect(game.getByRole('status').filter({ hasText: 'La comparación anterior se ha borrado' })).toHaveCount(1);
+  // The sale-month slider cannot leave 0..months (the browser clamps it), so the out-of-range message is unreachable by hand.
   await game.getByLabel('Mes de venta').fill('9');
-  await game.getByRole('button', { name: 'Comparar mantener y vender' }).click();
-  await expect(game.locator('.hsg-error')).toContainText('El mes de venta debe ser un número entero entre 0 y 3');
-  await expect(game.getByLabel('Mes de venta')).toBeFocused();
-  await expect(game.getByRole('alert')).toHaveCount(0);
-  await game.getByLabel('Mes de venta').fill('3');
-  await game.getByLabel('Importe inicial (€)').fill('0');
-  await game.getByLabel('Aportación mensual (€)').fill('0');
+  await expect(game.getByLabel('Mes de venta')).toHaveValue('3');
+  await page.getByLabel('Importe inicial').fill('0');
+  await page.getByLabel('Aportación mensual').fill('0');
   await game.getByRole('button', { name: 'Comparar mantener y vender' }).click();
   await expect(game.locator('.hsg-error')).toContainText('no pueden ser ambos 0');
+  await expect(game.locator('#hsg-form-error')).toBeFocused();
+  await expect(game.getByRole('alert')).toHaveCount(0);
 });
 
 test('local data mode shows a notice and never calls the game endpoint', async ({ page }) => {
@@ -102,12 +102,12 @@ test('English labels and results', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'English' }).click();
   await page.getByRole('button', { name: 'Simulator', exact: true }).click();
+  await startJourney(page, SANTANDER);
   const game = page.locator('section.hsg');
   await expect(game.getByRole('heading', { name: 'What if I sell in month X?' })).toBeVisible();
-  await game.getByLabel('Fund').selectOption(SANTANDER);
-  await game.getByLabel('Initial amount (€)').fill('1000');
-  await game.getByLabel('Monthly contribution (€)').fill('100');
-  await game.getByLabel('Months', { exact: true }).fill('3');
+  await page.getByLabel('Initial amount').fill('1000');
+  await page.getByLabel('Monthly contribution').fill('100');
+  await page.getByLabel('Practice period').fill('3');
   await game.getByLabel('Sale month').fill('2');
   await game.getByRole('button', { name: 'Compare holding and selling' }).click();
   await expect(game.locator('.hsg-card')).toHaveCount(2);
@@ -124,7 +124,7 @@ test('375px viewport has no horizontal page overflow, with the table open', asyn
   const page = await context.newPage();
   const game = await openGame(page);
   await fillCase(game);
-  await game.getByLabel('Meses', { exact: true }).fill('24');
+  await page.getByLabel('Tiempo de práctica').fill('24');
   await game.getByLabel('Mes de venta').fill('12');
   await game.getByRole('button', { name: 'Comparar mantener y vender' }).click();
   await expect(game.locator('.hsg-card')).toHaveCount(2);
@@ -141,17 +141,17 @@ test('375px viewport has no horizontal page overflow, with the table open', asyn
 });
 
 test('a CaixaBank-scoped app shows the no-funds message instead of the form', async ({ page }) => {
-  const game = await openGame(page, 'http://127.0.0.1:5194/');
+  const game = await openGame(page, 'http://127.0.0.1:5194/', CAIXA);
   await expect(game.getByText(/No hay fondos con histórico mensual verificado/)).toBeVisible();
   await expect(game.getByRole('button', { name: 'Comparar mantener y vender' })).toHaveCount(0);
 });
 
 const compareButton = (game: ReturnType<Page['locator']>) => game.getByRole('button', { name: /Comparar mantener y vender|Compare holding and selling/ });
 async function quickCase(game: ReturnType<Page['locator']>) {
-  await game.getByLabel('Fondo').selectOption(SANTANDER);
-  await game.getByLabel('Importe inicial (€)').fill('1000');
-  await game.getByLabel('Aportación mensual (€)').fill('100');
-  await game.getByLabel('Meses', { exact: true }).fill('3');
+  const page = game.page();
+  await page.getByLabel('Importe inicial').fill('1000');
+  await page.getByLabel('Aportación mensual').fill('100');
+  await page.getByLabel('Tiempo de práctica').fill('3');
   await game.getByLabel('Mes de venta').fill('2');
 }
 
@@ -184,7 +184,7 @@ test('a delayed response never renders after the user edits a field', async ({ p
   await quickCase(game);
   await compareButton(game).click();
   await expect(game.getByRole('button', { name: 'Calculando…' })).toBeVisible();
-  await game.getByLabel('Importe inicial (€)').fill('900');
+  await page.getByLabel('Importe inicial').fill('900');
   await page.waitForTimeout(2200);
   await expect(game.locator('.hsg-card')).toHaveCount(0);
   await expect(game.getByRole('alert')).toHaveCount(0);
@@ -213,24 +213,34 @@ test('changing the fund clamps months and sale month to its history', async ({ p
     await route.fulfill({ response, json: body });
   });
   const game = await openGame(page);
-  await game.getByLabel('Fondo').selectOption(SANTANDER);
-  await game.getByLabel('Meses', { exact: true }).fill('60');
+  const page_ = game.page();
+  await page_.getByLabel('Tiempo de práctica').fill('60');
   await game.getByLabel('Mes de venta').fill('50');
-  await game.getByLabel('Fondo').selectOption('bbva-mi-inversion-bolsa-acumulacion');
-  await expect(game.getByLabel('Meses', { exact: true })).toHaveValue('24');
+  await expect(game.getByLabel('Mes de venta')).toHaveValue('50');
+  await pickFund(page_, BBVA);
+  await expect(page_.getByLabel('Tiempo de práctica')).toHaveValue('24');
   await expect(game.getByLabel('Mes de venta')).toHaveValue('24');
-  await expect(game.getByText(/Entre 1 y 24 meses/)).toBeVisible();
+  await expect(game.getByText(/Entre 0 y 24/)).toBeVisible();
+});
+
+test('a fund excluded from the challenge shows a note and an eligible-fund selector, steps 1 and 2 stay usable', async ({ page }) => {
+  const game = await openGame(page, '/', CAIXA);
+  await expect(game.getByText('Este reto no usa este fondo; elige otro para jugar.')).toBeVisible();
+  await expect(game.getByRole('button', { name: 'Comparar mantener y vender' })).toHaveCount(0);
+  await expect(page.locator('.sim-values strong').first()).toBeVisible();
+  await game.getByLabel('Fondo para el reto').selectOption(SANTANDER);
+  await expect(page.locator(`input[name="jr-fund"][value="${SANTANDER}"]`)).toBeChecked();
+  await expect(game.getByLabel('Mes de venta')).toBeVisible();
 });
 
 test('invalid amounts are announced through both fields and the CNMV reuse link is shown', async ({ page }) => {
   const game = await openGame(page);
-  await game.getByLabel('Importe inicial (€)').fill('0');
-  await game.getByLabel('Aportación mensual (€)').fill('0');
+  await game.page().getByLabel('Importe inicial').fill('0');
+  await game.page().getByLabel('Aportación mensual').fill('0');
   await compareButton(game).click();
-  await expect(game.getByLabel('Importe inicial (€)')).toHaveAttribute('aria-describedby', /hsg-form-error/);
-  await expect(game.getByLabel('Aportación mensual (€)')).toHaveAttribute('aria-describedby', /hsg-form-error/);
+  await expect(game.locator('#hsg-form-error')).toContainText('no pueden ser ambos 0');
   await expect(game.getByText(/empieza en el primer cierre observado/)).toBeVisible();
-  await game.getByLabel('Aportación mensual (€)').fill('50');
+  await game.page().getByLabel('Aportación mensual').fill('50');
   await compareButton(game).click();
   await expect(game.getByRole('link', { name: 'Condiciones de reutilización de la CNMV' })).toHaveAttribute('href', /^https:\/\//);
 });

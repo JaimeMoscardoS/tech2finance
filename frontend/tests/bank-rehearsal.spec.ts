@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { pickFund, reveal } from './journey';
 
 const labels = {
  es: {home:'Inicio',explore:'Explorar',sim:'Simulador',portfolio:'Mi cartera',open:'Abrir asistente',askProduct:'Preguntar por este producto',question:'Tu pregunta',send:'Enviar pregunta',initial:'Importe inicial',monthly:'Aportación mensual',annual:'Aportación anual',period:'Tiempo de práctica',run:'Ver mi ejemplo',entity:'Entidad',instrument:'Instrumento',pause:'¿Te preocupa la caída?',context:'Añadir contexto (opcional)',liquidity:'¿Necesitas liquidez pronto? (opcional)',ask:'Preguntar al asistente'},
@@ -23,9 +24,9 @@ for (const language of ['es','en'] as const) test(`GUI rehearsal ${language}: tw
  const nav=async (name:string)=>page.getByRole('button',{name,exact:true}).click();
  const open=async()=>nav(t.open);
  const simulator=async()=>nav(t.sim);
- const selectExternal=async (bank:'bbva'|'caixabank', instrument:string)=>{await page.goto(bank==='bbva'?'http://127.0.0.1:5196/':'http://127.0.0.1:5194/');if(language==='en')await page.getByRole('button',{name:'English',exact:true}).click();await simulator();await expect(page.getByLabel(t.instrument)).toHaveValue(instrument);};
+ const selectExternal=async (bank:'bbva'|'caixabank', instrument:string)=>{await page.goto(bank==='bbva'?'http://127.0.0.1:5196/':'http://127.0.0.1:5194/');if(language==='en')await page.getByRole('button',{name:'English',exact:true}).click();await simulator();await pickFund(page,instrument);};
  const chooseFund=async()=>{await nav(t.explore);await page.locator('.beginner-guide select').last().selectOption('caixabank-monetario-estandar');await expect(page.locator('.beginner-card h2')).toContainText('CAIXABANK MONETARIO');await open();};
- const runSimulation=async()=>{await simulator();await page.getByLabel(t.instrument).selectOption('bbva-mi-inversion-bolsa-acumulacion');await page.getByLabel(t.initial).fill('1000');await page.getByLabel(t.monthly).fill('0');await page.getByLabel(t.period).selectOption('3');await nav(t.run);await expect(page.locator('.sim-values')).toContainText(language==='es'?'744,62':'744.62');await open();};
+ const runSimulation=async()=>{await simulator();await pickFund(page,'bbva-mi-inversion-bolsa-acumulacion');await page.getByLabel(t.initial).fill('1000');await page.getByLabel(t.monthly).fill('0');await page.getByLabel(t.period).fill('3');await reveal(page);await expect(page.locator('.sim-values')).toContainText(language==='es'?'744,62':'744.62');await open();};
  for(let i=0;i<12;i++) {
   let requestBody: any, answer='';
   try {
@@ -33,8 +34,8 @@ for (const language of ['es','en'] as const) test(`GUI rehearsal ${language}: tw
    if(i===0||i===1||i===8||i===11) await open();
    if(i===2||i===10) await chooseFund();
    if(i===4||i===5) await runSimulation();
-   if(i===6){await selectExternal('caixabank','caixabank-monetario-estandar');await page.getByLabel(t.initial).fill('1000');await page.getByLabel(t.monthly).fill('0');await nav(t.run);await expect(page.locator('.sim-values')).toContainText('999');await open();}
-   if(i===7){await selectExternal('bbva','bbva-mi-inversion-bolsa-acumulacion');await page.getByLabel(t.instrument).selectOption('bbva-mi-inversion-bolsa');await open();}
+   if(i===6){await selectExternal('caixabank','caixabank-monetario-estandar');await page.getByLabel(t.initial).fill('1000');await page.getByLabel(t.monthly).fill('0');await reveal(page);await expect(page.locator('.sim-values')).toContainText('999');await open();}
+   if(i===7){await page.goto('http://127.0.0.1:5196/');if(language==='en')await page.getByRole('button',{name:'English',exact:true}).click();await nav(t.explore);await page.locator('.beginner-guide select').last().selectOption('bbva-mi-inversion-bolsa');await simulator();await expect(page.locator('input[name="jr-fund"][value="bbva-mi-inversion-bolsa"]')).toBeDisabled();await open();}
    if(i===9){await nav(t.portfolio);await page.getByRole('button',{name:t.pause}).click();const pause=page.getByRole('dialog',{name:language==='es'?'Tomemos un momento':'Let’s take a moment'});await expect(pause).toContainText(language==='es'?'25,54':'25.54');await pause.getByText(t.context).click();await pause.getByLabel(t.liquidity).selectOption('yes');await pause.getByRole('button',{name:t.ask}).click();}
    const input=page.getByLabel(t.question);await input.fill(questions[language][i]);
    const req=page.waitForRequest(r=>r.url().endsWith('/api/tutor') && r.method()==='POST');

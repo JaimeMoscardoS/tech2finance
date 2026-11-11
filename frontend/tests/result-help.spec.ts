@@ -1,3 +1,4 @@
+import { startJourney } from "./journey";
 import { test, expect } from "@playwright/test";
 
 test("result help is prominent and opens the local tutor with the current result", async ({
@@ -8,6 +9,7 @@ test("result help is prominent and opens the local tutor with the current result
   );
   await page.goto("/");
   await page.getByRole("button", { name: "Simulador", exact: true }).click();
+  await startJourney(page);
   const help = page.locator(".result-help");
   const button = help.getByRole("button", { name: "Explícame este resultado" });
   await expect(button).toBeVisible();
@@ -31,6 +33,7 @@ test("result help sends server tutor the active simulation", async ({
 }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Simulador", exact: true }).click();
+  await startJourney(page);
   const button = page.getByRole("button", { name: "Explícame este resultado" });
   await expect(button).toBeVisible();
   await button.click();
@@ -58,6 +61,7 @@ test("result help fits and remains legible in each level and theme on mobile", a
   await page.goto("/");
   await page.getByRole("button", { name: "Abrir menú" }).click();
   await page.getByRole("button", { name: "Simulador", exact: true }).click();
+  await startJourney(page);
   for (const theme of ["light", "dark"]) {
     if (theme === "dark")
       await page.getByRole("button", { name: "Modo oscuro" }).click();
