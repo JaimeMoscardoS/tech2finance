@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Mic, Square, Volume2, X } from 'lucide-react';
 import { createLocalTutorProvider, MAX_MESSAGE_LENGTH, type TutorContext, type TutorProvider, type TutorReply, type TutorHistoryMessage } from '../../tutor-ia/src/index';
-import { speakLocal, type VoiceState } from './voice/browser-voice';
+import { type VoiceState } from './voice/browser-voice';
+import { speak, stopPlayback } from './voice/playback';
 import { cancelDictation, startDictation, type DataMode } from './voice/dictation';
 import { replyOrigin } from './reply-origin';
 import './voice-assistant.css';
@@ -32,10 +33,10 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
  const inputRef = useRef<HTMLInputElement>(null);
  const currentSession = useRef({ key, provider });
  currentSession.current = { key, provider };
- const cancel = () => { generation.current++; request.current?.abort(); request.current = null; cancelDictation(); setPhase('idle'); setMessage(''); };
+ const cancel = () => { generation.current++; request.current?.abort(); request.current = null; stopPlayback(); cancelDictation(); setPhase('idle'); setMessage(''); };
  useEffect(() => {
   cancel(); history.current = []; setQuestion(''); setReply(null); setDraft(''); setShowText(false); setShowAnswer(false);
-  return () => { generation.current++; request.current?.abort(); request.current = null; cancelDictation(); };
+  return () => { generation.current++; request.current?.abort(); request.current = null; stopPlayback(); cancelDictation(); };
  }, [open, key, provider]);
  const submitQuestion = (text: string, id: number, snapshot: TutorContext) => {
   if (!text) { setPhase('idle'); setMessage(t.empty); return; }
@@ -47,7 +48,7 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
    if (id !== generation.current || controller.signal.aborted) return;
    history.current = [...history.current, {role:'user' as const,text}, {role:'assistant' as const,text:result.text,intent:result.intent}].slice(-8);
    request.current = null; setReply(result); setPhase('speaking');
-   speakLocal(result.text, result.language, (voiceState, voiceMessage) => {
+   void speak(dataMode, result.text, result.language, (voiceState, voiceMessage) => {
     if (id !== generation.current) return;
     setMessage(voiceMessage);
     if (voiceState === 'idle' || voiceState === 'error') setPhase('idle');
@@ -88,7 +89,7 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
  const play = () => {
   if (!reply) return;
   cancel(); const id = generation.current; setPhase('speaking');
-  speakLocal(reply.text, reply.language, (state, detail) => {
+  void speak(dataMode, reply.text, reply.language, (state, detail) => {
    if (id !== generation.current) return;
    setMessage(detail); if (state === 'idle' || state === 'error') setPhase('idle');
   });
@@ -113,6 +114,7 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
    <button type="button" className="voice-panel__icon" onClick={close} aria-label={t.close}><X size={20}/></button>
   </div>
   {dataMode === 'server' && <p className="voice-panel__privacy">{context.language === 'es' ? 'Si ElevenLabs está configurado, tu audio se enviará a ElevenLabs. Idioma: español.' : 'If ElevenLabs is configured, your audio will be sent to ElevenLabs. Language: English.'}</p>}
+  {dataMode === 'server' && <p className="voice-panel__privacy">{context.language === 'es' ? 'Si ElevenLabs está configurado para la lectura, se le enviará el texto de la respuesta.' : 'If ElevenLabs is configured for playback, the answer text will be sent to it.'}</p>}
   {reply && <div className="voice-panel__actions"><span className="voice-panel__provider">{reply.provider === 'anthropic' ? `Anthropic · ${reply.model ?? 'Claude Sonnet'}` : context.language === 'es' ? 'Respuesta por reglas' : 'Rule-based response'}</span><button type="button" onClick={() => setShowAnswer(value => !value)} aria-expanded={showAnswer}>{context.language === 'es' ? 'Ver respuesta' : 'View answer'}</button></div>}
   {showAnswer && reply && <div className="voice-panel__result">{question && <section><h3>{t.heard}</h3><p>{question}</p></section>}<section><h3>{t.answer}</h3><p>{reply.text}</p>{provider.id === 'server_rules' && replyOrigin(reply.provider, reply.language) && <div className="voice-panel__sources">{replyOrigin(reply.provider, reply.language)}</div>}{reply.sources.length > 0 && <div className="voice-panel__sources">{t.sources}: {reply.sources.map(source => <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.label}</a>)}</div>}</section><button type="button" onClick={phase === 'speaking' ? cancel : play} disabled={phase === 'dictating' || phase === 'pending'}><Volume2 size={17}/>{phase === 'speaking' ? t.stop : t.listen}</button></div>}
   {showText && <form className="voice-panel__form" onSubmit={submitText}><label htmlFor="voice-question">{context.language === 'es' ? 'Escribe tu pregunta' : 'Type your question'}</label><div><input ref={inputRef} id="voice-question" value={draft} onChange={event => setDraft(event.target.value)} maxLength={MAX_MESSAGE_LENGTH}/><button type="submit" disabled={!draft.trim()}>{context.language === 'es' ? 'Enviar' : 'Send'}</button></div></form>}

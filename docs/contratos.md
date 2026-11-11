@@ -43,6 +43,10 @@ El juego histórico no es una previsión: documentar qué activo representa cada
 
 ## Conversación, voz y análisis
 
+El servidor carga opcionalmente `.env` desde la raíz al iniciarse, sin sustituir variables de entorno preexistentes. La plantilla permite configurar las claves privadas, el proveedor de análisis y las voces de respuesta en español e inglés; las pruebas omiten el archivo. Cambiarlo exige reiniciar el servidor. La selección de voces no acredita que estén disponibles en una cuenta ni que se haya probado la conexión real.
+
+La lectura de respuestas permite síntesis local o ElevenLabs según `ttsProvider` en `GET /api/health`. `POST /api/speech/synthesize` recibe únicamente `{text, language}` con texto de 1 a 3000 caracteres e idioma `es` o `en`, y devuelve `audio/mpeg` sin caché. Las voces predeterminadas son David Martin en castellano y Elara en inglés; el modelo por defecto es `eleven_flash_v2_5`. La operación tiene un plazo de 25 s, límite de 2 MiB, cuatro solicitudes simultáneas y 30 por minuto por proceso. Un fallo de ElevenLabs no cambia silenciosamente a voz local. La conexión real y la calidad de las voces siguen pendientes de comprobación.
+
 ### Análisis detallado de caídas
 
 `POST /api/decline-explanations` recibe `{decline: DeclineSpec, level: 'beginner'|'intermediate'|'advanced', decision?: Decision}`. El idioma procede de `decline.language`; se rechazan informes, cifras, fuentes y campos extra del cliente. El servidor calcula de nuevo el informe y utiliza el mismo constructor TypeScript que el modo local. La respuesta `DetailedDeclineAnalysis` incluye versión `1.0`, modo `demo` o `ai`, proveedor, modelo, idioma, resumen, seis secciones ordenadas (`observed`, `context`, `mechanism`, `portfolio`, `decision`, `uncertainty`) y fuentes con identificadores y URL. La coincidencia temporal no demuestra causalidad.
@@ -65,7 +69,7 @@ La implementación anterior del PR 36 permanece en `backend.tutor_bridge.reply()
 
 Los accesos contextuales preparan una pregunta localizada y editable sobre el resultado, ejemplo, caída o fondo seleccionado; no la envían automáticamente. El acceso genérico abre el chat vacío. La etiqueta del proveedor procede de la respuesta recibida.
 
-`GET /api/health` indica `speechProvider`, `speechKeyConfigured`, `tutorProvider`, `newsProvider` y `externalProviders`; refleja configuración, no prueba credenciales ni conectividad. Configurar claves como variables del entorno del servidor y reiniciarlo, sin subirlas a Git. Con claves presentes se activan automáticamente transcripción y chat salvo override; el análisis detallado requiere además `T2F_ANALYSIS_PROVIDER=anthropic`. Se han implementado adaptadores y pruebas simuladas; la conexión real a ElevenLabs y Anthropic y la calidad de sus respuestas están pendientes de comprobación con credenciales reales. La lectura en voz alta sigue dependiendo de las capacidades locales disponibles.
+`GET /api/health` indica `speechProvider`, `speechKeyConfigured`, `tutorProvider`, `newsProvider` y `externalProviders`; refleja configuración, no prueba credenciales ni conectividad. Configurar claves como variables del entorno del servidor y reiniciarlo, sin subirlas a Git. Con claves presentes se activan automáticamente transcripción y chat salvo override; el análisis detallado requiere además `T2F_ANALYSIS_PROVIDER=anthropic`. Se han implementado adaptadores y pruebas simuladas; la conexión real a ElevenLabs y Anthropic y la calidad de sus respuestas están pendientes de comprobación con credenciales reales.
 
 ## Motor de análisis de caídas
 

@@ -2,6 +2,8 @@
 
 ## Qué es
 
+La configuración local opcional del servidor usa `.env` privado en la raíz, copiado de `.env.example`; contiene claves de Anthropic y ElevenLabs, selección de análisis y voces de respuesta en español e inglés. Se carga al arrancar y requiere reinicio tras cambios. Disponibilidad de voz y proveedores con credenciales reales pendiente de comprobación. Véase [backend](../backend/README.md#configuración-privada-local).
+
 En la rama de trabajo, **BancoT2F** es la entidad ficticia anfitriona de la experiencia y Tech2Finance su tutor. Las condiciones del anfitrión, los costes de productos no disponibles y los límites se detallan en [BancoT2F](banco-t2f.md); el [guion de demo](../presentacion/demo-banco-t2f.md) recoge el recorrido histórico propuesto.
 
 Tech2Finance es una propuesta de asistente para la sección de inversión de la aplicación de un banco. Su propósito es ayudar al cliente a entender lo que ve, aprender cómo se comportan las inversiones y explorar decisiones con dinero ficticio antes de comprometer dinero real.

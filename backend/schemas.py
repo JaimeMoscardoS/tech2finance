@@ -105,6 +105,10 @@ class TutorRequest(RequestModel):
 class SpeechTokenRequest(RequestModel):
     language: Language
 
+class SpeechSynthesisRequest(RequestModel):
+    text: Annotated[str, Field(min_length=1, max_length=3000, pattern=r'\S')]
+    language: Language
+
 class DeclineExplanationRequest(RequestModel):
     decline: DeclineSpec
     level: Literal['beginner', 'intermediate', 'advanced']

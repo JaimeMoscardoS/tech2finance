@@ -5,20 +5,23 @@ import hashlib
 import json
 import math
 import os
+from backend.env_config import load_project_env
+load_project_env()
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.domain import DomainError, analyze_decline, build_tutor_context, get_catalog, run_simulation
 from backend.domain.game import run_game
-from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest, SpeechTokenRequest
+from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest, SpeechTokenRequest, SpeechSynthesisRequest
 from backend.decline_explanations import AnalysisUnavailable, explain, provider
 from backend.news import get_news
 from backend.tutor_bridge import TutorUnavailable, reply
 from backend.providers import ProviderError, speech_provider, tutor_provider, speech_token, tutor_reply
+from backend.speech_playback import tts_provider, synthesize
 
 MAX_BODY = 65536
 
@@ -44,7 +47,7 @@ class BodyLimit:
             size += len(event.get("body", b""))
             if size > MAX_BODY:
                 response = error(413, "request_too_large", "Request body is too large.")
-                if scope.get('path') == '/api/speech/token':
+                if scope.get('path') in ('/api/speech/token', '/api/speech/synthesize'):
                     response.headers['Cache-Control'] = 'no-store'
                 await response(scope, receive, send)
                 return
@@ -62,7 +65,7 @@ class BodyLimit:
             return await receive()
 
         async def send_with_cache_control(event):
-            if scope.get('path') == '/api/speech/token' and event['type'] == 'http.response.start':
+            if scope.get('path') in ('/api/speech/token', '/api/speech/synthesize') and event['type'] == 'http.response.start':
                 headers = [(k, v) for k, v in event.get('headers', []) if k.lower() != b'cache-control']
                 event['headers'] = headers + [(b'cache-control', b'no-store')]
             await send(event)
@@ -130,9 +133,9 @@ async def provider_error(_request: Request, exc: ProviderError):
 def health():
     news_provider = os.environ.get('T2F_NEWS_PROVIDER', 'ecb_archive')
     speech, tutor = speech_provider(), tutor_provider()
-    return {"status": "ok", "mode": "demo", "tutorProvider": tutor, "speechProvider": speech,
+    return {"status": "ok", "mode": "demo", "tutorProvider": tutor, "speechProvider": speech, "ttsProvider": tts_provider(),
             "speechKeyConfigured": bool(os.environ.get('ELEVENLABS_API_KEY')),
-            "externalProviders": provider() == "anthropic" or news_provider == 'ecb_archive' or speech == 'elevenlabs' or tutor == 'anthropic', "newsProvider": news_provider}
+            "externalProviders": provider() == "anthropic" or news_provider == 'ecb_archive' or speech == 'elevenlabs' or tutor == 'anthropic' or tts_provider() == 'elevenlabs', "newsProvider": news_provider}
 
 
 @app.get("/api/catalog")
@@ -199,6 +202,26 @@ async def token(request: SpeechTokenRequest, raw_request: Request):
         response = JSONResponse(await speech_token(request.language))
     response.headers['Cache-Control'] = 'no-store'
     return response
+
+
+@app.post('/api/speech/synthesize')
+async def synthesize_speech(request: SpeechSynthesisRequest, raw_request: Request):
+    origin = raw_request.headers.get('origin')
+    if origin and origin not in ('http://localhost:5173', 'http://127.0.0.1:5173'):
+        return error(403, 'invalid_origin', 'Invalid origin.')
+    task = asyncio.create_task(synthesize(request.text, request.language))
+    try:
+        while not task.done():
+            await asyncio.wait({task}, timeout=0.2)
+            if not task.done() and await raw_request.is_disconnected():
+                task.cancel()
+                raise asyncio.CancelledError()
+        audio = await task
+    finally:
+        if not task.done():
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+    return Response(audio, media_type='audio/mpeg', headers={'Cache-Control': 'no-store'})
 
 
 @app.post("/api/decline-explanations")

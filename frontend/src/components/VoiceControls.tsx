@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { localVoice, speakLocal, subscribeVoicesChanged, type VoiceLanguage, type VoiceState } from '../voice/browser-voice';
+import { localVoice, subscribeVoicesChanged, type VoiceLanguage, type VoiceState } from '../voice/browser-voice';
+import { speak, stopPlayback } from '../voice/playback';
 import { cancelDictation, finishDictation, startDictation, type DataMode } from '../voice/dictation';
 import './VoiceControls.css';
 
@@ -24,8 +25,8 @@ export default function VoiceControls({ text, language, speechLanguage = languag
     setState(next); setMessage(detail); callback.current?.(detail);
     setMode(next === 'idle' || next === 'error' ? null : requestedMode);
   };
-  useEffect(() => { setState('idle'); setMode(null); setMessage(''); return () => { cancelDictation(); }; }, [text, language, speechLanguage, dataMode, scopeKey]);
-  useEffect(() => { if (disabled) cancelDictation(); }, [disabled]);
+  useEffect(() => { setState('idle'); setMode(null); setMessage(''); return () => { stopPlayback(); cancelDictation(); }; }, [text, language, speechLanguage, dataMode, scopeKey]);
+  useEffect(() => { if (disabled) { stopPlayback(); cancelDictation(); } }, [disabled]);
   useEffect(() => subscribeVoicesChanged(() => {
     // Voice discovery may complete after the first request; let the user retry.
     if (localVoice(window.speechSynthesis.getVoices(), speechLanguage)) {
@@ -37,9 +38,9 @@ export default function VoiceControls({ text, language, speechLanguage = languag
   return <div className="voice-controls">
     <div className="voice-controls__actions">
       {text && <button type="button" disabled={disabled} aria-pressed={active && mode === 'speech'} onClick={() => {
-        if (active && mode === 'speech') { cancelDictation(); return; }
+        if (active && mode === 'speech') { stopPlayback(); cancelDictation(); return; }
         cancelDictation();
-        speakLocal(text, speechLanguage, status('speech'));
+        void speak(dataMode, text, speechLanguage, status('speech'));
       }}>{active && mode === 'speech' ? (spanish ? 'Detener lectura' : 'Stop reading') : (spanish ? 'Escuchar' : 'Listen')}</button>}
       {onTranscript && <button type="button" disabled={disabled} aria-pressed={active && mode === 'dictation'} onClick={() => {
         if (active && mode === 'dictation') { finishDictation(); return; }
@@ -47,6 +48,7 @@ export default function VoiceControls({ text, language, speechLanguage = languag
       }}>{active && mode === 'dictation' ? (spanish ? 'Detener dictado' : 'Stop dictation') : (spanish ? 'Dictar' : 'Dictate')}</button>}
     </div>
     {onTranscript && dataMode === 'server' && <small>{spanish ? 'Si ElevenLabs está configurado, tu audio se enviará a ElevenLabs. Idioma: español.' : 'If ElevenLabs is configured, your audio will be sent to ElevenLabs. Language: English.'}</small>}
+    {text && dataMode === 'server' && <small>{spanish ? 'Si ElevenLabs está configurado para la lectura, se le enviará este texto.' : 'If ElevenLabs is configured for playback, this text will be sent to it.'}</small>}
     <span className="voice-controls__status" role="status" aria-live="polite">{message}</span>
   </div>;
 }
