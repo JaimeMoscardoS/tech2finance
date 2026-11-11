@@ -4,6 +4,8 @@
 
 Acuerdos entre áreas y contrato de la API local de demostración. El motor Python histórico conserva su propio contrato y se expone en `POST /api/game/compare`.
 
+Los nombres genéricos bilingües de presentación se mantienen aparte del catálogo verificado en `shared/fund-aliases.json`. La interfaz y el servidor resuelven los duplicados sobre el catálogo completo ordenando sus identificadores; los informes de caídas y el contexto del tutor usan el alias. El catálogo de API, la identidad de noticias, los archivos de datos y los CSV conservan la denominación oficial. El alias no representa una clasificación de riesgo ni de activos.
+
 ## Detección y noticias
 
 `POST /api/decline-events` recibe exclusivamente `{decline: DeclineSpec}` y reconstruye el informe. Si `currentDrawdownPercent >= 5`, umbral educativo de demo sin significado de asesoramiento, responde `triggered` y un `eventId` estable derivado de la especificación y las observaciones; de otro modo responde `not_triggered`, identificador nulo y no consulta noticias. No registra transiciones persistentes ni escucha bancos: evalúa la instantánea histórica cuando la interfaz solicita una valoración.

@@ -177,7 +177,7 @@ test('step 3 follows steps 1 and 2 live and has no duplicate form', async ({ pag
   await expect(game.getByLabel('Importe inicial')).toHaveCount(0);
   await expect(game.getByLabel('Fondo', { exact: true })).toHaveCount(0);
   const synced = game.locator('.hsg-synced');
-  await expect(synced).toContainText('SANTANDER');
+  await expect(synced).toContainText('Fondo ahorro');
   await expect(synced.locator('dd').nth(1)).toHaveText('1000,00 €');
   await expect(synced.locator('dd').nth(3)).toHaveText('3');
   await expect(game.getByLabel('Mes de venta')).toHaveAttribute('max', '3');
