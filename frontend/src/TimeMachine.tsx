@@ -22,7 +22,7 @@ type Props = {
   /** Localized assumption text of the step 2 result, used when no sale was calculated. */
   assumption: string;
   /** Final reveal of step 2 (final value, prediction check, tutor shortcuts): shown only inside the summary, after the last month. */
-  renderReveal?: () => ReactNode;
+  renderReveal?: (sold: boolean) => ReactNode;
   onFinished?: (finished: boolean) => void;
   /** True once the first month has been shown (and false again after a restart or unmount). */
   onStarted?: (started: boolean) => void;
@@ -365,7 +365,7 @@ export default function TimeMachine({ language, mode, fund, instruments, navHist
               ? t.summarySold(sale.month, euro(sale.summary.series[last].sell), euro(sale.summary.series[last].hold))
               : t.summaryHeld(euro(row.contributed), euro(row.value), signed(row.profit))}
           </p>
-          {renderReveal?.()}
+          {renderReveal?.(!!sale)}
           <h4>{t.learnedTitle}</h4>
           <ul className="tm-learned">{learned.map((text, i) => <li key={i}><Lightbulb size={15} aria-hidden="true" />{text}</li>)}</ul>
           <details className="tm-more">

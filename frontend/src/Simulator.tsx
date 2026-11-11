@@ -226,17 +226,17 @@ export default function Simulator({
   const actualText = verdict ? (verdict.actual === "more" ? j.actualMore : verdict.actual === "less" ? j.actualLess : j.actualSame) : "";
 
   /** What step 2 used to show. It is rendered only inside the replay summary, once the whole journey has been lived. */
-  const renderReveal = () => {
+  const renderReveal = (sold = false) => {
     if (!currentResult) return null;
     const bar = barPart(currentResult);
     return (
       <div className="sim-result">
-        <h3>{j.resultTitle}</h3>
+        <h4>{sold ? j.predictionTitleSold : j.resultTitle}</h4>
         <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
           {`${t.resultUpdated}: ${euro(currentResult.value)}, ${t.totalPaid}: ${euro(currentResult.contributed)}.${verdict && guess ? ` ${j.yourGuess(j.answers[guess])} ${actualText} ${verdict.matched ? j.matched : j.missed}` : ""}`}
         </span>
         <div className="jr-feedback">
-          <p className="jr-fact">{j.fact(euro(currentResult.value), euro(currentResult.contributed), signedEuro(currentResult.profit))}</p>
+          {sold && <p className="jr-fact">{j.holdFact(euro(currentResult.value), euro(currentResult.contributed), signedEuro(currentResult.profit))}</p>}
           {verdict && guess && <p>{j.yourGuess(j.answers[guess])} {actualText} <strong>{verdict.matched ? j.matched : j.missed}</strong></p>}
         </div>
         <dl className="sim-values">
