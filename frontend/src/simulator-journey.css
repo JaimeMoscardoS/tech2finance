@@ -76,11 +76,12 @@ html[data-theme='dark'] .journey {
 .jr-preset, .jr-answer { min-height: 44px; padding: 10px 16px; color: var(--jc); background: var(--jc-soft); border: 1px solid var(--jc-line); border-radius: 999px; font-weight: 600; font-size: .9rem; }
 .jr-preset[aria-pressed='true'] { background: var(--jc); color: var(--jc-on); border-color: var(--jc); }
 .jr-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 14px; }
-.jr-input { display: grid; gap: 6px; min-width: 0; }
+.jr-input { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; }
+/* Sin ancho intrínseco del campo numérico (unos 150 px) el campo y su unidad caben en 320 px sin desbordar. */
 .jr-input-label { font-size: .85rem; font-weight: 600; color: var(--ink); }
 .jr-input-label small { font-weight: 500; font-size: .75rem; }
 .jr-field { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 12px; background: var(--surface-raised); border: 1px solid var(--jr-border); border-radius: 12px; }
-.jr-field input, .jr-field select { flex: 1; min-width: 0; padding: 10px 0; color: var(--ink); background: transparent; border: 0; outline: 0; font-size: 1rem; }
+.jr-field input, .jr-field select { flex: 1; min-width: 0; width: 0; padding: 10px 0; color: var(--ink); background: transparent; border: 0; outline: 0; font-size: 1rem; }
 .jr-field:focus-within { border-color: var(--jc); }
 .jr-field [aria-invalid='true'] { text-decoration: underline wavy var(--error-ink); }
 .jr-field:has([aria-invalid='true']) { border: 2px solid var(--error-ink); }

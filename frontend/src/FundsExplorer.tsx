@@ -6,9 +6,10 @@ import type { Language } from "./copy";
 import type { Catalog } from "./server-api";
 import "./funds-explorer.css";
 import GoalsPanel from "./GoalsPanel";
+import { annualPeriods } from "./annual-periods";
+import { LEVELS, LEVEL_LABELS, type Level } from "./types/level";
 import manifest from "../../shared/data-manifest.json";
 
-type Level = "beginner" | "intermediate" | "advanced";
 type Props = {
   language: Language;
   level: Level;
@@ -415,8 +416,8 @@ export default function FundsExplorer({
       <div className="fund-level">
         <span>{es ? "Nivel de detalle" : "Detail level"}</span>
         <div role="group" aria-label={es ? "Nivel de detalle" : "Detail level"}>
-          {(["beginner", "intermediate", "advanced"] as Level[]).map(
-            (item, index) => (
+          {LEVELS.map(
+            (item) => (
               <button
                 key={item}
                 type="button"
@@ -430,11 +431,7 @@ export default function FundsExplorer({
                   }
                 }}
               >
-                {
-                  (es
-                    ? ["Principiante", "Intermedio", "Avanzado"]
-                    : ["Beginner", "Intermediate", "Advanced"])[index]
-                }
+                {LEVEL_LABELS[es ? "es" : "en"][item]}
               </button>
             ),
           )}

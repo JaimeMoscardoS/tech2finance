@@ -32,7 +32,7 @@ test('all layouts fit 320px in English dark theme', async ({browser}) => {
  await expect(page.locator('.beginner-card h2')).toHaveText('Equity fund 2');
  await page.locator('.beginner-card details summary').first().click();
  await expect(page.locator('.beginner-card details').first()).toContainText('Official name: BBVA MI INVERSION BOLSA ACUMULACION, FI');
- for (const level of ['Beginner','Intermediate','Advanced']) { await page.getByRole('group',{name:'Detail level'}).getByRole('button',{name:level}).click(); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy(); await expect(page.getByRole('button',{name:'Ask by voice'})).toBeVisible(); }
+ for (const level of ['Basic','Intermediate','Advanced']) { await page.getByRole('group',{name:'Detail level'}).getByRole('button',{name:level}).click(); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy(); await expect(page.getByRole('button',{name:'Ask by voice'})).toBeVisible(); }
  await context.close();
 });
 
@@ -49,7 +49,7 @@ test('ineligible NAV does not enable practice', async ({page}) => {
 test('filters, document status and CSV retain selected fund context', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode','local')); await page.goto('/'); await page.getByRole('button',{name:'Explorar',exact:true}).click();
  const levels=page.getByRole('group',{name:'Nivel de detalle'});
- for (const name of ['Principiante','Intermedio','Avanzado']) {
+ for (const name of ['Básico','Intermedio','Avanzado']) {
   await levels.getByRole('button',{name,exact:true}).click(); await expect(page.getByRole('button',{name:'Escribir al asistente'})).toBeVisible(); await expect(page.getByRole('button',{name:'Hablar con el asistente'})).toBeVisible(); const voice=page.getByRole('button',{name:'Hablar con el asistente'}); const contrast=await voice.evaluate(el => { const css=getComputedStyle(el); const lum=(v:string)=>v.match(/\d+/g)!.slice(0,3).map(Number).map(x=>x/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4).reduce((s,x,i)=>s+x*[.2126,.7152,.0722][i],0); const a=lum(css.color),b=lum(css.backgroundColor); return (Math.max(a,b)+.05)/(Math.min(a,b)+.05); }); expect(contrast).toBeGreaterThanOrEqual(4.5);
   const docs=page.locator('.fund-documents'); await docs.locator('summary').click(); await expect(docs).toContainText('Documento de datos fundamentales: no disponible'); await expect(docs).toContainText('Folleto: no disponible'); await docs.locator('summary').click();
  }

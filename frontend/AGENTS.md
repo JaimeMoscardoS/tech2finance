@@ -16,6 +16,7 @@ Ejecutor: `t2f-01-frontend-executor`. Revisor: `t2f-01-frontend-reviewer`. Plani
 
 - `t2f-01-diseno`: Diseña experiencias bancarias sencillas, pantallas y jerarquía visual para tres niveles, juego y pausa, con criterios claros y sin implementar.
 - `t2f-01-accesibilidad`: Revisa navegación por teclado, contraste, lector de pantalla, estados y experiencia de voz con evidencia real.
+- `ui-designer` (solo Claude): Rediseña e implementa páginas, paneles y componentes aplicando `frontend-design`; compila y verifica el resultado visual.
 
 ## Motor de análisis de caídas
 

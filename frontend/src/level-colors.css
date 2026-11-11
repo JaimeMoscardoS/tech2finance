@@ -1,20 +1,4 @@
-/* Detail levels are visual preferences, not risk profiles. Financial colours are independent. */
-html { --chart-rise:#176b40; --chart-fall:#b12c35; --chart-flat:#57636a; }
-html[data-theme='dark'] { --chart-rise:#75d39e; --chart-fall:#ff9c9c; --chart-flat:#c0cbd0; }
-html[data-level='beginner'][data-theme='light'] { --ground:#edf3f6; --surface-tint:#dcebf2; --accent:#1e5e78; --accent-hover:#15495f; --accent-soft:#cfe1e8; --action-ink:#fff; }
-html[data-level='intermediate'][data-theme='light'] { --ground:#f2eff7; --surface-tint:#e9e0f4; --accent:#654294; --accent-hover:#4e3077; --accent-soft:#e4d9f0; --action-ink:#fff; }
-html[data-level='advanced'][data-theme='light'] { --ground:#f5f1e9; --surface-tint:#f0e5ce; --accent:#805208; --accent-hover:#633e04; --accent-soft:#f1dfbb; --action-ink:#fff; }
-html[data-level='beginner'][data-theme='dark'] { --ground:#030a13; --surface-tint:#102d3d; --accent:#a5d1d8; --accent-hover:#c2e4e7; --accent-soft:#173948; --action-ink:#082b37; }
-html[data-level='intermediate'][data-theme='dark'] { --ground:#100b1c; --surface:#1c1528; --surface-raised:#281d36; --surface-tint:#302342; --accent:#dac1ff; --accent-hover:#ebdcff; --accent-soft:#39284e; --action-ink:#2e164b; }
-html[data-level='advanced'][data-theme='dark'] { --ground:#181209; --surface:#211a10; --surface-raised:#2c2215; --surface-tint:#3b2e1a; --accent:#f4d197; --accent-hover:#ffe4b6; --accent-soft:#493820; --action-ink:#3b2604; }
+/* Los colores por nivel y tema viven en styles/tokens.css. El nivel no es un perfil de riesgo. */
 .preference-button.selected { color:var(--action-ink); }
-
-html[data-theme='dark'][data-level] .sidebar { background:var(--surface); }
-
-/* Home destinations keep distinct colours across detail levels. */
-html[data-theme='light'] .action-card--funds { background:#e1eef7; border-color:#a5c8dd; }
-html[data-theme='light'] .action-card--practice { background:#eee6f7; border-color:#cab5dd; }
-html[data-theme='light'] .action-card--portfolio { background:#f8ebd6; border-color:#dfc28e; }
-html[data-theme='dark'] .action-card--funds { background:#183547; border-color:#64889c; }
-html[data-theme='dark'] .action-card--practice { background:#38294b; border-color:#8b75a0; }
-html[data-theme='dark'] .action-card--portfolio { background:#44321b; border-color:#9c8058; }
+/* Separador decorativo de la ruta de navegación: mismo contraste que el texto secundario. */
+.breadcrumb span { color:var(--muted); }

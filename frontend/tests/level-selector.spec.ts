@@ -18,7 +18,7 @@ test("selects every level and supports keyboard, back and outside dismissal", as
   await expect(menu.getByRole("button", { name: "Volver" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
-  for (const [name, value] of [["Intermedio", "intermediate"], ["Avanzado", "advanced"], ["Principiante", "beginner"]]) {
+  for (const [name, value] of [["Intermedio", "intermediate"], ["Avanzado", "advanced"], ["Básico", "beginner"]]) {
     await trigger.click();
     await expect(menu.getByRole("button", { name })).toBeVisible();
     await menu.getByRole("button", { name }).click();
@@ -28,7 +28,7 @@ test("selects every level and supports keyboard, back and outside dismissal", as
   await trigger.focus();
   await page.keyboard.press("Enter");
   await expect(menu.getByRole("button", { name: "Volver" })).toBeFocused();
-  await expect(menu.getByRole("button", { name: "Principiante" })).toHaveAttribute("aria-pressed", "true");
+  await expect(menu.getByRole("button", { name: "Básico" })).toHaveAttribute("aria-pressed", "true");
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
   await expect(menu).toHaveAttribute("inert", "");
@@ -41,7 +41,7 @@ test("selects every level and supports keyboard, back and outside dismissal", as
   await expect(menu).toHaveCSS("opacity", "1");
   await expect(menu).toHaveCSS("filter", "blur(0px)");
   await page.screenshot({ path: "test-results/level-desktop-open.png" });
-  await page.locator("h1").first().click();
+  await page.locator("main").click({ position: { x: 4, y: 4 } });
   await expect(menu).toHaveAttribute("inert", "");
 });
 

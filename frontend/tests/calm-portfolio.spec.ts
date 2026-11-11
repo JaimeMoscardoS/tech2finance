@@ -44,7 +44,7 @@ test('dialog traps focus with details closed and open and restores the trigger',
  await page.addInitScript(()=>localStorage.setItem('t2f-data-mode','local')); await page.goto('/');
  const card=page.getByRole('button',{name:/¿Te preocupa la caída\?/}); await card.focus(); await page.keyboard.press('Enter');
  const dialog=page.getByRole('dialog',{name:'Tomemos un momento'}); const close=dialog.getByRole('button',{name:'Cerrar',exact:true});
- await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab'); await expect(dialog.getByRole('button',{name:'Continuar en la demo'})).toBeFocused();
+ await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab'); await expect(dialog.locator('button:visible').last()).toBeFocused(); // el último control del diálogo (Shift+Tab desde Cerrar vuelve al final)
  await page.keyboard.press('Tab'); await expect(close).toBeFocused();
  await dialog.getByText('Añadir contexto (opcional)').click(); await close.focus(); await page.keyboard.press('Shift+Tab');
  await expect.poll(()=>page.evaluate(()=>document.activeElement?.closest('[role=dialog]') !== null)).toBe(true);
@@ -70,7 +70,8 @@ for (const mode of ['local','server'] as const) test(`concern and liquidity cont
 
 for (const mode of ['local','server'] as const) test(`historical explanation is immediately available in ${mode}`, async ({page}) => {
  await page.addInitScript(mode=>localStorage.setItem('t2f-data-mode',mode),mode); await page.goto('/');
- await page.getByRole('button',{name:/¿Te preocupa la caída\?/}).click();
+ // Análisis detallado y noticias públicas: caso de «Probar una caída» (serie histórica del catálogo); el enlace calm de Inicio analiza la cartera DEMO sin servidor.
+ await page.getByRole('button',{name:'Probar una caída'}).click();
  const dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
  await expect(dialog.getByRole('heading',{name:'Análisis detallado'})).toBeVisible();
  await expect(dialog.locator('.detailed-analysis')).toContainText('25,54');
@@ -91,7 +92,7 @@ for (const scenario of ['zero','insufficient'] as const) test(`no unsupported cr
   else {body.status='insufficient_data'; body.observationCount=1; body.latestLabel=null; body.latestValue=null; body.peakValue=null; body.currentDrawdownPercent=null; body.maxDrawdownPercent=null;}
   await route.fulfill({response,json:body});
  });
- await page.goto('/'); await page.getByRole('button',{name:/¿Te preocupa la caída\?/}).click();
+ await page.goto('/'); await page.getByRole('button',{name:'Probar una caída'}).click();
  const dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
  await expect(dialog.locator(scenario==='zero'?'.anti-panic__metric small':'.anti-panic__notice')).toContainText(scenario==='zero'?'no hay caída':'No hay suficientes observaciones');
  await expect(dialog.locator('.anti-panic__story')).toHaveCount(0);

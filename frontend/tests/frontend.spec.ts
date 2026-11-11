@@ -5,9 +5,9 @@ test('users can explore, change level and run a labelled simulation', async ({ p
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Invertir empieza/ })).toBeVisible();
-  await page.getByRole('button', { name: /Detalle: Principiante/ }).click();
+  await page.getByRole('button', { name: /Detalle: Básico/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
-  await page.getByRole('button', { name: 'Simulador', exact: true }).click();
+  await page.locator('aside').first().getByRole('button', { name: 'Simulador', exact: true }).click();
   await expect(page.getByText(/Cierres mensuales históricos de la CNMV/)).toBeVisible();
   await expect(page.getByText(/aportaciones al cierre/i).first()).toBeVisible();
   await pickFund(page);
@@ -23,7 +23,8 @@ test('pause dialog handles keyboard focus and escape', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await page.getByRole('button', { name: 'Mi cartera', exact: true }).click();
-  const trigger = page.getByRole('button', { name: /¿Te preocupa la caída\?/ });
+  // En Mi cartera la pausa se abre con «Entender una caída» (el enlace «¿Te preocupa la caída?» está en Inicio).
+  const trigger = page.getByRole('button', { name: 'Entender una caída' });
   await trigger.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -41,7 +42,8 @@ test('mobile navigation is hidden until opened', async ({ browser }) => {
   await expect(page.getByRole('button', { name: 'Simulador', exact: true })).toBeHidden();
   await page.getByRole('button', { name: 'Abrir menú' }).click();
   await page.getByRole('button', { name: 'Simulador', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Simular inversión' })).toBeVisible();
+  // Simulador único: un solo h1 «Simulador» encima del recorrido de producto (que no repite su propio h1).
+  await expect(page.getByRole('heading', { level: 1, name: /Simulador/ })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   await context.close();
 });
@@ -60,13 +62,15 @@ test('language and theme switches apply across the interface and persist', async
 test('experience levels show distinct views without changing the selected risk', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
-  await expect(page.getByText('Tu punto de partida')).toBeVisible();
-  await page.getByRole('button', { name: /Detalle: Principiante/ }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-level', 'beginner');
+  await page.getByRole('button', { name: /Detalle: Básico/ }).click();
   await page.getByRole('button', { name: 'Intermedio' }).click();
-  await expect(page.getByText('Tu panorama')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-level', 'intermediate');
+  await expect(page.getByText('Progreso al objetivo').first()).toBeVisible(); // Inicio intermedio: indicadores de la cartera DEMO (antes «Disponible» de la cabecera de main)
   await page.getByRole('button', { name: /Detalle: Intermedio/ }).click();
   await page.getByRole('button', { name: 'Avanzado' }).click();
-  await expect(page.getByText('Panel de análisis')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-level', 'advanced');
+  await expect(page.getByText('Volatilidad').first()).toBeVisible();
 });
 test('English navigation, assistant and simulated portfolio are translated', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
@@ -75,7 +79,7 @@ test('English navigation, assistant and simulated portfolio are translated', asy
   await page.getByRole('button', { name: 'Explore', exact: true }).click();
   await expect(page.getByText('Explore the available information and its limits. These are not recommendations.')).toBeVisible();
   await page.getByRole('button', { name: 'My portfolio', exact: true }).click();
-  await page.getByRole('button', { name: 'Worried about the decline?' }).click();
+  await page.getByRole('button', { name: 'Understand a decline' }).click();
   await expect(page.getByText(/no one can guarantee whether or when it will recover/)).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Open assistant' }).click();
@@ -104,7 +108,7 @@ test('English intermediate view fits a 320px screen', async ({ browser }) => {
  const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button', { name: 'English' }).click();
- await page.getByRole('button', { name: 'Detail: Beginner' }).click();
+ await page.getByRole('button', { name: 'Detail: Basic' }).click();
  await page.getByRole('button', { name: 'Intermediate', exact: true }).click();
  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
  await context.close();
@@ -137,7 +141,7 @@ test('catalogue selection changes the example and preserves the selected real fu
  await expect(page.locator('input[name="jr-fund"]:checked')).toHaveValue(BBVA);
  await expect(panel.locator('.sim-values strong').first()).not.toHaveText(original!);
  const newValue=await panel.locator('.sim-values strong').first().textContent();
- await page.getByRole('button', {name:/Detalle: Principiante/}).click();
+ await page.getByRole('button', {name:/Detalle: Básico/}).click();
  await page.getByRole('button', {name:'Avanzado', exact:true}).click();
  await expect(panel.locator('.sim-values strong').first()).toHaveText(newValue!);
  await expect(page.getByLabel('Entidad',{exact:true})).toHaveCount(0);
@@ -190,7 +194,7 @@ test('monthly NAV simulation preserves contributions and values across preferenc
  await page.getByLabel('Importe inicial').fill('1000');
  await expect(panel.getByText(/Has cambiado los datos/)).toBeVisible();
  await expect(panel.locator('.sim-values strong').filter({hasText:'999,70 €'})).toBeVisible();
- await page.getByRole('button',{name:/Detalle: Principiante/}).click();
+ await page.getByRole('button',{name:/Detalle: Básico/}).click();
  await page.getByRole('button',{name:'Avanzado',exact:true}).click();
  await expect(panel.locator('.sim-values strong').filter({hasText:'999,70 €'})).toBeVisible();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
@@ -208,16 +212,16 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await page.getByRole('button',{name:'Simulator',exact:true}).click();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
  await page.screenshot({path:'test-results/simulator-tablet.png',fullPage:true});
- await page.getByRole('button',{name:'Detail: Beginner'}).click();
+ await page.getByRole('button',{name:'Detail: Basic'}).click();
  await page.keyboard.press('Escape');
- await expect(page.getByRole('button',{name:'Detail: Beginner'})).toHaveAttribute('aria-expanded','false');
+ await expect(page.getByRole('button',{name:'Detail: Basic'})).toHaveAttribute('aria-expanded','false');
  await tablet.close();
  const mobile=await browser.newContext({viewport:{width:568,height:320}});
  const phone=await mobile.newPage(); await phone.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local')); await phone.goto('/');
  await phone.getByRole('button',{name:'Abrir menú'}).click();
  await expect(phone.locator('main')).toHaveAttribute('inert','');
  await phone.getByRole('button',{name:'Mi cartera',exact:true}).click();
- await phone.getByRole('button',{name:'¿Te preocupa la caída?'}).click();
+ await phone.getByRole('button',{name:'Entender una caída'}).click();
  const modal=phone.getByRole('dialog');
  expect(await modal.evaluate(el=>el.scrollHeight>el.clientHeight)).toBeTruthy();
  await modal.getByRole('button',{name:'Continuar en la demo'}).scrollIntoViewIfNeeded();
@@ -248,7 +252,7 @@ test('monthly deposits, table and percentage view stay consistent across prefere
  await expect(rows.last()).toContainText('2020-12-31');
  await panel.getByRole('button',{name:'Evolución del instrumento (%)'}).click();
  await expect(rows.last()).toContainText('2020-12-31');
- await page.getByRole('button',{name:/Detalle: Principiante/}).click();
+ await page.getByRole('button',{name:/Detalle: Básico/}).click();
  await page.getByRole('button',{name:'Intermedio',exact:true}).click();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
  await page.getByRole('button',{name:'English'}).click();
@@ -284,7 +288,7 @@ test('portfolio chart retains useful width on narrow screens', async ({browser})
   if (width===768) { await page.getByRole('button',{name:'English'}).click(); await page.getByRole('button',{name:'Dark theme'}).click(); }
   if (width===320) await page.getByRole('button',{name:'Abrir menú'}).click();
   await page.getByRole('button',{name: width===768 ? 'My portfolio' : 'Mi cartera',exact:true}).click();
-  const plot=page.locator('.large-portfolio .investment-chart__plot');
+  const plot=page.locator('.dash-evo').first();
   await expect(plot).toBeVisible();
   expect((await plot.boundingBox())!.width).toBeGreaterThan(width===320?200:260);
   await page.screenshot({path:`test-results/portfolio-${width}.png`,fullPage:true});
@@ -360,10 +364,13 @@ test('decline explanations use observed series without inventing a current crisi
  await dialog.getByRole('button',{name:'Preguntar al asistente'}).click();
  await expect(page.getByRole('dialog',{name:'Tu asistente'})).toBeVisible();
  await page.keyboard.press('Escape'); await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
- await page.getByRole('button',{name:'¿Te preocupa la caída?'}).click();
+ // Mi cartera: la pausa analiza la serie REAL mostrada (NAV CNMV, participaciones DEMO): caída máxima 8,79 % (2019-12 -> 2020-03; 5 fondos x 5.000 € DEMO), contrastada con un cálculo independiente (también en backend/tests/test_nav_history.py).
+ await page.getByRole('button',{name:'Entender una caída'}).click();
  dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
- await expect(dialog).toContainText('2020-03-31');
- await expect(dialog).toContainText('25,54 %');
+ await expect(dialog).toContainText('NAV CNMV; participaciones DEMO');
+ await expect(dialog).toContainText('2019-12-31 – 2025-12-31');
+ await expect(dialog).toContainText('8,79 %');
+ await expect(dialog).toContainText('2020-03-11');
  await dialog.getByRole('button',{name:'Continuar en la demo'}).click();
  await expect(dialog).toBeHidden();
 });
@@ -426,7 +433,7 @@ test('local panels fit desktop and mobile in both themes', async ({browser}) => 
   await page.keyboard.press('Escape');
   if(width===320){await page.getByRole('button',{name:'Open menu'}).click();await page.getByRole('button',{name:'My portfolio',exact:true}).click();}
   else await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
-  await page.getByRole('button',{name:width===320?'Worried about the decline?':'¿Te preocupa la caída?'}).click();
+  await page.getByRole('button',{name:width===320?'Understand a decline':'Entender una caída'}).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   const overflow = await page.evaluate(()=>({screen:window.innerWidth,document:document.documentElement.scrollWidth,items:[...document.querySelectorAll('body *')].filter(el=>el.getBoundingClientRect().right>innerWidth+1).map(el=>`${el.tagName}.${el.className}`)}));
   await page.screenshot({path:`test-results/local-decline-${width}.png`});

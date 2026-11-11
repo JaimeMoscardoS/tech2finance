@@ -122,3 +122,8 @@ La práctica guiada utiliza dos solicitudes de simulación independientes. La in
 ### Contexto del fondo en Explorar
 
 En esta rama, el cliente envía el identificador del fondo seleccionado al tutor por reglas en la pantalla `explore`. El servidor reconstruye identidad y fuentes desde el catálogo, sin aceptar cifras del cliente; no añade una simulación. Las vistas de detalle comparten esa selección y los mismos datos. Esta capacidad no conecta un LLM ni un proveedor de voz.
+
+
+### Páginas del tutor (rama `mejora-ui`)
+
+El contexto del tutor admite `home`, `explore`, `simulator`, `portfolio`, `learn` y `game` en el servidor (`backend/schemas.py` y `build_tutor_context`); el cliente envía la página tal cual, sin convertir `learn` a `home`. El tipo `Page` del cliente solo usa `learn`: la antigua página `game` se fusionó en `simulator`, pero el servidor sigue aceptándola. Comprobado con `test_tutor_accepts_learn_and_game_pages`.

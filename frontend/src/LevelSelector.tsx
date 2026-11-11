@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 
-type Level = "beginner" | "intermediate" | "advanced";
-const levels: Level[] = ["beginner", "intermediate", "advanced"];
+import { LEVELS, type Level } from "./types/level";
 const spring = { type: "spring" as const, bounce: 0.55, duration: 1 };
 
 export default function LevelSelector({ level, onChange, names, label, backLabel }: {
@@ -48,7 +47,7 @@ export default function LevelSelector({ level, onChange, names, label, backLabel
       aria-hidden={!open} inert={!open} style={{ pointerEvents: open ? "auto" : "none" }} initial={false}
       animate={open ? { visibility: "visible", scaleX: 1, scaleY: 1, opacity: 1, filter: reduced ? "none" : "blur(0px)" } : { scaleX: reduced ? 1 : 0.2, scaleY: reduced ? 1 : 0.9, opacity: 0, filter: reduced ? "none" : "blur(8px)", transitionEnd: { visibility: "hidden" } }} transition={transition}>
       <motion.button ref={back} type="button" className="level-back" aria-label={backLabel} onClick={() => close(true)} whileTap={reduced ? undefined : { scale: 1.15 }}><ArrowLeft size={18} aria-hidden="true" /></motion.button>
-      {levels.map(option => <motion.button type="button" key={option} aria-pressed={level === option}
+      {LEVELS.map(option => <motion.button type="button" key={option} aria-pressed={level === option}
         onClick={() => { onChange(option); close(true); }} whileTap={reduced ? undefined : { scale: 1.05 }}>{names[option]}</motion.button>)}
     </motion.div>
   </div>;
