@@ -2,7 +2,7 @@
 
 ## Qué es
 
-La configuración local opcional del servidor usa `.env` privado en la raíz, copiado de `.env.example`; contiene claves de Anthropic y ElevenLabs, selección de análisis y voces de respuesta en español e inglés. Se carga al arrancar y requiere reinicio tras cambios. La síntesis real devolvió MP3 para ambos idiomas; audición, micrófono y Sonnet actual siguen pendientes de comprobación. Véase [backend](../backend/README.md#configuración-privada-local).
+La configuración local opcional del servidor usa `.env` privado en la raíz, copiado de `.env.example`; contiene claves de Anthropic y ElevenLabs, selección de análisis y voces de respuesta en español e inglés. Se carga al arrancar y requiere reinicio tras cambios. La síntesis real devolvió MP3 para ambos idiomas; la audición y el micrófono siguen pendientes de comprobación. Véase [backend](../backend/README.md#configuración-privada-local).
 
 En la rama de trabajo, **BancoT2F** es la entidad ficticia anfitriona de la experiencia y Tech2Finance su tutor. Las condiciones del anfitrión, los costes de productos no disponibles y los límites se detallan en [BancoT2F](banco-t2f.md); el [guion de demo](../presentacion/demo-banco-t2f.md) recoge el recorrido histórico propuesto.
 
@@ -160,7 +160,7 @@ La elegibilidad se basa en informes semestrales que cubren 2020–2025, sin dist
 
 ## Integración local de demostración
 
-En esta rama, el frontend usa la API FastAPI local para catálogo, simulación, caídas y tutor; ofrece también demo local explícita. El servidor selecciona Anthropic y ElevenLabs automáticamente cuando sus claves respectivas están disponibles, salvo overrides; el análisis detallado se configura por separado. Además de pruebas simuladas, se han recibido archivos MP3 reales para ambos idiomas; las demás conexiones reales siguen pendientes. Véase [backend-contexto](backend-contexto.md) para contrato y límites. Esta integración no implica despliegue ni conexión bancaria.
+En esta rama, el frontend usa la API FastAPI local para catálogo, simulación, caídas y tutor; ofrece también demo local explícita. El servidor selecciona Anthropic y ElevenLabs automáticamente cuando sus claves respectivas están disponibles, salvo overrides; el análisis detallado se configura por separado. Véase [backend-contexto](backend-contexto.md) para contrato y límites. Esta integración no implica despliegue ni conexión bancaria.
 
 
 Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](planning/plan.md).
@@ -177,7 +177,7 @@ La entidad visible se fija mediante `VITE_BANK_ID` al iniciar o compilar (por de
 La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inversión». La cabecera identifica el modo demo sin dinero real; las fuentes, limitaciones y costes siguen visibles donde aportan contexto.
 
 
-En la rama de trabajo se implementan adaptadores opcionales para transcripción ElevenLabs y conversación Anthropic, con selección y límites descritos en [contratos](contratos.md#conversación-voz-y-análisis). Las pruebas simuladas no acreditan conexiones reales ni calidad de las respuestas; falta comprobarlas con credenciales.
+En la comprobación real del tutor Anthropic, las preguntas sobre la subida de la cartera en español e inglés devolvieron HTTP 200 y cifras calculadas de 25.000 a 28.175,75 €, con beneficio de 3.175,75 € y rentabilidad del 12,7 %, sin atribuir una causa desconocida. La síntesis real ElevenLabs devolvió HTTP 200 y audio MPEG para texto normalizado en español. Estas pruebas no acreditan la calidad general de las respuestas ni la audición física del audio; el dictado con micrófono sigue sin probarse. La selección y los límites se describen en [contratos](contratos.md#conversación-voz-y-análisis).
 
 En el tutor Anthropic, una prueba real de saludo recibió HTTP 200 del proveedor, pero la respuesta se rechazó por exceder el máximo de párrafos e incluir un dígito en el nombre del banco ficticio. Las instrucciones al modelo ahora detallan esos límites; las comprobaciones de seguridad permanecen activas y pueden seguir rechazando respuestas generadas. Si las reglas no reconocen la pregunta, su texto de reserva no se envía como respuesta informativa al modelo; se conservan la pregunta, el historial y el contexto.
 
