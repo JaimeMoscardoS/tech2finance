@@ -17,7 +17,7 @@ test("beginner search and advanced chart selection retain selected fund", async 
     .locator(".beginner-guide select")
     .last()
     .selectOption("demo-equity");
-  await expect(page.locator(".beginner-card h2")).toHaveText("Fondo Horizonte");
+  await expect(page.locator(".beginner-card h2")).toHaveText("T2F Horizonte");
   await expect(page.locator(".filter-disclosure")).not.toHaveAttribute(
     "open",
     "",
@@ -34,7 +34,7 @@ test("beginner search and advanced chart selection retain selected fund", async 
   await picker.locator("input").first().uncheck();
   await expect(page.locator(".dashboard-card")).toHaveCount(2);
   await expect(page.locator(".technical-inspector h2")).toHaveText(
-    "Fondo Horizonte",
+    "T2F Horizonte",
   );
   await page.screenshot({
     path: "/tmp/t2f-latest-advanced.png",

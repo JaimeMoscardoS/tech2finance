@@ -13,6 +13,65 @@ VALID = {"instrumentId": "fictional", "initial": 100, "recurringContribution": 1
 CONTEXT = {"page": "home", "level": "beginner", "language": "es"}
 
 
+def test_scripted_decline_is_scoped_and_server_owned():
+    spec = {'basis': 'instrument', 'instrumentId': 'demo-mixed', 'periods': 6, 'language': 'es'}
+    result = client.post('/api/declines', json=spec)
+    assert result.status_code == 200
+    report = result.json()
+    assert report['causesStatus'] == 'unknown'
+    assert report['demoContext']['sourceKind'] == 'synthetic_demo'
+    assert report['currentDrawdownPercent'] == pytest.approx(13.09810375)
+    assert 'demoContext' not in client.post('/api/declines', json=spec | {'periods': 5}).json()
+    assert 'demoContext' not in client.post('/api/declines', json={'basis': 'portfolio_demo', 'language': 'es'}).json()
+    assert 'demoContext' not in client.post('/api/declines', json=spec | {'instrumentId': 'caixabank-monetario-estandar', 'periods': 5}).json()
+    context = CONTEXT | {'page': 'simulator', 'instrumentId': 'demo-mixed', 'decline': spec}
+    answer = client.post('/api/tutor', json={'message': '¿Por qué ha caído?', 'context': context})
+    assert answer.status_code == 200 and 'supuesto narrativo' in answer.json()['text']
+    assert client.post('/api/tutor', json={'message': 'hola', 'context': context | {'demoContext': report['demoContext']}}).status_code == 422
+    assert client.post('/api/declines', json=spec | {'demoContext': report['demoContext']}).status_code == 422
+
+
+def test_bank_context_and_untrusted_fields(monkeypatch):
+    captured = {}
+    def capture(payload):
+        captured.clear()
+        captured.update(payload['context'])
+        return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
+    monkeypatch.setattr('backend.app.reply', capture)
+    assert client.get('/api/catalog').json()['bankProfile']['bankId'] == 'demo'
+    for page in ('home', 'explore', 'simulator', 'portfolio'):
+        result = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': page, 'instrumentId': 'demo-mixed'}})
+        assert result.status_code == 200
+        assert captured['bank']['bankId'] == 'demo'
+        assert ('product' in captured.get('instrument', {})) == (page in ('explore', 'simulator'))
+    assert client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'bankId': 'other'}}).json()['error']['code'] == 'unknown_bank'
+    for field in ('bank', 'bankProfile', 'product', 'fees', 'results'):
+        assert client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {field: {}}}).status_code == 422
+    assert client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': 'explore', 'instrumentId': 'bbva-mi-inversion-bolsa'}}).status_code == 200
+    assert 'product' not in captured['instrument']
+
+
+def test_bank_fee_through_real_bridge_and_unknown_selection():
+    context = CONTEXT | {'page': 'explore', 'instrumentId': 'demo-mixed'}
+    response = client.post('/api/tutor', json={'message': '¿Cuánto cuesta este fondo?', 'context': context})
+    assert response.status_code == 200
+    body = response.json()
+    assert '0,75%' in body['text'] and 'no se descuentan' in body['text']
+    assert body['intent'] == 'bank_fees' and body['sources'] == []
+    follow = client.post('/api/tutor', json={'message': '¿Y eso está descontado?', 'context': context, 'history': [{'role': 'assistant', 'text': body['text'], 'intent': body['intent']}]})
+    assert follow.status_code == 200 and 'no se descuentan' in follow.json()['text']
+    missing = client.post('/api/tutor', json={'message': 'hola', 'context': context | {'instrumentId': 'not-a-product'}})
+    assert missing.status_code == 404 and missing.json()['error']['code'] == 'unknown_instrument'
+
+
+def test_annual_contributions_are_not_mistaken_for_fees():
+    spec = {'instrumentId': 'caixabank-monetario-estandar', 'initial': 500, 'recurringContribution': 100, 'periods': 5}
+    context = {'page': 'simulator', 'level': 'beginner', 'language': 'en', 'simulation': spec}
+    reply = client.post('/api/tutor', json={'message': 'How much did I contribute?', 'context': context})
+    assert reply.status_code == 200
+    assert '1,000' in reply.json()['text'] and reply.json()['intent'] == 'result'
+
+
 def test_health_and_catalog():
     response = client.get("/api/health")
     assert response.json() == {"status": "ok", "mode": "demo", "tutorProvider": "server_rules", "externalProviders": False}
@@ -189,3 +248,61 @@ def test_explore_tutor_receives_selected_catalog_fund(monkeypatch):
     assert seen['instrument']['dataKind'] == 'annual_published_returns'
     assert seen['instrument']['sources'][0]['url'].startswith('https://www.caixabankassetmanagement.com/')
     assert 'simulation' not in seen
+
+
+GAME = {"instrumentId": "demo-equity", "initial": 500, "monthly": 50, "months": 12, "sellMonth": 6, "buyFeeRate": 0, "sellFeeRate": 0}
+
+
+def test_game_compare_ok():
+    response = client.post("/api/game/compare", json=GAME)
+    assert response.status_code == 200
+    body = response.json()
+    assert {"hold", "sell", "provenance"} <= set(body)
+    assert body["dataKind"] == "fictional" and len(body["hold"]["timeline"]) == 13
+
+
+def test_game_rejects_excluded_and_invalid_requests():
+    excluded = client.post("/api/game/compare", json=GAME | {"instrumentId": "caixabank-monetario-estandar"})
+    assert excluded.status_code == 422 and excluded.json()["error"]["code"] == "game_unavailable"
+    assert client.post("/api/game/compare", json=GAME | {"sellMonth": 13}).status_code == 422
+    assert client.post("/api/game/compare", json=GAME | {"extra": 1}).status_code == 422
+    unknown = client.post("/api/game/compare", json=GAME | {"instrumentId": "unknown"})
+    assert unknown.status_code == 404 and unknown.json()["error"]["code"] == "unknown_instrument"
+
+
+def test_game_edge_months_and_no_dates():
+    import json
+    import re
+    for sell_month in (0, 12):
+        response = client.post("/api/game/compare", json=GAME | {"sellMonth": sell_month})
+        assert response.status_code == 200
+        body = response.json()
+        body.pop("provenance")  # datasetVersion embeds a build date
+        assert not re.search(r"\d{4}-\d{2}-\d{2}", json.dumps(body))
+
+
+def test_game_rejects_bad_values_and_unavailable_banks():
+    assert client.post("/api/game/compare", json=GAME | {"initial": 0, "monthly": 0}).status_code == 422
+    for change in ({"months": True}, {"months": 2.5}, {"buyFeeRate": 0.06}, {"sellFeeRate": -0.01}):
+        assert client.post("/api/game/compare", json=GAME | change).status_code == 422
+    for identifier in ("bbva-mi-inversion-bolsa", "santander-rf-ahorro"):
+        response = client.post("/api/game/compare", json=GAME | {"instrumentId": identifier})
+        assert response.status_code == 422 and response.json()["error"]["code"] == "game_unavailable"
+
+
+def test_configured_external_bank_context_is_scoped(monkeypatch):
+    captured = {}
+    def capture(payload):
+        captured.clear()
+        captured.update(payload['context'])
+        return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
+    monkeypatch.setattr('backend.app.reply', capture)
+    for bank, instrument in [('bbva', 'bbva-mi-inversion-bolsa'), ('caixabank', 'caixabank-monetario-estandar')]:
+        response = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': 'explore', 'bankId': bank, 'instrumentId': instrument}})
+        assert response.status_code == 200
+        assert 'bank' not in captured and 'product' not in captured['instrument']
+        assert captured['instrument']['id'] == instrument
+    response = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'page': 'explore', 'bankId': 'bbva', 'instrumentId': 'demo-mixed'}})
+    assert response.status_code == 422
+    response = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'bankId': 'unknown'}})
+    assert response.status_code == 400 and response.json()['error']['code'] == 'unknown_bank'

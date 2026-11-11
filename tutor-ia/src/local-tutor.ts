@@ -1,5 +1,6 @@
 import type { TutorProvider, TutorRequest, TutorReply, SimulationFacts } from './types.ts';
 import { safeSources } from './decline.ts';
+import { bankAnswer } from './bank-profile.ts';
 
 export const MAX_MESSAGE_LENGTH = 1500;
 export const MAX_HISTORY_MESSAGES = 8;
@@ -16,11 +17,11 @@ const validFacts = (s: SimulationFacts | undefined): s is SimulationFacts => !!s
 function detect(message: string): string {
   const m = message.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   if (/ignore|ignora|system prompt|api.?key|secret|password/.test(m)) return 'unknown';
-  if (/caus|why.*(fall|drop)|por que.*(ca|baj)/.test(m)) return 'causes';
+  if (/caus|noticia|news|contexto|why.*(fall|drop)|por que.*(ca|baj)/.test(m)) return 'causes';
   if (/liquid|horizon|horizonte|plazo|vender|sell|mantener|hold/.test(m)) return 'decision';
   if (/drawdown|caida|caido|bajada|recuper|recovery|drop/.test(m)) return 'decline';
   if (/fuente|source|histor|nav|publicad/.test(m)) return 'source';
-  if (/resultado|beneficio|perdida|ganancia|rentabilidad|result|profit|return|aport|contribut|p&l|balance|simulacion|simulation/.test(m)) return 'result';
+  if (/resultado|beneficio|perdida|ganancia|rentabilidad|result|profit|return|aport|contribut|\b(?:lose|lost|loss)\b|p&l|balance|simulacion|simulation/.test(m)) return 'result';
   if (/diversif/.test(m)) return 'diversification';
   if (/cost|comision|fee/.test(m)) return 'costs';
   if (/riesgo|risk|volatil/.test(m)) return 'risk';
@@ -37,6 +38,8 @@ export function createLocalTutorProvider(): TutorProvider {
     const en = context?.language === 'en';
     const lang = en ? 'en' : 'es';
     const message = typeof request.message === 'string' ? request.message.trim() : '';
+    const bankResponse = message.length <= MAX_MESSAGE_LENGTH ? bankAnswer(message, context, Array.isArray(request.history) ? request.history : []) : undefined;
+    if (bankResponse) return { ...bankResponse, text: bankResponse.text.slice(0, 3000), language: lang, mode: 'local', provider: 'local', sources: [] };
     let intent = message.length <= MAX_MESSAGE_LENGTH ? detect(message) : 'unknown';
     if (intent === 'unknown' && /^(y eso|explica(?:me)? m[aá]s|m[aá]s detalles|por qu[eé]|c[oó]mo|and that|explain more|more details|why|how)[\s?¿.!]*$/i.test(message)) {
       const previous = (Array.isArray(request.history) ? request.history.slice(-MAX_HISTORY_MESSAGES) : []).reverse().find(h => h?.role === 'assistant');
@@ -98,7 +101,10 @@ export function createLocalTutorProvider(): TutorProvider {
       const d = context?.decline;
       if (!d || d.status !== 'ok' || !Number.isFinite(d.currentDrawdownPercent) || !Number.isFinite(d.maxDrawdownPercent) || typeof d.latestLabel !== 'string') text = en ? 'There are not enough valid observations to analyse a decline.' : 'No hay observaciones válidas suficientes para analizar una caída.';
       else text = en ? `At ${d.latestLabel}, the observed decline from the peak is ${fmt(d.currentDrawdownPercent!)}%; the largest observed decline is ${fmt(d.maxDrawdownPercent!)}%. An observed recovery does not guarantee a future recovery.` : `En ${d.latestLabel}, la caída observada desde el máximo es del ${fmt(d.currentDrawdownPercent!)}%; la mayor caída observada es del ${fmt(d.maxDrawdownPercent!)}%. Una recuperación observada no garantiza una recuperación futura.`;
-    } else if (intent === 'causes') text = en ? 'The cause is unknown from the available data. There are no verified news or comparable cases here.' : 'La causa es desconocida con los datos disponibles. Aquí no hay noticias verificadas ni casos comparables.';
+    } else if (intent === 'causes') {
+      const demo = context?.decline?.demoContext;
+      text = demo?.sourceKind === 'synthetic_demo' ? `${demo.explanation[lang]} ${en ? 'Fictional BancoT2F script, not verified news; no comparable cases are available.' : 'Guion ficticio BancoT2F, no son noticias verificadas; no hay casos comparables.'}` : (en ? 'The cause is unknown from the available data. There are no verified news or comparable cases here.' : 'La causa es desconocida con los datos disponibles. Aquí no hay noticias verificadas ni casos comparables.');
+    }
     else if (intent === 'decision') {
       const decision = context?.decision;
       const parts: string[] = [];

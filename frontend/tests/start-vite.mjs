@@ -2,8 +2,8 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 const [bank, port] = process.argv.slice(2);
 if (
-  !["demo", "caixabank", "unknown"].includes(bank) ||
-  !["5175", "5177", "5178"].includes(port)
+  !["demo", "caixabank", "bbva", "unknown"].includes(bank) ||
+  !["5175", "5177", "5178", "5179"].includes(port)
 )
   throw new Error("Invalid test configuration");
 const vite = fileURLToPath(

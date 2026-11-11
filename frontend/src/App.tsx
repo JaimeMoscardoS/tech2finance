@@ -19,9 +19,11 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import CountUp from "./CountUp";
+import BankInfo from "./BankInfo";
 import { simulate } from "./demo";
 import { annualHistory, replayAnnual } from "./annual-history";
-import { banks as localBanks, instruments as localInstruments, type Instrument } from "./catalog";
+import { banks as localBanks, instruments as localInstruments, bankProfile as localBankProfile, type Instrument } from "./catalog";
 import { requestJson, isCatalog, isSimulation, isDecline, serverTutorProvider, type Catalog, type SimulationSpec, type DeclineSpec, type ServerSimulation } from "./server-api";
 import InvestmentChart from "./LazyInvestmentChart";
 import FundsExplorer from "./FundsExplorer";
@@ -31,6 +33,7 @@ import { MAX_SIMULATION_AMOUNT } from "./simulation-types";
 import { copy, type Language } from "./copy";
 import { analyzeDecline, type DeclineReport, type DecisionContext, type TutorContext } from "../../tutor-ia/src/index";
 import { portfolioPoints } from "./portfolio-demo";
+import { withDemoDecline } from "../../tutor-ia/src/decline-demo";
 import AssistantPanel from "./AssistantPanel";
 import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
@@ -55,7 +58,7 @@ export default function App() {
     () => saved("t2f-theme", ["light", "dark"], "light") as "light" | "dark",
   );
   const [mode, setMode] = useState<"server" | "local">(() => saved("t2f-data-mode", ["server", "local"], "server") as "server" | "local");
-  const [rawCatalog, setCatalog] = useState<Catalog | null>(() => saved("t2f-data-mode", ["server", "local"], "server") === "local" ? {schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,annualHistory} : null);
+  const [rawCatalog, setCatalog] = useState<Catalog | null>(() => saved("t2f-data-mode", ["server", "local"], "server") === "local" ? {schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,bankProfile:localBankProfile,annualHistory} : null);
   const configuredBank = import.meta.env.VITE_BANK_ID?.trim() || "demo";
   const catalog = useMemo(() => rawCatalog ? scopeCatalog(rawCatalog, configuredBank) : null, [rawCatalog, configuredBank]);
   const catalogMode = useRef<"server" | "local" | null>(saved("t2f-data-mode", ["server", "local"], "server") === "local" ? "local" : null);
@@ -73,6 +76,7 @@ export default function App() {
   const declineRequest = useRef<AbortController | null>(null);
   const declineGeneration = useRef(0);
   const [declineSpec, setDeclineSpec] = useState<DeclineSpec | undefined>();
+  const [demoLaunch, setDemoLaunch] = useState(false);
   const [practiceOpen, setPracticeOpen] = useState(false);
   const [practiceResult, setPracticeResult] = useState<{spec: SimulationSpec; result: ServerSimulation} | null>(null);
   const [page, setPage] = useState<Page>("home"),
@@ -217,7 +221,7 @@ export default function App() {
     simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort();
     setResult(null); setPracticeResult(null); setPause(null); setAssistantDecline(undefined); setDeclineSpec(undefined); setServerError(false); setOperationPending(false); retryAction.current = null;
     catalogMode.current = mode === "local" ? "local" : null;
-    if (mode === "local") { setCatalog({schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,annualHistory}); setServerLoading(false); return; }
+    if (mode === "local") { setCatalog({schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,bankProfile:localBankProfile,annualHistory}); setServerLoading(false); return; }
     setCatalog(null); setServerLoading(true); const controller = new AbortController(); catalogRequest.current = controller;
     requestJson("/api/catalog", isCatalog, undefined, controller.signal).then(data => { if (!controller.signal.aborted) {restoreRecoveryFocus.current ||= !!recoveryRef.current?.contains(document.activeElement); catalogMode.current = "server";setCatalog(data);setServerLoading(false);} }).catch(() => {if (!controller.signal.aborted) {setServerError(true);setServerLoading(false);}});
     return () => controller.abort();
@@ -273,6 +277,27 @@ export default function App() {
     if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
     return {...outcome, instrumentId:item.instrumentId, currency:"EUR", contributionTiming:item.dataStatus === "annual_history" ? "year_end_after_return" : "month_start", sources:item.sourceUrl ? [{label:language === "es" ? "Ficha oficial" : "Official product page",url:item.sourceUrl,checkedAt:item.sourceDate ?? undefined}] : [], assumptions:item.dataStatus === "annual_history" ? [language === "es" ? "Rentabilidades anuales publicadas y redondeadas; aportaciones al cierre." : "Published rounded annual returns; contributions at year end."] : [language === "es" ? "Serie ficticia repetida; aportaciones al inicio de cada mes." : "Repeated fictional series; contributions at the start of each month."]};
   }, [catalog, mode, language]);
+  useEffect(() => {
+    if (!demoLaunch || !catalog || page !== "simulator" || selectedId !== "demo-mixed" || initial !== "1000" || monthly !== "0" || months !== "6") return;
+    setDemoLaunch(false);
+    const item = catalog.instruments.find(i => i.instrumentId === "demo-mixed");
+    if (!item) return;
+    simulationRequest.current?.abort();
+    const controller = new AbortController(); simulationRequest.current = controller;
+    const id = ++simulationGeneration.current;
+    setServerError(false); setError(null); setOperationPending(true);
+    retryAction.current = () => setDemoLaunch(true);
+    const spec = {instrumentId:"demo-mixed", initial:1000, recurringContribution:0, periods:6};
+    calculatePractice(spec, controller.signal).then(outcome => {
+      if (controller.signal.aborted || id !== simulationGeneration.current) return;
+      setResult({...outcome, initial:1000, monthly:0, annual:0, months:6});
+      const decline = {basis:"instrument" as const, language, instrumentId:"demo-mixed", periods:6};
+      void showDecline(decline, () => withDemoDecline(analyzeDecline({name:item.name[language], dataKind:"fictional", sources:[], observations:outcome.timeline.map(point=>({label:`${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}), "demo-mixed", 6));
+    }).catch(() => {if (!controller.signal.aborted && id === simulationGeneration.current) {setServerError(true); setOperationPending(false);}});
+  }, [demoLaunch, catalog, page, selectedId, initial, monthly, months, calculatePractice, language]);
+  function launchDeclineDemo() {
+    choose("simulator"); setSelectedId("demo-mixed"); setInitial("1000"); setMonthly("0"); setMonths("6"); setResult(null); setDemoLaunch(true);
+  }
   const openAssistant = () => {
     setAssistantDecline(undefined);
     assistantTriggerRef.current = mobileNav
@@ -316,12 +341,14 @@ export default function App() {
   const source = selected.sourceUrl ? [{label:language === "es" ? "Ficha oficial" : "Official product page",url:selected.sourceUrl,checkedAt:selected.sourceDate ?? undefined}] : [];
   const validResult = page === "simulator" && !practiceOpen && result?.instrumentId === selected.instrumentId ? result : null;
   const practiceInstrument = practiceResult && instruments.find(item => item.instrumentId === practiceResult.spec.instrumentId);
-  const tutorInstrument = practiceOpen ? practiceInstrument || undefined : selected;
+  const tutorInstrument = page === "explore"
+    ? instruments.find(item => item.instrumentId === selectedId)
+    : page === "simulator" ? (practiceOpen ? practiceInstrument || undefined : selected) : undefined;
   const tutorSource = tutorInstrument?.sourceUrl ? [{label: language === "es" ? "Ficha oficial" : "Official product page", url:tutorInstrument.sourceUrl, checkedAt:tutorInstrument.sourceDate ?? undefined}] : [];
   const activeSpec = practiceOpen ? practiceResult?.spec : validResult ? {instrumentId:validResult.instrumentId,initial:validResult.initial,recurringContribution:validResult.kind === "annual_history" ? validResult.annual : validResult.monthly,periods:validResult.kind === "annual_history" ? 5 : validResult.months} : undefined;
   const activeResult = practiceOpen ? practiceResult?.result : validResult;
-  const tutorContext: TutorContext = {page,level,language,
-    ...((page === "simulator" || page === "explore") && tutorInstrument ? {instrument:{id:tutorInstrument.instrumentId,name:tutorInstrument.name[language],currency:tutorInstrument.currency,dataKind:tutorInstrument.dataStatus === "annual_history" ? "annual_published_returns" : tutorInstrument.dataStatus,sources:tutorSource}} : {}),
+  const tutorContext: TutorContext = {page,level,language,...(configuredBank === "demo" && catalog ? {bank:catalog.bankProfile} : {}),
+    ...((page === "explore" || page === "simulator") && tutorInstrument ? {instrument:{id:tutorInstrument.instrumentId,name:tutorInstrument.name[language],currency:tutorInstrument.currency,dataKind:tutorInstrument.dataStatus === "annual_history" ? "annual_published_returns" : tutorInstrument.dataStatus,sources:tutorSource,product:configuredBank === "demo" ? catalog?.bankProfile.products.find(p=>p.instrumentId === tutorInstrument.instrumentId) : undefined}} : {}),
     ...(page === "simulator" && activeResult && activeSpec ? {simulation:{kind:activeResult.kind,initial:activeSpec.initial,recurringContribution:activeSpec.recurringContribution,contributionTiming:activeResult.kind === "annual_history" ? "year_end_after_return" : "month_start",periods:activeSpec.periods,finalValue:activeResult.value,totalContributed:activeResult.contributed,profit:activeResult.profit,simpleReturnPercent:activeResult.simpleReturnPercent,instrumentReturnPercent:activeResult.timeline[activeResult.timeline.length-1].instrumentReturnPercent,...(activeResult.kind === "annual_history" ? {periodStart:(catalog?.annualHistory ?? annualHistory).baseline,periodEnd:activeResult.timeline[activeResult.timeline.length-1].date ?? undefined,annualReturns:(catalog?.annualHistory ?? annualHistory).returns.map(row=>({year:row.year,ratePercent:row.rate*100}))} : {})}} : {}),
     ...((page === "home" || page === "portfolio") ? {portfolio:{name:t.examplePortfolio,value:1093,initial:1000,dataKind:"fictional" as const}} : {}),
     ...(assistantDecline ? {decline:assistantDecline,decision} : {})};
@@ -332,7 +359,7 @@ export default function App() {
     catch {if(id===declineGeneration.current && !controller.signal.aborted)setServerError(true);} finally {if(id===declineGeneration.current)setOperationPending(false);}
   }
   function openPortfolioDecline(){void showDecline({basis:"portfolio_demo",language},()=>analyzeDecline({name:t.examplePortfolio,dataKind:"fictional",sources:[],observations:points.map((value,index)=>({label:`${t.pointLabel} ${index+1}`,value}))}));}
-  function openSimulationDecline(){if(!validResult)return;void showDecline({basis:"instrument",language,instrumentId:selected.instrumentId,periods:validResult.kind === "annual_history" ? 5 : validResult.months},()=>analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}));}
+  function openSimulationDecline(){if(!validResult)return;void showDecline({basis:"instrument",language,instrumentId:selected.instrumentId,periods:validResult.kind === "annual_history" ? 5 : validResult.months},()=>withDemoDecline(analyzeDecline({name:selected.name[language],dataKind:validResult.kind === "annual_history" ? "annual_published_returns" : "fictional",sources:source,observations:validResult.timeline.map(point=>({label:point.date ?? `${t.month} ${point.period}`,value:100*(1+point.instrumentReturnPercent/100)}))}),selected.instrumentId,validResult.kind === "annual_history" ? 5 : validResult.months));}
   function askDecline(){if(!pause)return;setAssistantDecline(pause);setPause(null);assistantTriggerRef.current=pauseTriggerRef.current;setAssistant(true);}
   const levelTitle = {
     beginner: t.beginnerView,
@@ -344,7 +371,7 @@ export default function App() {
     intermediate: t.intermediateText,
     advanced: t.advancedText,
   }[level];
-  const serverContext = {page,level,language,...((page === "simulator" || page === "explore") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline && declineSpec ? {decline:{...declineSpec,language},decision} : {})};
+  const serverContext = {page,level,language,bankId:configuredBank,...( (page === "explore" || page === "simulator") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline && declineSpec ? {decline:{...declineSpec,language},decision} : {})};
   const serverContextKey = JSON.stringify(serverContext);
   const provider = useMemo(() => serverTutorProvider(serverContext), [serverContextKey]);
   const switchMode = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setCatalog(null); setResult(null); setMode(mode === "server" ? "local" : "server"); };
@@ -377,9 +404,9 @@ export default function App() {
           </div>
           <div>
             <strong>
-              tech<span>2</span>finance
+              {catalog.banks[0].name[language]}
             </strong>
-            <small>{t.app}</small>
+            <small>{language === "es" ? "Demo Tech2Finance · sin conexión bancaria" : "Tech2Finance demo · no bank connection"}</small>
           </div>
           <button
             className="icon-button close-mobile"
@@ -442,7 +469,7 @@ export default function App() {
               <Menu size={20} />
             </button>
             <span className="breadcrumb">
-              {t.space} <span>/</span> <strong>{names[page]}</strong>
+              {catalog.banks[0].name[language]} <span>/</span> <strong>{names[page]}</strong>
             </span>
           </div>
           <div className="top-actions">
@@ -522,6 +549,7 @@ export default function App() {
                   <p>{t.intro}</p>
                 </div>
               </div>
+              {configuredBank === "demo" && <BankInfo profile={catalog.bankProfile} language={language} />}
               <section className={`welcome-card level-${level}`}>
                 <div className="welcome-content">
                   <span className="view-tag">
@@ -534,6 +562,26 @@ export default function App() {
                   <h2>{levelTitle}</h2>
                   <p>{levelText}</p>
                   <p>{t.knowledgeNote}</p>
+                  <div className="welcome-actions">
+                    <button
+                      className="button dark"
+                      onClick={() => choose("simulator")}
+                    >
+                      {t.trySimulator}
+                      <ArrowRight size={16} />
+                    </button>
+                    {configuredBank === "demo" && <button className="text-link" onClick={launchDeclineDemo}>
+                      {language === "es" ? "Probar una caída" : "Try a decline"}
+                      <ArrowRight size={15} />
+                    </button>}
+                    <button
+                      className="text-link"
+                      onClick={() => choose("explore")}
+                    >
+                      {t.viewFunds}
+                      <ArrowRight size={15} />
+                    </button>
+                  </div>
                 </div>
               </section>
               <div className="section-head">
@@ -581,7 +629,7 @@ export default function App() {
 
             </>
           )}
-          {page === "explore" && <FundsExplorer language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { selectInstrument(item); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
+          {page === "explore" && <FundsExplorer language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { selectInstrument(item); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
           {page === "simulator" && (
             practiceOpen ? <Suspense fallback={<p role="status">{language === "es" ? "Cargando práctica…" : "Loading practice…"}</p>}><PracticeLab language={language} level={level} instruments={instruments} annualHistory={catalog.annualHistory} mode={mode} calculate={calculatePractice} onActiveResult={setPracticeResult} onExit={() => choose("simulator")} openAssistant={openAssistant} /></Suspense> : <>
             <button type="button" className="text-link history-shortcut" onClick={openPractice}>{language === "es" ? "Abrir práctica guiada" : "Open guided practice"}<ArrowRight size={15}/></button>
@@ -591,6 +639,8 @@ export default function App() {
                 language,
                 level,
                 selected,
+                bankProfile: configuredBank === "demo" ? catalog.bankProfile : undefined,
+                banks: catalog.banks,
                 instruments,
                 history: catalog.annualHistory,
                 result,
@@ -683,7 +733,7 @@ export default function App() {
                   <BarChart3 size={20} />
                 </div>
                 <div>
-                  <strong>{t.fundOne}</strong>
+                  <strong>{t.examplePortfolio}</strong>
                   <small>{t.fictionalFund}</small>
                 </div>
                 <div className="holding-value">

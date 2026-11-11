@@ -4,13 +4,13 @@ import { readFile } from 'node:fs/promises';
 test('three distinct layouts retain the selected fund and show truthful chart data', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode','local')); await page.goto('/'); await page.getByRole('button',{name:'Explorar',exact:true}).click();
  await expect(page.locator('[data-layout="beginner"]')).toBeVisible(); await page.locator('.beginner-guide select').last().selectOption('demo-equity');
- await expect(page.locator('.beginner-card h2')).toHaveText('Fondo Horizonte'); await expect(page.locator('.beginner-guide details')).toHaveCount(2);
+ await expect(page.locator('.beginner-card h2')).toHaveText('T2F Horizonte'); await expect(page.locator('.beginner-guide details')).toHaveCount(2);
  const levels = page.getByRole('group',{name:'Nivel de detalle'}); await levels.getByRole('button',{name:'Intermedio'}).click();
- await expect(page.locator('[data-layout="intermediate"]')).toBeVisible(); await expect(page.locator('.compare-selected h2')).toHaveText('Fondo Horizonte');
+ await expect(page.locator('[data-layout="intermediate"]')).toBeVisible(); await expect(page.locator('.compare-selected h2')).toHaveText('T2F Horizonte');
  await expect(page.locator('.fund-chart[data-instrument="demo-equity"] .annual-row')).toHaveCount(12);
  await levels.getByRole('button',{name:'Avanzado'}).click(); await expect(page.locator('[data-layout="advanced"]')).toBeVisible();
  await expect(page.locator('.dashboard-card')).toHaveCount(3); await expect(page.locator('.dashboard-card .mini-bars')).toHaveCount(3);
- await expect(page.locator('.technical-inspector h2')).toHaveText('Fondo Horizonte');
+ await expect(page.locator('.technical-inspector h2')).toHaveText('T2F Horizonte');
  await expect(page.locator('.fund-chart[data-instrument="demo-equity"]')).toContainText('Una secuencia inventada');
  await page.getByRole('button',{name:'Preguntar por voz',exact:true}).click(); await expect(page.getByRole('dialog',{name:'Habla con tu asistente'})).toBeVisible(); await page.keyboard.press('Escape');
 });
@@ -47,8 +47,8 @@ test('filters, document status and CSV retain selected fund context', async ({pa
   const docs=page.locator('.fund-documents'); await docs.locator('summary').click(); await expect(docs).toContainText('Documento de datos fundamentales: no disponible'); await expect(docs).toContainText('Folleto: no disponible'); await docs.locator('summary').click();
  }
  await levels.getByRole('button',{name:'Intermedio'}).click(); await expect(page.locator('.compare-picker input:checked')).toHaveCount(3); await page.locator('.compare-picker label').first().locator('input').uncheck(); await expect(page.locator('.compare-panel tbody tr')).toHaveCount(2); await levels.getByRole('button',{name:'Avanzado'}).click();
- await page.locator('.filter-disclosure summary').click(); await page.getByLabel('Buscar fondo').fill('Horizonte'); await expect(page.locator('.dashboard-card')).toHaveCount(1); await expect(page.locator('.fund-filters')).toContainText('Fondo seleccionado para el asistente: Fondo Equilibrio');
- await page.getByLabel('Buscar fondo').fill(''); await page.getByLabel('Ordenar por').selectOption('risk'); await expect(page.locator('.dashboard-card').first()).toContainText('Fondo Estabilidad');
+ await page.locator('.filter-disclosure summary').click(); await page.getByLabel('Buscar fondo').fill('Horizonte'); await expect(page.locator('.dashboard-card')).toHaveCount(1); await expect(page.locator('.fund-filters')).toContainText('Fondo seleccionado para el asistente: T2F Equilibrio');
+ await page.getByLabel('Buscar fondo').fill(''); await page.getByLabel('Ordenar por').selectOption('risk'); await expect(page.locator('.dashboard-card').first()).toContainText('T2F Estabilidad');
  const downloadPromise=page.waitForEvent('download'); await page.getByRole('button',{name:'Descargar serie disponible (CSV)'}).click(); const download=await downloadPromise; expect(download.suggestedFilename()).toBe('demo-mixed-rates.csv'); const csv = await readFile((await download.path())!, 'utf8'); expect(csv).toContain('Mes 1,1.5,fictional'); expect(csv.split('\r\n')).toHaveLength(13);
 });
 
@@ -63,5 +63,5 @@ test('mismatched annual series is not attributed to another fund', async ({page}
 test('incompatible or invalid series cannot enter a comparison', async ({page}) => {
  await page.route('**/api/catalog', async route => { const response=await route.fetch(); const catalog=await response.json(); catalog.instruments.find((i:any)=>i.instrumentId==='demo-equity').returns=[0.01]; catalog.instruments.find((i:any)=>i.instrumentId==='demo-fixed').returns=[null]; await route.fulfill({response,json:catalog}); });
  await page.goto('/'); await page.getByRole('button',{name:'Explorar',exact:true}).click(); await page.getByRole('group',{name:'Nivel de detalle'}).getByRole('button',{name:'Avanzado'}).click();
- const group=page.getByRole('group',{name:/Elige hasta tres series/}); await expect(group.locator('input:checked')).toHaveCount(1); await expect(group.getByLabel(/Fondo Horizonte/)).toBeDisabled(); await expect(group.getByLabel(/Fondo Estabilidad/)).toBeDisabled(); await expect(page.getByText(/al menos dos series compatibles/)).toBeVisible();
+ const group=page.getByRole('group',{name:/Elige hasta tres series/}); await expect(group.locator('input:checked')).toHaveCount(1); await expect(group.getByLabel(/T2F Horizonte/)).toBeDisabled(); await expect(group.getByLabel(/T2F Estabilidad/)).toBeDisabled(); await expect(page.getByText(/al menos dos series compatibles/)).toBeVisible();
 });

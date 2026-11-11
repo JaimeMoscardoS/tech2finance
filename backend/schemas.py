@@ -51,6 +51,7 @@ class TutorContext(RequestModel):
     page: Literal["home", "explore", "simulator", "portfolio"]
     level: Literal["beginner", "intermediate", "advanced"]
     language: Language
+    bankId: Identifier = "demo"
     instrumentId: Identifier | None = None
     simulation: SimulationSpec | None = None
     decline: DeclineSpec | None = None
@@ -68,6 +69,27 @@ class TutorContext(RequestModel):
             raise ValueError("simulation and decline instruments do not match")
         if self.simulation and self.page != "simulator":
             raise ValueError("simulation is only available on simulator page")
+        return self
+
+
+Rate = Annotated[float, Field(ge=0, le=0.05)]
+
+
+class GameSpec(RequestModel):
+    instrumentId: Identifier
+    initial: Amount
+    monthly: Amount
+    months: Annotated[int, Field(ge=1, le=120)]
+    sellMonth: Annotated[int, Field(ge=0, le=120)]
+    buyFeeRate: Rate
+    sellFeeRate: Rate
+
+    @model_validator(mode="after")
+    def validate_game(self):
+        if self.sellMonth > self.months:
+            raise ValueError("sellMonth must not exceed months")
+        if self.initial + self.monthly <= 0:
+            raise ValueError("initial or monthly must be positive")
         return self
 
 

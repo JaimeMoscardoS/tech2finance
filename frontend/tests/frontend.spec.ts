@@ -146,7 +146,7 @@ test('explore transfers the chosen fictional instrument', async ({page}) => {
  await page.locator('.beginner-guide select').last().selectOption('demo-equity');
  await page.getByRole('button',{name:'Practicar con este fondo'}).click();
  await expect(page.getByLabel('Instrumento')).toHaveValue('demo-equity');
- await expect(page.locator('.sim-result')).toContainText('Fondo Horizonte');
+ await expect(page.locator('.sim-result')).toContainText('T2F Horizonte');
 });
 
 test('catalogue fits mobile in English dark mode', async ({browser}) => {

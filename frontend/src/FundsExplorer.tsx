@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, MessageCircle, Mic } from "lucide-react";
-import type { Bank, Instrument } from "./catalog";
+import type { Bank, Instrument, BankProfile } from "./catalog";
+import { ProductCosts } from "./BankInfo";
 import type { Language } from "./copy";
 import type { Catalog } from "./server-api";
 import "./funds-explorer.css";
@@ -15,6 +16,7 @@ type Props = {
   banks: Bank[];
   instruments: Instrument[];
   history: Catalog["annualHistory"];
+  bankProfile?: BankProfile;
   selectedId: string;
   onSelect: (item: Instrument) => void;
   onPractice: (item: Instrument) => void;
@@ -29,6 +31,7 @@ export default function FundsExplorer({
   banks,
   instruments,
   history,
+  bankProfile,
   selectedId,
   onSelect,
   onPractice,
@@ -44,12 +47,18 @@ export default function FundsExplorer({
   const [comparison, setComparison] = useState<Record<string, string[]>>({});
   const [chartSelection, setChartSelection] = useState<string[] | null>(null);
   // These educational examples are invented solely for the fictional demo funds.
-  const examples: Record<string, { risk: number; fee: number; years: number }> =
+  const examples: Record<string, { risk: number; years: number }> =
     {
-      "demo-mixed": { risk: 3, fee: 0.8, years: 3 },
-      "demo-equity": { risk: 5, fee: 1.2, years: 5 },
-      "demo-fixed": { risk: 2, fee: 0.5, years: 2 },
+      "demo-mixed": { risk: 3, years: 3 },
+      "demo-equity": { risk: 5, years: 5 },
+      "demo-fixed": { risk: 2, years: 2 },
     };
+
+  const feeFor = (id: string): number | null => {
+    const bps = bankProfile?.products.find((p) => p.instrumentId === id)?.fees.annualOngoingBps;
+    return bps == null ? null : bps / 100;
+  };
+  const feeText = (id: string) => { const fee = feeFor(id); return fee === null ? (es ? "No definido" : "Not defined") : `${fee.toLocaleString(es ? "es-ES" : "en-GB", {minimumFractionDigits: 2, maximumFractionDigits: 2})} %`; };
 
   const funds = instruments.filter((i) => i.assetType === "fund");
   const availableBanks = banks.filter((b) =>
@@ -97,20 +106,8 @@ export default function FundsExplorer({
           ? a.dataStatus.localeCompare(b.dataStatus) ||
             a.name[language].localeCompare(b.name[language])
           : ["risk", "fee", "horizon"].includes(sort)
-            ? (a.dataStatus === "fictional" && examples[a.instrumentId]
-                ? examples[a.instrumentId][
-                    sort === "risk" ? "risk" : sort === "fee" ? "fee" : "years"
-                  ]
-                : Infinity) -
-                (b.dataStatus === "fictional" && examples[b.instrumentId]
-                  ? examples[b.instrumentId][
-                      sort === "risk"
-                        ? "risk"
-                        : sort === "fee"
-                          ? "fee"
-                          : "years"
-                    ]
-                  : Infinity) ||
+            ? ((sort === "fee" ? feeFor(a.instrumentId) : sort === "risk" ? examples[a.instrumentId]?.risk : examples[a.instrumentId]?.years) ?? Infinity) -
+              ((sort === "fee" ? feeFor(b.instrumentId) : sort === "risk" ? examples[b.instrumentId]?.risk : examples[b.instrumentId]?.years) ?? Infinity) ||
               a.name[language].localeCompare(b.name[language])
             : a.name[language].localeCompare(b.name[language]),
     );
@@ -737,7 +734,7 @@ export default function FundsExplorer({
                 <p>
                   {examples[selected.instrumentId] &&
                   selected.dataStatus === "fictional"
-                    ? `${examples[selected.instrumentId].fee} % · ${examples[selected.instrumentId].fee * 10} € / 1.000 € (${es ? "ejemplo ficticio anual" : "fictional annual example"})`
+                    ? feeText(selected.instrumentId)
                     : unavailable}
                 </p>
               </div>
@@ -758,6 +755,7 @@ export default function FundsExplorer({
                 </p>
               </div>
             </div>
+            {bankProfile && <ProductCosts product={bankProfile.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />}
             <details>
               <summary>{es ? "Ver detalles" : "View details"}</summary>
               <p>
@@ -880,7 +878,7 @@ export default function FundsExplorer({
                         <td>
                           {i.dataStatus === "fictional" &&
                           examples[i.instrumentId]
-                            ? `${examples[i.instrumentId].risk}/7 · ${examples[i.instrumentId].fee}% · ${examples[i.instrumentId].years} ${es ? "años ficticios" : "fictional years"}`
+                            ? `${examples[i.instrumentId].risk}/7 · ${feeText(i.instrumentId)} · ${examples[i.instrumentId].years} ${es ? "años ficticios" : "fictional years"}`
                             : unavailable}
                         </td>
                         <td>{historyLabel(i)}</td>
@@ -909,6 +907,7 @@ export default function FundsExplorer({
             </span>
             <h2>{selected.name[language]}</h2>
             {chart(selected)}
+            {bankProfile && <ProductCosts product={bankProfile.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />}
             {periodSummary(selected)}
             <details className="comparison-details">
               <summary>
@@ -918,8 +917,8 @@ export default function FundsExplorer({
               </summary>
               <p>
                 {es
-                  ? "Composición, índice de referencia, valor liquidativo y fecha, condiciones de liquidez y costes detallados: no disponibles. El plazo es un supuesto ficticio solo en los ejemplos marcados."
-                  : "Composition, benchmark, net asset value and date, liquidity conditions and detailed fees are unavailable. Horizon is a fictional assumption only in marked examples."}
+                  ? "Composición, índice de referencia, valor liquidativo y fecha, condiciones de liquidez: no disponibles. El plazo es un supuesto ficticio solo en los ejemplos marcados."
+                  : "Composition, benchmark, net asset value and date, liquidity conditions are unavailable. Horizon is a fictional assumption only in marked examples."}
               </p>
               <p>
                 {es ? "Gestora" : "Manager"}: {selected.manager || unavailable}{" "}
@@ -1074,7 +1073,7 @@ export default function FundsExplorer({
                 <dd>
                   {selected.dataStatus === "fictional" &&
                   examples[selected.instrumentId]
-                    ? `${examples[selected.instrumentId].risk}/7 · ${examples[selected.instrumentId].fee}% · ${examples[selected.instrumentId].years} ${es ? "años ficticios" : "fictional years"}`
+                    ? `${examples[selected.instrumentId].risk}/7 · ${feeText(selected.instrumentId)} · ${examples[selected.instrumentId].years} ${es ? "años ficticios" : "fictional years"}`
                     : unavailable}
                 </dd>
               </div>
@@ -1114,6 +1113,7 @@ export default function FundsExplorer({
                   : "Fictional educational assumptions; fees are not applied in the simulation."}
               </p>
             )}
+            {bankProfile && <ProductCosts product={bankProfile.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />}
             {periodSummary(selected)}
             <div className="technical-groups">
               <details>
@@ -1134,8 +1134,8 @@ export default function FundsExplorer({
                 </summary>
                 <p>
                   {es
-                    ? "Comisiones desglosadas, valor liquidativo, volatilidad, máxima caída, Sharpe, beta y tracking error: no disponibles."
-                    : "Fee breakdown, net asset value, volatility, maximum drawdown, Sharpe, beta and tracking error: unavailable."}
+                    ? "Valor liquidativo, volatilidad, máxima caída, Sharpe, beta y tracking error: no disponibles."
+                    : "Net asset value, volatility, maximum drawdown, Sharpe, beta and tracking error: unavailable."}
                 </p>
               </details>
             </div>

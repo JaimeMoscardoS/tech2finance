@@ -1,4 +1,5 @@
 import json
+import hashlib
 import shutil
 import subprocess
 import sys
@@ -51,6 +52,9 @@ def test_snapshot_reproduces_authoritative_replay(tmp_path):
     shutil.copytree(ROOT, tmp_path / 'shared')
     root = tmp_path / 'shared'
     snapshot = read_json(root / 'snapshots/demo-2026-11-09.1/demo-data.json')
+    old_path = root / 'snapshots/demo-2026-11-09.1/demo-data.json'
+    old_bytes = old_path.read_bytes()
+    assert hashlib.sha256(old_bytes.replace(b'\r\n', b'\n')).hexdigest() == 'bbe3f27302476aa080f30847a490658ce8323ae6c8ce04270f94736678a1f625'
     rates = snapshot['instruments'][0]['returns'][:1]
     result = replay(500, 50, rates, [None, None], 'fictional_monthly')
     assert result['value'] == 558.25
@@ -61,9 +65,18 @@ def test_snapshot_reproduces_authoritative_replay(tmp_path):
     with pytest.raises(ValueError):
         load_verified_dataset(root)
     retained = read_json(root / 'snapshots/demo-2026-11-09.1/demo-data.json')
+    assert old_path.read_bytes() == old_bytes
     manifest = read_json(root / 'data-manifest.json')
     assert manifest['calculationVersion'] == 'demo-calculations-1.0.0'
     assert replay(500, 50, retained['instruments'][0]['returns'][:1], [None, None], 'fictional_monthly') == result
+
+
+@pytest.mark.parametrize('newline', [b'\n', b'\r\n'])
+def test_old_snapshot_identity_accepts_git_line_endings(newline):
+    original = (ROOT / 'snapshots/demo-2026-11-09.1/demo-data.json').read_bytes()
+    lf = original.replace(b'\r\n', b'\n')
+    copy = lf.replace(b'\n', newline)
+    assert hashlib.sha256(copy.replace(b'\r\n', b'\n')).hexdigest() == 'bbe3f27302476aa080f30847a490658ce8323ae6c8ce04270f94736678a1f625'
 
 
 def test_metadata_stable_isolated_and_legacy_fields():
@@ -78,7 +91,7 @@ def test_metadata_stable_isolated_and_legacy_fields():
     assert 'provenance' not in context and 'provenance' not in context['simulation']
 
 
-@pytest.mark.parametrize('path', ['demo-data.json', 'snapshots/demo-2026-11-09.1/demo-data.json', 'data-manifest.json'])
+@pytest.mark.parametrize('path', ['demo-data.json', 'snapshots/demo-2026-11-10.1/demo-data.json', 'data-manifest.json'])
 def test_integrity_detects_drift(tmp_path, path):
     shutil.copytree(ROOT, tmp_path / 'shared')
     root = tmp_path / 'shared'
@@ -99,6 +112,21 @@ def test_canonicalization_and_invalid_json(tmp_path):
         path.write_text(text, encoding='utf-8')
         with pytest.raises(ValueError):
             read_json(path)
+
+
+def test_bank_demo_profile_version_and_fees():
+    data, metadata = load_verified_dataset()
+    profile = data['bankProfile']
+    assert metadata['datasetVersion'] == 'demo-2026-11-10.1'
+    assert metadata['calculationVersion'] == 'demo-calculations-1.0.0'
+    assert profile['bankId'] == 'demo'
+    assert profile['profileVersion'] == 'bank-demo-2026-11-10.1'
+    fees = {product['instrumentId']: product['fees'] for product in profile['products']}
+    assert {key: value['annualOngoingBps'] for key, value in fees.items()} == {
+        'demo-fixed': 40, 'demo-mixed': 75, 'demo-equity': 110,
+        'demo-etf': 20, 'demo-stock': None,
+    }
+    assert all(value['treatment'] == 'illustrative_excluded' for value in fees.values())
 
 
 def test_decline_episodes_and_tutor_contract(monkeypatch):

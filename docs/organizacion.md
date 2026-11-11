@@ -28,7 +28,7 @@ La conversación de perfil y el filtrado de opciones son propuestas futuras suje
 
 ## Trabajo conjunto y tecnología
 
-Acordar primero `docs/contratos.md`. La persona 5 prepara muestras ficticias mientras se verifican fuentes reales. Trabajar en ramas separadas y revisar cambios compartidos. La demo usa React/TypeScript y una API local Python/FastAPI para catálogo, simulación periódica, caídas y tutor por reglas mediante Node. El motor histórico independiente permanece aislado; Claude y ElevenLabs siguen como propuestas no conectadas. La propuesta anterior de Next.js permanece en el historial.
+Acordar primero `docs/contratos.md`. La persona 5 prepara muestras ficticias mientras se verifican fuentes reales. Trabajar en ramas separadas y revisar cambios compartidos. La demo usa React/TypeScript y una API local Python/FastAPI para catálogo, simulación periódica, caídas y tutor por reglas mediante Node. El motor histórico expone la comparación del juego mediante `POST /api/game/compare`, que el frontend aún no consume; Claude y ElevenLabs siguen como propuestas no conectadas. La propuesta anterior de Next.js permanece en el historial.
 
 
 ## Líneas de ejecución y funciones de empresa

@@ -1,7 +1,7 @@
 {
-  "datasetVersion": "demo-2026-11-09.1",
+  "datasetVersion": "demo-2026-11-10.1",
   "calculationVersion": "demo-calculations-1.0.0",
-  "datasetSha256": "8a0f06c8b95182bde24f9834763c3b39c194e7500b40ac83662c9b7e7f08fb45",
+  "datasetSha256": "70d234a224a2dc3f08d8e3f92cd4bfad3456ebb3cbcd9bb8db208940dafed0a4",
   "canonicalization": "canonical-json-v1",
   "canonicalizationDescription": "json.dumps(data, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode('utf-8'); complete parsed document, duplicate keys and nonfinite numbers rejected"
 }
