@@ -12,10 +12,12 @@ const number = (x: unknown): x is number => typeof x === 'number' && Number.isFi
 
 export function bankAnswer(message: string, context: TutorContext, history: readonly TutorHistoryMessage[] = []): Answer | undefined {
   const m = norm(message).replace(/^\s*¿/, ''), en = context?.language === 'en', lang = en ? 'en' : 'es';
+  if (/ignore|ignora|system prompt|api.?key|secret|password/.test(m)) return;
+  const missing = /(?:simular|simulate|simulation|simulacion).*(?:no|cannot|can't|unavailable)|(?:no puedo|cannot|can't|why).*(?:simular|simulate)/.test(m);
+  if (missing && context?.instrument?.dataKind === 'missing_history') return {intent: 'bank_missing_history', text: en ? 'The selected instrument has no available history, so it cannot be simulated.' : 'El instrumento seleccionado no tiene histórico disponible, por lo que no se puede simular.'};
   const bank = context?.bank;
   if (!bank) return;
   const unavailable = (intent = 'unknown'): Answer => ({ intent, text: en ? 'That information is not available for the requested bank or product.' : 'No hay información disponible para el banco o producto solicitado.' });
-  if (/ignore|ignora|system prompt|api.?key|secret|password/.test(m)) return;
   const last = [...history].slice(-8).reverse().find(item => item?.role === 'assistant');
   const followFee = /^(?:y eso|and (?:is )?that|is (?:that|it)|se|esta|is it).*(?:descontad|deducted|included)/.test(m) && last?.intent === 'bank_fees';
   const feeQuery = /(?:cuanto (?:cuesta|cobran)|comision|coste|fees?|charg(?:e|es|ed)|costs?)/.test(m);
@@ -39,10 +41,8 @@ export function bankAnswer(message: string, context: TutorContext, history: read
   const otherBanco = !!bancoName && !['t2f', 'de', 'demo', 'ficticio', 'ficticia', 'actual', 'seleccionado'].includes(bancoName);
   const otherBank = /\b(?:[a-z0-9]+bank[a-z0-9]*|bank[a-z0-9]+)\b/.test(m);
   const page = /que estoy viendo|what am i (?:seeing|looking at)|what is this page/.test(m);
-  const missing = /(?:simular|simulate|simulation|simulacion).*(?:no|cannot|can't|unavailable)|(?:no puedo|cannot|can't|why).*(?:simular|simulate)/.test(m);
   const forecast = /(?:ganar[eé]|earn|profit|return|rentabilidad|beneficio).*(?:proxim[oa]|next|futuro|future|manana|tomorrow)/.test(m);
   if (forecast) return { intent: 'unknown', text: en ? 'Future returns are not available or predictable from this demonstration.' : 'La rentabilidad futura no está disponible y esta demostración no permite predecirla.' };
-  if (missing && context.instrument?.dataKind === 'missing_history') return {intent: 'bank_missing_history', text: en ? 'The selected instrument has no available history, so it cannot be simulated.' : 'El instrumento seleccionado no tiene histórico disponible, por lo que no se puede simular.'};
   if ((foreign || otherBanco || otherBank) && (identity || conditions || services || feeQuery)) return unavailable();
   if (!(identity || conditions || services || page || (feeQuery && !genericFee) || followFee)) return;
   if (!validBank) return unavailable();

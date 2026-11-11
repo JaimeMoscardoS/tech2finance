@@ -306,3 +306,18 @@ def test_configured_external_bank_context_is_scoped(monkeypatch):
     assert response.status_code == 422
     response = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT | {'bankId': 'unknown'}})
     assert response.status_code == 400 and response.json()['error']['code'] == 'unknown_bank'
+
+
+@pytest.mark.parametrize(('language', 'question', 'expected'), [
+    ('es', '¿Por qué no puedo simularlo?', 'no tiene histórico disponible'),
+    ('en', "Why can't I simulate it?", 'no available history'),
+])
+def test_external_missing_history_through_tutor_bridge(language, question, expected):
+    context = {'page': 'simulator', 'level': 'beginner', 'language': language,
+               'bankId': 'bbva', 'instrumentId': 'bbva-mi-inversion-bolsa'}
+    response = client.post('/api/tutor', json={'message': question, 'context': context})
+    assert response.status_code == 200
+    answer = response.json()
+    assert answer['intent'] == 'bank_missing_history'
+    assert expected in answer['text']
+    assert '0,75' not in answer['text'] and '0.75' not in answer['text']

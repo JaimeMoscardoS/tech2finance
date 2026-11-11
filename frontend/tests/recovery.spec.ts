@@ -103,11 +103,12 @@ test('switching mode cancels an in-flight simulation', async ({page}) => {
   await page.getByLabel('Importe inicial').fill('123');
   await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
   await startedRequest;
+  await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();
-  await expect(page.getByText('Demo local',{exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
   release();
   await Promise.all(settled);
-  await expect(page.getByText('Demo local',{exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
 });
 
 test('changed inputs invalidate a failed simulation retry', async ({page}) => {
@@ -121,7 +122,8 @@ test('changed inputs invalidate a failed simulation retry', async ({page}) => {
   await page.getByLabel('Importe inicial').fill('456');
   await expect(page.getByRole('button',{name:'Reintentar'})).toHaveCount(0);
   const before = count;
+  await page.locator('.connection-settings summary').click();
   await page.getByRole('button',{name:'Usar demo local'}).click();
-  await expect(page.getByText('Demo local',{exact:true})).toBeVisible();
+  await expect(page.locator('.connection-settings summary')).toContainText('Demo local');
   expect(count).toBe(before);
 });

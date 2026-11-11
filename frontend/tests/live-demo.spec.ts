@@ -8,7 +8,7 @@ for (const mode of ['local', 'server'] as const) for (const language of ['es', '
     const pause = page.getByRole('dialog', {name: language === 'es' ? 'Una pausa para comprender' : 'A moment to understand'});
     await expect(pause).toContainText(language === 'es' ? '13,10 %' : '13.10 %');
     await expect(pause).toContainText(language === 'es' ? 'supuesto narrativo' : 'narrative assumption');
-    await pause.getByText(language === 'es' ? 'Ver noticias del guion' : 'View script news').click();
+    await pause.getByText(language === 'es' ? 'Ver contexto ilustrativo, sin noticias en directo' : 'View illustrative context, no live news').click();
     await expect(pause).toContainText(language === 'es' ? 'Mes 5' : 'Month 5');
     if (mode === 'server' && language === 'es') {
       await pause.screenshot({path:'test-results/live-demo-desktop.png'});
@@ -43,6 +43,6 @@ test('retry resumes the guided decline after a server error', async ({ page }) =
   const pause = page.getByRole('dialog',{name:'Una pausa para comprender'});
   await expect(pause).toContainText('13,10 %');
   await expect(pause).toContainText('supuesto narrativo');
-  await pause.getByText('Ver noticias del guion').click();
+  await pause.getByText('Ver contexto ilustrativo, sin noticias en directo').click();
   await expect(pause).toContainText('Subida inesperada de tipos');
 });

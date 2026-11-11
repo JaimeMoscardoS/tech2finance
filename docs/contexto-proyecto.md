@@ -93,7 +93,9 @@ Un horizonte largo puede ayudar a contextualizar la volatilidad y disponer de m�
 
 La persona 5 identifica y verifica fuentes y licencias; la 3 define las reglas de comparación y realiza los cálculos; la 2 conecta datos y resultados; la 4 prepara la explicación y la voz; y la 1 presenta los resultados y sus limitaciones. Cada responsable participa en las pruebas de su componente y la persona 5 coordina las pruebas del flujo completo.
 
-En esta rama la pausa muestra un análisis local de las observaciones del instrumento seleccionado o de la cartera ficticia, con episodios y recuperación solo cuando se observa. No atribuye causas y no busca noticias ni comparables. El motor Python histórico no se usa en la pausa; si faltan datos suficientes, la interfaz lo indica.
+En esta rama la pausa muestra un análisis local de las observaciones del instrumento seleccionado o de la cartera ficticia, con episodios y recuperación solo cuando se observa. No busca noticias ni comparables ni atribuye una causa real. El escenario ficticio de seis meses indicado arriba añade un guion narrativo identificado, no noticias verificadas. El motor Python histórico no se usa en la pausa; si faltan datos suficientes, la interfaz lo indica.
+
+Si el instrumento externo seleccionado no tiene histórico, el tutor explica por qué no puede simularse incluso cuando la entidad configurada no dispone de perfil BancoT2F. No incorpora las condiciones ni tarifas de BancoT2F a esa respuesta.
 ## Noticias y explicación de movimientos
 
 La intención del equipo es poder contrastar las explicaciones con noticias reales y actuales de fuentes fiables. Para ello habría que conectar una fuente, conservar título, enlace y fechas relevantes y comprobar que la información corresponde a la cartera y al periodo. Esa conexión todavía no existe ni se ha elegido un proveedor.

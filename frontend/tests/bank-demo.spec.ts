@@ -20,6 +20,10 @@ for (const mode of ['local', 'server'] as const) for (const bank of ['caixabank'
   await expect(dialog.locator('.message.assistant[lang="es"]')).toHaveCount(1);
   await expect(dialog).not.toContainText('0,75');
   if (mode === 'server') expect(requests.at(-1).context).toMatchObject({bankId:bank,instrumentId:bank === 'caixabank' ? 'caixabank-monetario-estandar' : 'bbva-mi-inversion-bolsa'});
+  await dialog.getByLabel('Tu pregunta').fill('¿Todos los productos de la plataforma son de BancoT2F?');
+  await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
+  await expect(dialog.locator('.message.assistant[lang="es"]')).toHaveCount(2);
+  await expect(dialog.locator('.message.assistant[lang="es"]').last()).not.toContainText(/productos de otras entidades|0,75/i);
  });
 }
 
@@ -71,7 +75,8 @@ test('mobile English dark view keeps the bank context readable', async ({page}) 
  await page.goto('/');
  await page.getByRole('button',{name:'English'}).click();
  await page.getByRole('button',{name:'Dark theme'}).click();
- await expect(page.locator('.bank-info')).toContainText('Fictional institution');
+ await expect(page.locator('.bank-info')).toContainText('demonstration environment');
+ await expect(page.locator('.bank-info')).toContainText('No real account');
  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });

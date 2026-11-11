@@ -39,7 +39,7 @@ test('mobile navigation is hidden until opened', async ({ browser }) => {
   await expect(page.getByRole('button', { name: 'Simulador', exact: true })).toBeHidden();
   await page.getByRole('button', { name: 'Abrir menú' }).click();
   await page.getByRole('button', { name: 'Simulador', exact: true }).click();
-  await expect(page.getByRole('heading', { name: /Practica con dinero ficticio/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Simular inversión' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   await context.close();
 });
@@ -92,7 +92,7 @@ test('mobile menu traps focus, closes with Escape and restores focus', async ({ 
  const trigger = page.getByRole('button', { name: 'Abrir menú' });
  await trigger.click(); const close = page.getByRole('dialog', { name: 'MI ESPACIO' }).getByRole('button', { name: 'Cerrar menú', exact: true });
  await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab');
- await expect(page.getByRole('button', { name: 'Tu asistente DEMO' })).toBeFocused();
+ await expect(page.getByRole('button', { name: 'Tu asistente', exact: true })).toBeFocused();
  await page.keyboard.press('Escape'); await expect(trigger).toBeFocused();
  await context.close();
 });
@@ -113,7 +113,7 @@ test('opening the assistant from the mobile menu transfers focus to the dialog',
  const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button', { name: 'Abrir menú' }).click();
- await page.getByRole('button', { name: 'Tu asistente DEMO' }).click();
+ await page.getByRole('button', { name: 'Tu asistente', exact: true }).click();
  const dialog = page.getByRole('dialog', { name: 'Tu asistente' });
  await expect(dialog).toBeVisible();
  await expect(dialog.getByRole('button', { name: 'Cerrar asistente' })).toBeFocused();
@@ -360,7 +360,7 @@ test('decline explanations use observed series without inventing a current crisi
  await page.getByRole('button',{name:'Entender una caída'}).click();
  dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});
  await expect(dialog.getByText(/Punto 14/)).toBeVisible();
- await expect(dialog.getByText(/Serie ficticia de ejemplo/)).toBeVisible();
+ await expect(dialog.getByText('Serie simulada, sin fechas reales.')).toBeVisible();
  await dialog.getByRole('button',{name:'Continuar en la demo'}).click();
  await expect(dialog).toBeHidden();
 });
