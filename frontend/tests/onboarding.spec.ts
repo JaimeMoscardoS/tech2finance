@@ -41,32 +41,32 @@ test.describe('Bienvenida', () => {
 });
 
 test.describe('Modo presentación', () => {
-  test('?demo=1 recorre 5 pasos con siguiente, anterior y Esc', async ({ page }) => {
+  test('?demo=1 recorre 7 pasos con siguiente, anterior y Esc', async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
     await page.goto('/?demo=1');
-    const card = page.getByRole('dialog', { name: 'Resumen de la cartera' });
+    const titles = ['Invertir empieza por entender', 'Tu nivel, tu ritmo', 'Un agente que te acompaña', 'Calma antes de vender', 'Aprende', 'Practica sin riesgo', 'Tu cartera, clara'];
+    const card = page.getByRole('dialog', { name: titles[0] });
     await expect(card).toBeVisible();
-    await expect(card).toContainText('Paso 1 de 5');
+    await expect(card).toContainText('Paso 1 de 7');
     await expect(page.locator('.tour__spot')).toBeVisible();
     await expect(card.getByRole('button', { name: /Anterior/ })).toBeDisabled();
 
     const next = () => page.locator('.tour__card').getByRole('button', { name: /Siguiente/ }).click();
-    await next();
-    await expect(page.getByRole('dialog', { name: 'Asistente de IA' })).toContainText('Paso 2 de 5');
-    await next();
-    await expect(page.getByRole('dialog', { name: 'Probar una caída' })).toContainText('Paso 3 de 5');
-    await next();
-    await expect(page.getByRole('dialog', { name: 'Simulador: ¿y si vendo?' })).toContainText('Paso 4 de 5');
-    await expect(page.locator('main h1')).toContainText('Simulador');
-    await next();
-    await expect(page.getByRole('dialog', { name: 'Práctica del Test MiFID' })).toContainText('Paso 5 de 5');
-    await expect(page.locator('[data-tour="mifid"]')).toBeVisible();
+    for (let i = 1; i < 7; i++) {
+      await next();
+      await expect(page.getByRole('dialog', { name: titles[i] })).toContainText(`Paso ${i + 1} de 7`);
+      if (i === 4) await expect(page.locator('[data-tour="mifid"]')).toBeVisible();
+      if (i === 5) await expect(page.locator('main h1')).toContainText('Simulador');
+    }
+    await expect(page.locator('main h1')).toContainText('Mi cartera');
+    await expect(page.locator('.tour__card')).toContainText('Entender primero, invertir después');
     await expect(page.locator('.tour__card').getByRole('button', { name: 'Terminar' })).toBeVisible();
 
     await page.locator('.tour__card').getByRole('button', { name: /Anterior/ }).click();
-    await expect(page.getByRole('dialog', { name: 'Simulador: ¿y si vendo?' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: titles[5] })).toBeVisible();
     await page.keyboard.press('ArrowLeft');
-    await expect(page.getByRole('dialog', { name: 'Probar una caída' })).toBeVisible();
+    await page.keyboard.press('ArrowLeft');
+    await expect(page.getByRole('dialog', { name: titles[3] })).toBeVisible();
     await expect(page.locator('main h1')).toContainText('Inicio');
 
     await page.keyboard.press('Escape');
@@ -77,7 +77,7 @@ test.describe('Modo presentación', () => {
     await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
     await page.goto('/');
     await page.getByRole('button', { name: /Modo presentación/ }).click();
-    await expect(page.getByRole('dialog', { name: 'Resumen de la cartera' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'Invertir empieza por entender' })).toBeVisible();
     await page.locator('.tour__card').getByRole('button', { name: /Salir de la presentación/ }).click();
     await expect(page.locator('.tour')).toHaveCount(0);
   });

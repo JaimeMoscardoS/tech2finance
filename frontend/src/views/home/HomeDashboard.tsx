@@ -135,7 +135,7 @@ export default function HomeDashboard({ language, level, onNavigate, onUnderstan
   return (
     <div className="home">
       <h1 className="dash-sr">{es ? "Inicio" : "Home"}</h1>
-      <section className="home__intro" aria-labelledby={`${panelId}-intro`}>
+      <section className="home__intro" data-tour="intro" aria-labelledby={`${panelId}-intro`}>
         <h2 id={`${panelId}-intro`}>{c.learnTitle}</h2>
         <p>{c.learnDesc}</p>
         <div className="home__cards" role="group" aria-label={c.cardsAria}>
@@ -154,7 +154,7 @@ export default function HomeDashboard({ language, level, onNavigate, onUnderstan
       </section>
 
       {onUnderstandFall && (
-        <section className="home__worry" aria-labelledby={`${panelId}-worry`}>
+        <section className="home__worry" data-tour="worry" aria-labelledby={`${panelId}-worry`}>
           <LifeBuoy size={30} aria-hidden="true" />
           <div>
             <h2 id={`${panelId}-worry`}>{c.worryTitle}</h2>

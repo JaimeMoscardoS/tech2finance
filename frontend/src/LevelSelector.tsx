@@ -33,7 +33,7 @@ export default function LevelSelector({ level, onChange, names, label, backLabel
     return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onPointer); };
   }, [open]);
 
-  return <div className="level-wrap" ref={wrap} onBlur={event => {
+  return <div className="level-wrap" data-tour="level" ref={wrap} onBlur={event => {
     if (open && event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) close(false);
   }}>
     <motion.button ref={trigger} type="button" className="level-button" onClick={() => { cancelAnimationFrame(focusFrame.current); setOpen(true); }} initial={false}

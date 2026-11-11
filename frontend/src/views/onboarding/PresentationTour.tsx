@@ -2,21 +2,25 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import "./onboarding.css";
 
-export type TourPage = "home" | "simulator" | "learn";
+export type TourPage = "home" | "simulator" | "learn" | "portfolio";
 type Step = { page: TourPage; selectors: readonly string[]; title: { es: string; en: string }; text: { es: string; en: string } };
 
 /** Recorrido guiado de 5 pasos para presentar la demo (botón «Presentar» o `?demo=1`). */
 export const TOUR_STEPS: readonly Step[] = [
-  { page: "home", selectors: ['[data-tour="summary"]'], title: { es: "Resumen de la cartera", en: "Portfolio summary" },
-    text: { es: "Valor, último mes y objetivo de una cartera de ejemplo con fondos reales (valores liquidativos de la CNMV) y participaciones DEMO.", en: "Value, last month and goal of a sample portfolio with real funds (CNMV net asset values) and DEMO holdings." } },
-  { page: "home", selectors: ['[data-tour="assistant"]'], title: { es: "Asistente de IA", en: "AI assistant" },
-    text: { es: "Dos preguntas, una respuesta en lenguaje claro: el modelo redacta y el código calcula las cifras. Sin órdenes ni consejos personalizados.", en: "Two questions, one plain-language answer: the model writes and code computes the figures. No orders or personalised advice." } },
-  { page: "home", selectors: ['[data-tour="decline"]', '[data-tour="assistant"]'], title: { es: "Probar una caída", en: "Try a decline" },
-    text: { es: "Pulsa «Probar una caída»: una pausa informativa explica la caída con datos y fuentes antes de decidir. No bloquea la venta.", en: "Press “Try a decline”: an informative pause explains the fall with data and sources before deciding. It does not block selling." } },
-  { page: "simulator", selectors: ["#jr-step-3", '[data-tour="simulator"]'], title: { es: "Simulador: ¿y si vendo?", en: "Simulator: what if I sell?" },
-    text: { es: "Recorrido en 3 pasos con un fondo real: elige, simula y compara mantener frente a vender en un mes concreto.", en: "3-step journey with a real fund: choose, simulate and compare holding versus selling in a given month." } },
-  { page: "learn", selectors: ['[data-tour="mifid"]'], title: { es: "Práctica del Test MiFID", en: "MiFID test practice" },
-    text: { es: "Preguntas típicas del test de conveniencia con explicación de por qué se hacen, adaptadas al nivel.", en: "Typical suitability-test questions explaining why they are asked, adapted to the level." } },
+  { page: "home", selectors: ['[data-tour="intro"]'], title: { es: "Invertir empieza por entender", en: "Investing starts with understanding" },
+    text: { es: "La portada de Inicio ofrece cuatro caminos: explorar fondos, simular, ver tu cartera y aprender. Primero se entiende, después se decide.", en: "The Home cover offers four paths: explore funds, simulate, see your portfolio and learn. First you understand, then you decide." } },
+  { page: "home", selectors: ['[data-tour="level"]'], title: { es: "Tu nivel, tu ritmo", en: "Your level, your pace" },
+    text: { es: "Básico, Intermedio o Avanzado: el nivel adapta toda la interfaz y la profundidad de las explicaciones.", en: "Basic, Intermediate or Advanced: the level adapts the whole interface and the depth of the explanations." } },
+  { page: "home", selectors: ['[data-tour="assistant"]'], title: { es: "Un agente que te acompaña", en: "An agent by your side" },
+    text: { es: "«¿Qué estoy viendo?» y «¿Cómo van las cosas?» responden en lenguaje claro con datos reales de la CNMV y explicaciones educativas, sin órdenes.", en: "“What am I looking at?” and “How are things going?” answer in plain language with real CNMV data and educational explanations, with no orders." } },
+  { page: "home", selectors: ['[data-tour="worry"]', '[data-tour="decline"]'], title: { es: "Calma antes de vender", en: "Calm before selling" },
+    text: { es: "Ante una caída, la pausa informativa muestra qué ha pasado con datos y fuentes. No bloquea la venta ni presiona a mantener.", en: "Facing a decline, the informative pause shows what happened with data and sources. It does not block selling or push you to hold." } },
+  { page: "learn", selectors: ['[data-tour="mifid"]'], title: { es: "Aprende", en: "Learn" },
+    text: { es: "Educación explica los conceptos clave y permite practicar el Test MiFID, con el porqué de cada pregunta.", en: "Education explains key concepts and lets you practise the MiFID test, with the reason behind each question." } },
+  { page: "simulator", selectors: ["#jr-step-3", '[data-tour="simulator"]'], title: { es: "Practica sin riesgo", en: "Practise without risk" },
+    text: { es: "El simulador usa fondos reales y responde «¿Y si vendo?»: compara mantener frente a vender en un mes concreto, sin dinero real.", en: "The simulator uses real funds and answers “What if I sell?”: it compares holding versus selling in a given month, with no real money." } },
+  { page: "portfolio", selectors: ['[data-tour="portfolio"]'], title: { es: "Tu cartera, clara", en: "Your portfolio, clear" },
+    text: { es: "Mi cartera resume valor, evolución y objetivo con datos de ejemplo. Entender primero, invertir después.", en: "My portfolio summarises value, evolution and goal with sample data. Understand first, invest later." } },
 ];
 
 type Rect = { top: number; left: number; width: number; height: number };

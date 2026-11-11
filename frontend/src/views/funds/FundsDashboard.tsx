@@ -377,7 +377,7 @@ export default function FundsDashboard(props: FundsDashboardProps) {
     ? (level === "beginner" ? r.subtitleBeginner : level === "intermediate" ? r.subtitleIntermediate : r.subtitleAdvanced)
     : (level === "beginner" ? t.subtitleBeginner : level === "intermediate" ? t.subtitleIntermediate : t.subtitleAdvanced);
   return (
-    <div className="fd">
+    <div className="fd" data-tour="portfolio">
       <h1 className="dash-sr">{language === "es" ? "Mi cartera" : "My portfolio"}</h1>
       <Section title={t.title} description={subtitle} demo language={language} actions={level !== "advanced" ? <Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} onUnderstandFall={onUnderstandFall} /> : undefined}>
         <details className="dash-origin fd__source">
