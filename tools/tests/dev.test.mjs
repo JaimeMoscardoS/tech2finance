@@ -15,6 +15,11 @@ test('catalog requires version and all collections', () => {
   assert.equal(validateCatalog({schemaVersion:'1.0', banks:[], instruments:[]}), false);
 });
 
+test('health accepts the optional Claude tutor provider', () => {
+  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'anthropic',externalProviders:true}), true);
+  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'other',externalProviders:true}), false);
+});
+
 test('health accepts a configured external analysis provider', () => {
   assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'server_rules',externalProviders:true}), true);
 });
