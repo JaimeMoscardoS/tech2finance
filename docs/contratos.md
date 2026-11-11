@@ -22,7 +22,7 @@ En el contexto interno del tutor se usa `bank?: BankProfile` y `instrument.produ
 
 - **1 → 2:** pantalla, nivel, parámetros del juego o pregunta; recibe resultados y errores.
 - **5 → 3 y 2:** catálogo ficticio y series verificadas con fuente, fecha, licencia, moneda, frecuencia, ajustes y costes; las muestras ficticias deben indicarlo.
-- **3 → 2:** evolución por fecha (en `/api/game/compare`, por número de mes sintético), aportaciones, resultados, decisiones de juego, fuente y supuestos. Los cálculos son verificables y no los hace el LLM.
+- **3 → 2:** evolución por fecha (en `/api/game/compare`, por número de mes y por fecha real de cierre), aportaciones, resultados, decisiones de juego, fuente y supuestos. Los cálculos son verificables y no los hace el LLM.
 - **2 → 4:** pregunta, pantalla, nivel y contexto mínimo disponible; objetivo, plazo y noticias verificadas con URL, fecha y procedencia cuando existan.
 - **4 → 2 → 1:** explicación textual y audio opcional, con fuentes y límites. Si no hay contexto o noticias suficientes, comunicarlo.
 - **1–4 → 5:** funciones comprobadas, resultados y limitaciones para pruebas y presentación.
@@ -68,7 +68,7 @@ En esta rama existe análisis cuantitativo básico local; los contratos de integ
 
 ## Contrato del motor Python, versión 1.0
 
-El motor `simulador` (`compare`) se expone en `POST /api/game/compare` para los fondos con histórico elegible; el frontend aún no consume ese endpoint. Las aportaciones sin comisiones comparten el momento de cierre de `/api/simulations`. La [referencia del simulador](../simulador/README.md) define el contrato del motor, cuyos importes se serializan como cadenas decimales y utilizan `Decimal` con 34 cifras. La comparación del juego admite costes explícitos y conserva el efectivo posterior a la venta; no implica órdenes reales.
+El motor `simulador` (`compare`) se expone en `POST /api/game/compare` para los fondos con histórico elegible; la sección «¿Y si vendo?» del Simulador lo consume en la rama `feature/juego-pantalla` (ver [README del frontend](../frontend/README.md)); el frontend valida el esquema, la procedencia y la coherencia de los totales antes de mostrarlo. Las aportaciones sin comisiones comparten el momento de cierre de `/api/simulations`. La [referencia del simulador](../simulador/README.md) define el contrato del motor, cuyos importes se serializan como cadenas decimales y utilizan `Decimal` con 34 cifras. La comparación del juego admite costes explícitos y conserva el efectivo posterior a la venta; no implica órdenes reales.
 
 
 ## Catálogo local de práctica (rama de trabajo)
