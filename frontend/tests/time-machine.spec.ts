@@ -472,7 +472,7 @@ test('while the replay runs step 1 is collapsed to the chosen fund, and it can b
   const step1 = page.locator('#jr-step-1');
   await expect(step1.locator('.jr-spark')).toHaveCount(0);
   await expect(step1).not.toContainText('Mayor caída en el periodo');
-  await expect(step1.locator('.jr-collapsed')).toContainText('CAIXABANK');
+  await expect(step1.locator('.jr-collapsed')).toContainText('Fondo monetario');
   await step1.getByRole('button', { name: 'Cambiar fondo' }).click();
   await expect(page.locator('#jr-step-1 .jr-spark').first()).toBeVisible();
 });

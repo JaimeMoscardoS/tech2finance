@@ -102,7 +102,7 @@ test('prediction reveals the backend result and states whether the guess matched
   await expect(values.locator('dd strong').nth(1)).toHaveText('1700,00 €');
   await expect(values.locator('dd strong').nth(2)).toHaveText('0,75 €');
   const feedback = page.locator('.tm-summary .jr-feedback');
-  await expect(feedback).toContainText('Acabaste con 1700,75 € habiendo puesto 1700,00 €: +0,75 €.');
+  await expect(page.locator('.tm-summary')).toContainText('Terminas el recorrido con 1700,75 €, habiendo puesto 1700,00 €');
   // 0,75 EUR is within 1 % of the contributed amount: "about the same", so "More" does not match.
   await expect(feedback).toContainText('Tu respuesta: Más.');
   await expect(feedback).toContainText('Tu respuesta no coincide con lo que ocurrió.');
@@ -121,7 +121,7 @@ test('a correct guess is reported as matching, with a loss shown as such', async
   await page.getByLabel('Tiempo de práctica').fill('3');
   await reveal(page, 'Menos');
   await finishReplay(page);
-  await expect(page.locator('.tm-summary .jr-feedback')).toContainText('Acabaste con 744,62 € habiendo puesto 1000,00 €: -255,38 €.');
+  await expect(page.locator('.tm-summary')).toContainText('Terminas el recorrido con 744,62 €, habiendo puesto 1000,00 €');
   await expect(page.locator('.tm-summary .jr-feedback')).toContainText('Tu respuesta coincide con lo que ocurrió.');
   await expect(page.locator('.jr-split')).toHaveAttribute('aria-label', /Pérdida/);
 });
@@ -266,7 +266,7 @@ test('English labels across the journey', async ({ page }) => {
   await reveal(page);
   await expect(page.locator('.jr-ack')).toContainText('Your answer: About the same.');
   await finishReplay(page);
-  await expect(page.locator('.jr-feedback').last()).toContainText(/You ended with .* having put in/);
+  await expect(page.locator('.tm-summary')).toContainText(/You finish the journey with .* having put in/);
   await expect(page.locator('.jr-achievement')).toHaveText('You discovered: not all the final money is gain');
   await expect(page.locator('#jr-step-3 h2')).toHaveText('Live the journey');
   await expect(page.getByText('Step 3 of 3').first()).toBeVisible();
