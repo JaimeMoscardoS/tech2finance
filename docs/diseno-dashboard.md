@@ -226,4 +226,6 @@ Se fusiona `origin/main` en la rama sin descartar el diseño por nivel. Detalle 
 
 **Contraste** (fórmula WCAG, 11-11-2026): texto, secundario, acento, positivo y negativo ≥ 4,63:1 sobre `#EDF1F7`, `#E3EAF5` y `#E1E7EF`.
 
-**Pendiente**: prueba con modelo real (solo proveedor simulado en pruebas); revisión ampliada del PR; pruebas Playwright específicas de bienvenida y presentación.
+**Pendiente**: prueba con modelo real (solo proveedor simulado en pruebas); revisión ampliada del PR.
+
+**Integración con `main` (11-11-2026)**: fusionados el tutor con Claude (#36) y la voz bilingüe ElevenLabs (#37). `/api/insights` sigue usando el proveedor del análisis de caídas (`T2F_ANALYSIS_PROVIDER`), no el del tutor (`T2F_TUTOR_PROVIDER`). Corrección en `AssistantPanel`: la última respuesta se asocia al contexto sin textos traducidos, para que siga pudiendo escucharse tras cambiar el idioma (dos pruebas de `main` fallaban también en `main`). Pruebas nuevas en `frontend/tests/onboarding.spec.ts`: la bienvenida (aparece, fija el nivel, «Saltar» y Esc) y el modo presentación (`?demo=1`, siguiente/anterior, flechas, Esc y botón «Presentar»). Comprobado: build, 159 unitarias, 278 de backend y Playwright completo con 216 superadas y 1 fallo intermitente de tiempos en `real-history.spec.ts:29`, que pasa al repetirlo aislado.
