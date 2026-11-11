@@ -160,7 +160,7 @@ def analyze_decline(spec):
 def build_tutor_context(context):
     try:
         page, level, language = context['page'], context['level'], context['language']
-        if page not in ('home', 'explore', 'simulator', 'portfolio') or level not in ('beginner', 'intermediate', 'advanced') or language not in ('es', 'en'):
+        if page not in ('home', 'explore', 'simulator', 'portfolio', 'learn', 'game') or level not in ('beginner', 'intermediate', 'advanced') or language not in ('es', 'en'):
             raise ValueError
         allowed = {'page', 'level', 'language', 'bankId', 'instrumentId', 'simulation', 'decline', 'decision'}
         if set(context) - allowed:

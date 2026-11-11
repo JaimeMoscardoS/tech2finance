@@ -168,7 +168,7 @@ Las PR grandes siguen la revisión ampliada del `CLAUDE.md` (nota mínima 8/10, 
 - Precio USD mostrado en € sin tipo de cambio (nota); fondos y gestoras solo en español.
 - Hechos con fechas de 2026 frente a series relativas (M0…M36).
 - No probado con lector de pantalla ni con teclado real (solo comprobaciones automáticas).
-- **Limitación servidor / `learn`**: el backend no acepta esa página del tutor; el cliente envía `home` (`game` ya no existe, ver fusión del Simulador). Parche propuesto, sin aplicar, en [propuestas/backend-learn-game.patch](propuestas/backend-learn-game.patch).
+- **Servidor / `learn`**: el backend acepta `learn` y `game` y el cliente envía la página sin convertirla (rama `backend-learn-game`).
 
 ## Fusión «Simulador» y «Simulación» (11-11-2026, rama `mejora-ui`, sin commit)
 
@@ -199,6 +199,6 @@ Se fusiona `origin/main` en la rama sin descartar el diseño por nivel. Detalle 
 - **Contexto del BCE** (PR #31): las noticias de mercado del archivo del BCE acompañan a la serie de estudio `portfolio_demo` («ejemplo histórico»), que se abre con «Probar una caída»; su estado se muestra junto a ese acceso en Inicio. La cartera mostrada (`portfolio_cnmv`) no está en caída actual, así que no activa esa búsqueda.
 - **Pausa** (`AntiPanicPanel`): lógica de `main` (calm y análisis detallado) con profundidad por nivel; no bloquea ni presiona.
 - **Pruebas**: specs Playwright adaptados a esta UI (ver el resultado final en el informe del cambio y en el README del frontend); los de `main` que esperaban la cartera/inicio antiguos (`large-portfolio`, tarjetas de acción) se adaptaron a la funcionalidad equivalente.
-- **Pendiente**: revisión visual en móvil y con lector de pantalla; el parche del backend para aceptar la página `learn` en el tutor ([propuestas/backend-learn-game.patch](propuestas/backend-learn-game.patch), sin aplicar y aún con referencias a la página `game` ya eliminada).
+- **Pendiente**: revisión visual en móvil y con lector de pantalla.
 - **Cambios de comportamiento hechos al probar** (mínimos): el botón superior del asistente se llama «Tu asistente» (antes repetía «Abrir asistente» de la barra lateral y chocaba por nombre accesible); el contenido de «¿Y si vendo?» solo se monta con su pestaña activa (evita etiquetas de formulario duplicadas y ocultas con las del simulador de producto); al cerrar la pausa, si el disparador ya no existe (p. ej. «Probar una caída» cambia de página), el foco pasa al contenido principal en lugar de perderse.
 - **Cifras de pruebas** (calculadas por la app y contrastadas con un cálculo independiente sobre `shared/nav-history.json`; las mismas en `frontend/src/portfolio-real.test.ts` y `backend/tests/test_nav_history.py`): cartera con NAV CNMV 2019-12-31 a 2025-12-31 (73 observaciones, 72 meses), 5 fondos × 5.000 € DEMO: coste 25.000 €, valor 28.175,75 € (28.176 €), caída máxima 8,79 % (pico 2019-12, mínimo 2020-03; recuperación 2021-07). Las cifras 744,62 / 25,54 % de `main` son las de la simulación de ejemplo y la serie `portfolio_demo` («Probar una caída»).

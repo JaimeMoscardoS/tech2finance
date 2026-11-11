@@ -30,9 +30,8 @@ export default function AssistantPanel({ open, onClose, context, panelRef, provi
   const snapshot=structuredClone(context); const history=messages.filter(item=>JSON.stringify(item.context)===JSON.stringify(context) && item.providerId===provider.id).slice(-MAX_HISTORY_MESSAGES).map(item=>({role:item.role,text:item.text,intent:item.reply?.intent}));
   const controller=new AbortController(); request.current=controller; const id=++generation.current;
   setMessages(previous=>[...previous,{providerId:provider.id,role:"user",text,context:snapshot}]);setInput("");setError(false);setPending(true);
-  try { // El contrato del servidor aún solo admite home/explore/simulator/portfolio: learn se envía como home.
-   const sent=provider.id==="local"||snapshot.page!=="learn"?snapshot:{...snapshot,page:"home" as const};
-   const reply=await provider.reply({message:text,history,context:sent,signal:controller.signal});
+  try {
+   const reply=await provider.reply({message:text,history,context:snapshot,signal:controller.signal});
    if(id===generation.current&&!controller.signal.aborted)setMessages(previous=>[...previous,{providerId:provider.id,role:"assistant",text:reply.text,context:snapshot,reply}]);
   } catch {if(id===generation.current&&!controller.signal.aborted)setError(true);}
   finally {if(id===generation.current){request.current=null;setPending(false);}}

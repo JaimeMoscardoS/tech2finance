@@ -51,7 +51,7 @@ class HistoryMessage(RequestModel):
 
 
 class TutorContext(RequestModel):
-    page: Literal["home", "explore", "simulator", "portfolio"]
+    page: Literal["home", "explore", "simulator", "portfolio", "learn", "game"]
     level: Literal["beginner", "intermediate", "advanced"]
     language: Language
     bankId: Identifier = "demo"
