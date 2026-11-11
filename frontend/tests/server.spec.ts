@@ -30,7 +30,7 @@ test('real server calculates monthly contributions, decline and contextual tutor
 test('server unavailable requires explicit local choice', async ({page}) => {
   await page.route('**/api/catalog', route => route.abort()); await page.goto('/');
   await expect(page.getByText(/No se pudo completar/)).toBeVisible(); await expect(page.getByRole('button',{name:'Usar demo local'})).toBeVisible();
-  await page.getByRole('button',{name:'Usar demo local'}).click(); await expect(page.getByRole('heading',{name:/Invertir empieza/})).toBeVisible();
+  await page.getByRole('button',{name:'Usar demo local'}).click(); await expect(page.getByRole('heading',{name:/Resumen de tu cartera/})).toBeVisible();
 });
 
 test('late server simulation cannot replace newer choice', async ({page}) => {

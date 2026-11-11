@@ -52,7 +52,11 @@ export default function AssistantPanel({ open, onClose, context, panelRef, provi
   finally {if(id===generation.current){request.current=null;setPending(false);}}
  }
  if(!open)return null;
- const lastReply=[...messages].reverse().find(item=>item.role==="assistant" && item.providerId===provider.id && JSON.stringify(item.context)===JSON.stringify(context));
+ // La respuesta guardada sigue disponible al cambiar el idioma de la interfaz (se lee en su propio idioma); cualquier otro cambio de contexto la descarta.
+ // Identidad del contexto sin textos traducidos: página, nivel, instrumento, simulación, cartera y caída (no nombres ni idioma).
+ const identity=(c:TutorContext)=>JSON.stringify({page:c.page,level:c.level,instrument:c.instrument?.id,simulation:c.simulation,portfolio:c.portfolio&&{value:c.portfolio.value,initial:c.portfolio.initial,dataKind:c.portfolio.dataKind},decline:c.decline?.latestLabel,decision:c.decision});
+ const sameContext=(a:TutorContext,b:TutorContext)=>identity(a)===identity(b);
+ const lastReply=[...messages].reverse().find(item=>item.role==="assistant" && item.providerId===provider.id && sameContext(item.context,context));
  const serverLabel = lastReply?.reply?.provider === "anthropic"
   ? `Anthropic · ${lastReply.reply.model}`
   : lastReply?.reply?.provider === "server_rules"

@@ -23,7 +23,7 @@ html[data-level='beginner'][data-theme='light'] {
   --chrome-bg: #0b2a52;
 }
 html[data-level='intermediate'][data-theme='light'] {
-  --ground: #f3f6fb; --surface: #ffffff; --surface-raised: #ffffff;
+  --ground: #edf1f7; --surface: #ffffff; --surface-raised: #ffffff;
   --ink: #13223a; --muted: #4a5a70; --accent: #2862d0;
   --card-border: #d7e0ec; --border: #748aa6;
   --positive: #17693f; --negative: #b3261e;
@@ -31,7 +31,7 @@ html[data-level='intermediate'][data-theme='light'] {
   --chrome-bg: #0b2545;
 }
 html[data-level='advanced'][data-theme='light'] {
-  --ground: #e9eef5; --surface: #ffffff; --surface-raised: #ffffff;
+  --ground: #e1e7ef; --surface: #ffffff; --surface-raised: #ffffff;
   --ink: #0f1a2b; --muted: #46566c; --accent: #2459c4;
   --card-border: #c9d4e3; --border: #6e819b;
   --positive: #146b3a; --negative: #b3261e;
@@ -137,3 +137,7 @@ html[data-theme='light'] .nav-item.active { background: var(--nav-active); color
 html[data-theme='light'] .nav-item.active svg { color: #ffffff; }
 /* Básico e Intermedio claro: cabecera blanca (solo la barra lateral es azul marino). */
 html[data-theme='light']:not([data-level='advanced']) .topbar { --chrome-bg: var(--surface); --chrome-border: var(--card-border); }
+
+/* Subida de nivel visible en claro: Básico cabecera blanca; Intermedio cabecera azulada con filo marino; Avanzado cabecera marino (arriba). */
+html[data-level='intermediate'][data-theme='light'] .topbar { background: #e3eaf5; border-bottom: 3px solid #0b2545; }
+html[data-level='advanced'][data-theme='light'] .dash-card, html[data-level='advanced'][data-theme='light'] .panel { box-shadow: 0 1px 2px rgba(7, 26, 51, .08), 0 6px 18px rgba(7, 26, 51, .06); }

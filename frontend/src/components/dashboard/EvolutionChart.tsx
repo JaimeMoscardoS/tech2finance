@@ -2,7 +2,7 @@ import { useId, type ReactNode } from "react";
 import { Area, CartesianGrid, ComposedChart, Line, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { DemoBadge, DeltaChip } from "./basics.tsx";
 import { dash, type Lang } from "./copy.ts";
-import { compactEur, eur } from "./format.ts";
+import { axisEur, eur, monthLabel } from "./format.ts";
 import { usePrefersReducedMotion } from "./useReducedMotion.ts";
 import "./dashboard.css";
 
@@ -21,7 +21,8 @@ export function EvolutionChart({ title, data, seriesName, compareName, changePct
   const reduced = usePrefersReducedMotion();
   const hasCompare = !!compareName && data.some((d) => d.compare != null);
   const last = data[data.length - 1];
-  const ticks = data.length <= 6 ? data.map((d) => d.label) : Array.from({ length: 6 }, (_, i) => data[Math.round((i * (data.length - 1)) / 5)].label);
+  const tickCount = 5;
+  const ticks = data.length <= tickCount ? data.map((d) => d.label) : Array.from({ length: tickCount }, (_, i) => data[Math.round((i * (data.length - 1)) / (tickCount - 1))].label);
   return (
     <article className="dash-card dash-evo" aria-labelledby={`${uid}-t`}>
       <header className="dash-card__head">
@@ -54,14 +55,14 @@ export function EvolutionChart({ title, data, seriesName, compareName, changePct
                     </linearGradient>
                   </defs>
                   <CartesianGrid vertical={false} stroke="var(--chart-grid)" strokeDasharray="2 4" />
-                  <XAxis dataKey="label" ticks={ticks} tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} minTickGap={12} />
-                  <YAxis width={60} tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} tickFormatter={(n: number) => compactEur(n, language)} domain={["auto", "auto"]} />
+                  <XAxis dataKey="label" ticks={ticks} interval="preserveStartEnd" tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} minTickGap={24} tickFormatter={(l: string) => monthLabel(l, language)} />
+                  <YAxis width={76} tickLine={false} axisLine={false} domain={["auto", "auto"]} tick={({ x, y, payload }: { x?: number | string; y?: number | string; payload?: { value?: unknown } }) => <text x={Number(x)} y={Number(y)} dy={4} textAnchor="end" fill="var(--muted)" fontSize={11} style={{ whiteSpace: "nowrap" }}>{axisEur(Number(payload?.value ?? 0), language)}</text>} />
                   <Tooltip cursor={{ stroke: "var(--muted)", strokeDasharray: "3 3" }} content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null;
                     const row = payload[0].payload as EvolutionPoint;
                     return (
                       <div className="dash-tip">
-                        <strong>{label}</strong>
+                        <strong>{monthLabel(String(label), language)}</strong>
                         <div><i className="dash-evo__key dash-evo__key--main" aria-hidden="true" />{seriesName}: <b>{eur(row.value, language)}</b></div>
                         {hasCompare && row.compare != null && <div><i className="dash-evo__key dash-evo__key--cmp" aria-hidden="true" />{compareName}: <b>{eur(row.compare, language)}</b></div>}
                       </div>
@@ -79,7 +80,7 @@ export function EvolutionChart({ title, data, seriesName, compareName, changePct
                 <table>
                   <caption className="dash-sr">{t.chartData}</caption>
                   <thead><tr><th scope="col">{t.point}</th><th scope="col" className="is-num">{seriesName}</th>{hasCompare && <th scope="col" className="is-num">{compareName}</th>}</tr></thead>
-                  <tbody>{data.map((d) => <tr key={d.label}><th scope="row">{d.label}</th><td className="is-num">{eur(d.value, language)}</td>{hasCompare && <td className="is-num">{d.compare != null ? eur(d.compare, language) : t.na}</td>}</tr>)}</tbody>
+                  <tbody>{data.map((d) => <tr key={d.label}><th scope="row">{monthLabel(d.label, language)}</th><td className="is-num">{eur(d.value, language)}</td>{hasCompare && <td className="is-num">{d.compare != null ? eur(d.compare, language) : t.na}</td>}</tr>)}</tbody>
                 </table>
               </div>
             </details>

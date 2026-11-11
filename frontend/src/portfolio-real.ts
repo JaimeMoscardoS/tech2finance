@@ -7,14 +7,16 @@
  * máxima, Sharpe (con tipo libre de riesgo SUPUESTO y declarado), mapa mensual, mejor/peor mes.
  * DEMO (supuesto ficticio): solo las participaciones: una compra única de DEMO_AMOUNT_PER_FUND_EUR por fondo
  * al inicio de la serie (no existe una cartera real del usuario).
- * SIN DATO («No disponible», nunca deducido ni inventado): clase de activo, nivel de riesgo, exposición a renta
- * variable, TER y región, que el catálogo publica como null para estos fondos.
+ * PERFIL DEMO (opcional, `info[isin].profile`, de `shared/mock/demo-fund-profiles.ts`): clase de activo, nivel de riesgo,
+ * exposición a renta variable, TER y región SUPUESTOS y marcados DEMO en la interfaz, porque el catálogo los publica
+ * como null. Sin perfil, esos campos quedan «sin dato» (nunca se deducen).
  * La referencia comparativa es la media simple mensual de los propios fondos: no es un índice de mercado.
  * El backend reproduce la misma serie para el análisis de caídas (`basis: "portfolio_cnmv"`,
  * backend/domain/__init__.py): si cambias la selección, las fechas o los importes, cámbialos en los dos sitios.
  * Rentabilidades pasadas no predicen las futuras. No es una recomendación.
  */
 import { DEMO_RISK_FREE_ANNUAL_PCT, type DemoFund, type DemoPosition } from "../../shared/mock/demo-portfolio.ts";
+import type { DemoFundProfile } from "../../shared/mock/demo-fund-profiles.ts";
 import { cumulativeFromReturns } from "./dashboard-metrics.ts";
 import { buildDemoPortfolio, type DemoPortfolio } from "./dashboard-portfolio.ts";
 
@@ -43,7 +45,7 @@ export function displayName(name: string): string {
  * meses comunes consecutivos.
  */
 /** Datos de presentación por ISIN tomados del catálogo: gestora y nombre genérico (alias de `shared/fund-aliases.json`). */
-export type FundInfo = Readonly<Record<string, { manager?: string; name?: string }>>;
+export type FundInfo = Readonly<Record<string, { manager?: string; name?: string; profile?: DemoFundProfile }>>;
 
 /** `info`: gestora y nombre genérico por ISIN; sin gestora se muestra el ISIN y sin alias, el nombre publicado. */
 export function buildRealPortfolio(nav: NavSource | null | undefined, info: FundInfo = {}): DemoPortfolio | null {
@@ -70,7 +72,8 @@ export function buildRealPortfolio(nav: NavSource | null | undefined, info: Fund
     const units = DEMO_AMOUNT_PER_FUND_EUR / navs[0];
     funds.push({
       id: inst.isin, isin: inst.isin, name: info[inst.isin]?.name ?? displayName(inst.name), manager: info[inst.isin]?.manager ?? `ISIN ${inst.isin}`,
-      assetClass: "unknown", region: "unknown", currency: "EUR", riskLevel: null, ter: null, equityWeight: null,
+      assetClass: info[inst.isin]?.profile?.assetClass ?? "unknown", region: info[inst.isin]?.profile?.region ?? "unknown", currency: "EUR",
+      riskLevel: info[inst.isin]?.profile?.riskLevel ?? null, ter: info[inst.isin]?.profile?.ter ?? null, equityWeight: info[inst.isin]?.profile?.equityWeight ?? null,
       startPrice: navs[0], monthlyReturnsPct: returns,
     });
     held.push({ fundId: inst.isin, units, costBasisEur: units * navs[0] });

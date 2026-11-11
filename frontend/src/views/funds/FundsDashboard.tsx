@@ -7,7 +7,7 @@ import {
   DemoBadge, DeltaChip, EvolutionChart, FundTable, KpiCard, KpiRow, MetricBar, PeriodSelector, Section, DonutCard, type EvolutionPoint, type DonutSlice,
 } from "../../components/dashboard/index.ts";
 import { assetClassNames, currencyNames, regionNames } from "../../components/dashboard/copy.ts";
-import { eur, num, pct, signedEur, signedPct } from "../../components/dashboard/format.ts";
+import { eur, monthLabel, num, pct, signedEur, signedPct } from "../../components/dashboard/format.ts";
 import { usePrefersReducedMotion } from "../../components/dashboard/useReducedMotion.ts";
 import { changePct, cumulativeFromReturns, returnsFromSeries } from "../../dashboard-metrics.ts";
 import { buildDemoPortfolio, type DemoPortfolio } from "../../dashboard-portfolio.ts";
@@ -24,6 +24,8 @@ export type FundsDashboardProps = {
   onExplore?: () => void;
   onSimulate?: () => void;
   onSell?: () => void;
+  /** Acceso fijo a la pausa informativa de caídas, junto a «Vender / Reducir». */
+  onUnderstandFall?: () => void;
   /** Cartera ya construida por App (NAV reales CNMV vía `buildRealPortfolio`, la misma que usa Inicio). Sin ella, la cartera DEMO. */
   portfolio?: DemoPortfolio;
 };
@@ -44,14 +46,15 @@ function periodControl(language: Lang, p: ReturnType<typeof usePeriod>) {
   return <PeriodSelector<PeriodId> label={fc[language].period} value={p.period} onChange={p.setPeriod} options={p.options.map((id) => ({ id, label: p.labelOf(language, id) }))} />;
 }
 
-function Actions({ language, onExplore, onSimulate, onSell }: Pick<FundsDashboardProps, "language" | "onExplore" | "onSimulate" | "onSell">) {
+function Actions({ language, onExplore, onSimulate, onSell, onUnderstandFall }: Pick<FundsDashboardProps, "language" | "onExplore" | "onSimulate" | "onSell" | "onUnderstandFall">) {
   const t = fc[language];
-  if (!onExplore && !onSimulate && !onSell) return null;
+  if (!onExplore && !onSimulate && !onSell && !onUnderstandFall) return null;
   return (
     <div className="fd__actions">
       {onExplore && <button type="button" className="fd-btn fd-btn--primary" onClick={onExplore}>{t.explore}</button>}
       {onSimulate && <button type="button" className="fd-btn" onClick={onSimulate}>{t.simulate}</button>}
       {onSell && <button type="button" className="fd-btn" onClick={onSell}>{t.sell}</button>}
+      {onUnderstandFall && <button type="button" className="fd-btn fd-btn--calm" onClick={onUnderstandFall}>{language === "es" ? "Entender una caída" : "Understand a decline"}</button>}
     </div>
   );
 }
@@ -61,7 +64,7 @@ function Kpis({ p, language, dense }: { p: DemoPortfolio; language: Lang; dense?
   const risk = p.averageRisk;
   return (
     <KpiRow label={t.kpis}>
-      <KpiCard label={t.value} icon={Wallet} value={eur(p.totalValue, language)} demo language={language} />
+      <KpiCard label={t.value} icon={Wallet} value={eur(p.totalValue, language)} language={language} />
       <KpiCard label={t.result} icon={BarChart3} value={signedEur(p.pnlAmount, language)} delta={p.pnlPercent} caption={dense ? undefined : t.resultCaption} language={language} />
       <KpiCard label={t.risk} icon={ShieldAlert} value={risk == null ? t.na : `${num(risk, language, 1)} / 7`} caption={dense ? undefined : t.riskCaption} language={language}>
         {risk != null && <MetricBar label={t.risk} value={risk} language={language} valueText={`${num(risk, language, 1)} / 7`} />}
@@ -93,15 +96,15 @@ function Basic(props: FundsDashboardProps & { p: DemoPortfolio }) {
   return (
     <>
       <Kpis p={p} language={language} />
-      <EvolutionChart title={t.evolution} description={p.real ? fr[language].evolutionDesc : t.evolutionDesc} data={data} seriesName={t.portfolio} changePct={change} periodControl={periodControl(language, per)} demo language={language} />
-      <Section title={t.yourFunds} description={t.yourFundsDesc} demo language={language} level={3}>
+      <EvolutionChart title={t.evolution} description={p.real ? fr[language].evolutionDesc : t.evolutionDesc} data={data} seriesName={t.portfolio} changePct={change} periodControl={periodControl(language, per)} language={language} />
+      <Section title={t.yourFunds} description={t.yourFundsDesc} language={language} level={3}>
         <ul className="fd-cards">
           {p.positions.map((r) => (
             <li key={r.fund.id}>
               <article className="dash-card fd-fund" aria-label={r.fund.name}>
                 <h4>{r.fund.name}</h4>
                 <small>{assetClassNames[language][r.fund.assetClass]}</small>
-                <p>{t.classHelp[r.fund.assetClass]}</p>
+                <p>{t.classHelp[r.fund.assetClass].split(". ")[0].replace(/\.?$/, ".")}</p>
                 <MetricBar label={`${t.riskOfProduct}: ${r.fund.name}`} value={r.fund.riskLevel} language={language} />
                 <dl>
                   <dt>{t.value}</dt><dd>{eur(r.value, language)}</dd>
@@ -128,9 +131,9 @@ function Intermediate(props: FundsDashboardProps & { p: DemoPortfolio }) {
   return (
     <>
       <Kpis p={p} language={language} />
-      <EvolutionChart title={t.evolution} description={p.real ? fr[language].compareDesc : t.compareDesc} data={data} seriesName={t.portfolio} compareName={p.real ? p.real.benchmarkName[language] : t.index} changePct={change} periodControl={periodControl(language, per)} demo language={language} />
+      <EvolutionChart title={t.evolution} description={p.real ? fr[language].compareDesc : t.compareDesc} data={data} seriesName={t.portfolio} compareName={p.real ? p.real.benchmarkName[language] : t.index} changePct={change} periodControl={periodControl(language, per)} language={language} />
       <article className="dash-card" aria-label={t.compare}>
-        <header className="dash-card__head"><h3>{p.real ? fr[language].indexLabel : t.compare} {!p.real && <DemoBadge language={language} />}</h3></header>
+        <header className="dash-card__head"><h3>{p.real ? fr[language].indexLabel : t.compare}</h3></header>
         <div className="fd-compare">
           <div><span>{t.portfolioChange}</span><strong>{change == null ? t.na : signedPct(change, language)}</strong></div>
           <div><span>{p.real ? fr[language].indexLabel : t.indexChange}</span><strong>{benchChange == null ? t.na : signedPct(benchChange, language)}</strong></div>
@@ -138,14 +141,14 @@ function Intermediate(props: FundsDashboardProps & { p: DemoPortfolio }) {
         </div>
         <p className="fd-note">{t.forPeriod}. {p.real ? fr[language].compareNote : t.compareNote}</p>
       </article>
-      <Section title={t.mix} description={t.mixDesc} demo language={language} level={3}>
+      <Section title={t.mix} description={t.mixDesc} language={language} level={3}>
         <div className="fd-grid">
-          <DonutCard title={t.byClass} slices={slices(p.byAssetClass, assetClassNames[language])} centerValue={eur(p.totalValue, language)} centerLabel={t.center} language={language} demo />
-          <DonutCard title={t.byCurrency} slices={slices(p.byCurrency, currencyNames[language])} language={language} demo />
-          <DonutCard title={t.byProduct} slices={p.positions.map((r) => ({ id: r.fund.id, label: r.fund.name, weight: r.weight }))} language={language} demo />
+          <DonutCard title={t.byClass} slices={slices(p.byAssetClass, assetClassNames[language])} centerValue={eur(p.totalValue, language)} centerLabel={t.center} language={language} />
+          <DonutCard title={t.byCurrency} slices={slices(p.byCurrency, currencyNames[language])} language={language} />
+          <DonutCard title={t.byProduct} slices={p.positions.map((r) => ({ id: r.fund.id, label: r.fund.name, weight: r.weight }))} language={language} />
         </div>
       </Section>
-      <FundTable rows={p.positions} caption={t.table} language={language} demo />
+      <FundTable rows={p.positions} caption={t.table} language={language} />
     </>
   );
 }
@@ -181,7 +184,7 @@ function MultiSeriesChart({ p, language, months, periodCtl }: { p: DemoPortfolio
     <article className="dash-card" aria-labelledby={`${uid}-t`}>
       <header className="dash-card__head">
         <div>
-          <h3 id={`${uid}-t`}>{t.seriesTitle} {!p.real && <DemoBadge language={language} />}</h3>
+          <h3 id={`${uid}-t`}>{t.seriesTitle}</h3>
           <p className="dash-card__desc">{p.real ? fr[language].seriesDesc : t.seriesDesc}</p>
         </div>
         {periodCtl}
@@ -200,14 +203,14 @@ function MultiSeriesChart({ p, language, months, periodCtl }: { p: DemoPortfolio
         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
           <LineChart data={data} accessibilityLayer={false} margin={{ top: 8, right: 14, left: 0, bottom: 4 }}>
             <CartesianGrid vertical={false} stroke="var(--chart-grid)" strokeDasharray="2 4" />
-            <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} minTickGap={16} />
+            <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} minTickGap={28} interval="preserveStartEnd" tickFormatter={(l: string) => monthLabel(l, language)} />
             <YAxis width={44} tickLine={false} axisLine={false} tick={{ fill: "var(--muted)", fontSize: 11 }} domain={["auto", "auto"]} tickFormatter={(n: number) => num(n, language, 0)} />
             <Tooltip cursor={{ stroke: "var(--muted)", strokeDasharray: "3 3" }} content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               const row = payload[0].payload as Record<string, number | string>;
               return (
-                <div className="fd-tip">
-                  <strong>{label}</strong>
+                <div className="fd-tip" data-l="1">
+                  <strong>{monthLabel(String(label), language)}</strong>
                   {shown.map((s) => <div key={s.key}>{s.name}: <b>{num(row[s.key] as number, language, 1)}</b></div>)}
                 </div>
               );
@@ -281,8 +284,33 @@ function RecentTrades({ language }: { language: Lang }) {
   );
 }
 
+/** Con la cartera CNMV la única «operación» es la compra DEMO supuesta de cada fondo al inicio de la serie. */
+function InitialTrades({ p, language }: { p: DemoPortfolio; language: Lang }) {
+  const t = fc[language];
+  const es = language === "es";
+  const total = p.positions.reduce((s, r) => s + r.cost, 0);
+  return (
+    <article className="dash-card fd-trades" aria-label={t.trades}>
+      <header className="dash-card__head"><div><h3>{t.trades}</h3><p className="dash-card__desc">{es ? "Compra única SIMULADA de cada fondo al inicio de la serie (supuesto de la cartera DEMO); sin comisiones ni impuestos." : "Single SIMULATED purchase of each fund at the start of the series (DEMO portfolio assumption); no fees or taxes."}</p></div></header>
+      <p className="fd-sum"><span>{t.bought}: <b>{eur(total, language)}</b></span><span>{t.sold}: <b>{eur(0, language)}</b></span></p>
+      <div className="fd-trades__scroll" role="region" aria-label={t.trades} tabIndex={0}>
+        <table>
+          <caption className="dash-sr">{t.trades}</caption>
+          <thead><tr><th scope="col">{t.month}</th><th scope="col">{es ? "Fondo" : "Fund"}</th><th scope="col">{t.side}</th><th scope="col" className="is-num">{t.units}</th><th scope="col" className="is-num">{t.price}</th><th scope="col" className="is-num">{t.amount}</th></tr></thead>
+          <tbody>{p.positions.map((r) => (
+            <tr key={r.fund.id}>
+              <th scope="row">{monthLabel(p.labels[0] ?? "", language)}</th><td>{r.fund.name}</td><td>{t.buy}</td>
+              <td className="is-num">{num(r.units, language, 2)}</td><td className="is-num">{eur(r.fund.startPrice, language, 2)}</td><td className="is-num">{eur(r.cost, language)}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </article>
+  );
+}
+
 function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
-  const { p, language, onExplore, onSimulate, onSell } = props;
+  const { p, language, onExplore, onSimulate, onSell, onUnderstandFall } = props;
   const t = fc[language];
   const per = usePeriod(p, ["3", "6", "12", "24", "all"], "all");
   const [assetClass, setAssetClass] = useState("all");
@@ -300,9 +328,9 @@ function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
   return (
     <>
       <KpiRow label={t.kpis}>
-        <KpiCard label={t.value} icon={Wallet} value={eur(p.totalValue, language)} demo language={language} />
+        <KpiCard label={t.value} icon={Wallet} value={eur(p.totalValue, language)} language={language} />
         <KpiCard label={t.result} icon={BarChart3} value={signedEur(p.pnlAmount, language)} delta={p.pnlPercent} language={language} />
-        <KpiCard label={t.change12} icon={Activity} value={change12 == null ? t.na : signedPct(change12, language)} delta={change12} language={language} />
+        <KpiCard label={t.change12} icon={Activity} value={change12 == null ? t.na : signedPct(change12, language)} language={language} />
         <KpiCard label={t.excess} icon={Layers} value={excess12 == null ? t.na : `${num(excess12, language, 2)} ${t.pp}`} language={language} />
         <KpiCard label={t.volatility} icon={Gauge} value={p.volatilityPct == null ? t.na : pct(p.volatilityPct, language)} language={language} />
         <KpiCard label={t.maxDd} icon={TrendingDown} value={p.maxDrawdownPct == null ? t.na : signedPct(p.maxDrawdownPct, language)} language={language} />
@@ -310,16 +338,15 @@ function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
         <KpiCard label={t.equity} icon={Layers} value={p.equityExposure == null ? t.na : pct(p.equityExposure * 100, language)} caption={t.equityCaption} language={language} />
         <KpiCard label={t.risk} icon={ShieldAlert} value={p.averageRisk == null ? t.na : `${num(p.averageRisk, language, 1)} / 7`} language={language} />
         <KpiCard label={t.positiveMonths} value={positive == null ? t.na : pct(positive, language, 0)} language={language}
-          caption={bw ? `${t.best}: ${signedPct(bw.best.value, language)} (M${bw.best.index + 1}) · ${t.worst}: ${signedPct(bw.worst.value, language)} (M${bw.worst.index + 1})` : undefined} />
+          caption={bw ? `${t.best}: ${signedPct(bw.best.value, language)} (${monthLabel(p.labels[bw.best.index + 1] ?? "", language)}) · ${t.worst}: ${signedPct(bw.worst.value, language)} (${monthLabel(p.labels[bw.worst.index + 1] ?? "", language)})` : undefined} />
       </KpiRow>
       <MultiSeriesChart p={p} language={language} months={per.months} periodCtl={periodControl(language, per)} />
-      <Heatmap rows={matrix} language={language} title={t.heatmap} description={p.real ? (p.real.heatmapFirstYear != null ? fr[language].heatmapDesc : fr[language].heatmapDescRel) : t.heatmapDesc} demo={!p.real} firstYear={p.real?.heatmapFirstYear} />
+      <Heatmap rows={matrix} language={language} title={t.heatmap} description={p.real ? (p.real.heatmapFirstYear != null ? fr[language].heatmapDesc : fr[language].heatmapDescRel) : t.heatmapDesc} demo={false} firstYear={p.real?.heatmapFirstYear} />
       <div className="fd-grid fd-grid--2">
-        {p.real ? <article className="dash-card" aria-label={t.geo}><header className="dash-card__head"><h3>{t.geo}</h3></header><p className="dash-state">{fr[language].geoUnavailable}</p></article>
-          : <ExposureBars title={t.geo} description={t.geoDesc} items={p.byRegion.map((g) => ({ key: g.key, label: regionNames[language][g.key], weight: g.weight }))} language={language} />}
-        <ExposureBars title={t.currency} items={p.byCurrency.map((g) => ({ key: g.key, label: currencyNames[language][g.key], weight: g.weight }))} language={language} demo={!p.real} />
+        <ExposureBars title={t.geo} description={t.geoDesc} items={p.byRegion.map((g) => ({ key: g.key, label: regionNames[language][g.key], weight: g.weight }))} language={language} demo={false} />
+        <ExposureBars title={t.currency} items={p.byCurrency.map((g) => ({ key: g.key, label: currencyNames[language][g.key], weight: g.weight }))} language={language} demo={false} />
       </div>
-      <Section title={t.positions} demo language={language} level={3} actions={<Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} />}>
+      <Section title={t.positions} language={language} level={3} actions={<Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} onUnderstandFall={onUnderstandFall} />}>
         <div className="fd-filters">
           <label className="fd-field" htmlFor={`${id}-c`}>{t.filterClass}
             <select id={`${id}-c`} value={assetClass} onChange={(e) => setAssetClass(e.target.value)}>
@@ -332,16 +359,16 @@ function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
           </label>
           <p className="fd-count" role="status">{t.filtered(rows.length, p.positions.length)}</p>
         </div>
-        <FundTable rows={rows} caption={t.table} language={language} demo />
+        <FundTable rows={rows} caption={t.table} language={language} />
       </Section>
-      {p.real ? <article className="dash-card fd-trades" aria-label={t.trades}><header className="dash-card__head"><h3>{t.trades}</h3></header><p className="dash-state">{fr[language].tradesUnavailable}</p></article> : <RecentTrades language={language} />}
+      {p.real ? <InitialTrades p={p} language={language} /> : <RecentTrades language={language} />}
     </>
   );
 }
 
 /** Sección Fondos/Inversiones adaptada al nivel. Datos DEMO ficticios; sin operaciones reales. */
 export default function FundsDashboard(props: FundsDashboardProps) {
-  const { language, level, onExplore, onSimulate, onSell } = props;
+  const { language, level, onExplore, onSimulate, onSell, onUnderstandFall } = props;
   const t = fc[language];
   const p = useMemo(() => props.portfolio ?? buildDemoPortfolio(), [props.portfolio]);
   const real = p.real;
@@ -350,20 +377,20 @@ export default function FundsDashboard(props: FundsDashboardProps) {
     ? (level === "beginner" ? r.subtitleBeginner : level === "intermediate" ? r.subtitleIntermediate : r.subtitleAdvanced)
     : (level === "beginner" ? t.subtitleBeginner : level === "intermediate" ? t.subtitleIntermediate : t.subtitleAdvanced);
   return (
-    <div className="fd">
+    <div className="fd" data-tour="portfolio">
       <h1 className="dash-sr">{language === "es" ? "Mi cartera" : "My portfolio"}</h1>
-      <Section title={t.title} description={subtitle} demo={!real} language={language} actions={level !== "advanced" ? <Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} /> : undefined}>
-        <p className="fd__notice">{real ? r.notice : t.notice}</p>
-        {real && (
-          <aside className="fd__source" aria-label={r.sourceTitle}>
-            <h3>{r.sourceTitle} <span className="fd-real" title={r.sourceReal}>{r.sourceReal}</span></h3>
-            <p>{r.sourceLine(real.sourceName, real.from, real.to, real.months)}</p>
+      <Section title={t.title} description={subtitle} demo language={language} actions={level !== "advanced" ? <Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} onUnderstandFall={onUnderstandFall} /> : undefined}>
+        <details className="dash-origin fd__source">
+          <summary>{r.sourceTitle}</summary>
+          <p>{real ? r.notice : t.notice}</p>
+          {real && <>
+            <p><span className="fd-real">{r.sourceReal}</span> {r.sourceLine(real.sourceName, monthLabel(real.from, language), monthLabel(real.to, language), real.months)}</p>
             <p><a href={real.sourceUrl} target="_blank" rel="noopener noreferrer">{r.sourceLink}</a></p>
-            <p><DemoBadge language={language} /> {r.demoLine}</p>
-            {level === "advanced" && <p>{r.sharpeAssumption}</p>}
-            <p>{r.pastNote}</p>
-          </aside>
-        )}
+            <p>{r.demoLine}</p>
+          </>}
+          {level === "advanced" && <p>{r.sharpeAssumption}</p>}
+          <p>{r.pastNote}</p>
+        </details>
       </Section>
       {level === "beginner" && <Basic {...props} p={p} />}
       {level === "intermediate" && <Intermediate {...props} p={p} />}

@@ -3,6 +3,7 @@ import { DemoBadge } from "../../components/dashboard/index.ts";
 import type { MatrixRow } from "../../funds-metrics.ts";
 import { matrixMaxAbs } from "../../funds-metrics.ts";
 import { fc, type Lang } from "./copy.ts";
+import { monthShort } from "../../components/dashboard/format.ts";
 import "./funds.css";
 
 const locale = (l: Lang) => (l === "es" ? "es-ES" : "en-GB");
@@ -40,7 +41,7 @@ export function Heatmap({ rows, language = "es", title, description, demo = true
               <thead>
                 <tr>
                   <th scope="col">{t.heatYear}</th>
-                  {months.map((m) => <th scope="col" key={m} className="is-num">{language === "es" ? "Mes" : "Month"} {m}</th>)}
+                  {months.map((m) => <th scope="col" key={m} className="is-num">{firstYear == null ? `${language === "es" ? "Mes" : "Month"} ${m}` : monthShort(m, language)}</th>)}
                   <th scope="col" className="is-num">{t.heatTotal}</th>
                 </tr>
               </thead>

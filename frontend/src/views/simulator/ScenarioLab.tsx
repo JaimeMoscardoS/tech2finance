@@ -146,7 +146,7 @@ export default function ScenarioLab({ language, level, onExplain }: { language: 
           {form}
           {kpis}
           {chart}
-          <Section level={3} title={t.horizons} description={t.horizonsDesc} demo language={language}>
+          <Section level={3} title={t.horizons} description={t.horizonsDesc} language={language}>
             {computed && <HorizonTable rows={computed.horizons} language={language} t={t} />}
           </Section>
         </div></Section>
@@ -158,7 +158,7 @@ export default function ScenarioLab({ language, level, onExplain }: { language: 
           {form}
           {kpis}
           {chart}
-          <Section level={3} title={t.scenarios} description={t.scenariosDesc} demo language={language}>
+          <Section level={3} title={t.scenarios} description={t.scenariosDesc} language={language}>
             {computed ? (
               <div className="dash-card">
                 <div className="dash-funds__scroll" role="region" aria-label={t.scenarioTable} tabIndex={0}>
@@ -184,7 +184,7 @@ export default function ScenarioLab({ language, level, onExplain }: { language: 
               </div>
             ) : <p className="dash-state">{errText ?? t.errorChart}</p>}
           </Section>
-          <Section level={3} title={t.horizons} description={t.horizonsDesc} demo language={language}>
+          <Section level={3} title={t.horizons} description={t.horizonsDesc} language={language}>
             {computed && <HorizonTable rows={computed.horizons} language={language} t={t} />}
           </Section>
           <Section level={3} title={t.conditions} language={language}>
