@@ -1,76 +1,33 @@
-"""Educational hold-vs-sell game over fictional instruments, backed by simulador.compare.
-
-Synthetic calendar dates exist only inside the engine call; the response uses month numbers.
-"""
-from datetime import date
+"""Educational hold/sell comparison using observed monthly CNMV NAV closes."""
 import math
-from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_EVEN, localcontext
-from functools import lru_cache
-
+from decimal import Decimal, InvalidOperation
 from simulador import InputError, compare, parse_series
+from backend.domain import DomainError, _NAV, _PROVENANCE, _instrument
+from backend.domain.nav_history import NavHistoryError, select_nav
 
-from backend.domain import DomainError, _DATA, _PROVENANCE, _instrument
-from backend.domain.provenance import DATASET_VERSION
-
-MONTHS = 120
-_QUANT = Decimal('1e-10')
-_ENGINE_ASSUMPTION = 'Declared metadata and license are not independently verified.'
-_SYNTHETIC_ASSUMPTION = 'Data are synthetic and generated in this repository; no third-party source applies.'
-CALCULATION_VERSION = 'simulador-historical-1.0'
-_EXTRA_ASSUMPTIONS = [
-    'Fees are game inputs; BancoT2F or product fees are not applied automatically.',
-    'Educational comparison; not a recommendation, forecast or guarantee.',
-    'Results depend on this fictional path and the chosen month; with other months or paths selling could end higher or lower.',
-    'Liquidity needs, goals and time horizon are not modelled; the decision remains the user\'s.',
-]
-_MAX_AMOUNT, _MAX_FEE = 1_000_000_000, 0.05
+CALCULATION_VERSION = 'simulador-nav-close-2.0.0'
 _POINT_FIELDS = ('price', 'contributed', 'cash', 'units', 'fees', 'total')
 _SIDE_FIELDS = (('unitType', 'unit_type'), ('contributed', 'contributed'), ('cash', 'cash'), ('units', 'units'),
                 ('fees', 'fees'), ('value', 'value'), ('profit', 'profit'), ('simpleReturn', 'simple_return'))
 
 
-def _month_date(month):
-    return date(2000 + month // 12, month % 12 + 1, 1).isoformat()
-
-
-@lru_cache(maxsize=None)
-def _series(instrument_id):
-    instrument = _instrument(instrument_id)
-    if instrument['dataStatus'] != 'fictional':
-        raise DomainError('game_unavailable', 422, 'Game is only available for fictional instruments')
-    returns = instrument['returns']
-    value, observations = Decimal('100'), []
-    with localcontext(Context(prec=34, rounding=ROUND_HALF_EVEN)):
-        for month in range(MONTHS + 1):
-            if month:
-                value = (value * (1 + Decimal(str(returns[(month - 1) % len(returns)])))).quantize(_QUANT, ROUND_HALF_EVEN)
-            observations.append({'date': _month_date(month), 'value': str(value)})
-    return parse_series({'schema_version': '1.0', 'metadata': {
-        'instrument_id': instrument_id, 'instrument_name': instrument['name']['es'],
-        'instrument_class': f"fictional_{instrument['assetType']}", 'currency': 'EUR', 'value_type': 'price_only',
-        'source': f'Tech2Finance demo dataset {DATASET_VERSION} (fictional monthly returns)',
-        'license': 'Synthetic demonstration data; no third-party rights', 'license_date': '2026-11-09',
-        'frequency': 'monthly synthetic month index', 'max_gap_days': 31,
-        'embedded_costs': 'None; fictional returns', 'distribution_policy': 'Not applicable; synthetic price index',
-        'data_kind': 'synthetic'}, 'observations': observations})
-
-
-def _text(value):
-    return str(Decimal(str(value)))
+def _number_ok(value, upper):
+    return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value) and 0 <= value <= upper
 
 
 def _side(result, by_date):
     if result['gaps']:
-        raise DomainError('invalid_game', 422, 'Invalid game request')
+        raise DomainError('invalid_game', 422, 'History has gaps')
     out = {key: result[source] for key, source in _SIDE_FIELDS}
     out['timeline'] = []
     for point in result['timeline']:
-        item = {'month': by_date[point['date']], **{key: point[key] for key in _POINT_FIELDS}, 'operations': []}
+        index = by_date[point['date']]
+        item = {'month': index, 'periodIndex': index, 'date': point['date'],
+                **{key: point[key] for key in _POINT_FIELDS}, 'operations': []}
         for op in point['operations']:
-            row = {'type': op['type']}
+            row = {'type': op['type'], 'scheduledDate': op['scheduled_date'], 'executionDate': point['date'], 'gross': op['gross']}
             if 'source' in op:
                 row['source'] = op['source']
-            row.update(scheduledMonth=by_date[op['scheduled_date']], gross=op['gross'])
             if 'fee' in op:
                 row['fee'] = op['fee']
             item['operations'].append(row)
@@ -78,39 +35,39 @@ def _side(result, by_date):
     return out
 
 
-def _number_ok(value, upper):
-    return not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value) and 0 <= value <= upper
-
-
 def run_game(spec):
     try:
-        instrument_id, months, sell_month = spec['instrumentId'], spec['months'], spec['sellMonth']
-        amounts = {'initial': _text(spec['initial']), 'monthly': _text(spec['monthly']),
-                   'buy_fee_rate': _text(spec['buyFeeRate']), 'sell_fee_rate': _text(spec['sellFeeRate'])}
-    except (KeyError, TypeError, InvalidOperation):
-        raise DomainError('invalid_game', 422, 'Invalid game request') from None
-    for key, upper in (('initial', _MAX_AMOUNT), ('monthly', _MAX_AMOUNT), ('buyFeeRate', _MAX_FEE), ('sellFeeRate', _MAX_FEE)):
-        if not _number_ok(spec[key], upper):
-            raise DomainError('invalid_game', 422, 'Invalid game request')
-    series = _series(instrument_id)
-    if (isinstance(months, bool) or isinstance(sell_month, bool) or not isinstance(months, int)
-            or not isinstance(sell_month, int) or not 1 <= months <= MONTHS or not 0 <= sell_month <= months):
-        raise DomainError('invalid_game', 422, 'Invalid game request')
-    try:
-        raw = compare(series, {'start': _month_date(0), 'end': _month_date(months), 'sell_date': _month_date(sell_month), **amounts})
-    except InputError:
-        raise DomainError('invalid_game', 422, 'Invalid game request') from None
-    by_date = {_month_date(m): m for m in range(MONTHS + 1)}
-    hold, sell = _side(raw['hold'], by_date), _side(raw['sell'], by_date)
-    cycle = len(_instrument(instrument_id)['returns'])
-    cycle_text = (f'Fictional monthly returns repeat every {cycle} months; '
-                  'month numbers are a synthetic index, not historical dates.')
-    assumptions = []
-    for text in raw['assumptions'] + raw['hold']['assumptions'] + [cycle_text] + _EXTRA_ASSUMPTIONS:
-        text = _SYNTHETIC_ASSUMPTION if text == _ENGINE_ASSUMPTION else text
-        if text not in assumptions:
-            assumptions.append(text)
-    return {'schemaVersion': '1.0', 'engine': 'simulador-historical-1.0', 'instrumentId': instrument_id,
-            'currency': 'EUR', 'dataKind': 'fictional', 'months': months, 'sellMonth': sell_month,
-            'hold': hold, 'sell': sell, 'provenance': {'datasetVersion': _PROVENANCE['datasetVersion'], 'datasetSha256': _PROVENANCE['datasetSha256'],
-                           'calculationVersion': CALCULATION_VERSION}, 'assumptions': assumptions}
+        instrument = _instrument(spec['instrumentId'])
+        months, sell_month = spec['months'], spec['sellMonth']
+        if any(not _number_ok(spec[k], upper) for k, upper in (('initial', 1_000_000_000), ('monthly', 1_000_000_000), ('buyFeeRate', 0.05), ('sellFeeRate', 0.05))):
+            raise ValueError
+        if spec['initial'] + spec['monthly'] <= 0 or isinstance(sell_month, bool) or not isinstance(sell_month, int) or not 0 <= sell_month <= months:
+            raise ValueError
+        rows = select_nav(_NAV, instrument['identifier'], spec.get('startDate'), months)
+        series = parse_series({'schema_version': '1.0', 'metadata': {
+            'instrument_id': instrument['instrumentId'], 'instrument_name': instrument['name']['es'],
+            'instrument_class': 'fund', 'currency': 'EUR', 'value_type': 'nav',
+            'source': _NAV['source']['indexUrl'], 'license': 'CNMV conditional reuse; see legal notice',
+            'license_date': '2026-11-11', 'frequency': 'observed monthly close', 'max_gap_days': 40,
+            'embedded_costs': 'Fund costs reflected in NAV; no external costs except explicit game fees',
+            'distribution_policy': 'No distributions recorded at published precision in consulted reports',
+            'data_kind': 'real'}, 'observations': [{'date': row['date'], 'value': row['nav']} for row in rows]})
+        request = {'start': rows[0]['date'], 'end': rows[-1]['date'], 'sell_date': rows[sell_month]['date'],
+                   'initial': str(Decimal(str(spec['initial']))), 'monthly': str(Decimal(str(spec['monthly']))),
+                   'buy_fee_rate': str(Decimal(str(spec['buyFeeRate']))), 'sell_fee_rate': str(Decimal(str(spec['sellFeeRate']))),
+                   'contribution_dates': [row['date'] for row in rows[1:]]}
+        raw = compare(series, request)
+    except DomainError:
+        raise
+    except (KeyError, TypeError, ValueError, InvalidOperation, InputError, NavHistoryError, IndexError):
+        raise DomainError('invalid_game', 422, 'Invalid request or unavailable history') from None
+    index = {row['date']: n for n, row in enumerate(rows)}
+    return {'schemaVersion': '2.0', 'engine': CALCULATION_VERSION, 'instrumentId': instrument['instrumentId'],
+            'currency': 'EUR', 'dataKind': 'historical_nav', 'months': months, 'sellMonth': sell_month,
+            'hold': _side(raw['hold'], index), 'sell': _side(raw['sell'], index),
+            'provenance': {**_PROVENANCE, 'calculationVersion': CALCULATION_VERSION},
+            'assumptions': ['Observed CNMV NAV; monthly contributions execute on observed closes after NAV change.',
+                            'Sale-date contribution is invested before sale; later contributions remain cash.',
+                            'Reported distributions are zero at published precision; no future policy is guaranteed.',
+                            'Costs embedded in NAV are not deducted again; explicit game fees are separate.',
+                            'No taxes, real orders, prediction or recommendation.']}

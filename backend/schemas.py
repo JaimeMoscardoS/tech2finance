@@ -18,6 +18,8 @@ class SimulationSpec(RequestModel):
     initial: Amount
     recurringContribution: Amount
     periods: Periods
+    startDate: str | None = None
+    contributionFrequency: Literal['monthly', 'annual'] = 'monthly'
 
 
 class DeclineSpec(RequestModel):
@@ -25,12 +27,13 @@ class DeclineSpec(RequestModel):
     language: Language
     instrumentId: Identifier | None = None
     periods: Periods | None = None
+    startDate: str | None = None
 
     @model_validator(mode="after")
     def validate_basis(self):
         if self.basis == "instrument" and (self.instrumentId is None or self.periods is None):
             raise ValueError("instrumentId and periods are required for instrument")
-        if self.basis == "portfolio_demo" and (self.instrumentId is not None or self.periods is not None):
+        if self.basis == "portfolio_demo" and (self.instrumentId is not None or self.periods is not None or self.startDate is not None):
             raise ValueError("portfolio_demo does not accept instrumentId or periods")
         return self
 
@@ -83,6 +86,7 @@ class GameSpec(RequestModel):
     sellMonth: Annotated[int, Field(ge=0, le=120)]
     buyFeeRate: Rate
     sellFeeRate: Rate
+    startDate: str | None = None
 
     @model_validator(mode="after")
     def validate_game(self):

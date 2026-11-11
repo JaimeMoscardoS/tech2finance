@@ -3,6 +3,7 @@
 export type TimelinePoint = {
   period: number;
   date: string | null;
+  nav?: string;
   valueBeforeContribution: number;
   contribution: number;
   contributed: number;
@@ -13,7 +14,7 @@ export type TimelinePoint = {
 };
 
 export type SimulationResult = {
-  kind: 'fictional_monthly' | 'annual_history';
+  kind: 'fictional_monthly' | 'annual_history' | 'real_monthly_nav';
   points: number[];
   timeline: TimelinePoint[];
   value: number;

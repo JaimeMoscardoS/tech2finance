@@ -1,4 +1,4 @@
-﻿import { test } from '@playwright/test';
+import { test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 const shots = 'test-results/review-shots';
 for (const [label, viewport] of Object.entries({desktop:{width:1280,height:800}, mobile:{width:320,height:700}, landscape:{width:568,height:320}})) {

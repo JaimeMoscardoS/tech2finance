@@ -14,10 +14,10 @@ export function safeSources(sources: readonly SourceRef[] | undefined): SourceRe
 
 export function analyzeDecline(input: DeclineInput): DeclineReport {
   const observations = Array.isArray(input?.observations) ? input.observations : [];
-  const valid = typeof input?.name === 'string' && !!input.name.trim() && input.name.length <= 200 && (input.dataKind === 'fictional' || input.dataKind === 'annual_published_returns') && observations.length >= 2 && observations.length <= 500 && Array.from(observations).every((o) => o && typeof o.label === 'string' && !!o.label.trim() && o.label.length <= 100 && typeof o.value === 'number' && Number.isFinite(o.value) && o.value > 0);
+  const valid = typeof input?.name === 'string' && !!input.name.trim() && input.name.length <= 200 && (input.dataKind === 'fictional' || input.dataKind === 'annual_published_returns' || input.dataKind === 'historical_nav') && observations.length >= 2 && observations.length <= 500 && Array.from(observations).every((o) => o && typeof o.label === 'string' && !!o.label.trim() && o.label.length <= 100 && typeof o.value === 'number' && Number.isFinite(o.value) && o.value > 0);
   const report: DeclineReport = {
     status: valid ? 'ok' : 'insufficient_data', basisName: typeof input?.name === 'string' ? input.name.slice(0, 200) : '',
-    dataKind: input?.dataKind === 'annual_published_returns' ? 'annual_published_returns' : 'fictional', observationCount: observations.length,
+    dataKind: input?.dataKind === 'annual_published_returns' ? 'annual_published_returns' : input?.dataKind === 'historical_nav' ? 'historical_nav' : 'fictional', observationCount: observations.length,
     latestLabel: null, latestValue: null, peakValue: null, currentDrawdownPercent: null, maxDrawdownPercent: null,
     episodes: [], sources: safeSources(input?.sources), causesStatus: 'unknown', comparablesStatus: 'not_available',
     limitations: ['Solo se analizan las observaciones facilitadas; no se conocen las causas ni hay comparables.', 'La recuperación observada no garantiza una recuperación futura.'],

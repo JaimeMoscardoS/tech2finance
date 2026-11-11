@@ -41,7 +41,17 @@ def historical(series: Series, request: dict[str, Any], sell: bool = False) -> d
     if not relevant:
         raise InputError('no observation in requested range')
     events = [(start, initial, 'initial')]
-    if monthly:
+    explicit_dates = request.get('contribution_dates')
+    if explicit_dates is not None:
+        if not isinstance(explicit_dates, list):
+            raise InputError('contribution_dates must be a list')
+        dates = [day(value, 'contribution_dates') for value in explicit_dates]
+        observed = {o.date for o in relevant}
+        if any(d <= start or d > end or d not in observed for d in dates) or dates != sorted(set(dates)):
+            raise InputError('contribution dates must be ordered observed dates after start')
+        if monthly:
+            events.extend((d, monthly, 'monthly') for d in dates)
+    elif monthly:
         max_offset = (end.year - start.year) * 12 + end.month - start.month
         for n in range(1, max_offset + 1):
             d = month_date(start, n)

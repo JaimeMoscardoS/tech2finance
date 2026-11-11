@@ -26,11 +26,11 @@ test('levels change appearance in both themes while chart meanings remain fixed'
   }
   expect(new Set(accents).size).toBe(3);
  }
- await page.goto('http://127.0.0.1:5177/'); await page.getByRole('button',{name:'Explorar',exact:true}).click();
+ await page.goto('http://127.0.0.1:5194/'); await page.getByRole('button',{name:'Explorar',exact:true}).click();
  await levels.getByRole('button',{name:'Intermedio',exact:true}).click();
- await expect(page.locator('.annual-row .negative')).toHaveCount(2);
- await expect(page.locator('.annual-row .positive')).toHaveCount(3);
- await expect(page.locator('.annual-row').first()).toContainText('-0,53');
+ await expect(page.locator('.annual-row .negative')).toHaveCount(28);
+ await expect(page.locator('.annual-row .positive')).toHaveCount(44);
+ await expect(page.locator('.annual-row').first()).toContainText('-0,01');
 });
 
 test('chart uses the visible series direction and explains contributions', async ({page}) => {
@@ -38,12 +38,12 @@ test('chart uses the visible series direction and explains contributions', async
  await page.goto('/'); await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
  const chart = page.locator('.large-portfolio .investment-chart');
  await expect(chart.getByText(/capital incluye aportaciones/)).toBeVisible();
- await expect(chart.locator('linearGradient stop[stop-color="var(--chart-rise)"]').first()).toBeAttached();
+ await expect(chart.locator('linearGradient stop[stop-color="var(--chart-rise)"]')).toHaveCount(0);
  await expect(chart.locator('linearGradient stop[stop-color="var(--chart-fall)"]').first()).toBeAttached();
  await page.screenshot({path:'/tmp/t2f-chart-colors.png',fullPage:true});
  await chart.getByText('Ver datos').click();
  await expect(chart.getByRole('columnheader',{name:'Cambio desde el punto anterior'})).toBeVisible();
- await expect(chart.getByRole('cell',{name:'Sube'}).first()).toBeVisible();
+ await expect(chart.getByRole('cell',{name:'Sube'})).toHaveCount(0);
  await expect(chart.getByRole('cell',{name:'Baja'}).first()).toBeVisible();
  await chart.getByRole('button',{name:'Evolución del instrumento (%)'}).click();
  await expect(chart.getByText(/evolución acumulada del instrumento con el punto anterior/)).toBeVisible();

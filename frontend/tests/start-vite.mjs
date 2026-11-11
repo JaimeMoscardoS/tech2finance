@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 const [bank, port] = process.argv.slice(2);
 if (
   !["demo", "caixabank", "bbva", "unknown"].includes(bank) ||
-  !["5175", "5177", "5178", "5179"].includes(port)
+  !["5193", "5194", "5195", "5196"].includes(port)
 )
   throw new Error("Invalid test configuration");
 const vite = fileURLToPath(
@@ -12,7 +12,7 @@ const vite = fileURLToPath(
 const child = spawn(
   process.execPath,
   [vite, "--host", "127.0.0.1", "--port", port, "--strictPort"],
-  { stdio: "inherit", env: { ...process.env, VITE_BANK_ID: bank } },
+  { stdio: "inherit", env: { ...process.env, VITE_BANK_ID: bank, T2F_BACKEND_PORT: process.env.T2F_BACKEND_PORT || "8111" } },
 );
 child.on("exit", (code) => process.exit(code ?? 1));
 for (const signal of ["SIGINT", "SIGTERM"])
