@@ -62,7 +62,7 @@ type Props = {
   setError: Dispatch<SetStateAction<FieldError>>;
   selectInstrument: (item: Instrument) => void;
   run: (event: FormEvent) => void;
-  openAssistant: () => void;
+  openAssistant: (question?: string) => void;
   openSimulationDecline: () => void;
   euro: (value: number) => string;
   /** Dentro de la página «Simulador» (que ya tiene su h1): la introducción del recorrido no repite el h1. */
@@ -461,7 +461,7 @@ export default function Simulator({
                     <div className="result-help">
                       <MessageCircle size={23} aria-hidden="true" />
                       <div><strong>{t.explainResult}</strong><p>{j.helpText}</p></div>
-                      <button className="button dark" type="button" onClick={openAssistant}>{j.explain}<ArrowRight size={17} /></button>
+                      <button className="button dark" type="button" onClick={() => openAssistant(language === "es" ? "¿Qué significa este resultado?" : "What does this result mean?")}>{j.explain}<ArrowRight size={17} /></button>
                     </div>
                     {currentResult.timeline[0]?.date && currentResult.timeline.at(-1)?.date && <p>{j.observed}: {currentResult.timeline[0].date} – {currentResult.timeline.at(-1)!.date}</p>}
                     <InvestmentChart

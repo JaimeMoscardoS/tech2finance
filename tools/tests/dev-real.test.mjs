@@ -5,7 +5,7 @@ import { createServer } from 'node:net';
 import { main, checkPort } from '../dev.mjs';
 
 const freePort = () => new Promise(resolve => { const server = createServer().listen(0, '127.0.0.1', () => { const port = server.address().port; server.close(() => resolve(port)); }); });
-const fixture = `const http = require('node:http'); http.createServer((req,res) => { res.setHeader('content-type','application/json'); res.end(JSON.stringify(req.url.endsWith('health') ? {status:'ok',mode:'demo',tutorProvider:'server_rules',externalProviders:false} : {schemaVersion:'1.0',banks:[],instruments:[],annualHistory:{}})); }).listen(Number(process.argv[1]),'127.0.0.1');`;
+const fixture = `const http = require('node:http'); http.createServer((req,res) => { res.setHeader('content-type','application/json'); res.end(JSON.stringify(req.url.endsWith('health') ? {status:'ok',mode:'demo',tutorProvider:'anthropic',speechProvider:'elevenlabs',speechKeyConfigured:true,externalProviders:true} : {schemaVersion:'1.0',banks:[],instruments:[],annualHistory:{}})); }).listen(Number(process.argv[1]),'127.0.0.1');`;
 
 test('real child failure stops other service and frees both ports', {timeout: 15000}, async () => {
   const ports = [await freePort(), await freePort()];

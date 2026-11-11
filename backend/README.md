@@ -101,3 +101,8 @@ Desde la raíz, con el entorno instalado y Node disponible:
 ```
 
 Las cifras siguientes son anteriores a `POST /api/game/compare` y no se han actualizado (`test_api.py` no se ejecuta sin FastAPI instalado). La ejecución de integración local del 10 de noviembre de 2026 pasó 44 pruebas del backend, incluido el puente real a Node, con una advertencia de deprecación de Starlette sobre TestClient y HTTPX. Consulta los [contratos entre áreas](../docs/contratos.md) y el [contexto de integración](../docs/backend-contexto.md) para los acuerdos y límites del proyecto.
+
+
+## Conversación y transcripción opcionales
+
+En el entorno del servidor, `ANTHROPIC_API_KEY` activa automáticamente el chat Anthropic y `ELEVENLABS_API_KEY` activa ElevenLabs para dictado. Reinicia el servidor tras definirlas. Para forzar los modos locales usa `T2F_TUTOR_PROVIDER=server_rules` y `T2F_SPEECH_PROVIDER=browser_local`; se pueden seleccionar explícitamente `anthropic` y `elevenlabs`. No guardes claves en el repositorio ni en el navegador. El análisis detallado se configura por separado con `T2F_ANALYSIS_PROVIDER=anthropic`; `T2F_ANTHROPIC_MODEL` es opcional. La clave configurada no demuestra acceso válido. Contratos, errores, límites y estado de pruebas: [conversación y voz](../docs/contratos.md#conversación-voz-y-análisis).

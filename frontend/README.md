@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, comparar ejemplos y entender una caída. Ofrece tres niveles, español e inglés, temas claro y oscuro y voz local opcional. La demo no conecta cuentas ni realiza operaciones.
+Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, comparar ejemplos y entender una caída. Ofrece tres niveles, español e inglés, temas claro y oscuro y voz opcional. La demo no conecta cuentas ni realiza operaciones.
 
 Los alias visibles proceden de `shared/fund-aliases.json` y se resuelven antes de filtrar el catálogo. Los nombres repetidos reciben un número estable según el identificador, incluso cuando una clase no es elegible. Los detalles conservan la denominación oficial y el CSV exporta ese nombre; los alias no modifican las fuentes ni describen la composición o el riesgo.
 
@@ -10,7 +10,7 @@ La tarjeta «¿Te preocupa la caída?» abre un análisis detallado de seis apar
 
 El selector de detalle de la cabecera se expande con Motion; permite volver, elegir un nivel o cerrarlo con Escape o pulsando fuera. Respeta la preferencia de movimiento reducido y mantiene el nivel global durante la sesión. Para comprobarlo: `npx playwright test -c playwright.level.config.ts`.
 
-El botón «Hablar con IA» inicia el dictado local y muestra una barra no modal. La respuesta se lee con voz local disponible; «Ver respuesta» y «Escribir» se abren solo al solicitarlos. El componente y su comprobación se describen en [componentes de interfaz](../docs/ui-components.md).
+El botón «Hablar con IA» abre la barra no modal y comienza el dictado. En modo servidor se usa el proveedor de voz seleccionado en el backend; si ElevenLabs está configurado, el audio se envía allí y se avisa en pantalla. La respuesta se lee con voz local disponible. «Ver respuesta» y «Escribir» se abren al solicitarlos. Véase [componentes de interfaz](../docs/ui-components.md).
 
 ## Datos y simulación
 
@@ -60,7 +60,9 @@ Arranca el backend conforme a [su README](../backend/README.md). La API local de
 
 ## Tutor local, voz y pausa
 
-El inicio organiza el recorrido en fondos, práctica guiada y cartera ficticia, con un color distinto para cada acceso en ambos temas. En Explorar, la entidad de demo filtra los fondos del catálogo; el selector de detalle ofrece conceptos básicos, comparación de datos disponibles o identidad, fuentes y rentabilidades anuales publicadas cuando existen. El fondo seleccionado se mantiene al cambiar de nivel y sirve de contexto para el asistente por reglas, también por voz si el dispositivo lo permite. Riesgo y costes se muestran como no disponibles si el catálogo no los contiene. El selector **Detalle** cambia la profundidad de la explicación, no el riesgo. **Conexión** permite cambiar entre servidor de demo y demo local; los errores y el reintento aparecen sin abrirlo. Abre el chat desde la navegación o el botón de la barra superior. El micrófono de la barra abre el asistente de voz y solicita inmediatamente el reconocimiento local; la escucha empieza solo si el navegador confirma disponibilidad y concede permiso. Desde la pausa se abre el panel sin iniciar la escucha hasta pulsar Hablar. Una consulta posterior también requiere pulsar Hablar. En el panel de voz, el dictado final se envía al terminar el reconocimiento; tras la respuesta no se vuelve a activar el micrófono automáticamente. En el chat, el dictado se mantiene editable y requiere envío manual. Responde por reglas con el contexto de la pantalla y conserva el texto de cada respuesta. Tras recibir una respuesta, **Escuchar** intenta utilizar una voz local del dispositivo. **Dictar** solo inicia reconocimiento cuando el navegador confirma procesamiento local y un modelo ya instalado; el texto reconocido se puede revisar antes de enviarlo. Si no hay una voz, capacidad o permiso disponibles, se puede seguir escribiendo. La aplicación no instala modelos ni envía audio a proveedores.
+El inicio organiza el recorrido en fondos, práctica guiada y cartera ficticia. El fondo seleccionado sirve de contexto para el tutor. El selector **Detalle** cambia la profundidad de la explicación, no el riesgo. **Conexión** permite cambiar entre servidor de demo y demo local sin cambio automático ante errores.
+
+El botón de voz de la barra inicia un turno; desde la pausa se abre el panel y se pulsa Hablar. El micrófono no vuelve a activarse automáticamente tras la respuesta. El dictado del panel se envía al finalizar el turno; en el chat se mantiene editable hasta pulsar Enviar. Sin capacidad o permiso de voz se puede escribir. Cambiar idioma, contexto o modo cancela el turno y la petición pendiente.
 
 En la cartera ficticia, **Entender una caída** analiza los puntos de ejemplo; en un resultado válido del simulador, **Entender las caídas** analiza la evolución del instrumento sin las aportaciones. Se muestran los episodios observados y sus límites, sin atribuir causas verificadas; el guion ficticio identificado se limita al escenario de seis meses de T2F Equilibrio. El objetivo, horizonte y necesidad de liquidez son opcionales y no constituyen una evaluación de idoneidad. La persona puede cerrar y continuar en la demo en cualquier momento.
 
@@ -70,7 +72,7 @@ Desde la tarjeta de práctica de inicio o el enlace del simulador se pueden comp
 
 Cada pareja se calcula en el modo seleccionado. Al editar una entrada, cambiar de lección o de modo se descartan los resultados anteriores; si falla el servidor se muestra el error y no se calcula silenciosamente en local. Se puede seleccionar A o B para preguntar al tutor sobre ese ejemplo. La prueba conceptual es opcional y no puntúa por obtener ganancias. El laboratorio no compra ni vende activos y no utiliza dinero real.
 
-El modo local funciona sin backend; el modo servidor usa las mismas reglas del tutor mediante un proceso Node local. Ninguno es un LLM ni conecta Claude, ElevenLabs o un banco. Los contratos para futuras integraciones están en [contratos](../docs/contratos.md#conversación-y-voz-propuesta); cualquier clave futura debe permanecer en el servidor, fuera del navegador y de Git.
+El modo local funciona sin backend ni solicitudes de voz externas y responde por reglas. En modo servidor, el tutor puede usar reglas o Anthropic Sonnet según la configuración; la interfaz identifica el proveedor declarado en la respuesta validada. El dictado puede utilizar ElevenLabs si está configurado y seleccionado en el servidor; la lectura sigue usando voces locales. Véanse [contratos](../docs/contratos.md) y [configuración del backend](../backend/README.md). Las credenciales permanecen en el servidor. La conexión real a proveedores queda pendiente de configurar y comprobar.
 
 ## Componentes y fuentes
 
@@ -96,7 +98,7 @@ Consulta las [instrucciones del área](AGENTS.md), el [contexto](../docs/context
 
 ## Contrato de servidor
 
-`GET /api/catalog` carga bancos, instrumentos y muestra anual; `POST /api/simulations`, `/api/declines` y `/api/tutor` devuelven respectivamente resultados, informes y respuestas basadas en reglas. El cliente envía parámetros, no resultados financieros ni fuentes al tutor, y el servidor reconstruye el contexto. Las peticiones se cancelan al cambiar contexto y tienen un plazo de diez segundos. `shared/demo-data.json` es la fuente común de ejemplos. Las pruebas Playwright arrancan backend y Vite, requieren `.venv` con dependencias instaladas y aceptan `T2F_PYTHON` para seleccionar el intérprete.
+`GET /api/catalog` carga bancos e instrumentos; `/api/simulations`, `/api/declines` y `/api/tutor` devuelven cálculos, informes y respuestas. El servidor reconstruye el contexto financiero. Las peticiones se cancelan al cambiar contexto; el tutor admite hasta 45 segundos y otras solicitudes diez. El dictado servidor consulta `/api/health` y obtiene un token de un solo uso mediante `/api/speech/token`. Las pruebas Playwright requieren Chrome y un backend de prueba.
 
 Si el catálogo tarda o falla, la pantalla de recuperación mantiene idioma y tema disponibles y permite elegir expresamente la demo local; un fallo no cambia de modo automáticamente. En error se puede reintentar la carga. Al llegar el catálogo se traslada el foco al contenido principal si estaba en la pantalla de recuperación. Las solicitudes anteriores se cancelan al cambiar de modo y el reintento de operación se descarta cuando cambian sus entradas o contexto. `npx playwright test tests/recovery.spec.ts` comprueba estos recorridos; las pruebas con lectores de pantalla físicos siguen pendientes.
 
@@ -110,7 +112,7 @@ La guía de objetivos es un ejercicio local de plantillas educativas editables, 
 
 La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inversión». La cabecera identifica el modo demo sin dinero real; las fuentes, limitaciones y costes siguen visibles donde aportan contexto.
 
-El tutor funciona por reglas, no utiliza LLM ni proveedores de voz remotos. El dictado y la lectura dependen de capacidades locales del dispositivo y conservan alternativa escrita. El gráfico ofrece tabla accesible y navegación por teclado. La comprobación con lectores de pantalla físicos sigue pendiente. El componente CountUp procede de React Bits; su licencia figura en `REACT-BITS-LICENSE.md`.
+El tutor local funciona por reglas; el servidor puede usar Anthropic si está configurado. El dictado puede enviarse a ElevenLabs en modo servidor, con aviso previo, y la lectura utiliza voces locales. Se conserva la alternativa escrita. El gráfico ofrece tabla accesible y navegación por teclado. La comprobación con lectores de pantalla físicos sigue pendiente. El componente CountUp procede de React Bits; su licencia figura en `REACT-BITS-LICENSE.md`.
 
 ## Integración con `main` (selector de nivel, simulador único y pausa)
 

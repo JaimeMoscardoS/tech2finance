@@ -14,10 +14,11 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.domain import DomainError, analyze_decline, build_tutor_context, get_catalog, run_simulation
 from backend.domain.game import run_game
-from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest
+from backend.schemas import DeclineSpec, DeclineEventRequest, DeclineExplanationRequest, GameSpec, SimulationSpec, TutorRequest, SpeechTokenRequest
 from backend.decline_explanations import AnalysisUnavailable, explain, provider
 from backend.news import get_news
 from backend.tutor_bridge import TutorUnavailable, reply
+from backend.providers import ProviderError, speech_provider, tutor_provider, speech_token, tutor_reply
 
 MAX_BODY = 65536
 
@@ -42,7 +43,10 @@ class BodyLimit:
                 return
             size += len(event.get("body", b""))
             if size > MAX_BODY:
-                await error(413, "request_too_large", "Request body is too large.")(scope, receive, send)
+                response = error(413, "request_too_large", "Request body is too large.")
+                if scope.get('path') == '/api/speech/token':
+                    response.headers['Cache-Control'] = 'no-store'
+                await response(scope, receive, send)
                 return
             chunks.append(event.get("body", b""))
             if not event.get("more_body", False):
@@ -57,7 +61,13 @@ class BodyLimit:
                 return {"type": "http.request", "body": body, "more_body": False}
             return await receive()
 
-        await self.app(scope, replay, send)
+        async def send_with_cache_control(event):
+            if scope.get('path') == '/api/speech/token' and event['type'] == 'http.response.start':
+                headers = [(k, v) for k, v in event.get('headers', []) if k.lower() != b'cache-control']
+                event['headers'] = headers + [(b'cache-control', b'no-store')]
+            await send(event)
+
+        await self.app(scope, replay, send_with_cache_control)
 
 
 app = FastAPI(title="Tech2Finance local demo", docs_url=None, redoc_url=None, openapi_url=None)
@@ -109,10 +119,20 @@ async def analysis_error(_request: Request, exc: AnalysisUnavailable):
     return error(503, exc.code, "Detailed analysis is unavailable.")
 
 
+@app.exception_handler(ProviderError)
+async def provider_error(_request: Request, exc: ProviderError):
+    response = error(exc.status, exc.code, "Provider is unavailable.")
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
 @app.get("/api/health")
 def health():
     news_provider = os.environ.get('T2F_NEWS_PROVIDER', 'ecb_archive')
-    return {"status": "ok", "mode": "demo", "tutorProvider": "server_rules", "externalProviders": provider() == "anthropic" or news_provider == 'ecb_archive', "newsProvider": news_provider}
+    speech, tutor = speech_provider(), tutor_provider()
+    return {"status": "ok", "mode": "demo", "tutorProvider": tutor, "speechProvider": speech,
+            "speechKeyConfigured": bool(os.environ.get('ELEVENLABS_API_KEY')),
+            "externalProviders": provider() == "anthropic" or news_provider == 'ecb_archive' or speech == 'elevenlabs' or tutor == 'anthropic', "newsProvider": news_provider}
 
 
 @app.get("/api/catalog")
@@ -162,10 +182,23 @@ async def decline_event(request: DeclineEventRequest):
 
 
 @app.post("/api/tutor")
-def tutor(request: TutorRequest):
+async def tutor(request: TutorRequest):
     payload = request.model_dump(mode="json", exclude_none=True)
     payload["context"] = build_tutor_context(payload["context"])
-    return reply(payload)
+    if tutor_provider() == 'server_rules':
+        return await asyncio.to_thread(reply, payload)
+    return await tutor_reply(payload)
+
+
+@app.post('/api/speech/token')
+async def token(request: SpeechTokenRequest, raw_request: Request):
+    origin = raw_request.headers.get('origin')
+    if origin and origin not in ('http://localhost:5173', 'http://127.0.0.1:5173'):
+        response = error(403, 'invalid_origin', 'Invalid origin.')
+    else:
+        response = JSONResponse(await speech_token(request.language))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 
 @app.post("/api/decline-explanations")

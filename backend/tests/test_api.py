@@ -74,7 +74,7 @@ def test_annual_contributions_are_not_mistaken_for_fees():
 
 def test_health_and_catalog():
     response = client.get("/api/health")
-    assert response.json() == {"status": "ok", "mode": "demo", "tutorProvider": "server_rules", "externalProviders": False, "newsProvider": "off"}
+    assert response.json() == {"status": "ok", "mode": "demo", "tutorProvider": "server_rules", "speechProvider": "browser_local", "speechKeyConfigured": False, "externalProviders": False, "newsProvider": "off"}
     catalog = client.get("/api/catalog")
     assert catalog.status_code == 200
     assert {"schemaVersion", "banks", "instruments", "annualHistory"} <= set(catalog.json())
