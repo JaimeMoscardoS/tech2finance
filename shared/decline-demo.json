@@ -4,15 +4,15 @@
   "periods": 6,
   "sourceKind": "synthetic_demo",
   "explanation": {
-    "es": "En este guion ficticio, una subida inesperada de tipos y una revisión a la baja de beneficios llevan a ajustar los precios de bonos y acciones. Es un supuesto narrativo para explicar la caída, no un modelo económico ni una causa real demostrada.",
-    "en": "In this fictional script, an unexpected interest-rate increase and lower earnings expectations lead bond and share prices to adjust. This is a narrative assumption to explain the decline, not an economic model or a demonstrated real-world cause."
+    "es": "En este escenario, una subida inesperada de tipos y una revisión a la baja de beneficios llevan a ajustar los precios de bonos y acciones. Es un supuesto narrativo para explicar la caída, no un modelo económico ni una causa real demostrada.",
+    "en": "In this scenario, an unexpected interest-rate increase and lower earnings expectations lead bond and share prices to adjust. This is a narrative assumption to explain the decline, not an economic model or a demonstrated real-world cause."
   },
   "news": [
     {
       "period": 5,
       "title": {
-        "es": "Subida inesperada de tipos en el mercado ficticio",
-        "en": "Unexpected rate increase in the fictional market"
+        "es": "Subida inesperada de tipos",
+        "en": "Unexpected interest-rate increase"
       },
       "body": {
         "es": "En el guion se anuncia una subida inesperada. Los bonos existentes pueden perder valor cuando ofrecen intereses inferiores a los nuevos.",
@@ -22,8 +22,8 @@
     {
       "period": 6,
       "title": {
-        "es": "Las empresas ficticias revisan sus beneficios",
-        "en": "Fictional companies revise their earnings"
+        "es": "Las empresas revisan sus beneficios",
+        "en": "Companies revise their earnings"
       },
       "body": {
         "es": "En el guion, menores beneficios esperados llevan a revisar el precio de las acciones. No se ha calculado una contribución separada de cada factor.",

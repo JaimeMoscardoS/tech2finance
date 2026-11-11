@@ -121,8 +121,8 @@ export default function FundsExplorer({
   const historyLabel = (i: Instrument) =>
     i.dataStatus === "fictional"
       ? es
-        ? "Variaciones mensuales ficticias"
-        : "Fictional monthly changes"
+        ? "Serie simulada mensual"
+        : "Simulated monthly series"
       : i.dataStatus === "annual_history" &&
           i.instrumentId === history.instrumentId &&
           history.returns.length > 0
@@ -251,8 +251,8 @@ export default function FundsExplorer({
       <p className="fund-source">
         {i.dataStatus === "fictional"
           ? es
-            ? "Sin fuente externa: ejemplo ficticio."
-            : "No external source: fictional example."
+            ? "Serie simulada; sin fuente externa."
+            : "Simulated series; no external source."
           : es
             ? "Fuente no disponible."
             : "Source unavailable."}
@@ -485,7 +485,7 @@ export default function FundsExplorer({
       <p className="institution-label">
         {es ? "Catálogo de" : "Catalogue of"}:{" "}
         {availableBanks.find((b) => b.id === bankId)?.name[language]} ·{" "}
-        {es ? "Demo sin conexión bancaria" : "Demo without a bank connection"}
+        {es ? "Catálogo de fondos" : "Fund catalogue"}
       </p>
       <aside
         className="fund-help"
@@ -568,8 +568,8 @@ export default function FundsExplorer({
                 <option value="all">{es ? "Todos" : "All"}</option>
                 <option value="known">
                   {es
-                    ? "Supuestos ficticios disponibles"
-                    : "Fictional assumptions available"}
+                    ? "Características disponibles"
+                    : "Features available"}
                 </option>
                 <option value="missing">{unavailable}</option>
               </select>
@@ -583,13 +583,13 @@ export default function FundsExplorer({
                   {es ? "Datos disponibles" : "Data availability"}
                 </option>
                 <option value="risk">
-                  {es ? "Riesgo ficticio" : "Fictional risk"}
+                  {es ? "Riesgo" : "Risk"}
                 </option>
                 <option value="fee">
-                  {es ? "Coste ficticio" : "Fictional fee"}
+                  {es ? "Coste" : "Fee"}
                 </option>
                 <option value="horizon">
-                  {es ? "Plazo ficticio" : "Fictional horizon"}
+                  {es ? "Plazo" : "Horizon"}
                 </option>
               </select>
             </label>
@@ -692,8 +692,8 @@ export default function FundsExplorer({
             <p className="fund-intro">
               {selected.relationship === "fictional"
                 ? es
-                  ? "Supuestos ficticios de aprendizaje: no son datos reales ni recomendaciones. Los costes de este ejemplo no se aplican en la simulación."
-                  : "Fictional educational assumptions: not real data or recommendations. These example fees are not applied in the simulation."
+                  ? "Características ilustrativas, no recomendaciones. Comisiones informativas: no se descuentan en la simulación."
+                  : "Illustrative characteristics, not recommendations. Fees are informational and are not deducted in the simulation."
                 : es
                   ? "Ficha de ejemplo con datos disponibles."
                   : "Sample product with available data."}
@@ -721,7 +721,7 @@ export default function FundsExplorer({
                 <p>
                   {examples[selected.instrumentId] &&
                   selected.dataStatus === "fictional"
-                    ? `${examples[selected.instrumentId].risk} / 7 · ${es ? "riesgo ficticio" : "fictional risk"}`
+                    ? `${examples[selected.instrumentId].risk} / 7 · ${es ? "riesgo ilustrativo" : "illustrative risk"}`
                     : unavailable}
                   .{" "}
                   {es
@@ -747,7 +747,7 @@ export default function FundsExplorer({
                 <p>
                   {examples[selected.instrumentId] &&
                   selected.dataStatus === "fictional"
-                    ? `${es ? "Plazo ficticio de ejemplo" : "Fictional example horizon"}: ${examples[selected.instrumentId].years} ${es ? "años" : "years"}. `
+                    ? `${es ? "Plazo de ejemplo" : "Illustrative horizon"}: ${examples[selected.instrumentId].years} ${es ? "años" : "years"}. `
                     : ""}
                   {es
                     ? "Disponibilidad y condiciones: no disponibles."
@@ -759,7 +759,7 @@ export default function FundsExplorer({
             <details>
               <summary>{es ? "Ver detalles" : "View details"}</summary>
               <p>
-                {es ? "Gestora" : "Manager"}: {selected.manager || unavailable}{" "}
+                {es ? "Gestora" : "Manager"}: {selected.dataStatus === "fictional" ? (es ? "No especificada" : "Not specified") : (selected.manager || unavailable)}{" "}
                 · ISIN: {selected.identifier ?? unavailable}
               </p>
             </details>
@@ -797,8 +797,8 @@ export default function FundsExplorer({
             </h2>
             <p>
               {es
-                ? "Selecciona un fondo para ver sus datos. Riesgo y costes solo están disponibles como supuestos ficticios en los ejemplos marcados."
-                : "Select a fund to view its data. Risk and fees are available only as fictional assumptions in marked examples."}
+                ? "Selecciona un fondo para ver sus datos. Riesgo y costes solo están disponibles como supuestos ilustrativos en los ejemplos marcados."
+                : "Select a fund to view its data. Risk and fees are available only as illustrative assumptions in marked examples."}
             </p>
             {bankFunds.length === 1 && (
               <p>
@@ -878,7 +878,7 @@ export default function FundsExplorer({
                         <td>
                           {i.dataStatus === "fictional" &&
                           examples[i.instrumentId]
-                            ? `${examples[i.instrumentId].risk}/7 · ${feeText(i.instrumentId)} · ${examples[i.instrumentId].years} ${es ? "años ficticios" : "fictional years"}`
+                            ? `${examples[i.instrumentId].risk}/7 · ${feeText(i.instrumentId)} · ${examples[i.instrumentId].years} ${es ? "años" : "years"}`
                             : unavailable}
                         </td>
                         <td>{historyLabel(i)}</td>
@@ -889,8 +889,8 @@ export default function FundsExplorer({
             </div>
             <p>
               {es
-                ? "Los riesgos y costes ficticios son supuestos educativos y no se aplican en las simulaciones."
-                : "Fictional risks and fees are educational assumptions and are not applied in simulations."}
+                ? "Los riesgos y costes ilustrativos son supuestos educativos y no se aplican en las simulaciones."
+                : "Risks and fees are educational assumptions and are not applied in simulations."}
             </p>
             <aside className="planning-prompt">
               <strong>{es ? "Antes de practicar" : "Before practising"}</strong>
@@ -917,11 +917,11 @@ export default function FundsExplorer({
               </summary>
               <p>
                 {es
-                  ? "Composición, índice de referencia, valor liquidativo y fecha, condiciones de liquidez: no disponibles. El plazo es un supuesto ficticio solo en los ejemplos marcados."
-                  : "Composition, benchmark, net asset value and date, liquidity conditions are unavailable. Horizon is a fictional assumption only in marked examples."}
+                  ? "Composición, índice de referencia, valor liquidativo y fecha, condiciones de liquidez: no disponibles. El plazo es un supuesto ilustrativo solo en los ejemplos marcados."
+                  : "Composition, benchmark, net asset value and date, liquidity conditions are unavailable. Horizon is an illustrative assumption only in marked examples."}
               </p>
               <p>
-                {es ? "Gestora" : "Manager"}: {selected.manager || unavailable}{" "}
+                {es ? "Gestora" : "Manager"}: {selected.dataStatus === "fictional" ? (es ? "No especificada" : "Not specified") : (selected.manager || unavailable)}{" "}
                 · ISIN: {selected.identifier ?? unavailable}
               </p>
             </details>
@@ -999,8 +999,8 @@ export default function FundsExplorer({
             {(chartSelection ?? defaultCharts).length < 2 && (
               <p>
                 {es
-                  ? "Selecciona al menos dos series compatibles para compararlas; no se combinan periodos ni datos ficticios con publicados."
-                  : "Select at least two compatible series to compare; periods and fictional and published data are not mixed."}
+                  ? "Selecciona al menos dos series compatibles para compararlas; no se combinan periodos ni datos simulados con publicados."
+                  : "Select at least two compatible series to compare; periods and simulated and published data are not mixed."}
               </p>
             )}
             <div className="fund-dashboard">
@@ -1048,7 +1048,7 @@ export default function FundsExplorer({
               </div>
               <div>
                 <dt>{es ? "Gestora" : "Manager"}</dt>
-                <dd>{selected.manager || unavailable}</dd>
+                <dd>{selected.dataStatus === "fictional" ? (es ? "No especificada" : "Not specified") : (selected.manager || unavailable)}</dd>
               </div>
               <div>
                 <dt>ISIN</dt>
@@ -1073,7 +1073,7 @@ export default function FundsExplorer({
                 <dd>
                   {selected.dataStatus === "fictional" &&
                   examples[selected.instrumentId]
-                    ? `${examples[selected.instrumentId].risk}/7 · ${feeText(selected.instrumentId)} · ${examples[selected.instrumentId].years} ${es ? "años ficticios" : "fictional years"}`
+                    ? `${examples[selected.instrumentId].risk}/7 · ${feeText(selected.instrumentId)} · ${examples[selected.instrumentId].years} ${es ? "años" : "years"}`
                     : unavailable}
                 </dd>
               </div>
@@ -1109,8 +1109,8 @@ export default function FundsExplorer({
             {selected.dataStatus === "fictional" && (
               <p className="fund-voice-note">
                 {es
-                  ? "Supuestos ficticios educativos; los costes no se aplican en la simulación."
-                  : "Fictional educational assumptions; fees are not applied in the simulation."}
+                  ? "Características ilustrativas. Comisiones informativas: no se descuentan en la simulación."
+                  : "Illustrative characteristics. Fees are informational and are not deducted in the simulation."}
               </p>
             )}
             {bankProfile && <ProductCosts product={bankProfile.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />}

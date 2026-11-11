@@ -406,7 +406,7 @@ export default function App() {
             <strong>
               {catalog.banks[0].name[language]}
             </strong>
-            <small>{language === "es" ? "Demo Tech2Finance · sin conexión bancaria" : "Tech2Finance demo · no bank connection"}</small>
+            <small>{language === "es" ? "Tech2Finance" : "Tech2Finance"}</small>
           </div>
           <button
             className="icon-button close-mobile"
@@ -436,7 +436,6 @@ export default function App() {
         <button className="nav-item" onClick={openAssistant}>
           <MessageCircle size={18} />
           <span>{t.assistant}</span>
-          <span className="new-tag">{t.demo}</span>
         </button>
         <div className="side-bottom">
           <div className="profile">
@@ -748,10 +747,6 @@ export default function App() {
           )}
           <footer>
             <span>© Tech2Finance · {t.footer}</span>
-            <span>
-              <LockKeyhole size={13} />
-              {t.noAccounts}
-            </span>
           </footer>
         </div>
       </main>
