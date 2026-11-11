@@ -102,18 +102,78 @@ def test_tutor_anthropic(language, paragraph, monkeypatch):
     assert 'fake-secret' not in response.text
 
 
+def test_tutor_prompt_requests_validation_compatible_paragraphs(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    def handler(request):
+        prompt = json.loads(request.content)['messages'][0]['content'].split('Data: ', 1)[0]
+        assert '1 to 4 paragraphs' in prompt
+        assert 'trusted financial facts' in prompt
+        value = {'language': 'es', 'paragraphs': ['La pantalla muestra información de una entidad ficticia.'], 'sourceIds': []}
+        return httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(handler))
+    response = client.post('/api/tutor', json={'message': '¿Qué estoy viendo?', 'context': CONTEXT})
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize('question,expected', [
+    ('Hola, ¿puedes ayudarme a entender lo que estoy viendo?', False),
+    ('Explica brevemente qué significa diversificar.', True),
+])
+def test_tutor_prompt_excludes_unknown_rules_fallback(question, expected, monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    original = tutor_bridge._rules_reply
+    if not expected:
+        def unknown(payload):
+            return {**original(payload), 'intent': 'unknown', 'text': 'Este tutor local utiliza explicaciones predefinidas.'}
+        monkeypatch.setattr(tutor_bridge, '_rules_reply', unknown)
+    received = []
+    def handler(request):
+        prompt = json.loads(request.content)['messages'][0]['content']
+        received.append(json.loads(prompt.split('Data: ', 1)[1]))
+        value = {'language': 'es', 'paragraphs': ['Puedo explicar conceptos generales de inversión.'], 'sourceIds': []}
+        return httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(handler))
+    response = client.post('/api/tutor', json={'message': question, 'context': CONTEXT})
+    assert response.status_code == 200
+    answer = received[0]['serverAnswer']
+    assert bool(answer) is expected
+    assert 'predefinidas' not in answer
+
+
+def test_tutor_prompt_masks_fictional_bank_brand_without_changing_original(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    original = tutor_bridge._rules_reply
+    def with_brand(payload):
+        return {**original(payload), 'text': 'BancoT2F es una entidad ficticia.'}
+    monkeypatch.setattr(tutor_bridge, '_rules_reply', with_brand)
+    received = []
+    def handler(request):
+        prompt = json.loads(request.content)['messages'][0]['content']
+        received.append(json.loads(prompt.split('Data: ', 1)[1]))
+        value = {'language': 'es', 'paragraphs': ['La entidad es ficticia.'], 'sourceIds': []}
+        return httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(handler))
+    response = client.post('/api/tutor', json={'message': 'Explica diversificar', 'context': CONTEXT | {'bankId': 'demo'}})
+    assert response.status_code == 200
+    facts = received[0]
+    assert 'BancoT2F' not in json.dumps(facts['context'], ensure_ascii=False)
+    assert 'BancoT2F' not in facts['serverAnswer']
+    assert 'BancoT2F es una entidad ficticia.' in response.json()['text']
+
+
 @pytest.mark.parametrize('value', [
     {'language': 'en', 'paragraphs': ['This is an English answer for your question.'], 'sourceIds': []},
     {'language': 'es', 'paragraphs': ['El fondo subió 99 por ciento.'], 'sourceIds': []},
     {'language': 'es', 'paragraphs': ['Debes vender el fondo ahora mismo.'], 'sourceIds': []},
     {'language': 'es', 'paragraphs': ['Esta explicación es apropiada para el contexto.'], 'sourceIds': ['invented']},
+    {'language': 'es', 'paragraphs': ['Esta explicación es adecuada.'] * 5, 'sourceIds': []},
 ])
 def test_tutor_rejects_unsafe_model_output(value, monkeypatch):
     monkeypatch.setenv('T2F_TUTOR_PROVIDER', 'anthropic')
     monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
     monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(lambda req: httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})))
     response = client.post('/api/tutor', json={'message': 'hello', 'context': CONTEXT})
-    assert response.status_code == 503 and response.json()['error']['code'] == 'tutor_provider_error'
+    assert response.status_code == 503 and response.json()['error']['code'] == 'tutor_validation_error'
 
 
 def test_tutor_no_fallback_without_key(monkeypatch):
@@ -132,6 +192,51 @@ def test_tutor_provider_failure_and_untrusted_fields(monkeypatch):
     assert client.post('/api/tutor', json={'message': 'hello', 'context': CONTEXT, 'history': [{'role': 'user', 'text': 'x'}] * 9}).status_code == 422
 
 
+def test_tutor_retries_invalid_model_output_once_with_shared_deadline(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    calls, deadlines = [], []
+    original = providers.post_json
+    async def record(url, headers, data, deadline, limit):
+        deadlines.append(deadline)
+        return await original(url, headers, data, deadline, limit)
+    monkeypatch.setattr(providers, 'post_json', record)
+    def handler(request):
+        calls.append(json.loads(request.content))
+        paragraph = 'El fondo subió 999999 euros.' if len(calls) == 1 else 'La causa concreta es desconocida.'
+        value = {'language': 'es', 'paragraphs': [paragraph], 'sourceIds': []}
+        return httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(handler))
+    response = client.post('/api/tutor', json={'message': '¿Por qué sube?', 'context': CONTEXT})
+    assert response.status_code == 200 and 'La causa concreta es desconocida.' in response.json()['text']
+    assert len(calls) == 2 and 'previous answer failed validation' in calls[1]['messages'][0]['content']
+    assert 0 < deadlines[1] <= deadlines[0] <= 35
+
+
+def test_tutor_http_failure_is_not_retried(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    calls = []
+    def handler(request):
+        calls.append(request)
+        return httpx.Response(429)
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(handler))
+    response = client.post('/api/tutor', json={'message': 'Hola', 'context': CONTEXT})
+    assert response.status_code == 503 and response.json()['error']['code'] == 'tutor_provider_error'
+    assert len(calls) == 1
+
+
+def test_tutor_stops_after_two_invalid_responses(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    calls = []
+    def handler(request):
+        calls.append(request)
+        value = {'language': 'es', 'paragraphs': ['El fondo ganó 999999 euros.'], 'sourceIds': []}
+        return httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(handler))
+    response = client.post('/api/tutor', json={'message': 'Hola', 'context': CONTEXT})
+    assert response.status_code == 503 and response.json()['error']['code'] == 'tutor_validation_error'
+    assert len(calls) == 2
+
+
 def test_token_capacity_is_bounded(monkeypatch):
     monkeypatch.setenv('ELEVENLABS_API_KEY', 'fake-secret')
     for _ in range(4):
@@ -145,36 +250,54 @@ def test_token_capacity_is_bounded(monkeypatch):
 
 
 @pytest.mark.parametrize('language,text', [
-    ('es', 'Conserva tu fondo hasta que vuelva a subir.'),
-    ('es', 'Te recomiendo que mantengas tu inversión.'),
-    ('es', 'El valor volverá a su nivel anterior.'),
-    ('es', 'La cartera está formada por bonos soberanos.'),
-    ('es', 'El fondo cayó por la subida de tipos del banco central.'),
-    ('es', 'La comisión del fondo es un euro.'),
-    ('en', 'Retain your investment until it rebounds.'),
-    ('en', 'Your money will return to its former value.'),
-    ('en', 'The portfolio consists of government bonds.'),
-    ('en', 'The fund fell because interest rates rose.'),
-    ('en', 'The fund charges a fee of a euro.'),
-    ('en', 'I recommend holding your fund.'),
-    ('es', 'La cartera está formada principalmente por bonos soberanos.'),
-    ('en', 'The fund fell sharply because interest rates rose.'),
-    ('es', 'El fondo cayó bruscamente por la subida de tipos.'),
-    ('en', 'The portfolio is composed mainly of government bonds.'),
-    ('en', 'I do not recommend holding your fund, but retain your investment.'),
-    ('es', 'No recomiendo que mantengas tu inversión, pero conserva tu fondo.'),
-    # Negating a recommendation about a specific transaction can still steer a decision.
-    ('en', 'I do not recommend selling your fund.'),
-    ('es', 'No recomiendo que vendas tu fondo.'),
-    ('en', 'I do not recommend holding your fund automatically.'),
-    ('es', 'No recomiendo que mantengas tu inversión automáticamente.'),
+    ('es', 'Debes vender el fondo ahora mismo.'),
+    ('es', 'No hay garantías, pero te recomiendo comprar tu fondo.'),
+    ('es', 'No puedo asegurar el resultado, pero se garantiza la rentabilidad.'),
+    ('en', 'There is no certainty, but I recommend selling your fund.'),
+    ('en', 'No one can guarantee gains, but your returns are guaranteed.'),
 ])
 def test_tutor_rejects_unsafe_financial_claims(language, text, monkeypatch):
     monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
     value = {'language': language, 'paragraphs': [text], 'sourceIds': []}
     monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(lambda req: httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})))
     response = client.post('/api/tutor', json={'message': 'hola' if language == 'es' else 'hello', 'context': CONTEXT | {'language': language}})
-    assert response.status_code == 503 and response.json()['error']['code'] == 'tutor_provider_error'
+    assert response.status_code == 503 and response.json()['error']['code'] == 'tutor_validation_error'
+
+
+@pytest.mark.parametrize('language,question,text', [
+    ('es', '¿Por qué sube mi cartera?', 'La cartera puede subir por cambios en el valor de sus activos. La causa concreta es desconocida.'),
+    ('es', '¿Por qué baja?', 'La cartera puede caer por condiciones de mercado; no sabemos la causa concreta.'),
+    ('es', '¿Cómo funcionan los costes y la venta?', 'La compra y la venta pueden tener costes. Diversificar reparte la exposición, pero no elimina el riesgo.'),
+    ('en', 'Why is my portfolio rising?', 'A portfolio can rise as assets change in value. The actual cause is unknown.'),
+    ('en', 'Why is my portfolio falling?', 'A portfolio can fall when markets change; the specific cause is unknown.'),
+    ('en', 'How do costs and selling work?', 'Buying and selling can involve costs. Diversification spreads exposure but cannot eliminate risk.'),
+])
+def test_tutor_accepts_open_educational_questions(language, question, text, monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    value = {'language': language, 'paragraphs': [text], 'sourceIds': []}
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(lambda req: httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})))
+    response = client.post('/api/tutor', json={'message': question, 'context': CONTEXT | {'language': language}})
+    assert response.status_code == 200, response.text
+    assert text in response.json()['text']
+
+
+def test_tutor_numeric_allowlist_excludes_untrusted_strings():
+    trusted = {'value': 1250, 'returnPercent': 4.5, 'rounded': 28175.7467,
+               'periodStart': '2019-01-31', 'name': 'Fund 999', 'url': 'https://example.com/2025'}
+    numbers = providers.financial_numbers(trusted)
+    assert not providers.unsupported_numbers('El valor es 1250 y el rendimiento 4.5%.', numbers)
+    assert not providers.unsupported_numbers('El valor es 28.175,75 en 2019.', numbers)
+    assert not providers.unsupported_numbers('The value is 28,175.75 in 2019.', numbers)
+    assert not providers.unsupported_numbers('El valor es 1.250 euros.', numbers)
+    assert not providers.unsupported_numbers('The value is 1,250 euros.', numbers)
+    assert providers.unsupported_numbers('El valor es 999.', numbers)
+    assert providers.unsupported_numbers('El valor es 2025.', numbers)
+    assert not providers.unsupported_numbers('BancoT2F es una entidad ficticia.', numbers)
+    names = {'holdings': [{'name': 'Fondo bolsa 2'}, {'name': 'Fondo estrategia 0-50'}]}
+    sentence = 'Ten en cuenta el Fondo bolsa 2 y el Fondo estrategia 0-50.'
+    assert not providers.unsupported_numbers(providers.mask_server_names(sentence, names), numbers)
+    assert providers.unsupported_numbers(providers.mask_server_names(sentence + ' Ganó 9999.', names), numbers)
+    assert not providers.unsafe_chat_narrative('La cartera subió por la variación de los valores liquidativos.')
 
 
 @pytest.mark.parametrize('language,text', [
@@ -227,7 +350,7 @@ def test_http_tutor_single_provider_call_and_excludes_goal(monkeypatch):
         pytest.fail('HTTP tutor must not call the legacy model adapter')
     monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(primary))
     monkeypatch.setattr(tutor_bridge, 'TRANSPORT', httpx.MockTransport(legacy))
-    response = client.post('/api/tutor', json={'message': 'hola', 'history': [{'role':'user', 'text':'untrusted history'}],
+    response = client.post('/api/tutor', json={'message': 'Explica diversificar', 'history': [{'role':'user', 'text':'untrusted history'}],
                            'context': CONTEXT | {'decision': {'goal': goal, 'horizonYears': 5, 'needsLiquidity': 'no'}}})
     assert response.status_code == 200 and len(calls) == 1
     prompt = json.loads(calls[0].content)['messages'][0]['content']

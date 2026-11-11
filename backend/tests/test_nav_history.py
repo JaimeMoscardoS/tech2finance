@@ -182,3 +182,33 @@ def test_cnmv_portfolio_decline_matches_frontend_series():
     from backend.domain import DomainError
     with pytest.raises(DomainError):
         analyze_decline({'basis': 'portfolio_cnmv', 'language': 'es', 'periods': 3})
+
+
+def test_tutor_portfolio_reproduces_shown_nav_holdings_and_period():
+    from backend.domain import build_tutor_context
+    for page in ('home', 'portfolio'):
+        p = build_tutor_context({'page': page, 'level': 'beginner', 'language': 'es'})['portfolio']
+        assert p['initial'] == p['totalContributed'] == 25000
+        assert p['recurringContribution'] == 0
+        assert p['periodStart'] == '2019-12-31' and p['periodEnd'] == '2025-12-31'
+        assert p['value'] == pytest.approx(28175.7467, abs=1e-3)
+        assert p['profit'] == pytest.approx(p['value'] - p['totalContributed'])
+        assert p['simpleReturnPercent'] == pytest.approx(100 * p['profit'] / p['totalContributed'])
+        assert len(p['holdings']) == 5
+        assert sum(h['value'] for h in p['holdings']) == pytest.approx(p['value'])
+        assert {h['instrumentId'] for h in p['holdings']} == {'caixabank-monetario-estandar', 'santander-rf-ahorro', 'bbva-mi-inversion-bolsa-acumulacion', 'santander-renta-fija-a', 'bbva-estrategia-0-50'}
+        assert p['causesStatus'] == 'unknown'
+        assert p['sources'][0]['url'].startswith('https://www.cnmv.es/')
+
+
+def test_tutor_does_not_substitute_other_portfolio_when_nav_missing(monkeypatch):
+    import backend.domain as domain
+    monkeypatch.setattr(domain, 'cnmv_portfolio_series', lambda: (_ for _ in ()).throw(domain.DomainError('missing_history')))
+    context = domain.build_tutor_context({'page': 'home', 'level': 'beginner', 'language': 'es'})
+    assert 'portfolio' not in context
+
+
+def test_tutor_omits_portfolio_when_ui_reports_unavailable():
+    from backend.domain import build_tutor_context
+    context = build_tutor_context({'page': 'home', 'level': 'beginner', 'language': 'es', 'portfolioBasis': 'unavailable'})
+    assert 'portfolio' not in context

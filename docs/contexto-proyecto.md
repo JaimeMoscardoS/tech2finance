@@ -2,6 +2,8 @@
 
 ## Qué es
 
+La configuración local opcional del servidor usa `.env` privado en la raíz, copiado de `.env.example`; contiene claves de Anthropic y ElevenLabs, selección de análisis y voces de respuesta en español e inglés. Se carga al arrancar y requiere reinicio tras cambios. La síntesis real devolvió MP3 para ambos idiomas; la audición y el micrófono siguen pendientes de comprobación. Véase [backend](../backend/README.md#configuración-privada-local).
+
 En la rama de trabajo, **BancoT2F** es la entidad ficticia anfitriona de la experiencia y Tech2Finance su tutor. Las condiciones del anfitrión, los costes de productos no disponibles y los límites se detallan en [BancoT2F](banco-t2f.md); el [guion de demo](../presentacion/demo-banco-t2f.md) recoge el recorrido histórico propuesto.
 
 Tech2Finance es una propuesta de asistente para la sección de inversión de la aplicación de un banco. Su propósito es ayudar al cliente a entender lo que ve, aprender cómo se comportan las inversiones y explorar decisiones con dinero ficticio antes de comprometer dinero real.
@@ -120,7 +122,9 @@ Una noticia que coincide con una caída no demuestra por sí misma que la haya c
 
 ## Conversación y voz
 
-En esta rama el tutor funciona con reglas o con Claude cuando está configurado, sin sustitución silenciosa ante errores. El dictado puede usar procesamiento local o ElevenLabs; el usuario inicia el micrófono y el chat escrito permite revisar el texto antes de enviarlo. Las etiquetas identifican el proveedor de la respuesta. Los detalles y límites están en [contratos](contratos.md#conversación-voz-y-análisis).
+El tutor del servidor puede recibir los hechos calculados de la cartera histórica mostrada en Inicio y Mi cartera: periodo, capital aportado, valor, beneficio, rentabilidad simple y posiciones ficticias. Los valores liquidativos proceden de CNMV; las participaciones son DEMO y las causas de los movimientos no se conocen por estos datos. Si falla la construcción o la interfaz muestra la alternativa ficticia, se omite la cartera del contexto del servidor; la interfaz comunica solo la variante visual, no importes.
+
+En esta rama el tutor funciona con reglas o con Claude cuando está configurado, sin sustitución silenciosa ante errores. El dictado puede usar procesamiento local o ElevenLabs; el usuario inicia el micrófono y el chat escrito permite revisar el texto antes de enviarlo. Las etiquetas identifican el proveedor de la respuesta. Para ElevenLabs se normalizan cantidades, porcentajes y fechas en una copia hablada sin alterar lo mostrado; la voz local solo expande EUR. Los detalles y límites están en [contratos](contratos.md#conversación-voz-y-análisis).
 
 La arquitectura de esta rama es:
 
@@ -156,7 +160,7 @@ La elegibilidad se basa en informes semestrales que cubren 2020–2025, sin dist
 
 ## Integración local de demostración
 
-En esta rama, el frontend usa la API FastAPI local para catálogo, simulación, caídas y tutor; ofrece también demo local explícita. El servidor selecciona Anthropic y ElevenLabs automáticamente cuando sus claves respectivas están disponibles, salvo overrides; el análisis detallado se configura por separado. Las integraciones de esta rama se han probado con proveedores simulados y falta comprobarlas con credenciales reales. Véase [backend-contexto](backend-contexto.md) para contrato y límites. Esta integración no implica despliegue ni conexión bancaria.
+En esta rama, el frontend usa la API FastAPI local para catálogo, simulación, caídas y tutor; ofrece también demo local explícita. El servidor selecciona Anthropic y ElevenLabs automáticamente cuando sus claves respectivas están disponibles, salvo overrides; el análisis detallado se configura por separado. Véase [backend-contexto](backend-contexto.md) para contrato y límites. Esta integración no implica despliegue ni conexión bancaria.
 
 
 Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](planning/plan.md).
@@ -173,7 +177,9 @@ La entidad visible se fija mediante `VITE_BANK_ID` al iniciar o compilar (por de
 La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inversión». La cabecera identifica el modo demo sin dinero real; las fuentes, limitaciones y costes siguen visibles donde aportan contexto.
 
 
-En la rama de trabajo se implementan adaptadores opcionales para transcripción ElevenLabs y conversación Anthropic, con selección y límites descritos en [contratos](contratos.md#conversación-voz-y-análisis). Las pruebas simuladas no acreditan conexiones reales ni calidad de las respuestas; falta comprobarlas con credenciales.
+En la comprobación real del tutor Anthropic, las preguntas sobre la subida de la cartera en español e inglés devolvieron HTTP 200 y cifras calculadas de 25.000 a 28.175,75 €, con beneficio de 3.175,75 € y rentabilidad del 12,7 %, sin atribuir una causa desconocida. La síntesis real ElevenLabs devolvió HTTP 200 y audio MPEG para texto normalizado en español. Estas pruebas no acreditan la calidad general de las respuestas ni la audición física del audio; el dictado con micrófono sigue sin probarse. La selección y los límites se describen en [contratos](contratos.md#conversación-voz-y-análisis).
+
+En el tutor Anthropic, una prueba real de saludo recibió HTTP 200 del proveedor, pero la respuesta se rechazó por exceder el máximo de párrafos e incluir un dígito en el nombre del banco ficticio. Las instrucciones al modelo ahora detallan esos límites; las comprobaciones de seguridad permanecen activas y pueden seguir rechazando respuestas generadas. Si las reglas no reconocen la pregunta, su texto de reserva no se envía como respuesta informativa al modelo; se conservan la pregunta, el historial y el contexto.
 
 ## Inicio reordenado (rama `mejoras-jurado`)
 

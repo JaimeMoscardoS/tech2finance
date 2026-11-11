@@ -40,7 +40,9 @@ Abrir un pull request y pedir revisión antes de integrar. No subir claves ni da
 
 ## Backend local de demostración
 
-La rama incluye una API FastAPI local para catálogo, simulación, caídas y tutor por reglas, sin API de modelo ni proveedor externo. `POST /api/game/compare` compara mantener con una venta en un mes seleccionado mediante NAV reales; no implementa decisiones de juego por turnos. El frontend utiliza el servidor por defecto y permite elegir demo local explícitamente. No conecta bancos ni proveedores externos. Véanse [backend-contexto](docs/backend-contexto.md) y [frontend/README](frontend/README.md) para contratos y ejecución.
+Para habilitar servicios opcionales, copia `.env.example` a `.env` en la raíz y añade `ANTHROPIC_API_KEY` y `ELEVENLABS_API_KEY`. El servidor lee el archivo al arrancar; reinícialo después de guardarlo. `.env` es privado y está excluido de Git. Consulta [configuración del backend](backend/README.md#configuración-privada-local).
+
+La rama incluye una API FastAPI local para catálogo, simulación, caídas y tutor por reglas, con proveedores externos opcionales. `POST /api/game/compare` compara mantener con una venta en un mes seleccionado mediante NAV reales; no implementa decisiones de juego por turnos. El frontend utiliza el servidor por defecto y permite elegir demo local explícitamente. No conecta bancos. Véanse [backend-contexto](docs/backend-contexto.md) y [frontend/README](frontend/README.md) para contratos y ejecución.
 
 
 Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](docs/planning/plan.md).

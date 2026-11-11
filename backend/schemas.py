@@ -55,6 +55,7 @@ class TutorContext(RequestModel):
     level: Literal["beginner", "intermediate", "advanced"]
     language: Language
     bankId: Identifier = "demo"
+    portfolioBasis: Literal["cnmv", "unavailable"] | None = None
     instrumentId: Identifier | None = None
     simulation: SimulationSpec | None = None
     decline: DeclineSpec | None = None
@@ -103,6 +104,10 @@ class TutorRequest(RequestModel):
     context: TutorContext
 
 class SpeechTokenRequest(RequestModel):
+    language: Language
+
+class SpeechSynthesisRequest(RequestModel):
+    text: Annotated[str, Field(min_length=1, max_length=3000, pattern=r'\S')]
     language: Language
 
 class DeclineExplanationRequest(RequestModel):

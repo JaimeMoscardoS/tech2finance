@@ -1,5 +1,6 @@
 import type { RealtimeConnection } from '@elevenlabs/client';
 import { startLocalDictation, stopBrowserVoice, type VoiceLanguage, type VoiceState } from './browser-voice.ts';
+import { stopPlayback } from './playback.ts';
 
 export type DataMode = 'local' | 'server';
 type Status = (state: VoiceState, detail: string) => void;
@@ -26,6 +27,7 @@ export function finishDictation() {
 }
 
 export async function startDictation(mode: DataMode, language: VoiceLanguage, transcript: (text: string) => void, status: Status) {
+ stopPlayback();
  cancelDictation();
  const id = generation;
  const guard: Status = (state, detail) => { if (id === generation) status(state, detail); };
