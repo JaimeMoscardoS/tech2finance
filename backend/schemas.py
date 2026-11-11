@@ -101,3 +101,8 @@ class TutorRequest(RequestModel):
     message: Annotated[str, Field(min_length=1, max_length=1500)]
     history: Annotated[list[HistoryMessage], Field(max_length=8)] = Field(default_factory=list)
     context: TutorContext
+
+class DeclineExplanationRequest(RequestModel):
+    decline: DeclineSpec
+    level: Literal['beginner', 'intermediate', 'advanced']
+    decision: Decision | None = None

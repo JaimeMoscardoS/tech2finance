@@ -14,3 +14,7 @@ test('catalog requires version and all collections', () => {
   assert.equal(validateCatalog({schemaVersion:'1.0', banks:[], instruments:[], annualHistory:{}}), true);
   assert.equal(validateCatalog({schemaVersion:'1.0', banks:[], instruments:[]}), false);
 });
+
+test('health accepts a configured external analysis provider', () => {
+  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'server_rules',externalProviders:true}), true);
+});

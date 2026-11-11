@@ -2,6 +2,8 @@
 
 ## Qué es
 
+`buildDetailedDeclineAnalysis` construye el informe detallado local compartido por interfaz y servidor. El servidor puede añadir explicaciones generadas por Sonnet si se configura expresamente; el tutor de conversación existente sigue funcionando por reglas. Véase [el contrato](../docs/contratos.md#análisis-detallado-de-caídas) para los datos transmitidos y límites.
+
 El contexto de BancoT2F y los ejemplos de preguntas se recogen en [BancoT2F](../docs/banco-t2f.md) y el [guion](../presentacion/demo-banco-t2f.md). Las formulaciones y respuestas del recorrido deben comprobarse sobre la integración final.
 
 Biblioteca TypeScript sin dependencias que explica conceptos y resultados aportados por la aplicación mediante reglas locales y analiza una serie observada. No es un modelo de IA ni utiliza servicios externos. Devuelve texto plano, idioma, intención y fuentes separadas; la interfaz debe presentar el texto como texto, no como HTML.
@@ -28,4 +30,4 @@ Las comprobaciones son patrones y ejemplos finitos, no una prueba exhaustiva ni 
 
 ## Integraciones futuras
 
-Claude/Anthropic y ElevenLabs son propuestas pendientes, sin SDK, claves, solicitudes de red ni adaptador implementado aquí. Un futuro adaptador debe gestionar credenciales y contexto en el servidor, mantener las claves fuera del navegador y conservar el modo textual cuando no haya voz. `TutorProvider` permite conectar otro proveedor sin presentar este módulo local como un modelo.
+El chat `TutorProvider` continúa por reglas. El adaptador opcional de Sonnet está en el servidor y solo se usa para el análisis detallado; ElevenLabs sigue pendiente. Las claves permanecen fuera del navegador y se conserva la opción textual.

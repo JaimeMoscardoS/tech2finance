@@ -344,7 +344,7 @@ test('decline explanations use observed series without inventing a current crisi
  let dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
  await expect(dialog).toContainText('2020-03-31');
  await expect(dialog).toContainText('2020-03-11');
- await expect(dialog.getByText(/causa es desconocida/i)).toBeVisible();
+ await expect(dialog.locator('.detailed-analysis')).toContainText(/causas.*no están disponibles/i);
  await dialog.getByText('Añadir contexto (opcional)').click();
  await dialog.getByLabel('Objetivo (opcional)').fill('Ejemplo educativo');
  await dialog.getByLabel('¿Necesitas liquidez pronto? (opcional)').selectOption('yes');

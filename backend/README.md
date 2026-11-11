@@ -6,7 +6,9 @@ El perfil de la entidad ficticia y sus tarifas informativas se documenta en [Ban
 
 API de demostración con FastAPI para el catálogo de práctica, las simulaciones, el análisis de caídas y el tutor contextual. Usa los datos locales de `shared/demo-data.json` y el motor Python del repositorio. El tutor aplica las reglas TypeScript existentes mediante un proceso Node local: no es un modelo de lenguaje.
 
-La demo no consulta proveedores externos en directo ni utiliza claves, base de datos o autenticación. No conecta cuentas ni realiza operaciones. Las series activas proceden de valores liquidativos CNMV descargados y versionados; la muestra anual publicada conserva su fuente y sus límites. La recuperación histórica no garantiza una recuperación futura y el usuario conserva la decisión.
+Por defecto la demo no consulta proveedores externos. El análisis detallado puede configurarse para llamar a Sonnet desde el servidor; requiere una clave de API y su prueba real está pendiente. La aplicación no usa base de datos ni autenticación, no conecta cuentas ni realiza operaciones. Las series activas proceden de valores liquidativos CNMV descargados y versionados; la recuperación histórica no garantiza una recuperación futura y el usuario conserva la decisión.
+
+Para el proveedor opcional, configurar en el entorno del servidor `T2F_ANALYSIS_PROVIDER=anthropic` y `ANTHROPIC_API_KEY`; `T2F_ANTHROPIC_MODEL` permite elegir otra versión Sonnet y por defecto usa `claude-sonnet-5-5`. No subir claves ni ponerlas en el frontend. El detalle de datos enviados, errores y límites figura en [contratos](../docs/contratos.md#análisis-detallado-de-caídas). Seleccionar `demo` para evitar llamadas externas.
 
 ## Requisitos y arranque
 

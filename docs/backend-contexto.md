@@ -2,7 +2,7 @@
 
 ## Qué es
 
-Contrato operativo de la API local de Tech2Finance. BancoT2F es un anfitrión ficticio; los cinco instrumentos activos son clases reales identificadas por ISIN y sus series proceden de ficheros públicos CNMV conservados en un conjunto versionado. El dinero y las operaciones son virtuales. No hay conexión bancaria, autenticación, base de datos ni proveedor externo en directo.
+Contrato operativo de la API local de Tech2Finance. BancoT2F es un anfitrión ficticio; los cinco instrumentos activos son clases reales identificadas por ISIN y sus series proceden de ficheros públicos CNMV conservados en un conjunto versionado. El dinero y las operaciones son virtuales. No hay conexión bancaria, autenticación ni base de datos. El análisis detallado dispone de un proveedor Sonnet opcional no verificado con credenciales reales; por defecto utiliza reglas locales. Véanse [configuración y contrato](contratos.md#análisis-detallado-de-caídas).
 
 ## Catálogo, simulación y caída
 

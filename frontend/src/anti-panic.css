@@ -6,9 +6,17 @@
 .calm-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .anti-panic__comfort { margin: 20px 0; padding: 16px; border-radius: 12px; background: var(--surface-tint); line-height: 1.55; }
 .anti-panic__comfort p + p { margin-top: 10px; }
-.anti-panic__explanation { margin: 24px 0; }
-.anti-panic__explanation h3 { margin: 0 0 12px; font-size: 19px; line-height: 1.3; }
-.anti-panic__explanation p { margin: 10px 0; color: var(--ink); font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.detailed-analysis { margin: 24px 0; }
+.detailed-analysis h3 { margin: 0 0 12px; font-size: 20px; }
+.detailed-analysis__mode { display: block; margin: 14px 0 0; color: var(--accent); font-size: 12px; font-weight: 700; }
+.detailed-analysis__summary { margin: 10px 0 18px; font-size: 15px; line-height: 1.6; }
+.detailed-analysis__sections { border-top: 1px solid var(--border); }
+.detailed-analysis__sections section { padding: 16px 0; border-bottom: 1px solid var(--border); }
+.detailed-analysis__sections h4 { margin: 0 0 8px; font-size: 16px; }
+.detailed-analysis__sections p { margin: 8px 0; line-height: 1.6; overflow-wrap: anywhere; }
+.detailed-analysis__sources { font-size: 13px; color: var(--muted); }
+.detailed-analysis__sources a { display: inline-block; margin-right: 10px; }
+.detailed-analysis > .button { margin-top: 18px; }
 .anti-panic__context > p { color: var(--muted); font-size: 13px; line-height: 1.5; }
 .anti-panic__header { display: flex; align-items: flex-start; gap: 16px; padding-right: 38px; }
 .anti-panic__header .pause-icon { flex: 0 0 45px; margin: 0; background: var(--surface-tint); color: var(--accent); }

@@ -10,7 +10,7 @@ export function validatePort(value) {
   if (!/^\d+$/.test(value) || Number(value) < 1 || Number(value) > 65535) throw new Error(`Puerto inválido: ${value}`);
   return Number(value);
 }
-export const validateHealth = x => x?.status === 'ok' && x?.mode === 'demo' && x?.tutorProvider === 'server_rules' && x?.externalProviders === false;
+export const validateHealth = x => x?.status === 'ok' && x?.mode === 'demo' && x?.tutorProvider === 'server_rules' && typeof x?.externalProviders === 'boolean';
 export const validateCatalog = x => typeof x?.schemaVersion === 'string' && Array.isArray(x?.banks) && Array.isArray(x?.instruments) && x?.annualHistory !== null && typeof x?.annualHistory === 'object' && !Array.isArray(x.annualHistory);
 export function checkPort(port) {
   return new Promise((yes, no) => {
