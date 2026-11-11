@@ -6,6 +6,8 @@ En la rama de trabajo, **BancoT2F** es la entidad ficticia anfitriona de la expe
 
 Tech2Finance es una propuesta de asistente para la sección de inversión de la aplicación de un banco. Su propósito es ayudar al cliente a entender lo que ve, aprender cómo se comportan las inversiones y explorar decisiones con dinero ficticio antes de comprometer dinero real.
 
+En esta rama, los fondos se presentan con nombres genéricos bilingües; los duplicados se numeran por identificador sobre el catálogo completo. La denominación oficial permanece en los detalles y en las fuentes, y sigue identificando las noticias y los datos originales.
+
 El banco sería el cliente comercial que incorporaría la tecnología a su propia experiencia; sus clientes serían los usuarios finales. Para el hackathon se propone una aplicación que imite esa sección bancaria: no hay un banco conectado ni un acuerdo comercial confirmado. El valor para la entidad —por ejemplo, mejorar la comprensión y reducir fricciones— es una hipótesis que habría que validar.
 
 ## El problema que intenta resolver

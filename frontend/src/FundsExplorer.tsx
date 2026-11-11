@@ -75,9 +75,8 @@ export default function FundsExplorer({
   const visibleFunds = bankFunds
     .filter(
       (i) =>
-        i.name[language]
-          .toLocaleLowerCase()
-          .includes(search.toLocaleLowerCase()) &&
+        [i.name[language], i.officialName?.[language] ?? ""].some(name =>
+          name.toLocaleLowerCase().includes(search.toLocaleLowerCase())) &&
         (filterKnown === "all" ||
           (filterKnown === "known"
             ? i.dataStatus === "fictional" && !!examples[i.instrumentId]
@@ -188,7 +187,7 @@ export default function FundsExplorer({
     if (!nav.length) return;
     const quote = (value: string | number | null) => `"${String(value ?? '').replace(/"/g, '""')}"`;
     const header = ['instrument_id','name','isin','currency','date','nav','rate_percent','source','dataset_version','dataset_sha256','nav_history_sha256'];
-    const csv = [header.join(','), ...nav.map((row,index) => [i.instrumentId,i.name[language],i.identifier,i.currency,row.date,row.nav,index ? (Number(row.nav)/Number(nav[index-1].nav)-1)*100 : '',navHistory.source.indexUrl,navHistory.datasetVersion,manifest.datasetSha256,manifest.navHistorySha256].map(quote).join(','))].join('\r\n');
+    const csv = [header.join(','), ...nav.map((row,index) => [i.instrumentId,(i.officialName ?? i.name)[language],i.identifier,i.currency,row.date,row.nav,index ? (Number(row.nav)/Number(nav[index-1].nav)-1)*100 : '',navHistory.source.indexUrl,navHistory.datasetVersion,manifest.datasetSha256,manifest.navHistorySha256].map(quote).join(','))].join('\r\n');
     const url = URL.createObjectURL(
       new Blob([csv], { type: "text/csv;charset=utf-8" }),
     );
@@ -732,6 +731,7 @@ export default function FundsExplorer({
             <ProductCosts product={bankProfile?.products.find(p => p.instrumentId === selected.instrumentId)} profile={bankProfile} language={language} />
             <details>
               <summary>{es ? "Ver detalles" : "View details"}</summary>
+              <p>{es ? "Denominación oficial" : "Official name"}: {(selected.officialName ?? selected.name)[language]}</p>
               <p>
                 {es ? "Gestora" : "Manager"}: {selected.dataStatus === "fictional" ? (es ? "No especificada" : "Not specified") : (selected.manager || unavailable)}{" "}
                 · ISIN: {selected.identifier ?? unavailable}
@@ -894,6 +894,7 @@ export default function FundsExplorer({
                   ? "Composición, índice de referencia y condiciones de liquidez: no disponibles. Los cierres mensuales y sus fechas proceden de la CNMV."
                   : "Composition, benchmark and liquidity conditions are unavailable. Monthly closes and dates come from CNMV."}
               </p>
+              <p>{es ? "Denominación oficial" : "Official name"}: {(selected.officialName ?? selected.name)[language]}</p>
               <p>
                 {es ? "Gestora" : "Manager"}: {selected.dataStatus === "fictional" ? (es ? "No especificada" : "Not specified") : (selected.manager || unavailable)}{" "}
                 · ISIN: {selected.identifier ?? unavailable}
@@ -1016,6 +1017,7 @@ export default function FundsExplorer({
             </span>
             <h2>{selected.name[language]}</h2>
             <dl className="fund-identity">
+              <div><dt>{es ? "Denominación oficial" : "Official name"}</dt><dd>{(selected.officialName ?? selected.name)[language]}</dd></div>
               <div>
                 <dt>{es ? "Tipo" : "Type"}</dt>
                 <dd>{type(selected)}</dd>

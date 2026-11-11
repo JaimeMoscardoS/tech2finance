@@ -152,7 +152,7 @@ test('explore transfers the chosen real instrument', async ({page}) => {
  await page.getByRole('button',{name:'Practicar con este fondo'}).click();
  await expect(page.locator('input[name="jr-fund"]:checked')).toHaveValue(BBVA);
  await reveal(page);
- await expect(page.locator('.sim-result')).toContainText('BBVA MI INVERSION BOLSA ACUMULACION');
+ await expect(page.locator('.sim-result')).toContainText('Fondo bolsa 2');
 });
 
 test('catalogue fits mobile in English dark mode', async ({browser}) => {
