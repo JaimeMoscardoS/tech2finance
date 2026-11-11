@@ -33,7 +33,7 @@ def test_historical_decline_is_scoped_and_server_owned():
 
 def test_bank_context_and_untrusted_fields(monkeypatch):
     captured = {}
-    def capture(payload):
+    def capture(payload, *, rules_only=False):
         captured.clear()
         captured.update(payload['context'])
         return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
@@ -187,7 +187,7 @@ def test_tutor_rejects_inconsistent_or_untrusted_context(context):
 
 
 def test_tutor_unavailable_is_controlled(monkeypatch):
-    def fail(_payload):
+    def fail(_payload, *, rules_only=False):
         raise tutor_bridge.TutorUnavailable()
     monkeypatch.setattr("backend.app.reply", fail)
     response = client.post("/api/tutor", json={"message": "private text", "context": CONTEXT})
@@ -259,7 +259,7 @@ def test_unknown_host_is_rejected():
 
 def test_explore_tutor_receives_selected_catalog_fund(monkeypatch):
     seen = {}
-    def capture(payload):
+    def capture(payload, *, rules_only=False):
         seen.update(payload['context'])
         return {'text': 'Respuesta de prueba', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'fund', 'sources': []}
     monkeypatch.setattr('backend.app.reply', capture)
@@ -311,7 +311,7 @@ def test_game_rejects_bad_values_and_unavailable_banks():
 
 def test_configured_external_bank_context_is_scoped(monkeypatch):
     captured = {}
-    def capture(payload):
+    def capture(payload, *, rules_only=False):
         captured.clear()
         captured.update(payload['context'])
         return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
@@ -352,7 +352,7 @@ def test_cnmv_portfolio_decline_endpoint():
 
 def test_tutor_accepts_learn_and_game_pages(monkeypatch):
     captured = {}
-    def capture(payload):
+    def capture(payload, *, rules_only=False):
         captured.update(payload['context'])
         return {'text': 'ok', 'language': 'es', 'mode': 'api', 'provider': 'server_rules', 'intent': 'unknown', 'sources': []}
     monkeypatch.setattr('backend.app.reply', capture)

@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.app import app
-from backend import providers
+from backend import providers, tutor_bridge
 
 client = TestClient(app)
 CONTEXT = {'page': 'home', 'level': 'beginner', 'language': 'es'}
@@ -207,3 +207,42 @@ def test_tutor_keeps_server_calculation_and_sources(monkeypatch):
     assert response.status_code == 200, response.text
     assert '538,29' in response.json()['text'] and base['text'] in response.json()['text']
     assert response.json()['sources'] == base['sources']
+
+
+def test_http_tutor_single_provider_call_and_excludes_goal(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    monkeypatch.setenv('T2F_TUTOR_PROVIDER', 'anthropic')
+    goal = '\ufeff \ufeff  private goal 7391  \ufeff \ufeff'
+    original = tutor_bridge._rules_reply
+    def with_goal(payload):
+        result = original(payload)
+        return {**result, 'text': result['text'] + ' private goal 7391'}
+    monkeypatch.setattr(tutor_bridge, '_rules_reply', with_goal)
+    calls = []
+    def primary(request):
+        calls.append(request)
+        value = {'language': 'es', 'paragraphs': ['El riesgo depende de tus objetivos.'], 'sourceIds': []}
+        return httpx.Response(200, json={'stop_reason': 'end_turn', 'content': [{'type': 'text', 'text': json.dumps(value)}]})
+    def legacy(request):
+        pytest.fail('HTTP tutor must not call the legacy model adapter')
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(primary))
+    monkeypatch.setattr(tutor_bridge, 'TRANSPORT', httpx.MockTransport(legacy))
+    response = client.post('/api/tutor', json={'message': 'hola', 'history': [{'role':'user', 'text':'untrusted history'}],
+                           'context': CONTEXT | {'decision': {'goal': goal, 'horizonYears': 5, 'needsLiquidity': 'no'}}})
+    assert response.status_code == 200 and len(calls) == 1
+    prompt = json.loads(calls[0].content)['messages'][0]['content']
+    facts = json.loads(prompt.split('Data: ', 1)[1])
+    assert 'private goal' not in prompt and '7391' not in prompt
+    assert facts['context']['decision'] == {'horizonYears': 5.0, 'needsLiquidity': 'no'}
+    assert '[user goal]' in facts['serverAnswer'] and facts['history'][0]['text'] == 'untrusted history'
+
+
+def test_http_rules_override_never_calls_either_provider(monkeypatch):
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'fake-secret')
+    monkeypatch.setenv('T2F_TUTOR_PROVIDER', 'server_rules')
+    def fail(request):
+        pytest.fail('rules mode must not use a model provider')
+    monkeypatch.setattr(providers, 'TRANSPORT', httpx.MockTransport(fail))
+    monkeypatch.setattr(tutor_bridge, 'TRANSPORT', httpx.MockTransport(fail))
+    response = client.post('/api/tutor', json={'message': 'hola', 'context': CONTEXT})
+    assert response.status_code == 200 and response.json()['provider'] == 'server_rules'

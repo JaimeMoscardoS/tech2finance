@@ -118,16 +118,16 @@ Una noticia que coincide con una caída no demuestra por sí misma que la haya c
 
 ## Conversación y voz
 
-En esta rama el tutor funciona mediante reglas locales y contexto explícito, no un LLM. La lectura de voz utiliza voces locales del dispositivo cuando están disponibles; el dictado solo se habilita con procesamiento local y modelo instalado. El micrófono de la barra abre el panel y solicita el reconocimiento local de inmediato; el dictado final se procesa al terminar, sin reactivar el micrófono tras la respuesta. Desde la pausa el inicio es manual. En el chat escrito el dictado se revisa antes de enviarse. La arquitectura siguiente es futura:
+En esta rama el tutor funciona con reglas o con Claude cuando está configurado, sin sustitución silenciosa ante errores. El dictado puede usar procesamiento local o ElevenLabs; el usuario inicia el micrófono y el chat escrito permite revisar el texto antes de enviarlo. Las etiquetas identifican el proveedor de la respuesta. Los detalles y límites están en [contratos](contratos.md#conversación-voz-y-análisis).
 
 La arquitectura de esta rama es:
 
 1. El usuario escribe o habla. Si se habilita el micrófono, ElevenLabs transcribe el audio.
-2. El backend prepara la pregunta y el contexto pertinente: pantalla, nivel y datos disponibles de la simulación o cartera ficticia; también objetivo, plazo y noticias verificadas si existen.
+2. El backend prepara la pregunta y el contexto pertinente: pantalla, nivel y datos disponibles de la simulación o cartera ficticia; también plazo y necesidad de liquidez si existen; el objetivo libre del contexto se excluye de la petición al modelo. La pregunta y el historial pueden contener texto libre.
 3. La API de Claude genera una respuesta adaptada al nivel. Los datos y cálculos provienen de los componentes del proyecto, no de cifras inventadas por el modelo.
 4. La interfaz presenta el texto y puede leerlo con una voz local del navegador; la síntesis de voz de ElevenLabs no está implementada.
 
-Primero se propone completar el chat escrito con contexto, después la lectura en voz y finalmente la entrada hablada. La experiencia escrita debe seguir disponible si el proveedor de voz falla. Las claves permanecen en el servidor. El modelo conversacional usado por el producto es distinto de los agentes de desarrollo configurados para el equipo.
+El chat escrito contextual y la entrada hablada están implementados en esta rama. La experiencia escrita debe seguir disponible si el proveedor de voz falla. Las claves permanecen en el servidor. El modelo conversacional usado por el producto es distinto de los agentes de desarrollo configurados para el equipo.
 
 ## Demo y visión futura
 
@@ -154,7 +154,7 @@ La elegibilidad se basa en informes semestrales que cubren 2020–2025, sin dist
 
 ## Integración local de demostración
 
-En esta rama, el frontend utiliza por defecto la API FastAPI local de catálogo, simulación, caídas y tutor por reglas. Ofrece demo local explícita ante fallo y comparte los ejemplos mediante `shared/demo-data.json`. El chat se ejecuta mediante Node local y no usa LLM ni servicios externos; el análisis detallado incorpora aparte un adaptador opcional para Sonnet, pendiente de prueba real. Véase [backend-contexto](backend-contexto.md) para contrato, ejecución y límites. Esta integración no implica despliegue ni conexión bancaria.
+En esta rama, el frontend usa la API FastAPI local para catálogo, simulación, caídas y tutor; ofrece también demo local explícita. El servidor selecciona Anthropic y ElevenLabs automáticamente cuando sus claves respectivas están disponibles, salvo overrides; el análisis detallado se configura por separado. Las integraciones de esta rama se han probado con proveedores simulados y falta comprobarlas con credenciales reales. Véase [backend-contexto](backend-contexto.md) para contrato y límites. Esta integración no implica despliegue ni conexión bancaria.
 
 
 Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](planning/plan.md).

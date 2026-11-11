@@ -114,7 +114,7 @@ def unsafe_chat_narrative(text):
 async def tutor_reply(payload):
     selected = tutor_provider()
     if selected == 'server_rules':
-        return await asyncio.to_thread(reply, payload)
+        return await asyncio.to_thread(reply, payload, rules_only=True)
     key = os.environ.get('ANTHROPIC_API_KEY', '')
     model = os.environ.get('T2F_ANTHROPIC_MODEL', 'claude-sonnet-5-5')
     if selected != 'anthropic' or not key or not re.fullmatch(r'claude-sonnet-[a-zA-Z0-9-]{1,60}', model):
@@ -124,13 +124,23 @@ async def tutor_reply(payload):
     try:
         # Only the trusted server-side rules provide numerical statements and source URLs.
         try:
-            base = await asyncio.to_thread(reply, payload)
+            base = await asyncio.to_thread(reply, payload, rules_only=True)
         except TutorUnavailable:
             raise ProviderError('tutor_provider_error') from None
         refs = {f'source_{i}': source for i, source in enumerate(base['sources'])}
-        facts = {'language': payload['context']['language'], 'level': payload['context']['level'],
-                 'context': payload['context'], 'currentQuestion': payload['message'],
-                 'history': payload.get('history', []), 'serverAnswer': base['text'],
+        context = dict(payload['context'])
+        decision = context.get('decision')
+        server_answer = base['text']
+        if isinstance(decision, dict):
+            goal = decision.get('goal')
+            context['decision'] = {k: v for k, v in decision.items() if k in ('horizonYears', 'needsLiquidity')}
+            if isinstance(goal, str):
+                variants = {goal, goal.strip(), re.sub(r'^[\s\ufeff]+|[\s\ufeff]+$', '', goal)}
+                for variant in sorted((v for v in variants if v), key=len, reverse=True):
+                    server_answer = server_answer.replace(variant, '[user goal]')
+        facts = {'language': context['language'], 'level': context['level'],
+                 'context': context, 'currentQuestion': payload['message'],
+                 'history': payload.get('history', []), 'serverAnswer': server_answer,
                  'registeredSources': [{'id': k, 'label': v['label']} for k, v in refs.items()]}
         schema = {'type': 'object', 'properties': {'language': {'type': 'string', 'enum': ['es', 'en']},
                   'paragraphs': {'type': 'array', 'items': {'type': 'string'}},

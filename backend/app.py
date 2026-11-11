@@ -186,7 +186,7 @@ async def tutor(request: TutorRequest):
     payload = request.model_dump(mode="json", exclude_none=True)
     payload["context"] = build_tutor_context(payload["context"])
     if tutor_provider() == 'server_rules':
-        return await asyncio.to_thread(reply, payload)
+        return await asyncio.to_thread(reply, payload, rules_only=True)
     return await tutor_reply(payload)
 
 
