@@ -21,15 +21,18 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
  const [question, setQuestion] = useState('');
  const [draft, setDraft] = useState('');
  const [reply, setReply] = useState<TutorReply | null>(null);
+ const [showText, setShowText] = useState(false);
+ const [showAnswer, setShowAnswer] = useState(false);
  const generation = useRef(0);
  const request = useRef<AbortController | null>(null);
  const history = useRef<TutorHistoryMessage[]>([]);
  const consumedStart = useRef(0);
+ const inputRef = useRef<HTMLInputElement>(null);
  const currentSession = useRef({ key, provider });
  currentSession.current = { key, provider };
  const cancel = () => { generation.current++; request.current?.abort(); request.current = null; stopBrowserVoice(); setPhase('idle'); setMessage(''); };
  useEffect(() => {
-  cancel(); history.current = []; setQuestion(''); setReply(null); setDraft('');
+  cancel(); history.current = []; setQuestion(''); setReply(null); setDraft(''); setShowText(false); setShowAnswer(false);
   return () => { generation.current++; request.current?.abort(); request.current = null; stopBrowserVoice(); };
  }, [open, key, provider]);
  const submitQuestion = (text: string, id: number, snapshot: TutorContext) => {
@@ -93,19 +96,22 @@ export default function VoiceAssistantPanel({ open, onClose, context, panelRef, 
   event.preventDefault();
   const text = draft.trim();
   if (!text) return;
+  inputRef.current?.focus();
   cancel(); setDraft('');
   submitQuestion(text, generation.current, structuredClone(context));
  };
  if (!open) return null;
  const active = phase !== 'idle';
- return <><button type="button" className="voice-panel__overlay" onClick={close} aria-hidden="true" tabIndex={-1}/><aside ref={panelRef} className="voice-panel" role="dialog" aria-modal="true" aria-label={t.title}>
-  <header className="voice-panel__header"><div><span className="voice-panel__eyebrow">{t.subtitle}</span><h2>{t.title}</h2></div><button className="voice-panel__close" type="button" onClick={close} aria-label={t.close}><X size={21}/></button></header>
-  <div className="voice-panel__mode">{provider.id === 'server_rules' ? t.server : t.local}</div>
-  <div className="voice-panel__body"><p className="voice-panel__intro">{t.intro}</p>
-   <div className="voice-panel__center"><button type="button" className="voice-panel__mic" onClick={active ? cancel : talk} aria-label={active ? t.cancel : t.talk}><span>{active ? <Square size={28} fill="currentColor"/> : <Mic size={34}/>}</span></button><strong>{active ? t.cancel : t.talk}</strong></div>
-   <p className="voice-panel__status" role="status" aria-live="polite">{message || t.privacy}</p>
-   {(question || reply) && <div className="voice-panel__result">{question && <section><h3>{t.heard}</h3><p>{question}</p></section>}{reply && <section><h3>{t.answer}</h3><p>{reply.text}</p>{reply.sources.length > 0 && <div className="voice-panel__sources">{t.sources}: {reply.sources.map(source => <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.label}</a>)}</div>}</section>}</div>}
-   {reply && <button type="button" className="voice-panel__listen" onClick={phase === 'speaking' ? cancel : play} disabled={phase === 'dictating' || phase === 'pending'}><Volume2 size={17}/>{phase === 'speaking' ? t.stop : t.listen}</button>}
-   <form className="voice-panel__form" onSubmit={submitText}><label htmlFor="voice-question">{context.language === 'es' ? 'O escribe tu pregunta' : 'Or type your question'}</label><div><input id="voice-question" value={draft} onChange={event => setDraft(event.target.value)} maxLength={MAX_MESSAGE_LENGTH} placeholder={context.language === 'es' ? 'Escribe aquí…' : 'Type here…'}/><button type="submit" disabled={!draft.trim()}>{context.language === 'es' ? 'Enviar' : 'Send'}</button></div></form>
-  </div></aside></>;
+ const status = phase === 'dictating' ? (context.language === 'es' ? 'Escuchando…' : 'Listening…') : phase === 'pending' ? t.pending : phase === 'speaking' ? (context.language === 'es' ? 'Respondiendo…' : 'Speaking…') : message || (context.language === 'es' ? 'Voz lista' : 'Voice ready');
+ return <aside ref={panelRef} className="voice-panel" role="region" aria-label={t.title}>
+  <div className="voice-panel__bar">
+   <span className="voice-panel__status" role="status" aria-live="polite">{status}</span>
+   <button type="button" className="voice-panel__write" onClick={() => setShowText(value => !value)} aria-expanded={showText}>{context.language === 'es' ? 'Escribir' : 'Type'}</button>
+   <button type="button" className="voice-panel__icon" onClick={active ? cancel : talk} aria-label={active ? t.cancel : t.talk}>{active ? <Square size={17} fill="currentColor"/> : <Mic size={19}/>}</button>
+   <button type="button" className="voice-panel__icon" onClick={close} aria-label={t.close}><X size={20}/></button>
+  </div>
+  {reply && <div className="voice-panel__actions"><button type="button" onClick={() => setShowAnswer(value => !value)} aria-expanded={showAnswer}>{context.language === 'es' ? 'Ver respuesta' : 'View answer'}</button></div>}
+  {showAnswer && reply && <div className="voice-panel__result">{question && <section><h3>{t.heard}</h3><p>{question}</p></section>}<section><h3>{t.answer}</h3><p>{reply.text}</p>{reply.sources.length > 0 && <div className="voice-panel__sources">{t.sources}: {reply.sources.map(source => <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.label}</a>)}</div>}</section><button type="button" onClick={phase === 'speaking' ? cancel : play} disabled={phase === 'dictating' || phase === 'pending'}><Volume2 size={17}/>{phase === 'speaking' ? t.stop : t.listen}</button></div>}
+  {showText && <form className="voice-panel__form" onSubmit={submitText}><label htmlFor="voice-question">{context.language === 'es' ? 'Escribe tu pregunta' : 'Type your question'}</label><div><input ref={inputRef} id="voice-question" value={draft} onChange={event => setDraft(event.target.value)} maxLength={MAX_MESSAGE_LENGTH}/><button type="submit" disabled={!draft.trim()}>{context.language === 'es' ? 'Enviar' : 'Send'}</button></div></form>}
+ </aside>;
 }

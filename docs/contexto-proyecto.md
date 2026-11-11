@@ -42,7 +42,7 @@ En esta rama, el inicio presenta accesos a fondos, práctica guiada y cartera fi
 
 El selector de detalle de la cabecera despliega los tres niveles mediante una transición interactiva; admite teclado y movimiento reducido. La selección afecta al nivel global de la sesión y no cambia el perfil de riesgo.
 
-La cabecera ofrece «Hablar con IA» para abrir directamente la conversación centrada, por voz o texto; la disponibilidad de voz sigue dependiendo de las capacidades locales del navegador.
+La cabecera ofrece «Hablar con IA» para iniciar el dictado con una barra no modal; escribir y ver la respuesta son acciones opcionales. La voz depende de las capacidades locales del navegador.
 
 | Nivel | Experiencia prevista |
 | --- | --- |

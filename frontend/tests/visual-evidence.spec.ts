@@ -11,7 +11,7 @@ for (const [label, viewport] of Object.entries({desktop:{width:1280,height:800},
   await page.screenshot({path:`${shots}/pause-${label}.png`});
   await page.getByRole('dialog',{name:'Una pausa para comprender'}).getByRole('button',{name:'Cerrar',exact:true}).click();
   await page.getByRole('button',{name:'Hablar con IA'}).click();
-  await page.getByRole('dialog').waitFor(); await page.screenshot({path:`${shots}/voice-${label}.png`});
+  await page.getByRole('region',{name:'Habla con tu asistente'}).waitFor(); await page.screenshot({path:`${shots}/voice-${label}.png`});
   await context.close();
  });
 }

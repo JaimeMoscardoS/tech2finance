@@ -148,9 +148,9 @@ export default function App() {
     } catch {}
   }, [language, theme, level]);
   useEffect(() => {
-    if (!pause && !assistant && !voiceAssistant) return;
-    const panel = pause ? modalRef.current : voiceAssistant ? voiceRef.current : assistantRef.current;
-    const previous = pause ? pauseTriggerRef.current : voiceAssistant ? voiceTriggerRef.current : assistantTriggerRef.current;
+    if (!pause && !assistant) return;
+    const panel = pause ? modalRef.current : assistantRef.current;
+    const previous = pause ? pauseTriggerRef.current : assistantTriggerRef.current;
     const items = () =>
       Array.from(
         panel?.querySelectorAll<HTMLElement>(
@@ -160,7 +160,7 @@ export default function App() {
     items()[0]?.focus();
     const key = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        pause ? setPause(null) : voiceAssistant ? setVoiceAssistant(false) : setAssistant(false);
+        pause ? setPause(null) : setAssistant(false);
         return;
       }
       if (e.key !== "Tab") return;
@@ -179,7 +179,18 @@ export default function App() {
       document.removeEventListener("keydown", key);
       previous?.focus();
     };
-  }, [pause, assistant, voiceAssistant]);
+  }, [pause, assistant]);
+  useEffect(() => {
+    if (!voiceAssistant) return;
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || pause || assistant || mobileNav) return;
+      const restore = voiceRef.current?.contains(document.activeElement);
+      setVoiceAssistant(false);
+      if (restore) voiceTriggerRef.current?.focus();
+    };
+    document.addEventListener("keydown", escape);
+    return () => document.removeEventListener("keydown", escape);
+  }, [voiceAssistant, pause, assistant, mobileNav]);
   useEffect(() => {
     if (!mobileNav) return;
     const items = () =>
@@ -301,6 +312,7 @@ export default function App() {
     choose("simulator"); setSelectedId(spec.instrumentId); setInitial(String(spec.initial)); setMonthly(String(spec.recurringContribution)); setContributionFrequency(spec.contributionFrequency ?? "monthly"); setMonths(String(spec.periods)); setResult(null); setDemoLaunch(true);
   }
   const openAssistant = () => {
+    setVoiceAssistant(false);
     setAssistantDecline(undefined);
     assistantTriggerRef.current = mobileNav
       ? menuButtonRef.current
@@ -362,7 +374,7 @@ export default function App() {
         const first = spec.basis === "portfolio_demo" ? portfolioResult?.timeline[0]?.date : validResult?.timeline[0]?.date;
         const events = (catalog?.navHistory.events ?? []).filter(event => first && event.date >= first && event.date <= report.latestLabel!);
         if (events.length) report.historicalContext = {events};
-      } if(id===declineGeneration.current && !controller.signal.aborted){setDeclineSpec(spec);setPause(report);}}
+      } if(id===declineGeneration.current && !controller.signal.aborted){setVoiceAssistant(false);setDeclineSpec(spec);setPause(report);}}
     catch {if(id===declineGeneration.current && !controller.signal.aborted)setServerError(true);} finally {if(id===declineGeneration.current)setOperationPending(false);}
   }
   function openPortfolioDecline(){if(!portfolioResult || !portfolioInstrument)return;void showDecline({basis:"portfolio_demo",language},()=>analyzeDecline({name:t.examplePortfolio,dataKind:"historical_nav",sources:[{label:"CNMV",url:catalog!.navHistory.source.indexUrl}],observations:points.map(point=>({label:point.date!,value:point.value}))}));}
@@ -400,7 +412,7 @@ export default function App() {
       <aside
         ref={navRef}
         className={`sidebar ${mobileNav ? "open" : ""}`}
-        inert={assistant || voiceAssistant || !!pause ? true : undefined}
+        inert={assistant || !!pause ? true : undefined}
         role={mobileNav ? "dialog" : undefined}
         aria-modal={mobileNav ? true : undefined}
         aria-label={t.space}
@@ -464,7 +476,7 @@ export default function App() {
           tabIndex={-1}
         />
       )}
-      <main ref={mainRef} tabIndex={-1} className="main" inert={mobileNav || assistant || voiceAssistant || !!pause ? true : undefined}>
+      <main ref={mainRef} tabIndex={-1} className="main" inert={mobileNav || assistant || !!pause ? true : undefined}>
         <header className="topbar">
           <div className="top-left">
             <button
@@ -724,7 +736,7 @@ export default function App() {
         </div>
       </main>
       <AssistantPanel provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
-      <VoiceAssistantPanel open={voiceAssistant} onClose={()=>setVoiceAssistant(false)} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
+      <VoiceAssistantPanel open={voiceAssistant} onClose={() => { if (voiceRef.current?.contains(document.activeElement)) voiceTriggerRef.current?.focus(); setVoiceAssistant(false); }} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
       {pause && <AntiPanicPanel onTalk={talkDecline} report={pause} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
 
     </div>

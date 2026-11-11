@@ -6,7 +6,7 @@ Interfaz educativa React/TypeScript para explorar fondos, simular aportaciones, 
 
 El selector de detalle de la cabecera se expande con Motion; permite volver, elegir un nivel o cerrarlo con Escape o pulsando fuera. Respeta la preferencia de movimiento reducido y mantiene el nivel global durante la sesión. Para comprobarlo: `npx playwright test -c playwright.level.config.ts`.
 
-El botón «Hablar con IA» abre directamente la conversación centrada, con voz y texto. El componente visual y su comprobación se describen en [componentes de interfaz](../docs/ui-components.md).
+El botón «Hablar con IA» inicia el dictado local y muestra una barra no modal. La respuesta se lee con voz local disponible; «Ver respuesta» y «Escribir» se abren solo al solicitarlos. El componente y su comprobación se describen en [componentes de interfaz](../docs/ui-components.md).
 
 ## Datos y simulación
 

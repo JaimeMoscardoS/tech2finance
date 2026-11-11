@@ -19,60 +19,69 @@ test.beforeEach(async ({ page }) => {
  });
 });
 
-test('toolbar starts one local dictation and supports typed follow-up', async ({ page }) => {
+test('toolbar starts one dictation without blocking the page; text is explicit', async ({ page }) => {
  await page.goto('/');
- await page.getByRole('button', { name: 'Hablar con IA' }).click();
- const dialog = page.getByRole('dialog', { name: 'Habla con tu asistente' });
- await expect(dialog).toBeVisible();
- const close = dialog.getByRole('button', {name: 'Cerrar asistente de voz'});
- await close.focus(); await page.keyboard.press('Shift+Tab');
- await expect(dialog.getByLabel('O escribe tu pregunta')).toBeFocused();
- await page.keyboard.press('Tab'); await expect(close).toBeFocused();
+ const trigger = page.getByRole('button', { name: 'Hablar con IA' });
+ await trigger.click();
+ const region = page.getByRole('region', { name: 'Habla con tu asistente' });
+ await expect(region).toBeVisible();
+ await expect(trigger).toBeFocused();
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+ await expect(page.locator('.voice-panel__overlay')).toHaveCount(0);
+ await expect(page.locator('main')).not.toHaveAttribute('inert', '');
+ await expect(region.getByLabel('Escribe tu pregunta')).toHaveCount(0);
  await expect.poll(() => page.evaluate(() => (window as any).shinyVoiceTest.starts)).toBe(1);
- const box = await dialog.boundingBox(); expect(box).not.toBeNull();
- expect(Math.abs(box!.x + box!.width / 2 - 640)).toBeLessThan(2);
  await page.screenshot({path: 'test-results/shiny/voice-desktop.png'});
  await page.evaluate(() => { const r = (window as any).shinyVoiceTest.recognition; r.onresult({resultIndex: 0, results: [{isFinal: true, 0: {transcript: 'Qué es un fondo'}}]}); r.onend(); });
- await expect(dialog.getByText('Qué es un fondo', { exact: true })).toBeVisible();
- await expect(dialog.getByText('Respuesta', { exact: true })).toBeVisible();
- await dialog.getByLabel('O escribe tu pregunta').fill('Qué es el riesgo');
- await dialog.getByRole('button', { name: 'Enviar' }).click();
- await expect(dialog.getByText('Qué es el riesgo', { exact: true })).toBeVisible();
- await expect(dialog.getByText('Respuesta', { exact: true })).toBeVisible();
+ await region.getByRole('button', {name: 'Ver respuesta'}).click();
+ await expect(region.getByText('Qué es un fondo', { exact: true })).toBeVisible();
+ await region.getByRole('button', {name: 'Escribir'}).click();
+ await region.getByLabel('Escribe tu pregunta').fill('Qué es el riesgo');
+ await region.getByRole('button', { name: 'Enviar' }).click();
+ await expect(region.getByLabel('Escribe tu pregunta')).toBeFocused();
+ await expect(region.getByText('Qué es el riesgo', { exact: true })).toBeVisible();
  expect(await page.evaluate(() => (window as any).shinyVoiceTest.starts)).toBe(1);
- await page.keyboard.press('Escape'); await expect(dialog).toHaveCount(0);
+ await page.keyboard.press('Escape'); await expect(region).toHaveCount(0); await expect(trigger).toBeFocused();
  await page.evaluate(() => { const r = (window as any).shinyVoiceTest.recognition; r.onresult({resultIndex: 0, results: [{isFinal: true, 0: {transcript: 'Tardío'}}]}); r.onend(); });
  await expect(page.getByText('Tardío')).toHaveCount(0);
 });
 
-test('dialog fits a 320px viewport', async ({ page }) => {
- await page.setViewportSize({width: 320, height: 640}); await page.goto('/');
- await page.getByRole('button', {name: 'Hablar con IA'}).click();
- const dialog = page.getByRole('dialog', {name: 'Habla con tu asistente'});
- await expect(dialog).toBeVisible();
- expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
- const box = await dialog.boundingBox(); expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x + box!.width).toBeLessThanOrEqual(320);
- await dialog.getByLabel('O escribe tu pregunta').scrollIntoViewIfNeeded();
- await expect(dialog.getByRole('button', {name: 'Enviar'})).toBeVisible();
- const send = await dialog.getByRole('button', {name: 'Enviar'}).boundingBox();
- expect(send!.x + send!.width).toBeLessThanOrEqual(box!.x + box!.width);
- await page.screenshot({path: 'test-results/shiny/shiny-voice-320.png'});
+test('navigation stays usable and opening text chat cancels voice', async ({ page }) => {
+ await page.goto('/');
+ const trigger = page.getByRole('button', {name: 'Hablar con IA'});
+ await trigger.click();
+ const region = page.getByRole('region', {name: 'Habla con tu asistente'});
+ await expect.poll(() => page.evaluate(() => (window as any).shinyVoiceTest.starts)).toBe(1);
+ await page.getByRole('button', {name: 'Explorar', exact: true}).click();
+ await expect(page.locator('.beginner-card')).toBeVisible();
+ await page.evaluate(() => { const r = (window as any).shinyVoiceTest.recognition; r.onresult({resultIndex:0, results:[{isFinal:true, 0:{transcript:'Pregunta antigua'}}]}); r.onend(); });
+ await expect(region.getByText('Pregunta antigua')).toHaveCount(0);
+ await page.getByRole('button', {name: 'Abrir asistente'}).click();
+ await expect(region).toHaveCount(0);
+ await expect(page.getByRole('dialog', {name: 'Tu asistente'})).toBeVisible();
+ await page.keyboard.press('Escape');
+ await trigger.click();
+ await region.getByRole('button', {name: 'Cerrar asistente de voz'}).click();
+ await expect(trigger).toBeFocused();
 });
 
 for (const language of ['es', 'en'] as const) for (const theme of ['light', 'dark'] as const) {
- test(`conversation fits ${language}/${theme} at 320px`, async ({ page }) => {
+ test(`non-modal voice fits ${language}/${theme} at 320px`, async ({ page }) => {
   await page.setViewportSize({width: 320, height: 640});
   await page.emulateMedia({reducedMotion: 'reduce'});
   await page.addInitScript(({language, theme}) => { localStorage.setItem('t2f-language', language); localStorage.setItem('t2f-theme', theme); }, {language, theme});
   await page.goto('/');
   await page.getByRole('button', {name: language === 'es' ? 'Hablar con IA' : 'Talk to AI'}).click();
-  const dialog = page.getByRole('dialog', {name: language === 'es' ? 'Habla con tu asistente' : 'Talk to your assistant'});
-  const box = await dialog.boundingBox(); expect(box).not.toBeNull();
-  expect(Math.abs(box!.x + box!.width / 2 - 160)).toBeLessThan(2);
+  const region = page.getByRole('region', {name: language === 'es' ? 'Habla con tu asistente' : 'Talk to your assistant'});
+  const box = await region.boundingBox(); expect(box).not.toBeNull();
+  expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x + box!.width).toBeLessThanOrEqual(320);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
-  const send = dialog.getByRole('button', {name: language === 'es' ? 'Enviar' : 'Send'});
-  await send.scrollIntoViewIfNeeded(); const buttonBox = await send.boundingBox();
-  expect(buttonBox!.x + buttonBox!.width).toBeLessThanOrEqual(box!.x + box!.width);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.locator('main')).not.toHaveAttribute('inert', '');
   await page.screenshot({path: `test-results/shiny/voice-${language}-${theme}-320.png`});
+  await region.getByRole('button',{name: language === 'es' ? 'Escribir' : 'Type'}).click();
+  await expect(region.locator('input')).toBeVisible();
+  await page.getByRole('button',{name:language === 'es' ? 'Abrir menú' : 'Open menu'}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
  });
 }
