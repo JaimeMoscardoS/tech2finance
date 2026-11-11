@@ -14,6 +14,17 @@ La cartera de ejemplo y «Probar una caída» comparten el caso BBVA Mi Inversi�
 
 Explorar muestra los fondos permitidos para el anfitrión, o filtra por emisor para una entidad configurada. La comparación utiliza series compatibles; CSV incluye los cierres, fuente, ISIN, moneda, versión y hashes. La práctica guiada compara aportaciones, plazos o instrumentos con condiciones compatibles y descarta resultados anteriores al editar. La muestra anual publicada previa permanece como método auxiliar de referencia, no como serie de NAV.
 
+## Sección «¿Y si vendo en el mes X?»
+
+Implementada en la rama `feature/juego-pantalla` (no en `main`). `HoldSellGame.tsx` se carga de forma diferida y se muestra bajo «02 / Evolución histórica» del Simulador; es una comparación simple, no el juego por turnos.
+
+- **Entradas:** fondo, importe inicial, aportación mensual, meses (máximo según el histórico del fondo, hasta 72), mes de venta (0..meses) y comisiones opcionales de compra y venta (0–5 %). Los valores del simulador solo inician el estado; después son independientes.
+- **Salida:** llama a `POST /api/game/compare` y muestra dos tarjetas neutras («Si mantengo» y «Si vendo en el mes N») con dinero final, aportado, comisiones y ganancia o pérdida (con signo), un gráfico de dos líneas distinguibles por color y trazo con marca «Venta · mes N», una tabla alternativa, fuente, periodo y supuestos localizados. No señala un mejor resultado ni recomienda; incluye el aviso sobre liquidez, horizonte y objetivo.
+- **Validación:** `game-domain.ts` construye la petición y valida la respuesta (esquema, coincidencia con la petición, procedencia frente a `shared/data-manifest.json`, fechas, totales y unidades). Los importes llegan como cadenas decimales y solo se convierten a número para mostrarlos. Cualquier edición borra el resultado y aborta la petición en curso.
+- **Modo local:** con datos locales (`t2f-data-mode=local`) solo se muestra un aviso: no se calcula nada en el navegador ni se envían peticiones.
+- **CaixaBank:** el selector del juego excluye CaixaBank (`GAME_EXCLUDED_BANK_IDS` en `game-domain.ts`); no se ha retirado del resto de la aplicación. Si no queda ningún fondo elegible (por ejemplo `VITE_BANK_ID=caixabank`), se muestra un mensaje en lugar del formulario.
+- **Comprobar:** `npm test` (`game-domain.test.ts`, con una respuesta real en `tests/fixtures/game-compare-santander-rf-ahorro.json`) y `npx playwright test tests/game.spec.ts`.
+
 ## Ejecutar y comprobar
 
 Con Node 22.12 o superior:

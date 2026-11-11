@@ -42,6 +42,7 @@ import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
 import Recovery from "./Recovery";
 const PracticeLab = lazy(() => import("./PracticeLab"));
+const HoldSellGame = lazy(() => import("./HoldSellGame"));
 
 type Page = "home" | "explore" | "simulator" | "portfolio";
 type Level = "beginner" | "intermediate" | "advanced";
@@ -682,6 +683,7 @@ export default function App() {
                 openSimulationDecline,
               }}
             />
+            <Suspense fallback={<p role="status">{language === "es" ? "Cargando ejercicio…" : "Loading exercise…"}</p>}><HoldSellGame language={language} level={level} mode={mode} instruments={instruments} navHistory={catalog.navHistory} defaults={{ instrumentId: selected.instrumentId, initial, monthly, months }} /></Suspense>
             </>
           )}
           {page === "portfolio" && (

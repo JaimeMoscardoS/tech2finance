@@ -1,0 +1,219 @@
+{
+    "schemaVersion": "2.0",
+    "engine": "simulador-nav-close-2.0.0",
+    "instrumentId": "santander-rf-ahorro",
+    "currency": "EUR",
+    "dataKind": "historical_nav",
+    "months": 3,
+    "sellMonth": 2,
+    "hold": {
+        "unitType": "fractional_virtual_nav",
+        "contributed": "1300.0",
+        "cash": "0.0",
+        "units": "135.0644738347305323179769154340694",
+        "fees": "13.000",
+        "value": "1254.627403898195387754919365158614",
+        "profit": "-45.372596101804612245080634841386",
+        "simpleReturn": "-0.03490199700138816326544664218568154",
+        "timeline": [
+            {
+                "month": 0,
+                "periodIndex": 0,
+                "date": "2019-12-31",
+                "price": "9.5485",
+                "contributed": "1000.0",
+                "cash": "0.0",
+                "units": "103.6812064722207676598418599780070",
+                "fees": "10.000",
+                "total": "989.9999999999999999999999999999998",
+                "operations": [
+                    {
+                        "type": "buy",
+                        "scheduledDate": "2019-12-31",
+                        "executionDate": "2019-12-31",
+                        "gross": "1000.0",
+                        "source": "initial",
+                        "fee": "10.000"
+                    }
+                ]
+            },
+            {
+                "month": 1,
+                "periodIndex": 1,
+                "date": "2020-01-31",
+                "price": "9.5598",
+                "contributed": "1100.0",
+                "cash": "0.0",
+                "units": "114.0370716576848987086085705786472",
+                "fees": "11.000",
+                "total": "1090.171597633136094674556213017752",
+                "operations": [
+                    {
+                        "type": "buy",
+                        "scheduledDate": "2020-01-31",
+                        "executionDate": "2020-01-31",
+                        "gross": "100.0",
+                        "source": "monthly",
+                        "fee": "1.000"
+                    }
+                ]
+            },
+            {
+                "month": 2,
+                "periodIndex": 2,
+                "date": "2020-02-29",
+                "price": "9.547",
+                "contributed": "1200.0",
+                "cash": "0.0",
+                "units": "124.4068213172638240254620323991144",
+                "fees": "12.000",
+                "total": "1187.711923115917727971086023314345",
+                "operations": [
+                    {
+                        "type": "buy",
+                        "scheduledDate": "2020-02-29",
+                        "executionDate": "2020-02-29",
+                        "gross": "100.0",
+                        "source": "monthly",
+                        "fee": "1.000"
+                    }
+                ]
+            },
+            {
+                "month": 3,
+                "periodIndex": 3,
+                "date": "2020-03-31",
+                "price": "9.2891",
+                "contributed": "1300.0",
+                "cash": "0.0",
+                "units": "135.0644738347305323179769154340694",
+                "fees": "13.000",
+                "total": "1254.627403898195387754919365158614",
+                "operations": [
+                    {
+                        "type": "buy",
+                        "scheduledDate": "2020-03-31",
+                        "executionDate": "2020-03-31",
+                        "gross": "100.0",
+                        "source": "monthly",
+                        "fee": "1.000"
+                    }
+                ]
+            }
+        ]
+    },
+    "sell": {
+        "unitType": "fractional_virtual_nav",
+        "contributed": "1300.0",
+        "cash": "1275.834803884758550691375163081202",
+        "units": "0",
+        "fees": "23.87711923115917727971086023314345",
+        "value": "1275.834803884758550691375163081202",
+        "profit": "-24.165196115241449308624836918798",
+        "simpleReturn": "-0.01858861239633957639124987455292154",
+        "timeline": [
+            {
+                "month": 0,
+                "periodIndex": 0,
+                "date": "2019-12-31",
+                "price": "9.5485",
+                "contributed": "1000.0",
+                "cash": "0.0",
+                "units": "103.6812064722207676598418599780070",
+                "fees": "10.000",
+                "total": "989.9999999999999999999999999999998",
+                "operations": [
+                    {
+                        "type": "buy",
+                        "scheduledDate": "2019-12-31",
+                        "executionDate": "2019-12-31",
+                        "gross": "1000.0",
+                        "source": "initial",
+                        "fee": "10.000"
+                    }
+                ]
+            },
+            {
+                "month": 1,
+                "periodIndex": 1,
+                "date": "2020-01-31",
+                "price": "9.5598",
+                "contributed": "1100.0",
+                "cash": "0.0",
+                "units": "114.0370716576848987086085705786472",
+                "fees": "11.000",
+                "total": "1090.171597633136094674556213017752",
+                "operations": [
+                    {
+                        "type": "buy",
+                        "scheduledDate": "2020-01-31",
+                        "executionDate": "2020-01-31",
+                        "gross": "100.0",
+                        "source": "monthly",
+                        "fee": "1.000"
+                    }
+                ]
+            },
+            {
+                "month": 2,
+                "periodIndex": 2,
+                "date": "2020-02-29",
+                "price": "9.547",
+                "contributed": "1200.0",
+                "cash": "1175.834803884758550691375163081202",
+                "units": "0",
+                "fees": "23.87711923115917727971086023314345",
+                "total": "1175.834803884758550691375163081202",
+                "operations": [
+                    {
+                        "type": "buy",
+                        "scheduledDate": "2020-02-29",
+                        "executionDate": "2020-02-29",
+                        "gross": "100.0",
+                        "source": "monthly",
+                        "fee": "1.000"
+                    },
+                    {
+                        "type": "sell",
+                        "scheduledDate": "2020-02-29",
+                        "executionDate": "2020-02-29",
+                        "gross": "1187.711923115917727971086023314345",
+                        "fee": "11.87711923115917727971086023314345"
+                    }
+                ]
+            },
+            {
+                "month": 3,
+                "periodIndex": 3,
+                "date": "2020-03-31",
+                "price": "9.2891",
+                "contributed": "1300.0",
+                "cash": "1275.834803884758550691375163081202",
+                "units": "0",
+                "fees": "23.87711923115917727971086023314345",
+                "total": "1275.834803884758550691375163081202",
+                "operations": [
+                    {
+                        "type": "cash_contribution",
+                        "scheduledDate": "2020-03-31",
+                        "executionDate": "2020-03-31",
+                        "gross": "100.0"
+                    }
+                ]
+            }
+        ]
+    },
+    "provenance": {
+        "datasetVersion": "cnmv-nav-2019-2025.1",
+        "calculationVersion": "simulador-nav-close-2.0.0",
+        "datasetSha256": "bcf93143ca4f4f8b26d6697086b11ddcb0cca10981b62fb94d3d962da1d6fd85",
+        "navHistorySha256": "743e76f281b6114d04b5ae18ae1994c3ecbef2fcef0dd3f3b4614c96409e36d5"
+    },
+    "assumptions": [
+        "Observed CNMV NAV; monthly contributions execute on observed closes after NAV change.",
+        "Sale-date contribution is invested before sale; later contributions remain cash.",
+        "Reported distributions are zero at published precision; no future policy is guaranteed.",
+        "Costs embedded in NAV are not deducted again; explicit game fees are separate.",
+        "No taxes, real orders, prediction or recommendation."
+    ]
+}
