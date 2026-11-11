@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { startJourney } from './journey';
+import { startAndFinish } from './journey';
 
 for (const language of ['es', 'en'] as const) {
   test(`result question is editable and sent only on request (${language})`, async ({ page }) => {
@@ -10,7 +10,7 @@ for (const language of ['es', 'en'] as const) {
     await page.goto('/');
     if (language === 'en') await page.getByRole('button', { name: 'English' }).click();
     await page.getByRole('button', { name: language === 'es' ? 'Simulador' : 'Simulator', exact: true }).click();
-    await startJourney(page);
+    await startAndFinish(page);
     const trigger = page.getByRole('button', { name: language === 'es' ? 'Explícame este resultado' : 'Explain this result' });
     const question = language === 'es' ? '¿Qué significa este resultado?' : 'What does this result mean?';
     await trigger.click();

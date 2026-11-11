@@ -1,4 +1,4 @@
-import { pickFund, reveal, startJourney } from './journey';
+import { finishReplay, pickFund, reveal, startJourney } from './journey';
 import { test, expect } from '@playwright/test';
 
 test('real server calculates monthly contributions, decline and contextual tutor', async ({ page, request }) => {
@@ -10,7 +10,7 @@ test('real server calculates monthly contributions, decline and contextual tutor
   await expect(page.getByRole('radiogroup',{name:'Instrumento'})).toBeVisible();
   await expect(page.locator('input[name="jr-fund"]:checked')).toHaveCount(0);
   await pickFund(page);
-  await page.getByLabel('Aportación mensual').fill('100'); await page.getByLabel('Tiempo de práctica').fill('12'); await reveal(page);
+  await page.getByLabel('Aportación mensual').fill('100'); await page.getByLabel('Tiempo de práctica').fill('12'); await reveal(page); await finishReplay(page);
   await expect(page.locator('.sim-values')).toContainText('1700,75'); await expect(page.locator('.sim-values')).toContainText('1700,00'); await expect(page.locator('.sim-values')).toContainText('0,75');
   await page.getByRole('button',{name:'Entender las caídas'}).click(); await expect(page.getByRole('dialog')).toContainText('2020');
   await page.getByRole('button',{name:/Preguntar al asistente/i}).click();
@@ -41,6 +41,7 @@ test('late server simulation cannot replace newer choice', async ({page}) => {
   const held = page.waitForRequest(req => req.url().endsWith('/api/simulations') && req.postDataJSON().initial === 123);
   await page.getByLabel('Importe inicial').fill('123'); await held;
   await page.getByLabel('Importe inicial').fill('500');
+  await finishReplay(page);
   await expect(page.locator('.sim-values')).toContainText('1100,30'); release?.();
   await expect(page.locator('.sim-values')).toContainText('1100,30');
 });

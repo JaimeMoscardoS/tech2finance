@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { BBVA, CAIXA, SANTANDER, pickFund, reveal, startJourney } from './journey';
+import { BBVA, CAIXA, SANTANDER, finishReplay, pickFund, reveal, startAndFinish, startJourney } from './journey';
 
 const openSimulator = async (page: Page, url = '/') => {
   await page.goto(url);
@@ -84,19 +84,30 @@ test('prediction reveals the backend result and states whether the guess matched
   const requests: unknown[] = [];
   page.on('request', r => { if (r.url().endsWith('/api/simulations')) requests.push(r.postDataJSON()); });
   await reveal(page, 'Más');
-  const values = page.locator('.sim-result .sim-values');
+  // Step 2 only acknowledges the answer: no final value, contributed amount, profit or match/miss before the replay.
+  const ack = page.locator('.jr-ack');
+  await expect(ack).toContainText('Tu respuesta: Más.');
+  await expect(ack).toContainText('lo comprobarás al final del recorrido');
+  await expect(page.locator('.sim-result')).toHaveCount(0);
+  const step2 = (await page.locator('#jr-step-2').evaluate(el => el.textContent ?? ''));
+  for (const hidden of ['1700,75', '1700,00', '0,75 €', 'coincide', 'Has descubierto']) expect(step2).not.toContain(hidden);
+  await expect(page.locator('#jr-step-2 [role="status"]').first()).not.toContainText(/\d+,\d\d €/);
+  await expect(page.locator('#jr-step-3 .tm-plot')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Explícame este resultado' })).toHaveCount(0);
+  await finishReplay(page);
+  // The reveal lives in the replay summary.
+  const values = page.locator('.tm-summary .sim-values');
   await expect(values.locator('dt')).toHaveText(['VALOR FINAL ILUSTRATIVO', 'TOTAL APORTADO', 'GANANCIA / PÉRDIDA']);
   await expect(values.locator('dd strong').nth(0)).toHaveText('1700,75 €');
   await expect(values.locator('dd strong').nth(1)).toHaveText('1700,00 €');
   await expect(values.locator('dd strong').nth(2)).toHaveText('0,75 €');
-  const feedback = page.locator('.jr-feedback');
-  await expect(feedback).toContainText('Acabaste con 1700,75 € habiendo puesto 1700,00 €: +0,75 €.');
+  const feedback = page.locator('.tm-summary .jr-feedback');
+  await expect(page.locator('.tm-summary')).toContainText('Terminas el recorrido con 1700,75 €, habiendo puesto 1700,00 €');
   // 0,75 EUR is within 1 % of the contributed amount: "about the same", so "More" does not match.
   await expect(feedback).toContainText('Tu respuesta: Más.');
   await expect(feedback).toContainText('Tu respuesta no coincide con lo que ocurrió.');
   await expect(page.locator('.jr-achievement')).toHaveText('Has descubierto: no todo el dinero final es ganancia');
   await expect(page.locator('.jr-split')).toHaveAttribute('role', 'img');
-  await expect(page.locator('.sim-result .investment-chart')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Explícame este resultado' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Entender las caídas' })).toBeVisible();
   expect(requests).toEqual([{ instrumentId: CAIXA, initial: 500, recurringContribution: 100, periods: 12, contributionFrequency: 'monthly' }]);
@@ -109,23 +120,26 @@ test('a correct guess is reported as matching, with a loss shown as such', async
   await page.getByLabel('Importe inicial').fill('1000');
   await page.getByLabel('Tiempo de práctica').fill('3');
   await reveal(page, 'Menos');
-  await expect(page.locator('.jr-feedback')).toContainText('Acabaste con 744,62 € habiendo puesto 1000,00 €: -255,38 €.');
-  await expect(page.locator('.jr-feedback')).toContainText('Tu respuesta coincide con lo que ocurrió.');
+  await finishReplay(page);
+  await expect(page.locator('.tm-summary')).toContainText('Terminas el recorrido con 744,62 €, habiendo puesto 1000,00 €');
+  await expect(page.locator('.tm-summary .jr-feedback')).toContainText('Tu respuesta coincide con lo que ocurrió.');
   await expect(page.locator('.jr-split')).toHaveAttribute('aria-label', /Pérdida/);
 });
 
 test('after the first reveal changes recalculate on their own, once, and never while invalid', async ({ page }) => {
   await openSimulator(page);
-  await startJourney(page);
-  const first = page.locator('.sim-result .sim-values dd strong').first();
+  await startAndFinish(page);
+  const first = page.locator('.tm-summary .sim-values dd strong').first();
   await expect(first).toHaveText('1100,30 €');
   const bodies: { initial: number; recurringContribution: number }[] = [];
   page.on('request', r => { if (r.url().endsWith('/api/simulations')) bodies.push(r.postDataJSON()); });
   const monthly = page.getByLabel('Aportación mensual');
-  // Rapid edits collapse into one request after the pause.
+  // Rapid edits collapse into one request after the pause; the replay restarts and the old final values disappear.
   await monthly.fill('60'); await monthly.fill('70'); await monthly.fill('100');
-  await expect(page.locator('.sim-result').getByText(/Has cambiado los datos/)).toBeVisible();
-  await expect(page.locator('.sim-result .investment-chart')).toHaveCount(0);
+  await expect(page.locator('.jr-ack').getByText(/Has cambiado los datos/)).toBeVisible();
+  await expect(page.locator('.tm-summary')).toHaveCount(0);
+  await expect(page.locator('#jr-step-3 .tm')).toContainText('Mes 0 de 12');
+  await finishReplay(page);
   await expect(first).toHaveText('1700,75 €');
   expect(bodies).toHaveLength(1);
   expect(bodies[0].recurringContribution).toBe(100);
@@ -137,12 +151,16 @@ test('after the first reveal changes recalculate on their own, once, and never w
   expect(bodies).toHaveLength(1);
   // Fixing it recovers; the explicit button also works and is optional.
   await monthly.fill('50');
+  await expect(page.locator('#jr-step-3 .tm')).toContainText('Mes 0 de 12');
+  await finishReplay(page);
   await expect(first).toHaveText('1100,30 €');
   await page.getByRole('button', { name: 'Actualizar resultado' }).click();
+  await finishReplay(page);
   await expect(first).toHaveText('1100,30 €');
   // Presets and the slider update the same way; the slider offers an accessible text value.
   await page.getByRole('button', { name: /Todo de golpe: 1000/ }).click();
   await expect(page.getByLabel('Importe inicial')).toHaveValue('1000');
+  await finishReplay(page);
   await expect(first).toHaveText('999,70 €');
   const slider = page.getByLabel('Tiempo de práctica');
   await slider.fill('6');
@@ -160,14 +178,15 @@ test('a late response for older inputs never replaces the newer result', async (
   await page.getByLabel('Importe inicial').fill('123');
   await held;
   await page.getByLabel('Importe inicial').fill('500');
-  await expect(page.locator('.sim-result .sim-values')).toContainText('1100,30');
+  await finishReplay(page);
+  await expect(page.locator('.tm-summary .sim-values')).toContainText('1100,30');
   release?.();
   await page.waitForTimeout(300);
-  await expect(page.locator('.sim-result .sim-values')).toContainText('1100,30');
+  await expect(page.locator('.tm-summary .sim-values')).toContainText('1100,30');
 });
 
 test('step 3 follows steps 1 and 2 live and has no duplicate form', async ({ page }) => {
-  const bodies: Record<string, number | string>[] = [];
+  const bodies: unknown[] = [];
   page.on('request', r => { if (r.url().endsWith('/api/game/compare')) bodies.push(r.postDataJSON()); });
   await openSimulator(page);
   await pickFund(page, SANTANDER);
@@ -175,68 +194,58 @@ test('step 3 follows steps 1 and 2 live and has no duplicate form', async ({ pag
   await page.getByLabel('Aportación mensual').fill('100');
   await page.getByLabel('Tiempo de práctica').fill('3');
   await reveal(page);
-  const game = page.locator('section.hsg');
-  await expect(game).toBeVisible();
-  await expect(game.getByLabel('Importe inicial')).toHaveCount(0);
-  await expect(game.getByLabel('Fondo', { exact: true })).toHaveCount(0);
-  const synced = game.locator('.hsg-synced');
-  await expect(synced).toContainText('Fondo ahorro');
-  await expect(synced.locator('dd').nth(1)).toHaveText('1000,00 €');
-  await expect(synced.locator('dd').nth(3)).toHaveText('3');
-  await expect(game.getByLabel('Mes de venta')).toHaveAttribute('max', '3');
-  await expect(game.getByLabel('Mes de venta')).toHaveAttribute('aria-valuetext', /Mes \d, /);
-  // Prediction first, then the two neutral cards, the chart with the sale marker and the table.
-  await game.getByLabel('Mes de venta').fill('2');
-  await expect(game.getByText('¿Qué crees que pasó si vendías en el mes 2?')).toBeVisible();
-  await game.getByRole('button', { name: 'Acabé con más dinero que manteniendo' }).click();
-  await expect(game.locator('.hsg-card')).toHaveCount(2);
-  expect(bodies).toEqual([{ instrumentId: SANTANDER, initial: 1000, monthly: 100, months: 3, sellMonth: 2, buyFeeRate: 0, sellFeeRate: 0 }]);
-  await expect(game.locator('.hsg-feedback')).toContainText('Vendiendo en el mes 2 acabaste con 1299,71 €; manteniendo, con 1267,30 €.');
-  await expect(game.locator('.hsg-feedback')).toContainText('Tu respuesta coincide con lo que ocurrió.');
-  await expect(game.locator('.hsg-achievement')).toHaveText('Has descubierto: el resultado depende del momento');
-  await expect(game).not.toContainText(/mejor|ganador|winner|better/i);
-  // Changing a step 2 value clears the stale comparison immediately and step 3 follows the new months.
+  const tm = page.locator('#jr-step-3 .tm');
+  await expect(tm).toBeVisible();
+  await expect(tm.getByRole('heading', { name: 'Vive el recorrido' })).toBeVisible();
+  await expect(tm.getByLabel('Importe inicial')).toHaveCount(0);
+  await expect(tm.locator('select, input[type="range"], input[type="number"]')).toHaveCount(0);
+  await expect(tm).toContainText('Mes 0 de 3');
+  // Nothing is requested until the user decides to sell.
+  expect(bodies).toEqual([]);
+  // Changing a step 2 value starts a fresh replay that follows the new months.
   await page.getByLabel('Tiempo de práctica').fill('6');
-  await expect(game.locator('.hsg-card')).toHaveCount(0);
-  await expect(game.getByLabel('Mes de venta')).toHaveAttribute('max', '6');
-  await expect(game.locator('.hsg-synced dd').nth(3)).toHaveText('6');
-  // The challenge hint uses a real NAV change and picks the month.
-  await expect(game.locator('.hsg-challenge')).toContainText('marzo de 2020');
-  await game.getByRole('button', { name: 'Elegir marzo de 2020' }).click();
-  await expect(game.getByLabel('Mes de venta')).toHaveValue('3');
+  await expect(page.locator('#jr-step-3 .tm')).toContainText('Mes 0 de 6');
+  await page.getByLabel('Aportación mensual').fill('50');
+  await expect(page.locator('#jr-step-3 .tm')).toContainText('Mes 0 de 6');
+  await expect(page.locator('#jr-step-3 .tm .tm-big').nth(1)).toContainText('1000,00 €');
 });
 
-test('CaixaBank works in steps 1 and 2 and is only excluded from the challenge', async ({ page }) => {
+test('CaixaBank works in steps 1 and 2 and the replay, and is only excluded from the sale decision', async ({ page }) => {
   await openSimulator(page);
   await startJourney(page, CAIXA);
-  await expect(page.locator('.sim-result .sim-values dd strong').first()).toBeVisible();
-  const game = page.locator('section.hsg');
-  await expect(game.getByText('Este reto no usa este fondo; elige otro para jugar.')).toBeVisible();
-  await expect(game.getByLabel('Fondo para el reto').locator(`option[value="${CAIXA}"]`)).toHaveCount(0);
-  await expect(game.getByLabel('Fondo para el reto').locator(`option[value="${SANTANDER}"]`)).toHaveCount(1);
+  const tm = page.locator('#jr-step-3 .tm');
+  await expect(tm).toBeVisible();
+  for (let i = 0; i < 3; i++) await tm.getByRole('button', { name: 'Siguiente mes' }).click();
+  await tm.locator('.tm-option').first().click();
+  await expect(tm.locator('.tm-note[data-block="bank"]')).toContainText('no participa en la comparación de venta');
+  await expect(tm.getByRole('button', { name: 'Vender ahora' })).toHaveCount(0);
 });
 
-test('annual contribution gets a clear note in step 3', async ({ page }) => {
+test('annual contribution gets a clear note instead of the sale decision', async ({ page }) => {
   await openSimulator(page);
   await startJourney(page, SANTANDER);
   await page.getByText('Más opciones').click();
   await page.getByLabel('Frecuencia de aportación').selectOption('annual');
-  const game = page.locator('section.hsg');
-  await expect(game.getByText('El reto usa aportación mensual.')).toBeVisible();
-  await game.getByRole('button', { name: 'Usar aportación mensual' }).click();
-  await expect(game.getByLabel('Mes de venta')).toBeVisible();
+  await page.getByLabel('Tiempo de práctica').fill('13');
+  const tm = page.locator('#jr-step-3 .tm');
+  await expect(tm).toContainText('Mes 0 de 13');
+  for (let i = 0; i < 3; i++) await tm.getByRole('button', { name: 'Siguiente mes' }).click();
+  await tm.locator('.tm-option').first().click();
+  await expect(tm.locator('.tm-note[data-block="annual"]')).toContainText('aportación mensual');
+  await expect(tm.getByRole('button', { name: 'Vender ahora' })).toHaveCount(0);
 });
 
-test('local mode keeps steps 1 and 2 and shows the server-only notice in step 3 without calling the game endpoint', async ({ page }) => {
+test('local mode keeps steps 1 to 3, shows the server-only notice at the sale decision and never calls the game endpoint', async ({ page }) => {
   await local(page);
   const calls: string[] = [];
   page.on('request', r => { if (r.url().includes('/api/game/compare')) calls.push(r.url()); });
   await openSimulator(page);
   await startJourney(page, SANTANDER);
-  await expect(page.locator('.sim-result .sim-values dd strong').first()).toBeVisible();
-  const game = page.locator('section.hsg');
-  await expect(game.getByText(/solo está disponible con el servidor de la demo/)).toBeVisible();
-  await expect(game.getByRole('button')).toHaveCount(0);
+  const tm = page.locator('#jr-step-3 .tm');
+  for (let i = 0; i < 3; i++) await tm.getByRole('button', { name: 'Siguiente mes' }).click();
+  await tm.locator('.tm-option').first().click();
+  await expect(tm.locator('.tm-note[data-block="local"]')).toContainText(/solo está disponible con el servidor de la demo/);
+  await expect(tm.getByRole('button', { name: 'Vender ahora' })).toHaveCount(0);
   await page.waitForTimeout(300);
   expect(calls).toEqual([]);
 });
@@ -255,11 +264,14 @@ test('English labels across the journey', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'About the same' })).toBeVisible();
   await expect(page.getByLabel('Practice period')).toBeVisible();
   await reveal(page);
-  await expect(page.locator('.jr-feedback')).toContainText(/You ended with .* having put in/);
+  await expect(page.locator('.jr-ack')).toContainText('Your answer: About the same.');
+  await finishReplay(page);
+  await expect(page.locator('.tm-summary')).toContainText(/You finish the journey with .* having put in/);
   await expect(page.locator('.jr-achievement')).toHaveText('You discovered: not all the final money is gain');
-  await expect(page.locator('section.hsg h2')).toHaveText('What if I sell in month X?');
+  await expect(page.locator('#jr-step-3 h2')).toHaveText('Live the journey');
   await expect(page.getByText('Step 3 of 3').first()).toBeVisible();
-  await expect(page.getByLabel('Move to choose the sale month')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next month' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
 });
 
 test('guide adapts to the level: advanced collapses it behind a toggle', async ({ page }) => {
@@ -297,12 +309,20 @@ for (const theme of ['light', 'dark'] as const) {
     await openSimulator(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
     await startJourney(page, SANTANDER);
-    await expect(page.locator('section.hsg')).toBeVisible();
+    await expect(page.locator('#jr-step-3 .tm')).toBeVisible();
+    // Step 1 is folded once the replay starts, so its fund cards are measured first.
+    for (const selector of ['.jr-fund-name', '.jr-fund-facts dd', '.jr-fund-facts dt']) {
+      expect(await contrast(page, selector), `${selector} in ${theme}`).toBeGreaterThanOrEqual(4.5);
+    }
+    // Open a pause (month 3 is the largest drop of this fund) so the question card is measured too.
+    for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Siguiente mes' }).click();
+    await expect(page.locator('.tm-card')).toBeVisible();
     const checks: [string, string?][] = [
       ['.jr-step-btn[aria-current="step"]'], ['.jr-step-btn:not([aria-current])'], ['.jr-guide-body p'], ['.jr-guide-body strong'],
-      ['#jr-step-1 .jr-step-label'], ['#jr-step-2 .jr-step-label'], ['.hsg .panel-number'],
-      ['.jr-preset'], ['.jr-feedback p'], ['.jr-achievement'], ['.jr-fund-name'],
-      ['.hsg-answer'], ['.hsg-run'], ['#jr-step-2 .button.dark'], ['.jr-fund-facts dd'], ['.jr-fund-facts dt'],
+      ['#jr-step-1 .jr-step-label'], ['#jr-step-2 .jr-step-label'], ['#jr-step-3 .jr-step-label'],
+      ['.jr-preset'], ['.jr-feedback p'], ['#jr-step-1 .jr-collapsed p'],
+      ['.tm-btn.tm-primary'], ['.tm-btn:not(.tm-primary)'], ['.tm-big dt'], ['.tm-big dd'], ['.tm-gl dd'], ['.tm-month'],
+      ['.tm-card h3'], ['.tm-badge'], ['.tm-option'], ['.tm-skip', '.tm-card'], ['#jr-step-2 .button.dark'],
     ];
     for (const [selector, bg] of checks) {
       const ratio = await contrast(page, selector, bg);
@@ -321,11 +341,17 @@ for (const width of [375, 320]) {
       expect(await overflow(page)).toBeLessThanOrEqual(0);
       await startJourney(page, SANTANDER);
       await page.getByLabel('Tiempo de práctica').fill('24');
-      await expect(page.locator('.sim-result .sim-values')).toBeVisible();
-      await page.locator('section.hsg').getByLabel('Mes de venta').fill('12');
-      await page.locator('section.hsg').getByRole('button', { name: 'Acabé con algo parecido' }).click();
-      await expect(page.locator('.hsg-card')).toHaveCount(2);
-      await page.getByRole('button', { name: 'Ver tabla' }).click();
+      await expect(page.locator('.jr-ack')).toBeVisible();
+      const tm = page.locator('#jr-step-3 .tm');
+      await expect(tm).toContainText('Mes 0 de 24');
+      for (let i = 0; i < 3; i++) await tm.getByRole('button', { name: 'Siguiente mes' }).click();
+      await expect(tm.locator('.tm-card')).toBeVisible();
+      await tm.locator('.tm-option').first().click();
+      await expect(tm.getByRole('button', { name: 'Vender ahora' })).toBeVisible();
+      await tm.getByRole('button', { name: 'Vender ahora' }).click();
+      await expect(tm.locator('.tm-card')).toHaveCount(0);
+      await tm.getByText('Ver tabla de los meses visibles').click();
+      await expect(tm.getByRole('table')).toBeVisible();
       await expect.poll(() => overflow(page), { timeout: 5000 }).toBeLessThanOrEqual(0);
       const box = await page.locator('.journey').boundingBox();
       expect(box!.x + box!.width).toBeLessThanOrEqual(width);
@@ -348,12 +374,14 @@ test('clicking the already-active preset after the reveal keeps the result', asy
   await startJourney(page);
   const preset = page.getByRole('button', { name: /Todo de golpe: 1000/ });
   await preset.click();
-  await expect(page.locator('.sim-result .sim-values dd strong').first()).toHaveText('999,70 €');
+  await finishReplay(page);
+  await expect(page.locator('.tm-summary .sim-values dd strong').first()).toHaveText('999,70 €');
   await expect(preset).toHaveAttribute('aria-pressed', 'true');
   await preset.click();
   await page.waitForTimeout(700);
-  await expect(page.locator('.sim-result .sim-values dd strong').first()).toHaveText('999,70 €');
-  await expect(page.locator('.sim-result .investment-chart')).toBeVisible();
+  // The same inputs keep the result and the replay.
+  await expect(page.locator('.tm-summary .sim-values dd strong').first()).toHaveText('999,70 €');
+  await expect(page.locator('#jr-step-3 .tm-plot')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Explícame este resultado' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Seguir con el paso 3/ })).toBeVisible();
 });
@@ -373,38 +401,40 @@ test('switching language while a recalculation is in flight still ends with the 
   await request;
   await page.getByRole('button', { name: 'English' }).click();
   release?.();
-  await expect(page.locator('.sim-result .sim-values dd strong').first()).toHaveText('€1,400.52');
+  await expect(page.locator('#jr-step-3 .tm')).toContainText('Month 0 of 12');
+  await finishReplay(page);
+  await expect(page.locator('.tm-summary .sim-values dd strong').first()).toHaveText('€1,400.52');
 });
 
-test('focus moves to the result headings after answering and when jumping to step 3', async ({ page }) => {
+test('focus moves to the result heading after answering and to the replay heading when jumping to step 3', async ({ page }) => {
   await openSimulator(page);
   await pickFund(page, SANTANDER);
   await reveal(page);
   await expect(page.locator('#jr-result-title')).toBeFocused();
   await expect(page.locator('#jr-step-3')).toBeVisible();
   await page.getByRole('button', { name: /Seguir con el paso 3/ }).click();
-  await expect(page.locator('#hsg-title')).toBeFocused();
+  await expect(page.locator('#tm-title')).toBeFocused();
   await expect(page.getByRole('navigation', { name: 'Tu recorrido' }).getByText('Paso 3 de 3')).toBeVisible();
   await page.getByRole('navigation', { name: 'Tu recorrido' }).getByRole('button').nth(1).click();
   await expect(page.locator('#jr-h-2')).toBeFocused();
   await page.getByRole('navigation', { name: 'Tu recorrido' }).getByRole('button').nth(2).click();
-  await expect(page.locator('#hsg-title')).toBeFocused();
-  // Answering in step 3 removes the buttons: focus goes to the results heading.
-  await page.locator('section.hsg').getByRole('button', { name: 'Acabé con algo parecido' }).click();
-  await expect(page.locator('.hsg-card')).toHaveCount(2);
-  await expect(page.locator('#hsg-results-title')).toBeFocused();
+  await expect(page.locator('#tm-title')).toBeFocused();
 });
 
 test('the stepper follows where the user is working, and the verdict is in the status region', async ({ page }) => {
   await openSimulator(page);
   await startJourney(page, SANTANDER);
   const stepper = page.getByRole('navigation', { name: 'Tu recorrido' });
-  await page.locator('section.hsg').getByLabel('Mes de venta').focus();
+  // Keyboard focus is tracked on focus; pointer focus is tracked by the click that follows (see Simulator.trackFocus).
+  await page.keyboard.press('Shift');
+  await page.locator('#tm-next').focus();
   await expect(stepper.getByText('Paso 3 de 3')).toBeVisible();
+  await page.keyboard.press('Shift');
   await page.getByLabel('Importe inicial').focus();
   await expect(stepper.getByText('Paso 2 de 3')).toBeVisible();
   await page.locator('#jr-h-1').click();
   await expect(stepper.getByText('Paso 1 de 3')).toBeVisible();
+  await finishReplay(page);
   await expect(page.locator('.sim-result [role="status"][aria-atomic="true"]')).toContainText(/Tu respuesta: Más o menos lo mismo\./);
 });
 
@@ -444,7 +474,16 @@ test('the tutor never receives a result the user has not revealed or that is bei
   expect(contexts[0].simulation).toBeUndefined();
   await page.getByRole('dialog', { name: 'Tu asistente' }).getByRole('button', { name: 'Cerrar asistente' }).click();
   await reveal(page);
-  await expect(page.locator('.sim-result .sim-values')).toBeVisible();
+  await expect(page.locator('.jr-ack')).toBeVisible();
+  // Answered but the replay is not finished: the tutor still does not get the result.
+  await page.getByRole('button', { name: 'Abrir asistente' }).click();
+  await page.locator('#chat-input').fill('¿Y el resultado?');
+  await page.getByRole('button', { name: 'Enviar pregunta' }).click();
+  await expect.poll(() => contexts.length).toBe(2);
+  expect(contexts[1].simulation).toBeUndefined();
+  await page.getByRole('dialog', { name: 'Tu asistente' }).getByRole('button', { name: 'Cerrar asistente' }).click();
+  await finishReplay(page);
+  await expect(page.locator('.tm-summary .sim-values')).toBeVisible();
   // While the new request is held, the old result is not exposed either.
   const held = page.waitForRequest(r => r.url().endsWith('/api/simulations') && r.postDataJSON().recurringContribution === 75);
   await page.getByLabel('Aportación mensual').fill('75');
@@ -452,8 +491,8 @@ test('the tutor never receives a result the user has not revealed or that is bei
   await page.getByRole('button', { name: 'Abrir asistente' }).click();
   await page.locator('#chat-input').fill('¿Y ahora?');
   await page.getByRole('button', { name: 'Enviar pregunta' }).click();
-  await expect.poll(() => contexts.length).toBe(2);
-  expect(contexts[1].simulation).toBeUndefined();
+  await expect.poll(() => contexts.length).toBe(3);
+  expect(contexts[2].simulation).toBeUndefined();
   release?.();
 });
 
@@ -479,12 +518,12 @@ for (const theme of ['light', 'dark'] as const) {
     await page.addInitScript(theme => localStorage.setItem('t2f-theme', theme), theme);
     await openSimulator(page);
     await startJourney(page, SANTANDER);
-    await expect(page.locator('section.hsg')).toBeVisible();
+    await expect(page.locator('#jr-step-3 .tm')).toBeVisible();
     const ratios = await page.evaluate(() => {
       const parse = (c: string) => { const m = c.match(/[\d.]+/g)!.map(Number); return { r: m[0], g: m[1], b: m[2], a: m[3] ?? 1 }; };
       const lum = ({ r, g, b }: { r: number; g: number; b: number }) => { const f = (v: number) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
       const solid = (el: Element | null) => { for (let e = el; e; e = e.parentElement) { const c = parse(getComputedStyle(e).backgroundColor); if (c.a > 0.99) return c; } return { r: 255, g: 255, b: 255, a: 1 }; };
-      return ['.jr-fund:not(.is-checked) .jr-fund-card', '.jr-field', '.jr-more', '.hsg-field input'].map(selector => {
+      return ['.jr-fund:not(.is-checked) .jr-fund-card', '.jr-field', '.jr-more', '.tm-btn:not(.tm-primary)', '.tm-big:nth-child(2)', '.tm-plot'].map(selector => {
         const el = document.querySelector(selector)!;
         const border = parse(getComputedStyle(el).borderTopColor);
         const [a, b] = [lum(border), lum(solid(el.parentElement))].sort((x, y) => y - x);

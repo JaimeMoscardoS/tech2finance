@@ -1,4 +1,4 @@
-import { startJourney } from "./journey";
+import { startAndFinish } from "./journey";
 import { test, expect } from "@playwright/test";
 
 test("result help is prominent and opens the local tutor with the current result", async ({
@@ -9,12 +9,13 @@ test("result help is prominent and opens the local tutor with the current result
   );
   await page.goto("/");
   await page.getByRole("button", { name: "Simulador", exact: true }).click();
-  await startJourney(page);
+  await startAndFinish(page);
   const help = page.locator(".result-help");
   const button = help.getByRole("button", { name: "Explícame este resultado" });
   await expect(button).toBeVisible();
   expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(56);
-  await expect(page.locator(".sim-result .investment-chart")).toBeVisible();
+  // The chart now lives in step 3 (the month-by-month replay), not inside the step 2 result.
+  await expect(page.locator("#jr-step-3 .tm-plot")).toBeVisible();
   await page.screenshot({ path: "/tmp/t2f-result-help.png", fullPage: true });
   await button.focus();
   await page.keyboard.press("Enter");
@@ -33,7 +34,7 @@ test("result help sends server tutor the active simulation", async ({
 }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Simulador", exact: true }).click();
-  await startJourney(page);
+  await startAndFinish(page);
   const button = page.getByRole("button", { name: "Explícame este resultado" });
   await expect(button).toBeVisible();
   await button.click();
@@ -61,7 +62,7 @@ test("result help fits and remains legible in each level and theme on mobile", a
   await page.goto("/");
   await page.getByRole("button", { name: "Abrir menú" }).click();
   await page.getByRole("button", { name: "Simulador", exact: true }).click();
-  await startJourney(page);
+  await startAndFinish(page);
   for (const theme of ["light", "dark"]) {
     if (theme === "dark")
       await page.getByRole("button", { name: "Modo oscuro" }).click();
