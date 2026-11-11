@@ -6,6 +6,8 @@ Contrato operativo de la API local de Tech2Finance. BancoT2F es un anfitrión fi
 
 ## Catálogo, simulación y caída
 
+La rama añade `POST /api/decline-events`: recalcula el informe, detecta una caída actual del 5 % y consulta contexto del archivo del BCE. La búsqueda es macroeconómica, tiene límites y puede desactivarse; no atribuye causas ni representa una conexión bancaria. Configuración, contrato y estados en [detección y noticias](contratos.md#detección-y-noticias).
+
 `GET /api/catalog` devuelve versión `2.0`, bancos, instrumentos, `demoStudyInstrumentIds`, `portfolioExample`, `annualHistory`, `navHistory`, perfil anfitrión y procedencia. La lista de estudio no altera la entidad de los fondos. El cliente no envía valores liquidativos, fuentes ni resultados al servidor.
 
 `POST /api/simulations` recibe `instrumentId`, `initial`, `recurringContribution`, `periods`, `startDate` opcional y `contributionFrequency` opcional (`monthly` por defecto o `annual`). La fecha inicial debe ser un cierre mensual observado. Cada periodo corresponde al siguiente cierre real; el máximo disponible es 72 desde diciembre de 2019, sin extrapolación. La aportación se suma después de la variación: mensualmente o en los periodos 12, 24, etc. Una simulación anual inferior a doce periodos no realiza ninguna aportación periódica. La salida `real_monthly_nav` incluye fecha y NAV exacto de cada observación, aportaciones, valores calculados, fuentes y hashes de catálogo e histórico.

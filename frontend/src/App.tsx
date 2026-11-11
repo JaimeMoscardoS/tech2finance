@@ -40,6 +40,7 @@ import { simulateNav } from "./nav-history";
 import AssistantPanel from "./AssistantPanel";
 import VoiceAssistantPanel from "./VoiceAssistantPanel";
 import AntiPanicPanel from "./AntiPanicPanel";
+import { useDeclineEvent } from "./decline-events";
 import Recovery from "./Recovery";
 const PracticeLab = lazy(() => import("./PracticeLab"));
 
@@ -255,6 +256,7 @@ export default function App() {
   const portfolioRows = catalog?.navHistory.instruments.find(i => i.isin === portfolioInstrument?.identifier && i.eligible)?.monthly;
   const portfolioResult = (() => { try { return portfolioRows && portfolioSpec ? simulateNav(portfolioRows, portfolioSpec.initial, portfolioSpec.recurringContribution, portfolioSpec.periods, portfolioSpec.startDate, portfolioSpec.contributionFrequency) : null; } catch { return null; } })();
   const points = portfolioResult?.timeline ?? [];
+  const declineEvent = useDeclineEvent(!!portfolioResult, mode, language, JSON.stringify({portfolioSpec, portfolioRows}));
   const nav = [
     { key: "home" as const, icon: Grid2X2 },
     { key: "explore" as const, icon: Compass },
@@ -620,7 +622,7 @@ export default function App() {
                   <span>{language === "es" ? "Ver cartera" : "View portfolio"}<ArrowRight size={14} /></span>
                 </button>
               </div>
-              <button type="button" className="calm-card" onClick={openPortfolioDecline} disabled={!portfolioResult}><span className="action-icon mint"><Pause size={21}/></span><span><strong>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}</strong><small>{language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options."}</small></span><ArrowRight size={19}/></button>
+              <div><button type="button" className="calm-card" onClick={openPortfolioDecline} disabled={!portfolioResult}><span className="action-icon mint"><Pause size={21}/></span><span><strong>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}</strong><small>{declineEvent.event?.status === "triggered" ? `${language === "es" ? "Caída detectada en el ejemplo histórico" : "Decline detected in the historical example"}: ${declineEvent.event.news.periodStart} – ${declineEvent.event.news.periodEnd} · ${declineEvent.event.news.items.length} ${language === "es" ? "fuentes de contexto BCE" : "ECB context sources"}` : (language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options.")}</small></span><ArrowRight size={19}/></button><div role="status">{declineEvent.state === "error" ? (language === "es" ? "No se pudo comprobar la caída y el contexto del BCE." : "The decline and ECB context could not be checked.") : ""}</div><button type="button" hidden={!declineEvent.hasError} onClick={declineEvent.retry}>{declineEvent.state === "ready" ? (language === "es" ? "Actualizar contexto" : "Refresh context") : (language === "es" ? "Reintentar" : "Retry")}</button></div>
             </>
           )}
           {page === "explore" && <FundsExplorer hostBankId={configuredBank} navHistory={catalog.navHistory} language={language} level={level} onLevel={setLevel} banks={catalog.banks} instruments={instruments} history={catalog.annualHistory} bankProfile={configuredBank === "demo" ? catalog.bankProfile : undefined} selectedId={selectedId} onSelect={item => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setOperationPending(false); setServerError(false); setSelectedId(item.instrumentId); setResult(null); }} onPractice={item => { if (item.dataStatus !== "historical_nav") return; selectInstrument(item); setJourneyFund("fund"); choose("simulator"); }} onVoice={openVoice} onText={openAssistant} />}
@@ -683,7 +685,7 @@ export default function App() {
                     </div>
                     <span className="pill">{t.examplePortfolioLabel}</span>
                   </div>
-                <button type="button" className="calm-card" onClick={openPortfolioDecline} disabled={!portfolioResult}><span className="action-icon mint"><Pause size={21}/></span><span><strong>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}</strong><small>{language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options."}</small></span><ArrowRight size={19}/></button>
+                <div><button type="button" className="calm-card" onClick={openPortfolioDecline} disabled={!portfolioResult}><span className="action-icon mint"><Pause size={21}/></span><span><strong>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}</strong><small>{declineEvent.event?.status === "triggered" ? `${language === "es" ? "Caída detectada en el ejemplo histórico" : "Decline detected in the historical example"}: ${declineEvent.event.news.periodStart} – ${declineEvent.event.news.periodEnd} · ${declineEvent.event.news.items.length} ${language === "es" ? "fuentes de contexto BCE" : "ECB context sources"}` : (language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options.")}</small></span><ArrowRight size={19}/></button><div role="status">{declineEvent.state === "error" ? (language === "es" ? "No se pudo comprobar la caída y el contexto del BCE." : "The decline and ECB context could not be checked.") : ""}</div><button type="button" hidden={!declineEvent.hasError} onClick={declineEvent.retry}>{declineEvent.state === "ready" ? (language === "es" ? "Actualizar contexto" : "Refresh context") : (language === "es" ? "Reintentar" : "Retry")}</button></div>
                   <InvestmentChart
                     compact
                     language={language}
@@ -741,7 +743,7 @@ export default function App() {
       </main>
       <AssistantPanel provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
       <VoiceAssistantPanel open={voiceAssistant} onClose={() => { if (voiceRef.current?.contains(document.activeElement)) voiceTriggerRef.current?.focus(); setVoiceAssistant(false); }} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
-      {pause && declineSpec && <AntiPanicPanel onTalk={talkDecline} report={pause} spec={declineSpec} level={level} mode={mode} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
+      {pause && declineSpec && <AntiPanicPanel onTalk={talkDecline} report={pause} initialNews={declineSpec.basis === "portfolio_demo" && declineEvent.event?.status === "triggered" ? declineEvent.event.news : null} spec={declineSpec} level={level} mode={mode} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
 
     </div>
   );
