@@ -1,3 +1,4 @@
+import { pickFund, reveal, startJourney } from './journey';
 import { test, expect } from '@playwright/test';
 
 test('real server calculates monthly contributions, decline and contextual tutor', async ({ page, request }) => {
@@ -6,8 +7,10 @@ test('real server calculates monthly contributions, decline and contextual tutor
   const missing = await request.post('/api/simulations', {data:{instrumentId:'bbva-mi-inversion-bolsa',initial:500,recurringContribution:0,periods:12}}); expect(missing.status()).toBe(409);
   await page.goto('http://127.0.0.1:5194/'); await expect(page.locator('.connection-settings summary')).toContainText('Servidor de demo');
   await page.getByRole('button',{name:'Simulador',exact:true}).click();
-  await expect(page.getByLabel('Instrumento')).toHaveValue('caixabank-monetario-estandar');
-  await page.getByLabel('Aportación mensual').fill('100'); await page.getByLabel('Tiempo de práctica').selectOption('12'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
+  await expect(page.getByRole('radiogroup',{name:'Instrumento'})).toBeVisible();
+  await expect(page.locator('input[name="jr-fund"]:checked')).toHaveCount(0);
+  await pickFund(page);
+  await page.getByLabel('Aportación mensual').fill('100'); await page.getByLabel('Tiempo de práctica').fill('12'); await reveal(page);
   await expect(page.locator('.sim-values')).toContainText('1700,75'); await expect(page.locator('.sim-values')).toContainText('1700,00'); await expect(page.locator('.sim-values')).toContainText('0,75');
   await page.getByRole('button',{name:'Entender las caídas'}).click(); await expect(page.getByRole('dialog')).toContainText('2020');
   await page.getByRole('button',{name:/Preguntar al asistente/i}).click();
@@ -34,8 +37,10 @@ test('late server simulation cannot replace newer choice', async ({page}) => {
   let release: (() => void) | undefined; const gate = new Promise<void>(resolve => {release=resolve});
   await page.route('**/api/simulations', async route => { const body=route.request().postDataJSON(); if (body.initial === 123) await gate; try { await route.continue(); } catch {} });
   await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
-  await page.getByLabel('Importe inicial').fill('123'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
-  await page.getByLabel('Importe inicial').fill('500'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
+  await startJourney(page);
+  const held = page.waitForRequest(req => req.url().endsWith('/api/simulations') && req.postDataJSON().initial === 123);
+  await page.getByLabel('Importe inicial').fill('123'); await held;
+  await page.getByLabel('Importe inicial').fill('500');
   await expect(page.locator('.sim-values')).toContainText('1100,30'); release?.();
   await expect(page.locator('.sim-values')).toContainText('1100,30');
 });

@@ -109,7 +109,7 @@ test("configured Caixa bank scopes exploration, simulator and practice", async (
   ).toHaveCount(1);
   await page.getByRole("button", { name: "Simulador", exact: true }).click();
   await expect(page.getByLabel("Entidad", { exact: true })).toHaveCount(0);
-  await expect(page.getByLabel("Instrumento").locator("option")).toHaveCount(1);
+  await expect(page.getByRole("radiogroup", { name: "Instrumento" }).getByRole("radio")).toHaveCount(1);
   await page.getByRole("button", { name: "Abrir práctica guiada" }).click();
   await expect(page.locator(".practice-lab")).toBeVisible();
   await expect(page.locator(".practice-lesson:disabled")).toHaveCount(1);
