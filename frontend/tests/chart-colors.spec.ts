@@ -26,7 +26,7 @@ test('levels change appearance in both themes while chart meanings remain fixed'
   }
   expect(new Set(accents).size).toBe(3);
  }
- await page.getByLabel('Entidad de la demo').selectOption('caixabank');
+ await page.goto('http://127.0.0.1:5177/'); await page.getByRole('button',{name:'Explorar',exact:true}).click();
  await levels.getByRole('button',{name:'Intermedio',exact:true}).click();
  await expect(page.locator('.annual-row .negative')).toHaveCount(2);
  await expect(page.locator('.annual-row .positive')).toHaveCount(3);

@@ -8,7 +8,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { annualHistory } from "./annual-history";
-import { type Bank, type Instrument } from "./catalog";
+import { type Instrument } from "./catalog";
 import { copy, type Language } from "./copy";
 import {
   MAX_SIMULATION_AMOUNT,
@@ -29,7 +29,6 @@ type Props = {
   t: (typeof copy)[Language];
   language: Language;
   level: Level;
-  banks: Bank[];
   instruments: Instrument[];
   history: typeof annualHistory;
   selected: Instrument;
@@ -56,7 +55,6 @@ export default function Simulator({
   language,
   level,
   selected,
-  banks,
   instruments,
   history,
   result,
@@ -94,6 +92,7 @@ export default function Simulator({
               : t.missingHistory}
         </span>
       </div>
+      {instruments.some(item => item.instrumentId === history.instrumentId) && (
       <button
         className="text-link history-shortcut"
         type="button"
@@ -108,6 +107,7 @@ export default function Simulator({
         {t.tryHistory}
         <ArrowRight size={15} />
       </button>
+      )}
       <div className="sim-grid">
         <form className="panel sim-form" onSubmit={run} noValidate>
           <div className="panel-number">01 / {t.configure}</div>
@@ -126,40 +126,9 @@ export default function Simulator({
                   if (item) selectInstrument(item);
                 }}
               >
-                <option value="fund">{t.mixedAsset}</option>
-                <option value="etf">{t.equityAsset}</option>
-                <option value="stock">{t.fixedAsset}</option>
-              </select>
-            </div>
-          </label>
-          <label>
-            {t.entity}
-            <div className="field">
-              <select
-                aria-label={t.entity}
-                value={selected.bankId}
-                onChange={(e) => {
-                  const item = instruments.find(
-                    (x) =>
-                      x.assetType === selected.assetType &&
-                      x.bankId === e.target.value,
-                  );
-                  if (item) selectInstrument(item);
-                }}
-              >
-                {banks
-                  .filter((bank) =>
-                    instruments.some(
-                      (item) =>
-                        item.assetType === selected.assetType &&
-                        item.bankId === bank.id,
-                    ),
-                  )
-                  .map((bank) => (
-                    <option key={bank.id} value={bank.id}>
-                      {bank.name[language]}
-                    </option>
-                  ))}
+                {instruments.some(i => i.assetType === "fund") && <option value="fund">{t.mixedAsset}</option>}
+                {instruments.some(i => i.assetType === "etf") && <option value="etf">{t.equityAsset}</option>}
+                {instruments.some(i => i.assetType === "stock") && <option value="stock">{t.fixedAsset}</option>}
               </select>
             </div>
           </label>
@@ -383,6 +352,11 @@ export default function Simulator({
                   <strong>{euro(result.profit)}</strong>
                 </div>
               </div>
+              <div className="result-help">
+                <MessageCircle size={23} aria-hidden="true" />
+                <div><strong>{t.explainResult}</strong><p>{language === "es" ? "Pregunta al asistente por este ejemplo y sus datos." : "Ask the assistant about this example and its data."}</p></div>
+                <button className="button dark" type="button" onClick={openAssistant}>{language === "es" ? "Explícame este resultado" : "Explain this result"}<ArrowRight size={17}/></button>
+              </div>
               <InvestmentChart
                 language={language}
                 title={t.chartTitle}
@@ -446,20 +420,7 @@ export default function Simulator({
           )}
         </section>
       </div>
-      {selected.dataStatus === "fictional" &&
-        result?.instrumentId === selected.instrumentId && (
-          <div className="tip-box">
-            <MessageCircle size={19} />
-            <div>
-              <strong>{t.explainResult}</strong>
-              <p>{t.askExample}</p>
-            </div>
-            <button className="button outline" onClick={openAssistant}>
-              {t.askButton}
-              <ArrowRight size={15} />
-            </button>
-          </div>
-        )}
+
     </>
   );
 }

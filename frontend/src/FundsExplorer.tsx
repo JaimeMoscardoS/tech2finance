@@ -4,6 +4,7 @@ import type { Bank, Instrument } from "./catalog";
 import type { Language } from "./copy";
 import type { Catalog } from "./server-api";
 import "./funds-explorer.css";
+import GoalsPanel from "./GoalsPanel";
 import { annualPeriods } from "./annual-periods";
 
 type Level = "beginner" | "intermediate" | "advanced";
@@ -41,6 +42,7 @@ export default function FundsExplorer({
   const [sort, setSort] = useState("name");
   const [filterKnown, setFilterKnown] = useState("all");
   const [comparison, setComparison] = useState<Record<string, string[]>>({});
+  const [chartSelection, setChartSelection] = useState<string[] | null>(null);
   // These educational examples are invented solely for the fictional demo funds.
   const examples: Record<string, { risk: number; fee: number; years: number }> =
     {
@@ -112,11 +114,6 @@ export default function FundsExplorer({
               a.name[language].localeCompare(b.name[language])
             : a.name[language].localeCompare(b.name[language]),
     );
-  const chooseBank = (id: string) => {
-    setComparison({});
-    const first = funds.find((i) => i.bankId === id);
-    if (first) onSelect(first);
-  };
   const type = (i: Instrument) =>
     ({
       mixed: es ? "Mixto" : "Mixed",
@@ -146,22 +143,47 @@ export default function FundsExplorer({
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(n);
-  const rowsFor = (i: Instrument) =>
-    i.dataStatus === "annual_history" && i.instrumentId === history.instrumentId
-      ? history.returns.map((row) => ({
-          label: String(row.year),
-          rate: row.rate,
-        }))
-      : i.dataStatus === "fictional" && i.returns
-        ? i.returns.map((rate, index) => ({
-            label: `${es ? "Mes" : "Month"} ${index + 1}`,
-            rate,
+  const rowsFor = (i: Instrument) => {
+    const rows =
+      i.dataStatus === "annual_history" &&
+      i.instrumentId === history.instrumentId
+        ? history.returns.map((row) => ({
+            label: String(row.year),
+            rate: row.rate,
           }))
-        : [];
+        : i.dataStatus === "fictional" && i.returns
+          ? i.returns.map((rate, index) => ({
+              label: `${es ? "Mes" : "Month"} ${index + 1}`,
+              rate,
+            }))
+          : [];
+    return rows.every(
+      (row) =>
+        Number.isFinite(row.rate) &&
+        row.rate >= -1 &&
+        Number.isFinite(row.rate * 100),
+    )
+      ? rows
+      : [];
+  };
+  const sameSeries = (a: Instrument, b: Instrument) =>
+    a.dataStatus === b.dataStatus &&
+    rowsFor(a).length > 0 &&
+    rowsFor(a).length === rowsFor(b).length &&
+    rowsFor(a).every((row, index) => row.label === rowsFor(b)[index].label);
+  const firstChart = bankFunds.find((i) => rowsFor(i).length > 0);
+  const defaultCharts = firstChart
+    ? bankFunds
+        .filter((i) => sameSeries(firstChart, i))
+        .slice(0, 3)
+        .map((i) => i.instrumentId)
+    : [];
   const dashboardMax = Math.max(
-    ...bankFunds.flatMap((item) =>
-      rowsFor(item).map((row) => Math.abs(row.rate)),
-    ),
+    ...bankFunds
+      .filter((item) =>
+        (chartSelection ?? defaultCharts).includes(item.instrumentId),
+      )
+      .flatMap((item) => rowsFor(item).map((row) => Math.abs(row.rate))),
     0.001,
   );
   const download = (i: Instrument) => {
@@ -207,7 +229,10 @@ export default function FundsExplorer({
               const value = annualPeriods(history.returns, n);
               return (
                 <tr key={n}>
-                  <th scope="row">{n}{value ? ` (${value.start}–${value.end})` : ""}</th>
+                  <th scope="row">
+                    {n}
+                    {value ? ` (${value.start}–${value.end})` : ""}
+                  </th>
                   <td>{value ? percent(value.cumulative) : unavailable}</td>
                   <td>{value ? percent(value.annualised) : unavailable}</td>
                 </tr>
@@ -249,15 +274,17 @@ export default function FundsExplorer({
         <h4>{historyLabel(i)}</h4>
         {rows.length ? (
           <>
-            {!compact && <p>
-              {i.dataStatus === "fictional"
-                ? es
-                  ? "Una secuencia inventada, no datos históricos ni una previsión."
-                  : "An invented sequence, not historical data or a forecast."
-                : es
-                  ? "Cifras anuales redondeadas, no precios ni previsiones. Gastos corrientes deducidos; sin impuestos ni costes externos."
-                  : "Rounded annual figures, not prices or forecasts. Ongoing charges deducted; excludes taxes and external costs."}
-            </p>}
+            {!compact && (
+              <p>
+                {i.dataStatus === "fictional"
+                  ? es
+                    ? "Una secuencia inventada, no datos históricos ni una previsión."
+                    : "An invented sequence, not historical data or a forecast."
+                  : es
+                    ? "Cifras anuales redondeadas, no precios ni previsiones. Gastos corrientes deducidos; sin impuestos ni costes externos."
+                    : "Rounded annual figures, not prices or forecasts. Ongoing charges deducted; excludes taxes and external costs."}
+              </p>
+            )}
             {compact ? (
               <>
                 <div className="mini-bars" aria-hidden="true">
@@ -325,15 +352,17 @@ export default function FundsExplorer({
                 ))}
               </div>
             )}
-            {compact && <p>
-              {i.dataStatus === "fictional"
-                ? es
-                  ? "Una secuencia inventada, no datos históricos ni una previsión."
-                  : "An invented sequence, not historical data or a forecast."
-                : es
-                  ? "Cifras anuales redondeadas, no precios ni previsiones. Gastos corrientes deducidos; sin impuestos ni costes externos."
-                  : "Rounded annual figures, not prices or forecasts. Ongoing charges deducted; excludes taxes and external costs."}
-            </p>}
+            {compact && (
+              <p>
+                {i.dataStatus === "fictional"
+                  ? es
+                    ? "Una secuencia inventada, no datos históricos ni una previsión."
+                    : "An invented sequence, not historical data or a forecast."
+                  : es
+                    ? "Cifras anuales redondeadas, no precios ni previsiones. Gastos corrientes deducidos; sin impuestos ni costes externos."
+                    : "Rounded annual figures, not prices or forecasts. Ongoing charges deducted; excludes taxes and external costs."}
+              </p>
+            )}
             <p>
               {es
                 ? "Verde: positivo; rojo: negativo; gris: cero."
@@ -424,7 +453,14 @@ export default function FundsExplorer({
                 key={item}
                 type="button"
                 aria-pressed={level === item}
-                onClick={() => onLevel(item)}
+                onClick={() => {
+                  onLevel(item);
+                  if (item === "beginner") {
+                    setFilterHistory("all");
+                    setFilterKnown("all");
+                    setSort("name");
+                  }
+                }}
               >
                 {
                   (es
@@ -449,23 +485,11 @@ export default function FundsExplorer({
                 : "Analyse available data by fund."}
         </p>
       </div>
-      <div className="funds-controls">
-        <label>
-          {es ? "Entidad de la demo" : "Demo institution"}
-          <select value={bankId} onChange={(e) => chooseBank(e.target.value)}>
-            {availableBanks.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name[language]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <p>
-          {es
-            ? "La selección cambia los ejemplos del catálogo; no hay ningún banco conectado."
-            : "This selection changes the catalogue examples; no bank is connected."}
-        </p>
-      </div>
+      <p className="institution-label">
+        {es ? "Catálogo de" : "Catalogue of"}:{" "}
+        {availableBanks.find((b) => b.id === bankId)?.name[language]} ·{" "}
+        {es ? "Demo sin conexión bancaria" : "Demo without a bank connection"}
+      </p>
       <aside
         className="fund-help"
         aria-label={es ? "Ayuda para entender" : "Help understanding"}
@@ -493,81 +517,93 @@ export default function FundsExplorer({
           </button>
         </div>
       </aside>
-      {level !== "beginner" && (
-        <div className="fund-filters">
-          <label>
-            {es ? "Buscar fondo" : "Search funds"}
-            <input value={search} onChange={(e) => setSearch(e.target.value)} />
-          </label>
-          <label>
-            {es ? "Tipo" : "Type"}
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-            >
-              <option value="all">{es ? "Todos" : "All"}</option>
-              <option value="mixed">{es ? "Mixto" : "Mixed"}</option>
-              <option value="equity">{es ? "Renta variable" : "Equity"}</option>
-              <option value="fixed">
-                {es ? "Renta fija" : "Fixed income"}
-              </option>
-              <option value="unknown">{unavailable}</option>
-            </select>
-          </label>
-          <label>
-            {es ? "Serie" : "Series"}
-            <select
-              value={filterHistory}
-              onChange={(e) => setFilterHistory(e.target.value)}
-            >
-              <option value="all">{es ? "Todas" : "All"}</option>
-              <option value="available">
-                {es ? "Disponible" : "Available"}
-              </option>
-              <option value="missing">{unavailable}</option>
-            </select>
-          </label>
-          <label>
-            {es ? "Riesgo, coste y plazo" : "Risk, fee and horizon"}
-            <select
-              value={filterKnown}
-              onChange={(e) => setFilterKnown(e.target.value)}
-            >
-              <option value="all">{es ? "Todos" : "All"}</option>
-              <option value="known">
-                {es
-                  ? "Supuestos ficticios disponibles"
-                  : "Fictional assumptions available"}
-              </option>
-              <option value="missing">{unavailable}</option>
-            </select>
-          </label>
-          <label>
-            {es ? "Ordenar por" : "Sort by"}
-            <select value={sort} onChange={(e) => setSort(e.target.value)}>
-              <option value="name">{es ? "Nombre" : "Name"}</option>
-              <option value="type">{es ? "Tipo" : "Type"}</option>
-              <option value="data">
-                {es ? "Datos disponibles" : "Data availability"}
-              </option>
-              <option value="risk">
-                {es ? "Riesgo ficticio" : "Fictional risk"}
-              </option>
-              <option value="fee">
-                {es ? "Coste ficticio" : "Fictional fee"}
-              </option>
-              <option value="horizon">
-                {es ? "Plazo ficticio" : "Fictional horizon"}
-              </option>
-            </select>
-          </label>
-          <p>
-            {es
-              ? `Fondo seleccionado para el asistente: ${selected.name[language]}. Los filtros no lo cambian.`
-              : `Fund selected for the assistant: ${selected.name[language]}. Filters do not change it.`}
-          </p>
-        </div>
-      )}
+      <GoalsPanel language={language} />
+      {
+        <details
+          className="filter-disclosure"
+          open={level === "intermediate" ? true : undefined}
+        >
+          <summary>{es ? "Más filtros" : "More filters"}</summary>
+          <div className="fund-filters">
+            <label>
+              {es ? "Buscar fondo" : "Search funds"}
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </label>
+            <label>
+              {es ? "Tipo" : "Type"}
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option value="all">{es ? "Todos" : "All"}</option>
+                <option value="mixed">{es ? "Mixto" : "Mixed"}</option>
+                <option value="equity">
+                  {es ? "Renta variable" : "Equity"}
+                </option>
+                <option value="fixed">
+                  {es ? "Renta fija" : "Fixed income"}
+                </option>
+                <option value="unknown">{unavailable}</option>
+              </select>
+            </label>
+            <label>
+              {es ? "Serie" : "Series"}
+              <select
+                value={filterHistory}
+                onChange={(e) => setFilterHistory(e.target.value)}
+              >
+                <option value="all">{es ? "Todas" : "All"}</option>
+                <option value="available">
+                  {es ? "Disponible" : "Available"}
+                </option>
+                <option value="missing">{unavailable}</option>
+              </select>
+            </label>
+            <label>
+              {es ? "Riesgo, coste y plazo" : "Risk, fee and horizon"}
+              <select
+                value={filterKnown}
+                onChange={(e) => setFilterKnown(e.target.value)}
+              >
+                <option value="all">{es ? "Todos" : "All"}</option>
+                <option value="known">
+                  {es
+                    ? "Supuestos ficticios disponibles"
+                    : "Fictional assumptions available"}
+                </option>
+                <option value="missing">{unavailable}</option>
+              </select>
+            </label>
+            <label>
+              {es ? "Ordenar por" : "Sort by"}
+              <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                <option value="name">{es ? "Nombre" : "Name"}</option>
+                <option value="type">{es ? "Tipo" : "Type"}</option>
+                <option value="data">
+                  {es ? "Datos disponibles" : "Data availability"}
+                </option>
+                <option value="risk">
+                  {es ? "Riesgo ficticio" : "Fictional risk"}
+                </option>
+                <option value="fee">
+                  {es ? "Coste ficticio" : "Fictional fee"}
+                </option>
+                <option value="horizon">
+                  {es ? "Plazo ficticio" : "Fictional horizon"}
+                </option>
+              </select>
+            </label>
+            <p>
+              {es
+                ? `Fondo seleccionado para el asistente: ${selected.name[language]}. Los filtros no lo cambian.`
+                : `Fund selected for the assistant: ${selected.name[language]}. Filters do not change it.`}
+            </p>
+          </div>
+        </details>
+      }
       {level === "beginner" && (
         <div className="beginner-layout" data-layout="beginner">
           <div className="beginner-guide">
@@ -581,6 +617,35 @@ export default function FundsExplorer({
                 : "Select an example to learn the essentials."}
             </p>
             <label>
+              {es ? "Buscar por nombre" : "Search by name"}
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </label>
+            <label>
+              {es ? "¿En qué invierte?" : "What does it invest in?"}
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option value="all">{es ? "Todos" : "All"}</option>
+                <option value="equity">{es ? "Acciones" : "Shares"}</option>
+                <option value="fixed">{es ? "Bonos" : "Bonds"}</option>
+                <option value="mixed">
+                  {es ? "Combinación" : "Combination"}
+                </option>
+                <option value="unknown">
+                  {es ? "No disponible" : "Unavailable"}
+                </option>
+              </select>
+            </label>
+            <p>
+              {es
+                ? `Coincidencias: ${visibleFunds.length}. Selección conservada: ${selected.name[language]}.`
+                : `Matches: ${visibleFunds.length}. Kept selection: ${selected.name[language]}.`}
+            </p>
+            <label>
               {es ? "Fondo" : "Fund"}
               <select
                 value={selected.instrumentId}
@@ -591,7 +656,12 @@ export default function FundsExplorer({
                   if (item) onSelect(item);
                 }}
               >
-                {bankFunds.map((i) => (
+                {[
+                  selected,
+                  ...visibleFunds.filter(
+                    (i) => i.instrumentId !== selected.instrumentId,
+                  ),
+                ].map((i) => (
                   <option key={i.instrumentId} value={i.instrumentId}>
                     {i.name[language]}
                   </option>
@@ -884,33 +954,87 @@ export default function FundsExplorer({
                   : "No funds match the filters."}
               </p>
             )}
+            <fieldset className="compare-picker">
+              <legend>
+                {es
+                  ? "Elige hasta tres series del mismo periodo para comparar"
+                  : "Choose up to three series from the same period to compare"}
+              </legend>
+              {bankFunds.map((i) => {
+                const ids = chartSelection ?? defaultCharts;
+                const reference = bankFunds.find(
+                  (item) => item.instrumentId === ids[0],
+                );
+                const compatible = !reference || sameSeries(reference, i);
+                return (
+                  <label key={i.instrumentId}>
+                    <input
+                      type="checkbox"
+                      checked={ids.includes(i.instrumentId)}
+                      disabled={
+                        !ids.includes(i.instrumentId) &&
+                        (ids.length >= 3 ||
+                          !compatible ||
+                          rowsFor(i).length === 0)
+                      }
+                      onChange={(e) =>
+                        setChartSelection(
+                          e.target.checked
+                            ? [...ids, i.instrumentId]
+                            : ids.filter((id) => id !== i.instrumentId),
+                        )
+                      }
+                    />{" "}
+                    {i.name[language]} · {historyLabel(i)}
+                  </label>
+                );
+              })}
+            </fieldset>
+            {defaultCharts.length === 0 && (
+              <p role="status">
+                {es
+                  ? "No hay series válidas para comparar en esta entidad."
+                  : "No valid series are available for comparison at this institution."}
+              </p>
+            )}
+            {(chartSelection ?? defaultCharts).length < 2 && (
+              <p>
+                {es
+                  ? "Selecciona al menos dos series compatibles para compararlas; no se combinan periodos ni datos ficticios con publicados."
+                  : "Select at least two compatible series to compare; periods and fictional and published data are not mixed."}
+              </p>
+            )}
             <div className="fund-dashboard">
-              {visibleFunds.map((i) => (
-                <article
-                  className={`dashboard-card ${selected.instrumentId === i.instrumentId ? "selected" : ""}`}
-                  key={i.instrumentId}
-                >
-                  <button
-                    className="dashboard-select"
-                    type="button"
-                    aria-pressed={selected.instrumentId === i.instrumentId}
-                    onClick={() => onSelect(i)}
+              {visibleFunds
+                .filter((i) =>
+                  (chartSelection ?? defaultCharts).includes(i.instrumentId),
+                )
+                .map((i) => (
+                  <article
+                    className={`dashboard-card ${selected.instrumentId === i.instrumentId ? "selected" : ""}`}
+                    key={i.instrumentId}
                   >
-                    <span>
-                      {selected.instrumentId === i.instrumentId
-                        ? es
-                          ? "SELECCIONADO"
-                          : "SELECTED"
-                        : es
-                          ? "SELECCIONAR"
-                          : "SELECT"}
-                    </span>
-                    <strong>{i.name[language]}</strong>
-                  </button>
-                  {chart(i, true)}
-                  {source(i)}
-                </article>
-              ))}
+                    <button
+                      className="dashboard-select"
+                      type="button"
+                      aria-pressed={selected.instrumentId === i.instrumentId}
+                      onClick={() => onSelect(i)}
+                    >
+                      <span>
+                        {selected.instrumentId === i.instrumentId
+                          ? es
+                            ? "SELECCIONADO"
+                            : "SELECTED"
+                          : es
+                            ? "SELECCIONAR"
+                            : "SELECT"}
+                      </span>
+                      <strong>{i.name[language]}</strong>
+                    </button>
+                    {chart(i, true)}
+                    {source(i)}
+                  </article>
+                ))}
             </div>
           </section>
           <article className="fund-detail technical-inspector">

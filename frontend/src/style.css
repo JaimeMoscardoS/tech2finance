@@ -256,3 +256,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .welcome-content { max-width: 100%; padding: 26px 30px; }
 .welcome-content p { max-width: 680px; }
 @media (max-width: 760px) { .connection-area { margin-top: -12px; } .welcome-content { padding: 24px; } }
+
+.result-help { display:flex; gap:14px; align-items:center; padding:18px; margin:22px 0; border:1px solid var(--border); border-radius:14px; background:var(--surface-tint); color:var(--ink); }.result-help > svg { color:var(--accent); flex-shrink:0; }.result-help > div { flex:1; }.result-help strong { font-size:16px; }.result-help p { color:var(--muted); font-size:13px; line-height:1.45; margin-top:5px; }.result-help .button { min-height:56px; font-size:15px; }
+@media(max-width:760px) { .result-help { align-items:flex-start; flex-wrap:wrap; }.result-help > div { flex:1 1 calc(100% - 44px); }.result-help .button { width:100%; } }

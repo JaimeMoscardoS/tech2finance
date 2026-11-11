@@ -135,16 +135,7 @@ test('catalogue selection changes the example and real funds have no invented re
  await page.getByRole('button', {name:/Detalle: Principiante/}).click();
  await page.getByRole('button', {name:'Avanzado', exact:true}).click();
  await expect(panel.locator('.sim-values strong').first()).toHaveText(newValue!);
- await page.getByLabel('Tipo de activo').selectOption('fund');
- await page.getByLabel('Entidad').selectOption('bbva');
- await expect(panel.getByText(/No hay histórico verificado/)).toBeVisible();
- await expect(panel.getByText(/No hay histórico verificado/)).toBeVisible();
- await expect(page.getByRole('button', {name:'Ver mi ejemplo'})).toBeDisabled();
- await page.getByLabel('Entidad').selectOption('caixabank');
- await expect(page.getByLabel('Instrumento')).toHaveValue('caixabank-monetario-estandar');
- await expect(panel.getByText(/ES0138045002/)).toBeVisible();
- await expect(panel.getByText('HISTÓRICO ANUAL')).toBeVisible();
- await expect(panel.locator('.sim-values strong').filter({hasText:'529,02 €'})).toBeVisible();
+ await expect(page.getByLabel('Entidad',{exact:true})).toHaveCount(0);
  await page.screenshot({path:'test-results/catalog-desktop.png',fullPage:true});
 });
 
@@ -152,7 +143,7 @@ test('explore transfers the chosen fictional instrument', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button',{name:'Explorar',exact:true}).click();
- await page.locator('.beginner-guide select').selectOption('demo-equity');
+ await page.locator('.beginner-guide select').last().selectOption('demo-equity');
  await page.getByRole('button',{name:'Practicar con este fondo'}).click();
  await expect(page.getByLabel('Instrumento')).toHaveValue('demo-equity');
  await expect(page.locator('.sim-result')).toContainText('Fondo Horizonte');
@@ -161,13 +152,12 @@ test('explore transfers the chosen fictional instrument', async ({page}) => {
 test('catalogue fits mobile in English dark mode', async ({browser}) => {
  const context=await browser.newContext({viewport:{width:320,height:700}});
  const page=await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('/');
+  await page.goto('http://127.0.0.1:5177/');
  await page.getByRole('button',{name:'English'}).click();
  await page.getByRole('button',{name:'Dark theme'}).click();
  await page.getByRole('button',{name:'Open menu'}).click();
  await page.getByRole('button',{name:'Simulator',exact:true}).click();
  await page.getByLabel('Asset type').selectOption('fund');
- await page.getByLabel('Institution').selectOption('caixabank');
  await page.screenshot({path:'test-results/catalog-mobile.png',fullPage:true});
  await expect(page.getByText('ANNUAL HISTORY')).toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
@@ -176,9 +166,8 @@ test('catalogue fits mobile in English dark mode', async ({browser}) => {
 
 test('annual history keeps fixed period and excludes monthly contributions', async ({ page }) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('/');
+  await page.goto('http://127.0.0.1:5177/');
  await page.getByRole('button', {name:'Simulador', exact:true}).click();
- await page.getByLabel('Aportación mensual').fill('200');
  await page.getByRole('button', {name:'Probar histórico 2021–2025'}).click();
  const panel=page.locator('.sim-result');
  await expect(page.getByLabel('Instrumento')).toHaveValue('caixabank-monetario-estandar');
@@ -210,12 +199,7 @@ test('annual history keeps fixed period and excludes monthly contributions', asy
  await page.getByRole('button',{name:'Modo oscuro'}).click();
  await page.getByRole('button',{name:'English'}).click();
  await expect(panel.locator('.sim-values strong').filter({hasText:'€1,058.05'})).toBeVisible();
- await page.getByLabel('Institution').selectOption('bbva');
- await expect(panel.getByText(/No verified historical series/)).toBeVisible();
- await page.getByLabel('Institution').selectOption('santander');
- await expect(panel.getByText(/No verified historical series/)).toBeVisible();
- await page.getByLabel('Institution').selectOption('demo');
- await expect(page.getByLabel('Monthly contribution')).toHaveValue('200');
+
 });
 
 test('tablet layout, modal scrolling and mobile menu background', async ({ browser }) => {
@@ -247,7 +231,7 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
 
 test('annual deposits, table and percentage view stay consistent across preferences', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('/');
+  await page.goto('http://127.0.0.1:5177/');
  await page.getByRole('button',{name:'Simulador',exact:true}).click();
  await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
  await page.getByLabel('Aportación anual').fill('50');
@@ -275,18 +259,12 @@ test('annual deposits, table and percentage view stay consistent across preferen
  await page.getByLabel('Annual contribution').fill('75');
  await expect(panel.getByText(/Your inputs changed/)).toBeVisible();
  await expect(panel.locator('.investment-chart')).toHaveCount(0);
- await page.getByLabel('Institution').selectOption('bbva');
- await expect(panel.getByText(/No verified historical series/)).toBeVisible();
- await expect(panel.locator('.investment-chart')).toHaveCount(0);
- await page.getByLabel('Institution').selectOption('demo');
- await expect(page.getByLabel('Monthly contribution')).toHaveValue('50');
- await page.getByLabel('Institution').selectOption('caixabank');
- await expect(page.getByLabel('Annual contribution')).toHaveValue('75');
+
 });
 
 test('validation identifies the actual field and retains annual help', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+  await page.goto('http://127.0.0.1:5177/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
  await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
  const initial=page.getByLabel('Importe inicial'); const annual=page.getByLabel('Aportación anual');
  await initial.fill('-1'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
@@ -320,7 +298,7 @@ test('local tutor grounds results, keeps previous messages and excludes dirty re
  const providerRequests:string[]=[];
  page.on('request',request=>{if (/anthropic|elevenlabs/i.test(request.url())) providerRequests.push(request.url());});
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+  await page.goto('http://127.0.0.1:5177/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
  await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
  await page.getByLabel('Aportación anual').fill('50'); await page.getByRole('button',{name:'Ver mi ejemplo'}).click();
  await page.getByRole('button',{name:'Abrir asistente'}).click();
@@ -366,7 +344,7 @@ test('assistant remains scrollable and voice controls reachable in short landsca
 
 test('decline explanations use observed series without inventing a current crisis', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
+  await page.goto('http://127.0.0.1:5177/'); await page.getByRole('button',{name:'Simulador',exact:true}).click();
  await page.getByRole('button',{name:'Probar histórico 2021–2025'}).click();
  await page.getByRole('button',{name:'Entender las caídas'}).click();
  let dialog=page.getByRole('dialog',{name:'Una pausa para comprender'});

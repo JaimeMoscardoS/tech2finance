@@ -25,6 +25,7 @@ import { banks as localBanks, instruments as localInstruments, type Instrument }
 import { requestJson, isCatalog, isSimulation, isDecline, serverTutorProvider, type Catalog, type SimulationSpec, type DeclineSpec, type ServerSimulation } from "./server-api";
 import InvestmentChart from "./LazyInvestmentChart";
 import FundsExplorer from "./FundsExplorer";
+import { scopeCatalog } from "./bank-scope";
 import Simulator, { type FieldError } from "./Simulator";
 import { MAX_SIMULATION_AMOUNT } from "./simulation-types";
 import { copy, type Language } from "./copy";
@@ -54,7 +55,9 @@ export default function App() {
     () => saved("t2f-theme", ["light", "dark"], "light") as "light" | "dark",
   );
   const [mode, setMode] = useState<"server" | "local">(() => saved("t2f-data-mode", ["server", "local"], "server") as "server" | "local");
-  const [catalog, setCatalog] = useState<Catalog | null>(() => saved("t2f-data-mode", ["server", "local"], "server") === "local" ? {schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,annualHistory} : null);
+  const [rawCatalog, setCatalog] = useState<Catalog | null>(() => saved("t2f-data-mode", ["server", "local"], "server") === "local" ? {schemaVersion:"1.0",banks:localBanks,instruments:localInstruments,annualHistory} : null);
+  const configuredBank = import.meta.env.VITE_BANK_ID?.trim() || "demo";
+  const catalog = useMemo(() => rawCatalog ? scopeCatalog(rawCatalog, configuredBank) : null, [rawCatalog, configuredBank]);
   const catalogMode = useRef<"server" | "local" | null>(saved("t2f-data-mode", ["server", "local"], "server") === "local" ? "local" : null);
   const [serverError, setServerError] = useState(false);
   const [serverLoading, setServerLoading] = useState(false);
@@ -95,14 +98,7 @@ export default function App() {
           annual: number;
         })
       | null
-    >(() => saved("t2f-data-mode", ["server", "local"], "server") === "local" ? ({
-      ...simulate(500, 50, 12),
-      instrumentId: "demo-mixed",
-      initial: 500,
-      monthly: 50,
-      months: 12,
-      annual: 0,
-    }) : null),
+    >(null),
     [error, setError] = useState<FieldError>(null);
   const [selectedId, setSelectedId] = useState("demo-mixed");
   useEffect(() => {
@@ -116,7 +112,7 @@ export default function App() {
   const instruments = catalog?.instruments ?? [];
   const selected = instruments.find(
     (item) => item.instrumentId === selectedId,
-  ) ?? localInstruments[0];
+  ) ?? instruments[0] ?? localInstruments[0];
   const modalRef = useRef<HTMLElement>(null),
     assistantRef = useRef<HTMLElement>(null),
     voiceRef = useRef<HTMLElement>(null),
@@ -230,7 +226,7 @@ export default function App() {
   useEffect(() => { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; if (catalogMode.current === mode) setServerError(false); setOperationPending(false); }, [initial, monthly, annual, months, mode, language]);
   useEffect(() => { retryAction.current = null; if (catalogMode.current === mode) setServerError(false); }, [level, practiceOpen, decision]);
   useEffect(() => { if (catalog && restoreRecoveryFocus.current) { restoreRecoveryFocus.current = false; mainRef.current?.focus(); } }, [catalog]);
-  useEffect(() => { if (catalog && !practiceOpen && catalogMode.current === mode) { const item = catalog.instruments.find(i => i.instrumentId === selectedId) ?? catalog.instruments[0]; selectInstrument(item); } }, [catalog, mode, practiceOpen]);
+  useEffect(() => { if (catalog && !practiceOpen && catalogMode.current === mode) { const item = catalog.instruments.find(i => i.instrumentId === selectedId) ?? catalog.instruments[0]; if (item) selectInstrument(item); } }, [catalog, mode, practiceOpen]);
   useEffect(() => {
     if (page !== "explore" || !catalog || catalog.instruments.some(item => item.instrumentId === selectedId && item.assetType === "fund")) return;
     const first = catalog.instruments.find(item => item.assetType === "fund");
@@ -363,6 +359,7 @@ export default function App() {
     {mode === "server" && serverError && retryAction.current && <button type="button" className="connection-retry" onClick={()=>retryAction.current?.()}>{language === "es" ? "Reintentar" : "Retry"}</button>}
   </div>;
   if (!catalog) return <Recovery ref={recoveryRef} language={language} theme={theme} failed={serverError} onLanguage={setLanguage} onTheme={setTheme} onRetry={retryCatalog} onLocal={switchMode} />;
+  if (!catalog.banks.length || !catalog.instruments.length) return <main className="content"><h1>{language === "es" ? "Catálogo no disponible" : "Catalogue unavailable"}</h1><p>{language === "es" ? "La entidad configurada no tiene instrumentos en esta demo. Revisa la configuración del despliegue." : "The configured institution has no instruments in this demo. Check the deployment configuration."}</p></main>;
   return (
     <div className="app-shell">
       <aside
@@ -594,7 +591,6 @@ export default function App() {
                 language,
                 level,
                 selected,
-                banks: catalog.banks,
                 instruments,
                 history: catalog.annualHistory,
                 result,
