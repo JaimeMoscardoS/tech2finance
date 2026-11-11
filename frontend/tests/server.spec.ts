@@ -16,7 +16,7 @@ test('real server calculates monthly contributions, decline and contextual tutor
   await page.getByRole('button',{name:/Preguntar al asistente/i}).click();
   await page.locator('#chat-input').fill('¿Cuánto he aportado?'); await page.getByRole('button',{name:'Enviar pregunta'}).click();
   await expect(page.locator('.message.assistant').last()).toContainText('1700');
-  await expect(page.locator('.assistant-banner')).toContainText('SERVIDOR DE DEMO');
+  await expect(page.locator('.assistant-banner')).toContainText('Servidor de demo');
   const followup = page.waitForRequest(req => req.url().endsWith('/api/tutor') && req.method() === 'POST');
   await page.locator('#chat-input').fill('Y la ganancia?'); await page.getByRole('button',{name:'Enviar pregunta'}).click();
   const payload = (await followup).postDataJSON(); expect(payload.history.length).toBe(2); expect(payload.history[1].intent).toBeTruthy();

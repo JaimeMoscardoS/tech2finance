@@ -141,12 +141,12 @@ def _claude_text(key: str, model: str, facts: dict, question: str, history: list
     return text
 
 
-def reply(payload: dict) -> dict:
+def reply(payload: dict, *, rules_only: bool = False) -> dict:
     if not _slots.acquire(blocking=False):
         raise TutorUnavailable()
     try:
         rules = _rules_reply(payload)
-        if tutor_provider() != "anthropic":
+        if rules_only or tutor_provider() != "anthropic":
             return rules
         key = os.environ.get("ANTHROPIC_API_KEY", "")
         model = os.environ.get("T2F_ANTHROPIC_MODEL", DEFAULT_MODEL)

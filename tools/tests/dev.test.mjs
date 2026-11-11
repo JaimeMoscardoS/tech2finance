@@ -7,7 +7,7 @@ test('ports reject invalid and non-integer values', () => {
   assert.equal(validatePort('8092'), 8092);
 });
 test('health contract is exact for demo mode', () => {
-  assert.equal(validateHealth({status:'ok', mode:'demo', tutorProvider:'server_rules', externalProviders:false}), true);
+  assert.equal(validateHealth({status:'ok', mode:'demo', tutorProvider:'server_rules', speechProvider:'browser_local', speechKeyConfigured:false, externalProviders:false}), true);
   assert.equal(validateHealth({status:'ok', mode:'demo'}), false);
 });
 test('catalog requires version and all collections', () => {
@@ -16,10 +16,13 @@ test('catalog requires version and all collections', () => {
 });
 
 test('health accepts the optional Claude tutor provider', () => {
-  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'anthropic',externalProviders:true}), true);
-  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'other',externalProviders:true}), false);
+  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'anthropic',speechProvider:'browser_local',speechKeyConfigured:false,externalProviders:true}), true);
+  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'other',speechProvider:'browser_local',speechKeyConfigured:false,externalProviders:true}), false);
 });
 
 test('health accepts a configured external analysis provider', () => {
-  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'server_rules',externalProviders:true}), true);
+  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'anthropic',speechProvider:'elevenlabs',speechKeyConfigured:true,externalProviders:true}), true);
+  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'unknown',speechProvider:'elevenlabs',speechKeyConfigured:true,externalProviders:true}), false);
+  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'anthropic',speechProvider:'unknown',speechKeyConfigured:true,externalProviders:true}), false);
+  assert.equal(validateHealth({status:'ok',mode:'demo',tutorProvider:'anthropic',speechProvider:'elevenlabs',speechKeyConfigured:'true',externalProviders:true}), false);
 });

@@ -118,16 +118,16 @@ Una noticia que coincide con una caída no demuestra por sí misma que la haya c
 
 ## Conversación y voz
 
-En esta rama el tutor funciona por defecto mediante reglas y contexto explícito; opcionalmente (`T2F_TUTOR_PROVIDER=anthropic` con clave en el servidor) Claude redacta la respuesta a partir de los hechos verificados y de la respuesta por reglas, con respaldo visible a reglas ante cualquier fallo (rama `feature/tutor-claude`, comprobado solo con proveedor simulado, no probado con clave real, ni en `main` ni desplegado; detalles en [contratos](contratos.md#tutor-del-chat-con-claude-opcional)). La lectura de voz utiliza voces locales del dispositivo cuando están disponibles; el dictado solo se habilita con procesamiento local y modelo instalado. El micrófono de la barra abre el panel y solicita el reconocimiento local de inmediato; el dictado final se procesa al terminar, sin reactivar el micrófono tras la respuesta. Desde la pausa el inicio es manual. En el chat escrito el dictado se revisa antes de enviarse. La parte de voz con proveedor sigue siendo futura:
+En esta rama el tutor funciona con reglas o con Claude cuando está configurado, sin sustitución silenciosa ante errores. El dictado puede usar procesamiento local o ElevenLabs; el usuario inicia el micrófono y el chat escrito permite revisar el texto antes de enviarlo. Las etiquetas identifican el proveedor de la respuesta. Los detalles y límites están en [contratos](contratos.md#conversación-voz-y-análisis).
 
-La arquitectura propuesta es:
+La arquitectura de esta rama es:
 
 1. El usuario escribe o habla. Si se habilita el micrófono, ElevenLabs transcribe el audio.
-2. El backend prepara la pregunta y el contexto pertinente: pantalla, nivel y datos disponibles de la simulación o cartera ficticia; también objetivo, plazo y noticias verificadas si existen.
+2. El backend prepara la pregunta y el contexto pertinente: pantalla, nivel y datos disponibles de la simulación o cartera ficticia; también plazo y necesidad de liquidez si existen; el objetivo libre del contexto se excluye de la petición al modelo. La pregunta y el historial pueden contener texto libre.
 3. La API de Claude genera una respuesta adaptada al nivel. Los datos y cálculos provienen de los componentes del proyecto, no de cifras inventadas por el modelo.
-4. La interfaz presenta el texto y, si se habilita, ElevenLabs lo convierte en audio.
+4. La interfaz presenta el texto y puede leerlo con una voz local del navegador; la síntesis de voz de ElevenLabs no está implementada.
 
-Primero se propone completar el chat escrito con contexto, después la lectura en voz y finalmente la entrada hablada. La experiencia escrita debe seguir disponible si el proveedor de voz falla. Las claves permanecen en el servidor. El modelo conversacional usado por el producto es distinto de los agentes de desarrollo configurados para el equipo.
+El chat escrito contextual y la entrada hablada están implementados en esta rama. La experiencia escrita debe seguir disponible si el proveedor de voz falla. Las claves permanecen en el servidor. El modelo conversacional usado por el producto es distinto de los agentes de desarrollo configurados para el equipo.
 
 ## Demo y visión futura
 
@@ -143,7 +143,7 @@ El trabajo se divide entre [cinco áreas](organizacion.md): interfaz, backend, s
 
 En `main` existe una primera demo React/TypeScript con catálogo y cartera ficticios, simulador ilustrativo, asistente de respuestas predefinidas y pausa ante una caída. La demo incluye tres niveles con distinta información, español/inglés y temas claro/oscuro. El frontend inicial y las vistas adaptativas se integraron mediante los pull requests #1 y #2. La [guía para backend](backend-contexto.md) recoge las decisiones y los puntos de conexión pendientes.
 
-La demo usa capital virtual y cinco históricos mensuales CNMV. El backend expone la comparación «mantener o vender» en `/api/game/compare` sobre esos cierres; en `main` el Simulador incluye la sección «¿Y si vendo en el mes X?» que consume ese endpoint (comparación simple, no el juego por turnos). En la rama `feature/simulador-guiado` (no en `main`) el Simulador es un recorrido guiado de tres pasos (elegir fondo, cuánto y durante cuánto con pregunta previa y recálculo en vivo, y «¿Y si vendo en el mes X?» como paso 3). CaixaBank solo queda excluido de esa comparación, que solo funciona con el servidor de la demo; los cálculos y contratos no cambian. Detalles y comprobaciones en `frontend/README.md`. La muestra anual publicada anterior se conserva aparte. La API FastAPI es local; el análisis tiene un adaptador opcional para Sonnet pendiente de prueba real. El detector de caídas consulta por defecto comunicados históricos del BCE como contexto macroeconómico; no demuestra causalidad ni conecta datos bancarios. ElevenLabs sigue pendiente. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
+La demo usa capital virtual y cinco históricos mensuales CNMV. El backend expone la comparación «mantener o vender» en `/api/game/compare` sobre esos cierres; en `main` el Simulador incluye la sección «¿Y si vendo en el mes X?» que consume ese endpoint (comparación simple, no el juego por turnos). En la rama `feature/simulador-guiado` (no en `main`) el Simulador es un recorrido guiado de tres pasos (elegir fondo, cuánto y durante cuánto con pregunta previa y recálculo en vivo, y «¿Y si vendo en el mes X?» como paso 3). CaixaBank solo queda excluido de esa comparación, que solo funciona con el servidor de la demo; los cálculos y contratos no cambian. Detalles y comprobaciones en `frontend/README.md`. La muestra anual publicada anterior se conserva aparte. La API FastAPI es local; el análisis tiene un adaptador opcional para Sonnet pendiente de prueba real. El detector de caídas consulta por defecto comunicados históricos del BCE como contexto macroeconómico; no demuestra causalidad ni conecta datos bancarios. La transcripción ElevenLabs está implementada en la rama y pendiente de prueba real. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
 
 
 ## Catálogo local de práctica (rama de trabajo)
@@ -154,7 +154,7 @@ La elegibilidad se basa en informes semestrales que cubren 2020–2025, sin dist
 
 ## Integración local de demostración
 
-En esta rama, el frontend utiliza por defecto la API FastAPI local de catálogo, simulación, caídas y tutor por reglas. Ofrece demo local explícita ante fallo y comparte los ejemplos mediante `shared/demo-data.json`. Por defecto el chat se ejecuta mediante Node local sin LLM ni servicios externos; con `T2F_TUTOR_PROVIDER=anthropic` puede redactarlo Claude (el servidor envía a Anthropic la pregunta, el historial y el contexto, sin el objetivo libre de la pausa), y el análisis detallado incorpora aparte un adaptador opcional para Sonnet; ambos pendientes de prueba real. Véase [backend-contexto](backend-contexto.md) para contrato, ejecución y límites. Esta integración no implica despliegue ni conexión bancaria.
+En esta rama, el frontend usa la API FastAPI local para catálogo, simulación, caídas y tutor; ofrece también demo local explícita. El servidor selecciona Anthropic y ElevenLabs automáticamente cuando sus claves respectivas están disponibles, salvo overrides; el análisis detallado se configura por separado. Las integraciones de esta rama se han probado con proveedores simulados y falta comprobarlas con credenciales reales. Véase [backend-contexto](backend-contexto.md) para contrato y límites. Esta integración no implica despliegue ni conexión bancaria.
 
 
 Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](planning/plan.md).
@@ -169,3 +169,6 @@ En la rama de interfaz, Explorar ofrece guía inicial, comparación y panel téc
 La entidad visible se fija mediante `VITE_BANK_ID` al iniciar o compilar (por defecto `demo`); el filtrado es de interfaz y no sustituye la autorización del servidor. La guía de objetivos usa plantillas locales editables según objetivo y preferencia de fluctuación, con condiciones explícitas de liquidez, reserva y deuda; no es una evaluación de idoneidad y sus respuestas no se envían al tutor. La comparación avanzada permite seleccionar hasta tres series compatibles por frecuencia, periodo y procedencia en gráficos separados con escala común. El simulador ofrece ayuda destacada junto al resultado válido.
 
 La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inversión». La cabecera identifica el modo demo sin dinero real; las fuentes, limitaciones y costes siguen visibles donde aportan contexto.
+
+
+En la rama de trabajo se implementan adaptadores opcionales para transcripción ElevenLabs y conversación Anthropic, con selección y límites descritos en [contratos](contratos.md#conversación-voz-y-análisis). Las pruebas simuladas no acreditan conexiones reales ni calidad de las respuestas; falta comprobarlas con credenciales.
