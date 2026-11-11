@@ -174,3 +174,7 @@ La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inv
 
 
 En la rama de trabajo se implementan adaptadores opcionales para transcripción ElevenLabs y conversación Anthropic, con selección y límites descritos en [contratos](contratos.md#conversación-voz-y-análisis). Las pruebas simuladas no acreditan conexiones reales ni calidad de las respuestas; falta comprobarlas con credenciales.
+
+## Inicio reordenado (rama `mejoras-jurado`)
+
+Orden de Inicio: «Invertir empieza por entender» con 4 tarjetas (Explorar fondos, Simular, Mi cartera, Aprender); tarjeta calmada «¿Te preocupa una caída?» con botón «Entender una caída» (abre la pausa existente, que no bloquea la venta); asistente; y resumen compacto (valor, último mes, objetivo; más volatilidad y caída máxima en Avanzado) con enlace «Ver mi cartera». La gráfica grande queda solo en Mi cartera, donde «Entender una caída» está junto a «Vender / Reducir». El paso «Resumen de la cartera» del modo presentación sigue apuntando a `data-tour="summary"`. Comprobado con build, tests unitarios y specs Playwright de onboarding, dashboard-views, frontend, calm-portfolio, decline-events y bank-rehearsal.

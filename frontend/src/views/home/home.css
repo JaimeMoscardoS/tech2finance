@@ -54,3 +54,25 @@
 .home__period-wrap { min-width: 0; max-width: 100%; }
 .home__action > span { display: grid; gap: .1rem; }
 .home__action-sub { color: var(--muted); font-weight: 500; font-size: .78rem; }
+
+/* Inicio: bienvenida, tarjeta antipánico (tono calmado) y resumen compacto */
+.home { display: grid; gap: 1.5rem; }
+.home__top { grid-template-columns: minmax(0, 1fr) !important; }
+.home__assistant { position: static !important; }
+.home__intro { display: grid; gap: .6rem; }
+.home__intro h2 { margin: 0; font-size: 1.5rem; }
+.home__intro > p { margin: 0; color: var(--muted); max-width: 60ch; }
+.home__cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); margin-top: .4rem; }
+.home__card { display: grid; gap: .45rem; align-content: start; padding: 1.25rem; border: 1px solid var(--card-border, var(--border)); border-radius: 16px; background: var(--surface); }
+.home__card svg { color: var(--accent); }
+.home__card h3 { margin: 0; font-size: 1.1rem; }
+.home__card p { margin: 0; color: var(--muted); }
+.home__card button, .home__worry button { min-height: 44px; margin-top: .4rem; padding: .55rem 1rem; border-radius: 12px; border: 1px solid var(--accent); background: var(--accent); color: var(--action-ink, #fff); font: inherit; font-weight: 700; cursor: pointer; }
+.home__card button:focus-visible, .home__worry button:focus-visible, .home__link:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.home__worry { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.25rem; padding: 1.25rem 1.5rem; border-radius: 16px; border: 1px solid var(--accent); background: var(--accent-soft); }
+.home__worry > svg { color: var(--accent); flex: none; }
+.home__worry > div { flex: 1 1 18rem; }
+.home__worry h2 { margin: 0 0 .2rem; font-size: 1.25rem; }
+.home__worry p { margin: 0; }
+.home__worry button { margin: 0; }
+.home__link { justify-self: start; min-height: 44px; background: none; border: 0; color: var(--accent); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }

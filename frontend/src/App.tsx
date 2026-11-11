@@ -590,11 +590,10 @@ export default function App() {
         <div className="content">
           {modeControls}
           {page === "home" && <>
-            <HomeDashboard language={language} level={level} onAskAssistant={() => openAssistant()} portfolio={shownPortfolio} events={catalog.navHistory.events} insights={insights}
+            <HomeDashboard language={language} level={level} onNavigate={choose} onUnderstandFall={openPortfolioDecline} onAskAssistant={() => openAssistant()} portfolio={shownPortfolio} events={catalog.navHistory.events} insights={insights}
               actions={<>
                 {configuredBank === "demo" && <button type="button" className="home__action" data-tour="decline" onClick={launchDeclineDemo}><TrendingDown size={17} aria-hidden="true" /><span>{language === "es" ? "Probar una caída" : "Try a decline"}{declineEvent.event?.status === "triggered" && <small className="home__action-sub">{language === "es" ? "Caída detectada en el ejemplo histórico" : "Decline detected in the historical example"}: {declineEvent.event.news.periodStart} – {declineEvent.event.news.periodEnd}</small>}</span></button>}
                 <button type="button" className="home__action" onClick={openPractice}><FlaskConical size={17} aria-hidden="true" />{t.practice}</button>
-                <button type="button" className="home__action" onClick={openPortfolioDecline}><Pause size={17} aria-hidden="true" />{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}</button>
               </>}
               status={configuredBank === "demo" ? <>
                 <div role="status" className="decline-event-status">{declineEvent.state === "error" ? (language === "es" ? "No se pudo comprobar la caída y el contexto del BCE." : "The decline and ECB context could not be checked.") : ""}</div>
@@ -644,8 +643,8 @@ export default function App() {
           )
           )}
           {page === "portfolio" && <>
-            <div className="info-banner"><LockKeyhole size={19} /><span>{t.portfolioWarning}</span><button type="button" className="button outline" onClick={openPortfolioDecline}><TrendingDown size={17} />{t.understandFall}</button></div>
-            <FundsDashboard language={language} level={level} theme={theme} portfolio={shownPortfolio} onExplore={()=>choose("explore")} onSimulate={()=>choose("simulator")} onSell={openPortfolioDecline} />
+            <div className="info-banner"><LockKeyhole size={19} /><span>{t.portfolioWarning}</span></div>
+            <FundsDashboard language={language} level={level} theme={theme} portfolio={shownPortfolio} onExplore={()=>choose("explore")} onSimulate={()=>choose("simulator")} onSell={openPortfolioDecline} onUnderstandFall={openPortfolioDecline} />
             <AgentPanelSection level={level} language={language} portfolio={shownPortfolio} insights={insights} />
           </>}
           {page === "learn" && <EducationDashboard language={language} level={level} theme={theme} portfolio={shownPortfolio} onGoSimulation={()=>choose("simulator")} />}

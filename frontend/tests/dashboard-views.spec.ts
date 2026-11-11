@@ -22,7 +22,7 @@ test.describe('Inicio', () => {
     await page.locator('.level-button').click();
     await page.locator('.level-menu').getByRole('button', { name: 'Avanzado' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-level', 'advanced');
-    await expect(page.locator('.dash-kpi')).toHaveCount(8);
+    await expect(page.locator('.dash-kpi')).toHaveCount(5); // resumen compacto: valor, último mes, objetivo + volatilidad y caída máxima
     expect(await page.evaluate(() => localStorage.getItem('t2f-level'))).toBe('advanced');
   });
 

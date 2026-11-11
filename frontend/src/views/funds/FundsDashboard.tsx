@@ -24,6 +24,8 @@ export type FundsDashboardProps = {
   onExplore?: () => void;
   onSimulate?: () => void;
   onSell?: () => void;
+  /** Acceso fijo a la pausa informativa de caídas, junto a «Vender / Reducir». */
+  onUnderstandFall?: () => void;
   /** Cartera ya construida por App (NAV reales CNMV vía `buildRealPortfolio`, la misma que usa Inicio). Sin ella, la cartera DEMO. */
   portfolio?: DemoPortfolio;
 };
@@ -44,14 +46,15 @@ function periodControl(language: Lang, p: ReturnType<typeof usePeriod>) {
   return <PeriodSelector<PeriodId> label={fc[language].period} value={p.period} onChange={p.setPeriod} options={p.options.map((id) => ({ id, label: p.labelOf(language, id) }))} />;
 }
 
-function Actions({ language, onExplore, onSimulate, onSell }: Pick<FundsDashboardProps, "language" | "onExplore" | "onSimulate" | "onSell">) {
+function Actions({ language, onExplore, onSimulate, onSell, onUnderstandFall }: Pick<FundsDashboardProps, "language" | "onExplore" | "onSimulate" | "onSell" | "onUnderstandFall">) {
   const t = fc[language];
-  if (!onExplore && !onSimulate && !onSell) return null;
+  if (!onExplore && !onSimulate && !onSell && !onUnderstandFall) return null;
   return (
     <div className="fd__actions">
       {onExplore && <button type="button" className="fd-btn fd-btn--primary" onClick={onExplore}>{t.explore}</button>}
       {onSimulate && <button type="button" className="fd-btn" onClick={onSimulate}>{t.simulate}</button>}
       {onSell && <button type="button" className="fd-btn" onClick={onSell}>{t.sell}</button>}
+      {onUnderstandFall && <button type="button" className="fd-btn fd-btn--calm" onClick={onUnderstandFall}>{language === "es" ? "Entender una caída" : "Understand a decline"}</button>}
     </div>
   );
 }
@@ -307,7 +310,7 @@ function InitialTrades({ p, language }: { p: DemoPortfolio; language: Lang }) {
 }
 
 function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
-  const { p, language, onExplore, onSimulate, onSell } = props;
+  const { p, language, onExplore, onSimulate, onSell, onUnderstandFall } = props;
   const t = fc[language];
   const per = usePeriod(p, ["3", "6", "12", "24", "all"], "all");
   const [assetClass, setAssetClass] = useState("all");
@@ -343,7 +346,7 @@ function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
         <ExposureBars title={t.geo} description={t.geoDesc} items={p.byRegion.map((g) => ({ key: g.key, label: regionNames[language][g.key], weight: g.weight }))} language={language} demo={false} />
         <ExposureBars title={t.currency} items={p.byCurrency.map((g) => ({ key: g.key, label: currencyNames[language][g.key], weight: g.weight }))} language={language} demo={false} />
       </div>
-      <Section title={t.positions} language={language} level={3} actions={<Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} />}>
+      <Section title={t.positions} language={language} level={3} actions={<Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} onUnderstandFall={onUnderstandFall} />}>
         <div className="fd-filters">
           <label className="fd-field" htmlFor={`${id}-c`}>{t.filterClass}
             <select id={`${id}-c`} value={assetClass} onChange={(e) => setAssetClass(e.target.value)}>
@@ -365,7 +368,7 @@ function Advanced(props: FundsDashboardProps & { p: DemoPortfolio }) {
 
 /** Sección Fondos/Inversiones adaptada al nivel. Datos DEMO ficticios; sin operaciones reales. */
 export default function FundsDashboard(props: FundsDashboardProps) {
-  const { language, level, onExplore, onSimulate, onSell } = props;
+  const { language, level, onExplore, onSimulate, onSell, onUnderstandFall } = props;
   const t = fc[language];
   const p = useMemo(() => props.portfolio ?? buildDemoPortfolio(), [props.portfolio]);
   const real = p.real;
@@ -376,7 +379,7 @@ export default function FundsDashboard(props: FundsDashboardProps) {
   return (
     <div className="fd">
       <h1 className="dash-sr">{language === "es" ? "Mi cartera" : "My portfolio"}</h1>
-      <Section title={t.title} description={subtitle} demo language={language} actions={level !== "advanced" ? <Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} /> : undefined}>
+      <Section title={t.title} description={subtitle} demo language={language} actions={level !== "advanced" ? <Actions language={language} onExplore={onExplore} onSimulate={onSimulate} onSell={onSell} onUnderstandFall={onUnderstandFall} /> : undefined}>
         <details className="dash-origin fd__source">
           <summary>{r.sourceTitle}</summary>
           <p>{real ? r.notice : t.notice}</p>

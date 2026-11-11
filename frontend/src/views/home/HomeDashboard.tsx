@@ -1,14 +1,14 @@
-import { HelpCircle, MessageCircle, Sparkles } from "lucide-react";
+import { BookOpen, Compass, FlaskConical, HelpCircle, LifeBuoy, MessageCircle, Sparkles, Wallet } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { insightFacts, useInsight, type InsightProvider } from "../../insights.ts";
 import { demoFacts } from "../../../../shared/mock/demo-facts.ts";
 import { demoHome } from "../../../../shared/mock/demo-home.ts";
-import { DemoBadge, EvolutionChart, KpiRow, Section, StatusChip } from "../../components/dashboard/index.ts";
+import { DemoBadge, KpiRow, Section, StatusChip } from "../../components/dashboard/index.ts";
 import { KpiCard } from "../../components/dashboard/index.ts";
 import { eur, monthLabel, num, pct, signedEur, signedPct } from "../../components/dashboard/format.ts";
 import { buildDemoPortfolio, type DemoPortfolio } from "../../dashboard-portfolio.ts";
 import type { HistoricalEvent } from "../../../../tutor-ia/src/types.ts";
-import { HOME_PERIODS, goalProgress, lastMonthChangePct, planStatus, selectFacts, sliceByPeriod, type HomePeriod, type PlanStatus } from "../../home-logic.ts";
+import { goalProgress, lastMonthChangePct, planStatus, selectFacts, type PlanStatus } from "../../home-logic.ts";
 import type { Level } from "../../types/level.ts";
 import "./home.css";
 
@@ -19,11 +19,6 @@ type Lang = "es" | "en";
 const DEMO_AS_OF = "2026-11-11";
 const FACT_COUNT: Record<Level, number> = { beginner: 3, intermediate: 4, advanced: 5 };
 
-const periodLabel: Record<Lang, Record<HomePeriod, string>> = {
-  es: { "1w": "1S", "1m": "1M", "3m": "3M", "6m": "6M", "1y": "1A", max: "Máx" },
-  en: { "1w": "1W", "1m": "1M", "3m": "3M", "6m": "6M", "1y": "1Y", max: "Max" },
-};
-
 const copy = {
   es: {
     title: "Inicio", summary: "Resumen de tu cartera de ejemplo", value: "Valor de la cartera", lastMonth: "Último mes",
@@ -31,6 +26,8 @@ const copy = {
     goalOf: (t: string) => `de ${t}`, vol: "Volatilidad anual", dd: "Caída máxima", kpis: "Indicadores de la cartera de ejemplo",
     chart: "Evolución de la cartera", period: "Periodo del gráfico", series: "Cartera DEMO", bench: "Índice de referencia DEMO",
     weekNote: "1S no disponible: los datos DEMO son mensuales y no se inventan datos diarios. 1M muestra el último mes.",
+    cardsAria: "Qué puedes hacer", seePortfolio: "Ver mi cartera", worryTitle: "¿Te preocupa una caída?", worryText: "Respira: antes de decidir, te mostramos con datos qué ha pasado. Nada te obliga a vender ni a mantener.", worryBtn: "Entender una caída",
+    cards: [["explore", "Explorar fondos", "Descubre qué son y cómo se comportan.", "Ver el catálogo"], ["simulator", "Simular", "Prueba qué habría pasado, sin dinero real.", "Probar el simulador"], ["portfolio", "Mi cartera", "Mira tus fondos y tu objetivo.", "Ver mis fondos"], ["learn", "Aprender", "Conceptos clave y práctica del Test MiFID.", "Empezar a aprender"]],
     learnTitle: "Invertir empieza por entender", learnDesc: "Elige por dónde empezar. Todo lo que ves aquí es una demostración educativa, sin operaciones reales.",
     assistant: "Asistente", what: "¿Qué estoy viendo?", how: "¿Cómo van las cosas?", close: "Cerrar", ask: "Preguntar al tutor",
     limits: "Contenido educativo y general: no son órdenes ni asesoramiento personalizado. Las observaciones no prueban causas y nada garantiza rendimientos futuros.",
@@ -44,6 +41,8 @@ const copy = {
     goalOf: (t: string) => `of ${t}`, vol: "Annual volatility", dd: "Maximum drawdown", kpis: "Sample portfolio indicators",
     chart: "Portfolio evolution", period: "Chart period", series: "DEMO portfolio", bench: "DEMO reference index",
     weekNote: "1W unavailable: DEMO data is monthly and no daily data is invented. 1M shows the last month.",
+    cardsAria: "What you can do", seePortfolio: "See my portfolio", worryTitle: "Worried about a decline?", worryText: "Take a breath: before deciding, we show you what happened with data. Nothing forces you to sell or hold.", worryBtn: "Understand a decline",
+    cards: [["explore", "Explore funds", "Discover what they are and how they behave.", "See the catalogue"], ["simulator", "Simulate", "Try what would have happened, with no real money.", "Try the simulator"], ["portfolio", "My portfolio", "See your funds and your goal.", "See my funds"], ["learn", "Learn", "Key concepts and MiFID test practice.", "Start learning"]],
     learnTitle: "Investing starts with understanding", learnDesc: "Pick where to start. Everything here is an educational demo with no real transactions.",
     assistant: "Assistant", what: "What am I looking at?", how: "How are things going?", close: "Close", ask: "Ask the tutor",
     limits: "Educational, general content: not orders or personalised advice. Observations do not prove causes and nothing guarantees future returns.",
@@ -68,8 +67,8 @@ function whatText(level: Level, lang: Lang, real?: DemoPortfolio["real"]): strin
   return [base, es ? "La volatilidad anualizada y la caída máxima se calculan por código sobre esa serie mensual, igual que en «Mi cartera»." : "Annualised volatility and maximum drawdown are computed by code on that monthly series, as in “My portfolio”."];
 }
 
-export default function HomeDashboard({ language, level, onAskAssistant, portfolio, events, insights, actions, status }: {
-  language: Lang; level: Level; onNavigate?: (page: Page) => void; onAskAssistant?: () => void;
+export default function HomeDashboard({ language, level, onNavigate, onUnderstandFall, onAskAssistant, portfolio, events, insights, actions, status }: {
+  language: Lang; level: Level; onNavigate?: (page: Page) => void; onUnderstandFall?: () => void; onAskAssistant?: () => void;
   /** Misma cartera que «Mi cartera», Educación y el asistente (construida en App); sin ella, la cartera DEMO. */
   portfolio?: DemoPortfolio;
   /** Hechos públicos verificados del dataset CNMV (`navHistory.events`); se usan solo con la cartera real. */
@@ -83,19 +82,13 @@ export default function HomeDashboard({ language, level, onAskAssistant, portfol
   const c = copy[language];
   const es = language === "es";
   const panelId = useId();
-  const [period, setPeriod] = useState<HomePeriod>("max");
   const [panel, setPanel] = useState<"what" | "how" | null>(null);
   const p = useMemo(() => portfolio ?? buildDemoPortfolio(), [portfolio]);
   const real = p.real;
   const goal = demoHome.goal;
   const beginner = level === "beginner";
 
-  const values = sliceByPeriod(p.valueSeries, period) ?? p.valueSeries;
-  const bench = sliceByPeriod(p.benchmarkSeries, period) ?? p.benchmarkSeries;
-  const labels = sliceByPeriod(p.labels, period) ?? p.labels;
   const advanced = level === "advanced";
-  const data = values.map((value, i) => ({ label: labels[i], value, compare: advanced || level === "intermediate" ? bench[i] : undefined }));
-  const periodChange = values.length > 1 && values[0] !== 0 ? (values[values.length - 1] / values[0] - 1) * 100 : null;
   const monthChange = lastMonthChangePct(p.valueSeries);
   const progress = goalProgress(p.totalValue, goal.targetEur);
   // El plan DEMO empieza con la serie: meses transcurridos = meses de la serie mostrada (72 con los datos CNMV).
@@ -142,46 +135,36 @@ export default function HomeDashboard({ language, level, onAskAssistant, portfol
   return (
     <div className="home">
       <h1 className="dash-sr">{es ? "Inicio" : "Home"}</h1>
-      <div className="home__top">
-        <div data-tour="summary">
-          <Section title={c.summary} demo language={language}>
-            <div className="home__hero">
-              <KpiRow label={c.kpis}>
-                <KpiCard label={c.value} value={eur(p.totalValue, language)} language={language} />
-                <KpiCard label={c.lastMonth} value={monthChange == null ? c.na : signedPct(monthChange, language)} language={language} />
-                {!beginner && <KpiCard label={c.invested} value={eur(p.totalCost, language)} language={language} />}
-                {!beginner && <KpiCard label={c.available} value={eur(demoHome.availableCashEur, language)} language={language} />}
-                {advanced && <KpiCard label={c.result} value={signedEur(p.pnlAmount, language)} caption={p.pnlPercent == null ? undefined : signedPct(p.pnlPercent, language)} language={language} />}
-                {advanced && <KpiCard label={c.vol} value={p.volatilityPct == null ? c.na : pct(p.volatilityPct, language)} language={language} />}
-                {advanced && <KpiCard label={c.dd} value={p.maxDrawdownPct == null ? c.na : pct(p.maxDrawdownPct, language)} language={language} />}
-                <KpiCard label={c.goal} value={progress ? pct(progress.pct, language) : c.na} caption={`${goal.name[language]} ${c.goalOf(eur(goal.targetEur, language))}`} language={language}>
-                  {progress && <div className="home__goal-bar" role="progressbar" aria-label={c.goal} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress.pct)}><span style={{ width: `${progress.pct}%` }} /></div>}
-                </KpiCard>
-              </KpiRow>
-              <EvolutionChart
-                title={c.chart} data={data} seriesName={real ? (es ? "Cartera" : "Portfolio") : c.series} compareName={real ? real.benchmarkName[language] : c.bench} changePct={periodChange} language={language}
-                periodControl={
-                  <div className="home__period-wrap">
-                    <div className="dash-period" role="group" aria-label={c.period}>
-                      {HOME_PERIODS.filter((o) => o.available).map((o) => (
-                        <button key={o.id} type="button" aria-pressed={o.id === period} onClick={() => setPeriod(o.id)}>{periodLabel[language][o.id]}</button>
-                      ))}
-                    </div>
-                  </div>
-                }
-              />
-              <details className="dash-origin">
-                <summary>{es ? "Origen de los datos" : "Data origin"}</summary>
-                <p>{real
-                  ? (es ? `Valores liquidativos mensuales reales (CNMV, ${monthLabel(real.from, language)} – ${monthLabel(real.to, language)}). Participaciones, efectivo y objetivo son DEMO (ficticios).` : `Real monthly net asset values (CNMV, ${monthLabel(real.from, language)} – ${monthLabel(real.to, language)}). Holdings, cash and goal are DEMO (fictional).`)
-                  : (es ? "Datos ficticios de ejemplo; no son datos reales ni una predicción." : "Fictional sample data; not real data or a prediction.")}</p>
-                <p>{es ? "La serie es mensual: «Último mes» es la última variación mensual y no hay datos diarios." : "The series is monthly: “Last month” is the latest monthly change and there is no daily data."}</p>
-                <p>{c.limits}</p>
-              </details>
-            </div>
-          </Section>
+      <section className="home__intro" aria-labelledby={`${panelId}-intro`}>
+        <h2 id={`${panelId}-intro`}>{c.learnTitle}</h2>
+        <p>{c.learnDesc}</p>
+        <div className="home__cards" role="group" aria-label={c.cardsAria}>
+          {c.cards.map(([id, title, line, btn], i) => {
+            const Icon = [Compass, FlaskConical, Wallet, BookOpen][i];
+            return (
+              <article key={id} className="home__card">
+                <Icon size={26} aria-hidden="true" />
+                <h3>{title}</h3>
+                <p>{line}</p>
+                <button type="button" onClick={() => onNavigate?.(id as Page)}>{btn}</button>
+              </article>
+            );
+          })}
         </div>
+      </section>
 
+      {onUnderstandFall && (
+        <section className="home__worry" aria-labelledby={`${panelId}-worry`}>
+          <LifeBuoy size={30} aria-hidden="true" />
+          <div>
+            <h2 id={`${panelId}-worry`}>{c.worryTitle}</h2>
+            <p>{c.worryText}</p>
+          </div>
+          <button type="button" onClick={onUnderstandFall}>{c.worryBtn}</button>
+        </section>
+      )}
+
+      <div className="home__top">
         <section className="dash-card home__assistant" data-tour="assistant" aria-labelledby={`${panelId}-h`}>
           <h2 id={`${panelId}-h`}><Sparkles size={18} aria-hidden="true" /> {c.assistant}</h2>
           <div className="home__assist">
@@ -234,6 +217,31 @@ export default function HomeDashboard({ language, level, onAskAssistant, portfol
           {status}
           <p className="home__note">{beginner ? (es ? "Contenido educativo: no son órdenes ni consejos personalizados." : "Educational content: not orders or personalised advice.") : c.limits}</p>
         </section>
+
+        <div data-tour="summary">
+          <Section title={c.summary} demo language={language}>
+            <div className="home__hero">
+              <KpiRow label={c.kpis}>
+                <KpiCard label={c.value} value={eur(p.totalValue, language)} language={language} />
+                <KpiCard label={c.lastMonth} value={monthChange == null ? c.na : signedPct(monthChange, language)} language={language} />
+                {advanced && <KpiCard label={c.vol} value={p.volatilityPct == null ? c.na : pct(p.volatilityPct, language)} language={language} />}
+                {advanced && <KpiCard label={c.dd} value={p.maxDrawdownPct == null ? c.na : pct(p.maxDrawdownPct, language)} language={language} />}
+                <KpiCard label={c.goal} value={progress ? pct(progress.pct, language) : c.na} caption={`${goal.name[language]} ${c.goalOf(eur(goal.targetEur, language))}`} language={language}>
+                  {progress && <div className="home__goal-bar" role="progressbar" aria-label={c.goal} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress.pct)}><span style={{ width: `${progress.pct}%` }} /></div>}
+                </KpiCard>
+              </KpiRow>
+              <button type="button" className="home__link" onClick={() => onNavigate?.("portfolio")}>{c.seePortfolio}</button>
+              <details className="dash-origin">
+                <summary>{es ? "Origen de los datos" : "Data origin"}</summary>
+                <p>{real
+                  ? (es ? `Valores liquidativos mensuales reales (CNMV, ${monthLabel(real.from, language)} – ${monthLabel(real.to, language)}). Participaciones, efectivo y objetivo son DEMO (ficticios).` : `Real monthly net asset values (CNMV, ${monthLabel(real.from, language)} – ${monthLabel(real.to, language)}). Holdings, cash and goal are DEMO (fictional).`)
+                  : (es ? "Datos ficticios de ejemplo; no son datos reales ni una predicción." : "Fictional sample data; not real data or a prediction.")}</p>
+                <p>{es ? "La serie es mensual: «Último mes» es la última variación mensual y no hay datos diarios." : "The series is monthly: “Last month” is the latest monthly change and there is no daily data."}</p>
+                <p>{c.limits}</p>
+              </details>
+            </div>
+          </Section>
+        </div>
       </div>
     </div>
   );

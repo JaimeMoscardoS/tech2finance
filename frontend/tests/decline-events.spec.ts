@@ -43,7 +43,7 @@ test('insufficient observations accept an unavailable period without fabricating
  const report={...original,status:'insufficient_data',latestLabel:null,latestValue:null,peakValue:null,currentDrawdownPercent:null,maxDrawdownPercent:null,episodes:[]};
  const unavailable={...news,status:'unavailable',periodStart:null,periodEnd:null,items:[]};
  await page.route('**/api/decline-events',route=>route.fulfill({json:{...event(report,unavailable),status:'not_triggered',eventId:null}}));
- await page.goto('/'); await expect(page.getByRole('button',{name:/¿Te preocupa la caída\?/}).first()).toBeVisible();
+ await page.goto('/'); await expect(page.getByRole('button',{name:/Entender una caída/}).first()).toBeVisible();
  await expect(page.getByText('No se pudo comprobar la caída y el contexto del BCE.')).toHaveCount(0);
 });
 
