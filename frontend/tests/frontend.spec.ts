@@ -92,7 +92,7 @@ test('mobile menu traps focus, closes with Escape and restores focus', async ({ 
  const trigger = page.getByRole('button', { name: 'Abrir menú' });
  await trigger.click(); const close = page.getByRole('dialog', { name: 'MI ESPACIO' }).getByRole('button', { name: 'Cerrar menú', exact: true });
  await expect(close).toBeFocused(); await page.keyboard.press('Shift+Tab');
- await expect(page.getByRole('button', { name: 'Tu asistente', exact: true })).toBeFocused();
+ await expect(page.getByRole('button', { name: 'Abrir asistente', exact: true })).toBeFocused();
  await page.keyboard.press('Escape'); await expect(trigger).toBeFocused();
  await context.close();
 });
@@ -113,7 +113,7 @@ test('opening the assistant from the mobile menu transfers focus to the dialog',
  const page = await context.newPage(); await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
  await page.getByRole('button', { name: 'Abrir menú' }).click();
- await page.getByRole('button', { name: 'Tu asistente', exact: true }).click();
+ await page.getByRole('button', { name: 'Abrir asistente', exact: true }).click();
  const dialog = page.getByRole('dialog', { name: 'Tu asistente' });
  await expect(dialog).toBeVisible();
  await expect(dialog.getByRole('button', { name: 'Cerrar asistente' })).toBeFocused();
@@ -319,7 +319,7 @@ test('local tutor grounds results, keeps previous messages and excludes dirty re
 test('assistant remains scrollable and voice controls reachable in short landscape', async ({browser}) => {
  const context=await browser.newContext({viewport:{width:568,height:320}}); const page=await context.newPage();
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
-  await page.goto('/'); await page.getByRole('button',{name:'Abrir asistente'}).click();
+  await page.goto('/'); await page.getByRole('button',{name:'Abrir menú'}).click(); await page.getByRole('button',{name:'Abrir asistente'}).click();
  const dialog=page.getByRole('dialog',{name:'Tu asistente'});
  await dialog.getByLabel('Tu pregunta').fill('¿Qué es un fondo?');
  await dialog.getByRole('button',{name:'Enviar pregunta'}).click();
@@ -408,6 +408,7 @@ test('local panels fit desktop and mobile in both themes', async ({browser}) => 
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   if(width===320){await page.getByRole('button',{name:'English'}).click();await page.getByRole('button',{name:'Dark theme'}).click();}
+  if(width===320) await page.getByRole('button',{name:'Open menu'}).click();
   await page.getByRole('button',{name:width===320?'Open assistant':'Abrir asistente'}).click();
   const assistant=page.getByRole('dialog',{name:width===320?'Your assistant':'Tu asistente'});
   await expect(assistant).toBeVisible();
