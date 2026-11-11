@@ -31,6 +31,14 @@ El juego histórico no es una previsión: documentar qué activo representa cada
 
 ## Conversación y voz propuesta
 
+### Análisis detallado de caídas
+
+`POST /api/decline-explanations` recibe `{decline: DeclineSpec, level: 'beginner'|'intermediate'|'advanced', decision?: Decision}`. El idioma procede de `decline.language`; se rechazan informes, cifras, fuentes y campos extra del cliente. El servidor calcula de nuevo el informe y utiliza el mismo constructor TypeScript que el modo local. La respuesta `DetailedDeclineAnalysis` incluye versión `1.0`, modo `demo` o `ai`, proveedor, modelo, idioma, resumen, seis secciones ordenadas (`observed`, `context`, `mechanism`, `portfolio`, `decision`, `uncertainty`) y fuentes con identificadores y URL. La coincidencia temporal no demuestra causalidad.
+
+El proveedor por defecto es `demo`, basado en reglas. Con `T2F_ANALYSIS_PROVIDER=anthropic` y `ANTHROPIC_API_KEY` en el entorno del servidor se usa Sonnet; `T2F_ANTHROPIC_MODEL` es opcional y por defecto vale `claude-sonnet-5-5`, identificador incluido en la [documentación oficial](https://platform.claude.com/docs/en/models/overview). Solo se aceptan identificadores `claude-sonnet-*`. El proveedor recibe el informe resumido, el contexto histórico curado, idioma, nivel, horizonte y necesidad de liquidez si existen; el objetivo libre no se envía. No se deben usar datos reales de clientes. Las cifras y las secciones de observaciones, decisión e incertidumbre quedan bajo control del código. El modelo genera explicaciones adicionales para contexto, mecanismos y cartera. Las comprobaciones de formato, referencias y texto reducen riesgos, pero no prueban la verdad ni sustituyen una revisión humana.
+
+Se usa la API de mensajes con `output_config.format`, sin reintentos, con concurrencia limitada, plazo total de 35 segundos para el proveedor y lectura limitada a 64 KiB. El proceso local previo tiene un límite independiente de cinco segundos. Configuración incorrecta, error del proveedor o respuesta inválida devuelven 503 (`analysis_configuration_error`, `analysis_provider_error` o `analysis_unavailable`), sin sustitución silenciosa por demo. Los filtros textuales son heurísticos y pueden fallar ante formulaciones distintas, tanto al admitir contenido incorrecto como al rechazar respuestas válidas. La clave permanece en el servidor. `health.externalProviders` indica que Anthropic está seleccionado, no que el servicio esté accesible ni que la clave sea válida. La integración real con credenciales y las respuestas de Sonnet están pendientes de comprobación; las pruebas simuladas no demuestran una conexión real.
+
 La pausa permite cargar un objetivo y horizonte ficticios en el contexto `decision`, sin responder automáticamente a `needsLiquidity`; sus valores editados se transmiten como contexto de la consulta. No se modifica el contrato HTTP ni se envían cifras calculadas desde el cliente. El perfil ficticio de Objetivos es independiente y permanece en el frontend.
 
 En esta rama hay una alternativa local implementada: [`TutorProvider` y los tipos](../tutor-ia/src/types.ts) reciben pregunta limitada, historial acotado y contexto explícito, y devuelven texto por reglas, intención y fuentes. La interfaz conserva texto y contexto de cada respuesta; no invoca un modelo. La pausa usa `analyzeDecline` sobre observaciones del instrumento sin flujos o sobre la cartera ficticia. El informe incluye caída observada, episodios y fuentes; causas y comparables no están disponibles.
@@ -46,7 +54,7 @@ La siguiente arquitectura sigue siendo una propuesta futura, no el modo local ac
 3. Claude genera una explicación adaptada a ese contexto. Los datos y cálculos proceden de los componentes correspondientes; el modelo no debe inventar cifras ni atribuir causas sin evidencia.
 4. La interfaz muestra la respuesta escrita. Si el usuario activa la voz, ElevenLabs convierte esa respuesta en audio para reproducirla.
 
-Para el hackathon, implementar primero el chat de texto contextual, después la lectura de respuestas y, por último, la entrada por micrófono. Mantener la opción escrita y gestionar fallos de cada proveedor. Las claves de Claude y ElevenLabs se conservan en el servidor y fuera de Git. Esta arquitectura es una propuesta; las integraciones todavía no están implementadas ni verificadas.
+La arquitectura anterior de conversación y voz mediante proveedores sigue siendo una propuesta. El adaptador de Sonnet implementado para el análisis detallado es independiente del chat; no se ha verificado con credenciales reales. ElevenLabs sigue pendiente. Las claves se conservan en el servidor y fuera de Git.
 
 ## Motor de análisis de caídas
 

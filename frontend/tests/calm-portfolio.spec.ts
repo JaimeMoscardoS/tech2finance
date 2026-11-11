@@ -72,19 +72,19 @@ for (const mode of ['local','server'] as const) test(`historical explanation is 
  await page.addInitScript(mode=>localStorage.setItem('t2f-data-mode',mode),mode); await page.goto('/');
  await page.getByRole('button',{name:/¿Te preocupa la caída\?/}).click();
  const dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
- await expect(dialog.getByRole('heading',{name:'Qué está pasando y por qué puede pasar'})).toBeVisible();
- await expect(dialog.locator('.anti-panic__explanation')).toContainText('25,54 %');
- await expect(dialog.locator('.anti-panic__explanation')).toContainText('2020-03-31');
- await expect(dialog.locator('.anti-panic__explanation')).toContainText('ejemplo histórico');
- await expect(dialog.locator('.anti-panic__explanation')).toContainText('no una explicación comprobada');
+ await expect(dialog.getByRole('heading',{name:'Análisis detallado'})).toBeVisible();
+ await expect(dialog.locator('.detailed-analysis')).toContainText('25,54');
+ await expect(dialog.locator('.detailed-analysis')).toContainText('2020-03-31');
+ await expect(dialog.locator('.detailed-analysis')).toContainText('históricos');
  await expect(dialog.locator('.anti-panic__story')).toContainText('2020-03-11');
  await expect(dialog.locator('.anti-panic__story')).toContainText('no demuestra');
  await expect(dialog.getByRole('link',{name:'Fuente original'})).toHaveAttribute('href',/who\.int/);
- await expect(dialog.getByRole('link',{name:/CNMV/})).toBeVisible();
+ await expect(dialog.locator('.anti-panic__sources').getByRole('link',{name:/CNMV/})).toBeVisible();
 });
 
 for (const scenario of ['zero','insufficient'] as const) test(`no unsupported crisis or event for ${scenario}`, async ({page}) => {
  await page.addInitScript(()=>localStorage.setItem('t2f-data-mode','server'));
+ await page.route('**/api/decline-explanations', route=>route.fulfill({status:503,body:'unavailable'}));
  await page.route('**/api/declines',async route=>{
   const response=await route.fetch(); const body=await response.json(); delete body.historicalContext; body.episodes=[];
   if(scenario==='zero'){body.currentDrawdownPercent=0; body.maxDrawdownPercent=0;}
@@ -93,8 +93,7 @@ for (const scenario of ['zero','insufficient'] as const) test(`no unsupported cr
  });
  await page.goto('/'); await page.getByRole('button',{name:/¿Te preocupa la caída\?/}).click();
  const dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
- await expect(dialog.locator('.anti-panic__explanation')).toContainText(scenario==='zero'?'no se muestra una caída':'no hay suficientes observaciones');
- await expect(dialog.locator('.anti-panic__explanation')).toContainText('No hay un acontecimiento público verificado');
+ await expect(dialog.locator(scenario==='zero'?'.anti-panic__metric small':'.anti-panic__notice')).toContainText(scenario==='zero'?'no hay caída':'No hay suficientes observaciones');
  await expect(dialog.locator('.anti-panic__story')).toHaveCount(0);
  await expect(dialog).not.toContainText('2020-03-11');
 });

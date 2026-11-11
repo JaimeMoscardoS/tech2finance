@@ -26,7 +26,7 @@ La idea puede ser útil para distintos perfiles de edad, pero no se ha demostrad
 
 ### Recorrido de caída para la demo
 
-En esta rama, el caso de caída usa BBVA MI INVERSION BOLSA ACUMULACION, FI, con valores liquidativos CNMV desde el cierre de diciembre de 2019 hasta el de marzo de 2020 e inversión virtual inicial de 1.000 €, sin aportaciones. La reconstrucción arroja aproximadamente 744,62 € y una caída del 25,54 % desde el máximo observado. La declaración pública de la OMS del 11 de marzo aparece solo si el periodo la incluye; su coincidencia no acredita la causa de la variación ni garantiza recuperación. El servidor reconstruye los hechos a partir de la especificación y rechaza cifras enviadas por el cliente. No hay proveedor de noticias en directo ni modelo de lenguaje conectado.
+En esta rama, el caso de caída usa BBVA MI INVERSION BOLSA ACUMULACION, FI, con valores liquidativos CNMV desde el cierre de diciembre de 2019 hasta el de marzo de 2020 e inversión virtual inicial de 1.000 €, sin aportaciones. La reconstrucción arroja aproximadamente 744,62 € y una caída del 25,54 % desde el máximo observado. La declaración pública de la OMS del 11 de marzo aparece solo si el periodo la incluye; su coincidencia no acredita la causa de la variación ni garantiza recuperación. El servidor reconstruye los hechos a partir de la especificación y rechaza cifras enviadas por el cliente. No hay proveedor de noticias en directo; el adaptador opcional de análisis con Sonnet está pendiente de prueba real.
 
 Para la demo, los controles y acciones del guion deben funcionar de principio a fin; ante un fallo deben mostrar un error y permitir recuperación o reintento. La voz es opcional. El asistente utiliza los mismos hechos observados y distingue el evento público de una causa no verificada. Las comprobaciones específicas de caída no prueban por sí solas todos los controles de la aplicación.
 
@@ -70,7 +70,7 @@ Cada resultado presenta su procedencia y condiciones. Estas comparaciones no usa
 
 ## Pausa antes de vender
 
-En esta rama, una tarjeta visible en inicio y junto al saldo de cartera abre una pausa con explicación inmediata de las fluctuaciones y acceso escrito o por voz al tutor por reglas. El informe muestra directamente el dato observado, los factores generales posibles, los acontecimientos públicos disponibles con su fuente y la advertencia de que no acreditan una causa. Cifras, episodios y fuentes se muestran sin desplegar. El contexto opcional permite cargar un objetivo y plazo ficticios editables; la necesidad de liquidez comienza sin indicar. Objetivos de aprendizaje incluye un perfil ficticio editable y restablecible. Los importes son ejemplos, mientras los históricos CNMV conservan su procedencia real.
+En esta rama de trabajo se prepara un análisis detallado de seis apartados al abrir la pausa. El modo local lo genera por reglas y se identifica como demostración. En modo servidor el proveedor puede generar una explicación con IA si está configurado; solo se identifica como IA cuando la respuesta confirma el proveedor y modelo. Un error se muestra y permite reintentar, manteniendo los datos observados visibles. Editar el contexto no envía solicitudes: se actualiza mediante un botón explícito. El uso real del proveedor requiere configuración y verificación independiente; no se da por conectado por el mero diseño de la interfaz. El contexto ficticio opcional es editable y la necesidad de liquidez comienza sin indicar. Los históricos CNMV conservan su procedencia real.
 
 Esta función busca dar contexto cuando el usuario ve una caída o inicia una venta dentro de la demo. Puede mostrar cuánto ha cambiado la cartera ficticia, qué objetivo y horizonte se habían indicado, y la información disponible para entender el movimiento. También puede preguntar si el usuario necesita el dinero pronto.
 
@@ -131,7 +131,7 @@ El trabajo se divide entre [cinco áreas](organizacion.md): interfaz, backend, s
 
 En `main` existe una primera demo React/TypeScript con catálogo y cartera ficticios, simulador ilustrativo, asistente de respuestas predefinidas y pausa ante una caída. La demo incluye tres niveles con distinta información, español/inglés y temas claro/oscuro. El frontend inicial y las vistas adaptativas se integraron mediante los pull requests #1 y #2. La [guía para backend](backend-contexto.md) recoge las decisiones y los puntos de conexión pendientes.
 
-La demo usa capital virtual y, en esta rama, cinco históricos mensuales CNMV. El backend expone la comparación «mantener o vender» en `/api/game/compare` sobre esos cierres; el frontend aún no utiliza el endpoint del juego. La muestra anual publicada anterior se conserva aparte. La API FastAPI es local; Claude, ElevenLabs y noticias en directo siguen sin conectarse. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
+La demo usa capital virtual y, en esta rama, cinco históricos mensuales CNMV. El backend expone la comparación «mantener o vender» en `/api/game/compare` sobre esos cierres; el frontend aún no utiliza el endpoint del juego. La muestra anual publicada anterior se conserva aparte. La API FastAPI es local; el análisis tiene un adaptador opcional para Sonnet pendiente de prueba real, mientras ElevenLabs y noticias en directo no están conectados. La conversación de origen incluía un documento generado por Claude que aparecía oculto en la copia compartida: no se ha podido contrastar su contenido.
 
 
 ## Catálogo local de práctica (rama de trabajo)
@@ -142,7 +142,7 @@ La elegibilidad se basa en informes semestrales que cubren 2020–2025, sin dist
 
 ## Integración local de demostración
 
-En esta rama, el frontend utiliza por defecto la API FastAPI local de catálogo, simulación, caídas y tutor por reglas. Ofrece demo local explícita ante fallo y comparte los ejemplos mediante `shared/demo-data.json`. El tutor se ejecuta mediante Node local; no usa LLM ni servicios externos. Véase [backend-contexto](backend-contexto.md) para contrato, ejecución y límites. Esta integración no implica despliegue ni conexión bancaria.
+En esta rama, el frontend utiliza por defecto la API FastAPI local de catálogo, simulación, caídas y tutor por reglas. Ofrece demo local explícita ante fallo y comparte los ejemplos mediante `shared/demo-data.json`. El chat se ejecuta mediante Node local y no usa LLM ni servicios externos; el análisis detallado incorpora aparte un adaptador opcional para Sonnet, pendiente de prueba real. Véase [backend-contexto](backend-contexto.md) para contrato, ejecución y límites. Esta integración no implica despliegue ni conexión bancaria.
 
 
 Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](planning/plan.md).
