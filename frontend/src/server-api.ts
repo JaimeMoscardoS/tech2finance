@@ -38,15 +38,35 @@ export const isGameComparison = (v: unknown): v is GameComparison => object(v) &
 export const isDecline = (v: unknown): v is DeclineReport => object(v) && ['ok','insufficient_data'].includes(v.status) && typeof v.basisName === 'string' && ['historical_nav','annual_published_returns'].includes(v.dataKind) && num(v.observationCount) && ['latestLabel'].every(k=>v[k] === null || typeof v[k] === 'string') && ['latestValue','peakValue','currentDrawdownPercent','maxDrawdownPercent'].every(k=>v[k] === null || num(v[k])) && Array.isArray(v.episodes) && v.episodes.every((e: unknown)=>object(e) && typeof e.peakLabel === 'string' && typeof e.troughLabel === 'string' && (e.recoveryLabel === null || typeof e.recoveryLabel === 'string') && num(e.drawdownPercent) && num(e.observationsToTrough) && (e.observationsToRecovery === null || num(e.observationsToRecovery))) && sources(v.sources) && v.causesStatus === 'unknown' && v.comparablesStatus === 'not_available' && Array.isArray(v.limitations) && v.limitations.every((s:unknown)=>typeof s === 'string') && v.demoContext === undefined && (v.historicalContext === undefined || (v.dataKind === 'historical_nav' && object(v.historicalContext) && Array.isArray(v.historicalContext.events) && v.historicalContext.events.every((e:unknown)=>object(e) && typeof e.id === 'string' && typeof e.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && e.sourceKind === 'verified_public_event' && typeof e.publisher === 'string' && safeUrl(e.sourceUrl) && localized(e.title) && localized(e.summary))));
 const isTutor = (v: unknown): v is TutorReply => object(v) && typeof v.text === 'string' && ['es','en'].includes(v.language) && v.mode === 'api' && (v.provider === 'server_rules' || (v.provider === 'anthropic' && typeof v.model === 'string' && /^claude-sonnet-[\w.-]+$/.test(v.model))) && typeof v.intent === 'string' && sources(v.sources);
 const TUTOR_DEADLINE = 45000;
+export type TutorErrorKind = 'connection' | 'provider' | 'validation';
+export class TutorRequestError extends Error {
+ constructor(public readonly kind: TutorErrorKind) { super('Tutor request failed'); }
+}
+export function tutorErrorMessage(error: unknown, language: 'es' | 'en'): string {
+ const kind = error instanceof TutorRequestError ? error.kind : 'connection';
+ if (kind === 'validation') return language === 'es' ? 'La respuesta del modelo no se pudo validar. Puedes volver a intentarlo.' : 'The model response could not be validated. You can try again.';
+ if (kind === 'provider') return language === 'es' ? 'El servicio de IA no está disponible. Comprueba su configuración y vuelve a intentarlo.' : 'The AI service is unavailable. Check its configuration and try again.';
+ return language === 'es' ? 'No se pudo conectar con el servidor. Comprueba la conexión y vuelve a intentarlo.' : 'Could not connect to the server. Check the connection and try again.';
+}
 export async function requestJson<T>(path: '/api/catalog' | '/api/simulations' | '/api/game/compare' | '/api/declines' | '/api/tutor', validate: (v: unknown) => v is T, body?: unknown, signal?: AbortSignal, deadline = 10000): Promise<T> {
  const controller = new AbortController(); const abort = () => controller.abort();
  if (signal?.aborted) controller.abort(); else signal?.addEventListener('abort', abort, {once:true});
  const timer = setTimeout(abort, deadline);
  try { const response = await fetch(path, { method: body === undefined ? 'GET' : 'POST', ...(body === undefined ? {} : {headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}), signal:controller.signal });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const result: unknown = await response.json(); if (!validate(result)) throw new Error('Invalid server response'); return result;
+  if (!response.ok) {
+   if (path === '/api/tutor') {
+    const body: unknown = await response.json().catch(() => null);
+    const code = object(body) && object(body.error) ? body.error.code : null;
+    throw new TutorRequestError(code === 'tutor_validation_error' ? 'validation' : 'provider');
+   }
+   throw new Error(`HTTP ${response.status}`);
+  }
+  let result: unknown;
+  try { result = await response.json(); } catch { if (path === '/api/tutor') throw new TutorRequestError('validation'); throw new Error('Invalid server response'); }
+  if (!validate(result)) { if (path === '/api/tutor') throw new TutorRequestError('validation'); throw new Error('Invalid server response'); } return result;
+ } catch (error) { if (path === '/api/tutor' && !(error instanceof TutorRequestError)) throw new TutorRequestError('connection'); throw error;
  } finally { clearTimeout(timer); signal?.removeEventListener('abort',abort); }
 }
-export function serverTutorProvider(context: {page:string;level:string;language:'es'|'en';bankId?:string;instrumentId?:string;simulation?:SimulationSpec;decline?:DeclineSpec;decision?:DecisionContext}): TutorProvider {
- return {id:'server_rules', async reply(request) { const result = await requestJson('/api/tutor',isTutor,{message:request.message,history:request.history?.map(({role,text,intent})=>({role,text,...(intent ? {intent}: {})})) ?? [],context},request.signal,TUTOR_DEADLINE); if (result.language !== context.language) throw new Error('Invalid response language'); return result; }};
+export function serverTutorProvider(context: {page:string;level:string;language:'es'|'en';bankId?:string;portfolioBasis?:'cnmv'|'unavailable';instrumentId?:string;simulation?:SimulationSpec;decline?:DeclineSpec;decision?:DecisionContext}): TutorProvider {
+ return {id:'server_rules', async reply(request) { const result = await requestJson('/api/tutor',isTutor,{message:request.message,history:request.history?.map(({role,text,intent})=>({role,text,...(intent ? {intent}: {})})) ?? [],context},request.signal,TUTOR_DEADLINE); if (result.language !== context.language) throw new TutorRequestError('validation'); return result; }};
 }

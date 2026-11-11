@@ -440,7 +440,7 @@ export default function App() {
   }
   function openSimulationDecline(){if(!validResult)return;setPauseSell(false);void showDecline({basis:"instrument",language,instrumentId:selected.instrumentId,periods:validResult.months},()=>analyzeDecline({name:selected.name[language],dataKind:"historical_nav",sources:source,observations:validResult.timeline.map(point=>({label:point.date!,value:100*(1+point.instrumentReturnPercent/100)}))}));}
   function askDecline(){if(!pause)return;setPrefillRequest({id:++prefillSequence.current,text:language === "es" ? "¿Por qué ha caído?" : "Why did it fall?"});setAssistantDecline(pause);setPause(null);assistantTriggerRef.current=pauseTriggerRef.current;setAssistant(true);}
-  const serverContext = {page,level,language,bankId:configuredBank,...( (page === "explore" || page === "simulator") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline ? {...(declineSpec ? {decline:{...declineSpec,language}} : {}),decision} : {})};
+  const serverContext = {page,level,language,bankId:configuredBank,...((page === "home" || page === "portfolio") ? {portfolioBasis: realPortfolio ? 'cnmv' as const : 'unavailable' as const} : {}),...( (page === "explore" || page === "simulator") && tutorInstrument ? {instrumentId:tutorInstrument.instrumentId} : {}),...(page === "simulator" && activeSpec ? {simulation:activeSpec} : {}),...(assistantDecline ? {...(declineSpec ? {decline:{...declineSpec,language}} : {}),decision} : {})};
   const serverContextKey = JSON.stringify(serverContext);
   const provider = useMemo(() => serverTutorProvider(serverContext), [serverContextKey]);
   const switchMode = () => { restoreRecoveryFocus.current = !!recoveryRef.current?.contains(document.activeElement); catalogRequest.current?.abort(); simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); retryAction.current = null; setCatalog(null); setResult(null); setMode(mode === "server" ? "local" : "server"); };
@@ -639,8 +639,8 @@ export default function App() {
           </footer>
         </div>
       </main>
-      <AssistantPanel dataMode={mode} prefillRequest={prefillRequest} provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
-      <VoiceAssistantPanel dataMode={mode} open={voiceAssistant} onClose={() => { if (voiceRef.current?.contains(document.activeElement)) voiceTriggerRef.current?.focus(); setVoiceAssistant(false); }} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
+      <AssistantPanel dataMode={mode} onUseServer={switchMode} prefillRequest={prefillRequest} provider={mode === "server" ? provider : undefined} open={assistant} onClose={()=>setAssistant(false)} context={tutorContext} panelRef={assistantRef}/>
+      <VoiceAssistantPanel dataMode={mode} onUseServer={() => { setVoiceAssistant(false); switchMode(); }} open={voiceAssistant} onClose={() => { if (voiceRef.current?.contains(document.activeElement)) voiceTriggerRef.current?.focus(); setVoiceAssistant(false); }} context={tutorContext} panelRef={voiceRef} provider={mode === "server" ? provider : undefined} startToken={voiceStartToken}/>
       {pause && <AntiPanicPanel level={level} sellOption={pauseSell} onTalk={talkDecline} report={pause} spec={declineSpec} initialNews={declineSpec?.basis === "portfolio_demo" && declineEvent.event?.status === "triggered" ? declineEvent.event.news : null} mode={mode} language={language} decision={decision} onDecision={setDecision} onClose={()=>setPause(null)} onAsk={askDecline} panelRef={modalRef}/>}
 
     </div>

@@ -66,8 +66,12 @@ MIN_REAL_POINTS = 13
 DEMO_AMOUNT_PER_FUND_EUR = 5000
 
 
+def _portfolio_instruments():
+    return [i for i in _NAV['instruments'] if i.get('eligible') and i.get('currency') == 'EUR' and len(i.get('monthly', [])) > 1][:MAX_REAL_FUNDS]
+
+
 def cnmv_portfolio_series():
-    usable = [i for i in _NAV['instruments'] if i.get('eligible') and i.get('currency') == 'EUR' and len(i.get('monthly', [])) > 1][:MAX_REAL_FUNDS]
+    usable = _portfolio_instruments()
     if not usable:
         raise DomainError('missing_history', 422, 'Portfolio history is unavailable')
     common = [row['date'] for row in usable[0]['monthly']]
@@ -162,8 +166,10 @@ def build_tutor_context(context):
         page, level, language = context['page'], context['level'], context['language']
         if page not in ('home', 'explore', 'simulator', 'portfolio', 'learn', 'game') or level not in ('beginner', 'intermediate', 'advanced') or language not in ('es', 'en'):
             raise ValueError
-        allowed = {'page', 'level', 'language', 'bankId', 'instrumentId', 'simulation', 'decline', 'decision'}
+        allowed = {'page', 'level', 'language', 'bankId', 'instrumentId', 'simulation', 'decline', 'decision', 'portfolioBasis'}
         if set(context) - allowed:
+            raise ValueError
+        if context.get('portfolioBasis', 'cnmv') not in ('cnmv', 'unavailable'):
             raise ValueError
         bank_id = context.get('bankId', 'demo')
         if bank_id not in {bank['id'] for bank in _DATA['banks']}:
@@ -199,16 +205,30 @@ def build_tutor_context(context):
                 facts.update(periodStart=_DATA['annualHistory']['baseline'], periodEnd=calculated['timeline'][-1]['date'],
                              annualReturns=[{'year': r['year'], 'ratePercent': r['rate'] * 100} for r in _DATA['annualHistory']['returns']])
             result['simulation'] = facts
-        if page in ('home', 'portfolio'):
-            # Misma cartera que muestran Inicio y «Mi cartera» (NAV CNMV, participaciones DEMO); si no hay datos, la de ejemplo.
+        if page in ('home', 'portfolio') and context.get('portfolioBasis', 'cnmv') == 'cnmv':
+            # La cartera local de respaldo es distinta: no atribuirle cifras de otra simulación.
             try:
-                _dates, values = cnmv_portfolio_series()
-                usable_count = round(values[0] / DEMO_AMOUNT_PER_FUND_EUR)
+                dates, values = cnmv_portfolio_series()
+                holdings = []
+                for nav in _portfolio_instruments():
+                    instrument = next((i for i in _DATA['instruments'] if i['identifier'] == nav['isin']), None)
+                    if instrument is None:
+                        raise DomainError('missing_history', 422, 'Portfolio instrument is unavailable')
+                    by_date = {row['date']: float(row['nav']) for row in nav['monthly']}
+                    holdings.append({'instrumentId': instrument['instrumentId'], 'name': display_name(instrument, language, _DATA['instruments']),
+                                     'initial': DEMO_AMOUNT_PER_FUND_EUR,
+                                     'value': DEMO_AMOUNT_PER_FUND_EUR * by_date[dates[-1]] / by_date[dates[0]]})
+                initial = len(holdings) * DEMO_AMOUNT_PER_FUND_EUR
+                profit = values[-1] - initial
                 result['portfolio'] = {'name': 'Mi cartera (NAV CNMV; participaciones DEMO)' if language == 'es' else 'My portfolio (CNMV NAVs; DEMO holdings)',
-                                       'value': values[-1], 'initial': usable_count * DEMO_AMOUNT_PER_FUND_EUR, 'dataKind': 'historical_nav'}
+                                       'value': values[-1], 'initial': initial, 'totalContributed': initial, 'recurringContribution': 0,
+                                       'profit': profit, 'simpleReturnPercent': 100 * profit / initial,
+                                       'periodStart': dates[0], 'periodEnd': dates[-1], 'currency': 'EUR',
+                                       'dataKind': 'historical_nav', 'holdingsKind': 'fictional_demo', 'holdings': holdings,
+                                       'sources': [{'label': 'CNMV: valores liquidativos mensuales' if language == 'es' else 'CNMV: monthly net asset values', 'url': _NAV['source']['indexUrl']}],
+                                       'causesStatus': 'unknown'}
             except DomainError:
-                portfolio = run_simulation(_DATA['portfolioExample'])
-                result['portfolio'] = {'name': 'Cartera de ejemplo' if language == 'es' else 'Sample portfolio', 'value': portfolio['value'], 'initial': _DATA['portfolioExample']['initial'], 'dataKind': 'historical_nav'}
+                pass
         if decline:
             result['decline'] = analyze_decline(decline)
         if 'decision' in context:

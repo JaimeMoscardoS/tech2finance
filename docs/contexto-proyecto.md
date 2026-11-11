@@ -120,6 +120,8 @@ Una noticia que coincide con una caída no demuestra por sí misma que la haya c
 
 ## Conversación y voz
 
+El tutor del servidor puede recibir los hechos calculados de la cartera histórica mostrada en Inicio y Mi cartera: periodo, capital aportado, valor, beneficio, rentabilidad simple y posiciones ficticias. Los valores liquidativos proceden de CNMV; las participaciones son DEMO y las causas de los movimientos no se conocen por estos datos. Si falla la construcción o la interfaz muestra la alternativa ficticia, se omite la cartera del contexto del servidor; la interfaz comunica solo la variante visual, no importes.
+
 En esta rama el tutor funciona con reglas o con Claude cuando está configurado, sin sustitución silenciosa ante errores. El dictado puede usar procesamiento local o ElevenLabs; el usuario inicia el micrófono y el chat escrito permite revisar el texto antes de enviarlo. Las etiquetas identifican el proveedor de la respuesta. Los detalles y límites están en [contratos](contratos.md#conversación-voz-y-análisis).
 
 La arquitectura de esta rama es:
@@ -174,3 +176,5 @@ La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inv
 
 
 En la rama de trabajo se implementan adaptadores opcionales para transcripción ElevenLabs y conversación Anthropic, con selección y límites descritos en [contratos](contratos.md#conversación-voz-y-análisis). Las pruebas simuladas no acreditan conexiones reales ni calidad de las respuestas; falta comprobarlas con credenciales.
+
+En el tutor Anthropic, una prueba real de saludo recibió HTTP 200 del proveedor, pero la respuesta se rechazó por exceder el máximo de párrafos e incluir un dígito en el nombre del banco ficticio. Las instrucciones al modelo ahora detallan esos límites; las comprobaciones de seguridad permanecen activas y pueden seguir rechazando respuestas generadas. Si las reglas no reconocen la pregunta, su texto de reserva no se envía como respuesta informativa al modelo; se conservan la pregunta, el historial y el contexto.
