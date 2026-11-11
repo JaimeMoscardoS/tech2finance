@@ -158,3 +158,5 @@ html[data-theme='dark'] .journey {
 /* Step 3 fields live inside the journey too. */
 .journey .hsg-field input, .journey .hsg-field select, .journey .hsg-pick select, .journey .hsg-fees { border-color: var(--jr-border); }
 .journey .hsg-synced > div, .journey .hsg-notice { border-color: var(--jr-border); }
+.journey .hsg-toggle, .journey .jr-guide-toggle { border-color: var(--jr-border); }
+.journey .hsg-challenge .hsg-toggle { background: var(--surface); }

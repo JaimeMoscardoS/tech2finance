@@ -400,7 +400,8 @@ test('the stepper follows where the user is working, and the verdict is in the s
   await expect(stepper.getByText('Paso 3 de 3')).toBeVisible();
   await page.getByLabel('Importe inicial').focus();
   await expect(stepper.getByText('Paso 2 de 3')).toBeVisible();
-  await page.locator('#jr-step-1 .jr-fund').first().click({ position: { x: 5, y: 5 }, trial: true });
+  await page.locator('#jr-h-1').click();
+  await expect(stepper.getByText('Paso 1 de 3')).toBeVisible();
   await expect(page.locator('.sim-result [role="status"][aria-atomic="true"]')).toContainText(/Tu respuesta: Más o menos lo mismo\./);
 });
 
@@ -457,14 +458,17 @@ test('Explorer does not offer practice for a fund without monthly NAV history', 
   await page.route('**/api/catalog', async route => {
     const response = await route.fetch();
     const catalog = await response.json();
-    for (const item of catalog.instruments) if (item.instrumentId === BBVA) item.dataStatus = 'annual_history';
+    for (const item of catalog.instruments) if (item.instrumentId === CAIXA) item.dataStatus = 'annual_history';
     await route.fulfill({ response, json: catalog });
   });
-  await page.goto('http://127.0.0.1:5196/');
+  await page.goto('http://127.0.0.1:5194/');
   await page.getByRole('button', { name: 'Explorar', exact: true }).click();
-  const select = page.locator('.beginner-guide select').last();
-  await select.selectOption(BBVA);
-  await expect(page.getByRole('button', { name: 'Practicar con este fondo' })).toBeDisabled();
+  const practise = page.getByRole('button', { name: 'Practicar con este fondo' });
+  await expect(practise).toBeDisabled();
+  await expect(page.getByText(/solo hay rentabilidades anuales publicadas/)).toBeVisible();
+  await practise.click({ force: true });
+  await expect(page.getByRole('navigation', { name: 'Tu recorrido' })).toHaveCount(0);
+  await expect(page.locator('input[name="jr-fund"]')).toHaveCount(0);
 });
 
 for (const theme of ['light', 'dark'] as const) {

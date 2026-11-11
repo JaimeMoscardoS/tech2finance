@@ -364,6 +364,13 @@ export default function FundsExplorer({
             : "Practice is unavailable for this fund: a verified historical series is missing."}
         </p>
       )}
+      {rowsFor(i).length > 0 && i.dataStatus !== "historical_nav" && (
+        <p className="fund-voice-note">
+          {es
+            ? "No se puede practicar con este fondo: el simulador necesita cierres mensuales verificados y aquí solo hay rentabilidades anuales publicadas."
+            : "Practice is unavailable for this fund: the simulator needs verified monthly closes and only published annual returns exist here."}
+        </p>
+      )}
       <p className="fund-voice-note">
         {es
           ? "El asistente por reglas usa el fondo seleccionado como contexto; la voz depende del dispositivo."

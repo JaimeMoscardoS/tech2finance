@@ -173,7 +173,7 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
     } catch (error) {
       const field = error instanceof GameInputError ? error.field : 'instrument';
       setInvalid(field);
-      setGuess(null);
+      setGuess(null); focusOutcome.current = false;
       if (field === 'buyFee' || field === 'sellFee') setFeesOpen(true);
       requestAnimationFrame(() => formRef.current?.querySelector<HTMLElement>(`#${fieldId[field]}`)?.focus());
       return;
@@ -188,7 +188,7 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
       if (generation.current !== current) return;
       setOutcome({ spec, response, summary }); setStatus('success');
     } catch {
-      if (generation.current === current) { setFailed(true); setGuess(null); setStatus('idle'); }
+      if (generation.current === current) { setFailed(true); setGuess(null); focusOutcome.current = false; setStatus('idle'); }
     } finally {
       if (generation.current === current) { setBusy(false); request.current = null; }
     }
@@ -213,6 +213,10 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
   const flagged = (field: GameField) => invalid === field;
   const describedBy = (field: GameField, ...ids: string[]) => [...ids, flagged(field) ? 'hsg-form-error' : ''].filter(Boolean).join(' ') || undefined;
   const amountText = (raw: string) => (raw.trim() === '' ? money(0) : Number.isFinite(Number(raw)) ? money(Number(raw)) : raw);
+  const statusDetail = (o: Outcome) => {
+    const verdict = guess ? evaluateSellPrediction(guess, o.summary.sell.value, o.summary.hold.value) : null;
+    return `${t.outcome(o.spec.sellMonth, money(o.summary.sell.value), money(o.summary.hold.value))}${verdict && guess ? ` ${t.yourGuess(t.short[guess])} ${t.actual[verdict.actual]} ${verdict.matched ? t.matched : t.missed}` : ''}`;
+  };
   const sellDate = dates[sellMonth];
   const maxSell = Number.isInteger(monthsNumber) ? monthsNumber : maxMonths;
   const aria = (field: GameField) => ({ 'aria-invalid': flagged(field) ? true : undefined });
@@ -243,7 +247,7 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
     const compact = (n: number) => new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }).format(n);
     return <div className="hsg-results" aria-labelledby="hsg-results-title" role="region">
       <h3 id="hsg-results-title" className="hsg-results-title" tabIndex={-1}>{t.results}</h3>
-      <div className="hsg-feedback" aria-live="polite">
+      <div className="hsg-feedback">
         <p>{t.outcome(spec.sellMonth, money(summary.sell.value), money(summary.hold.value))}</p>
         {guess && (() => { const verdict = evaluateSellPrediction(guess, summary.sell.value, summary.hold.value); return <p>{t.yourGuess(t.short[guess])} {t.actual[verdict.actual]} <strong>{verdict.matched ? t.matched : t.missed}</strong></p>; })()}
         <p>{t.pastNote}</p>
@@ -323,7 +327,7 @@ export default function HoldSellGame({ language, level, mode, instruments, navHi
       </div>}
       <button className="hsg-run" type="submit" aria-disabled={busy || undefined}>{busy ? t.running : t.run}<ArrowRight size={17} aria-hidden="true" /></button>
     </form>
-    <div role="status" aria-live="polite" className="sr-only">{status === 'pending' ? t.pending : status === 'success' ? t.ready : status === 'invalidated' ? t.cleared : ''}</div>
+    <div role="status" aria-live="polite" className="sr-only">{status === 'pending' ? t.pending : status === 'success' ? `${t.ready}${outcome ? ` ${statusDetail(outcome)}` : ''}` : status === 'invalidated' ? t.cleared : ''}</div>
     {outcome && renderResults(outcome)}
   </section>;
 }

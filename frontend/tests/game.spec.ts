@@ -188,7 +188,7 @@ test('a delayed response never renders after the user edits a field', async ({ p
   await page.waitForTimeout(2200);
   await expect(game.locator('.hsg-card')).toHaveCount(0);
   await expect(game.getByRole('alert')).toHaveCount(0);
-  await expect(game.getByRole('button', { name: 'Comparar mantener y vender' })).toBeEnabled();
+  await expect(game.getByRole('button', { name: 'Comparar mantener y vender' })).not.toHaveAttribute('aria-disabled', 'true');
 });
 
 test('a delayed response never renders after switching language', async ({ page }) => {
@@ -201,7 +201,22 @@ test('a delayed response never renders after switching language', async ({ page 
   await page.waitForTimeout(2200);
   await expect(game.locator('.hsg-card')).toHaveCount(0);
   await expect(game.getByRole('alert')).toHaveCount(0);
-  await expect(game.getByRole('button', { name: 'Compare holding and selling' })).toBeEnabled();
+  await expect(game.getByRole('button', { name: 'Compare holding and selling' })).not.toHaveAttribute('aria-disabled', 'true');
+});
+
+test('clicking an answer or Compare while busy sends exactly one request', async ({ page }) => {
+  const bodies: unknown[] = [];
+  await page.route('**/api/game/compare', async route => { bodies.push(route.request().postDataJSON()); await new Promise(r => setTimeout(r, 800)); await route.continue().catch(() => {}); });
+  const game = await openGame(page);
+  await quickCase(game);
+  const answer = game.getByRole('button', { name: 'Acabé con algo parecido' });
+  await answer.click();
+  await expect(game.getByRole('button', { name: 'Calculando…' })).toHaveAttribute('aria-disabled', 'true');
+  await game.getByRole('button', { name: 'Acabé con más dinero que manteniendo' }).click({ force: true });
+  await game.getByRole('button', { name: 'Calculando…' }).click({ force: true });
+  await expect(game.locator('.hsg-card')).toHaveCount(2);
+  expect(bodies).toHaveLength(1);
+  await expect(game.locator('.hsg-feedback')).toContainText('Tu respuesta: parecido.');
 });
 
 test('changing the fund clamps months and sale month to its history', async ({ page }) => {
