@@ -172,3 +172,5 @@ La interfaz usa nombres como «Mi cartera», «Explorar fondos» y «Simular inv
 
 
 En la rama de trabajo se implementan adaptadores opcionales para transcripción ElevenLabs y conversación Anthropic, con selección y límites descritos en [contratos](contratos.md#conversación-voz-y-análisis). Las pruebas simuladas no acreditan conexiones reales ni calidad de las respuestas; falta comprobarlas con credenciales.
+
+La exploración usa tres gamas de azul por nivel, en temas claro y oscuro. El selector de series avanzadas se abre bajo demanda y conserva la selección; la entrada a la pausa de cartera es visible y no bloquea decisiones. Las condiciones de BancoT2F se consultan desde un desplegable en inicio. Los colores verde y rojo de las gráficas siguen indicando la dirección de los datos, no el nivel de detalle.

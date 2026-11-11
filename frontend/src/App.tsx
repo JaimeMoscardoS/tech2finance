@@ -301,7 +301,8 @@ export default function App() {
   const choose = (p: Page) => {
     retryAction.current = null; setServerError(false);
     setPracticeOpen(false); setPracticeResult(null); setAssistantDecline(undefined); setDeclineSpec(undefined);
-    if (p !== "simulator") { simulationGeneration.current++; simulationRequest.current?.abort(); declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false); }
+    declineGeneration.current++; declineRequest.current?.abort(); setOperationPending(false);
+    if (p !== "simulator") { simulationGeneration.current++; simulationRequest.current?.abort(); }
     if (p === "explore" && selected.assetType !== "fund") { const firstFund = instruments.find(item => item.assetType === "fund"); if (firstFund) setSelectedId(firstFund.instrumentId); }
     if (p !== "simulator") setJourneyFund(false);
     setPage(p);
@@ -577,8 +578,8 @@ export default function App() {
         <div className="content">
           {modeControls}
           {page === "home" && <>
-            {configuredBank === "demo" && <BankInfo profile={catalog.bankProfile} language={language} />}
             <HomeDashboard language={language} level={level} onNavigate={choose} onAskAssistant={() => openAssistant()} portfolio={realPortfolio ?? undefined} events={catalog.navHistory.events} />
+            {configuredBank === "demo" && <details className="bank-overview"><summary>{language === "es" ? "Conocer BancoT2F y sus condiciones" : "About BancoT2F and its terms"}</summary><BankInfo profile={catalog.bankProfile} language={language} /></details>}
             <div className="welcome-actions home-extra-actions">
               <button type="button" className="text-link" onClick={openPractice}>{t.practice}<small> · {t.practiceDesc}</small><ArrowRight size={15} /></button>
               <button type="button" className="text-link calm-link" onClick={openPortfolioDecline}>{language === "es" ? "¿Te preocupa la caída?" : "Worried about the decline?"}<small> · {language === "es" ? "Tómate un momento para entenderla y explorar tus opciones." : "Take a moment to understand it and explore your options."}</small><Pause size={15} aria-hidden="true" /></button>
@@ -629,7 +630,7 @@ export default function App() {
           )
           )}
           {page === "portfolio" && <>
-            <div className="info-banner"><LockKeyhole size={19} /><span>{t.portfolioWarning}</span><button type="button" className="button outline" onClick={openPortfolioDecline}><TrendingDown size={17} />{t.understandFall}</button></div>
+            <div className="info-banner"><LockKeyhole size={19} /><span>{t.portfolioWarning}</span><button type="button" className="button dark" style={{minHeight: 56}} onClick={openPortfolioDecline}><TrendingDown size={17} />{language === "es" ? "¿Te preocupa la caída? Revísala con calma" : "Worried about the decline? Review it calmly"}</button></div>
             <FundsDashboard language={language} level={level} theme={theme} portfolio={realPortfolio ?? undefined} onExplore={()=>choose("explore")} onSimulate={()=>choose("simulator")} onSell={openPortfolioDecline} />
             <AgentPanelSection level={level} language={language} portfolio={realPortfolio ?? undefined} />
           </>}

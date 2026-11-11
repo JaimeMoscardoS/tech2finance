@@ -29,6 +29,7 @@ test("beginner search and advanced chart selection retain selected fund", async 
     .getByRole("group", { name: "Nivel de detalle" })
     .getByRole("button", { name: "Avanzado" })
     .click();
+  await page.locator(".chart-picker-disclosure summary").click();
   const picker = page.getByRole("group", { name: /Elige hasta tres series/ });
   await expect(picker.locator("input:checked")).toHaveCount(3);
   await picker.locator("input").first().uncheck();

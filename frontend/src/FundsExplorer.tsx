@@ -352,10 +352,7 @@ export default function FundsExplorer({
           {es ? "Practicar con este fondo" : "Practise with this fund"}{" "}
           <ArrowRight size={16} />
         </button>
-        <button className="fund-voice" onClick={onVoice}>
-          <Mic size={17} />
-          {es ? "Preguntar por voz" : "Ask by voice"}
-        </button>
+
       </div>
       {rowsFor(i).length === 0 && (
         <p className="fund-voice-note">
@@ -371,11 +368,7 @@ export default function FundsExplorer({
             : "Practice is unavailable for this fund: the simulator needs verified monthly closes and only published annual returns exist here."}
         </p>
       )}
-      <p className="fund-voice-note">
-        {es
-          ? "El asistente por reglas usa el fondo seleccionado como contexto; la voz depende del dispositivo."
-          : "The rule-based assistant uses the selected fund as context; voice depends on the device."}
-      </p>
+
     </>
   );
   if (!selected)
@@ -452,8 +445,7 @@ export default function FundsExplorer({
       </div>
       <p className="institution-label">
         {es ? "Catálogo de" : "Catalogue of"}:{" "}
-        {hostBankId === "demo" ? (es ? "Casos de estudio de distintas gestoras" : "Study cases from different managers") : availableBanks.find((b) => b.id === bankId)?.name[language]} ·{" "}
-        {es ? "Catálogo de fondos" : "Fund catalogue"}
+        {hostBankId === "demo" ? (es ? "Casos de estudio de distintas gestoras" : "Study cases from different managers") : availableBanks.find((b) => b.id === bankId)?.name[language]}
       </p>
       <aside
         className="fund-help"
@@ -925,6 +917,8 @@ export default function FundsExplorer({
                   : "No funds match the filters."}
               </p>
             )}
+            <details className="chart-picker-disclosure">
+              <summary>{es ? "Elegir fondos para comparar" : "Choose funds to compare"} ({(chartSelection ?? defaultCharts).length})</summary>
             <fieldset className="compare-picker">
               <legend>
                 {es
@@ -961,6 +955,7 @@ export default function FundsExplorer({
                 );
               })}
             </fieldset>
+            </details>
             {defaultCharts.length === 0 && (
               <p role="status">
                 {es

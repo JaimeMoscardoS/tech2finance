@@ -23,8 +23,8 @@ test('pause dialog handles keyboard focus and escape', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('/');
   await page.getByRole('button', { name: 'Mi cartera', exact: true }).click();
-  // En Mi cartera la pausa se abre con «Entender una caída» (el enlace «¿Te preocupa la caída?» está en Inicio).
-  const trigger = page.getByRole('button', { name: 'Entender una caída' });
+  // En Mi cartera la pausa se abre con «¿Te preocupa la caída? Revísala con calma» (el enlace «¿Te preocupa la caída?» está en Inicio).
+  const trigger = page.getByRole('button', { name: '¿Te preocupa la caída? Revísala con calma' });
   await trigger.click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -79,7 +79,7 @@ test('English navigation, assistant and simulated portfolio are translated', asy
   await page.getByRole('button', { name: 'Explore', exact: true }).click();
   await expect(page.getByText('Explore the available information and its limits. These are not recommendations.')).toBeVisible();
   await page.getByRole('button', { name: 'My portfolio', exact: true }).click();
-  await page.getByRole('button', { name: 'Understand a decline' }).click();
+  await page.getByRole('button', { name: 'Worried about the decline? Review it calmly' }).click();
   await expect(page.getByText(/no one can guarantee whether or when it will recover/)).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Open assistant' }).click();
@@ -221,7 +221,7 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await phone.getByRole('button',{name:'Abrir menú'}).click();
  await expect(phone.locator('main')).toHaveAttribute('inert','');
  await phone.getByRole('button',{name:'Mi cartera',exact:true}).click();
- await phone.getByRole('button',{name:'Entender una caída'}).click();
+ await phone.getByRole('button',{name:'¿Te preocupa la caída? Revísala con calma'}).click();
  const modal=phone.getByRole('dialog');
  expect(await modal.evaluate(el=>el.scrollHeight>el.clientHeight)).toBeTruthy();
  await modal.getByRole('button',{name:'Continuar en la demo'}).scrollIntoViewIfNeeded();
@@ -365,7 +365,7 @@ test('decline explanations use observed series without inventing a current crisi
  await expect(page.getByRole('dialog',{name:'Tu asistente'})).toBeVisible();
  await page.keyboard.press('Escape'); await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
  // Mi cartera: la pausa analiza la serie REAL mostrada (NAV CNMV, participaciones DEMO): caída máxima 8,79 % (2019-12 -> 2020-03; 5 fondos x 5.000 € DEMO), contrastada con un cálculo independiente (también en backend/tests/test_nav_history.py).
- await page.getByRole('button',{name:'Entender una caída'}).click();
+ await page.getByRole('button',{name:'¿Te preocupa la caída? Revísala con calma'}).click();
  dialog=page.getByRole('dialog',{name:'Tomemos un momento'});
  await expect(dialog).toContainText('NAV CNMV; participaciones DEMO');
  await expect(dialog).toContainText('2019-12-31 – 2025-12-31');
@@ -433,7 +433,7 @@ test('local panels fit desktop and mobile in both themes', async ({browser}) => 
   await page.keyboard.press('Escape');
   if(width===320){await page.getByRole('button',{name:'Open menu'}).click();await page.getByRole('button',{name:'My portfolio',exact:true}).click();}
   else await page.getByRole('button',{name:'Mi cartera',exact:true}).click();
-  await page.getByRole('button',{name:width===320?'Understand a decline':'Entender una caída'}).click();
+  await page.getByRole('button',{name:width===320?'Worried about the decline? Review it calmly':'¿Te preocupa la caída? Revísala con calma'}).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   const overflow = await page.evaluate(()=>({screen:window.innerWidth,document:document.documentElement.scrollWidth,items:[...document.querySelectorAll('body *')].filter(el=>el.getBoundingClientRect().right>innerWidth+1).map(el=>`${el.tagName}.${el.className}`)}));
   await page.screenshot({path:`test-results/local-decline-${width}.png`});
