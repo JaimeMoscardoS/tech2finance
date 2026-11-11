@@ -1,48 +1,142 @@
 # Tech2Finance
 
-## Qué es
+**Entender primero, invertir después.**
 
-Prototipo de copiloto para la sección de inversión de un banco: tres niveles de explicación, simulaciones educativas con datos históricos y una pausa informativa antes de vender. Se propone venderlo a bancos; esta hipótesis está pendiente de validar.
+Copiloto de inversión con IA, de marca blanca, para la sección de inversión de un banco. Acompaña al cliente antes, durante y después de invertir: adapta la interfaz a lo que sabe, le explica su cartera por texto y voz, y le ayuda a mantener la calma cuando el mercado cae.
 
-La experiencia busca que una persona entienda productos y riesgos, practique con una máquina del tiempo y pueda consultar a un tutor por texto o voz. La pausa muestra el análisis disponible de la caída; la búsqueda de comparables y fuentes adicionales sigue siendo una propuesta. El banco sería el cliente comercial y el usuario bancario utilizaría la herramienta.
+> Entorno de demostración educativo: no usa dinero, cuentas ni operaciones reales y no constituye asesoramiento financiero.
 
-La demo no usa dinero ni cuentas reales. Los datos históricos deben ser verificables; los escenarios futuros no son predicciones. La pausa no bloquea al usuario ni promete recuperación. Lee el [contexto completo](docs/contexto-proyecto.md) para conocer la idea, el recorrido y sus límites.
+---
 
-La rama de trabajo incorpora el perfil ficticio [BancoT2F](docs/banco-t2f.md) y el [guion de demostración](presentacion/demo-banco-t2f.md). El perfil no contiene productos ni comisiones propias; los costes reales no disponibles se indican como desconocidos. El recorrido final está pendiente de comprobación tras la integración.
+## El problema
 
-La práctica utiliza dinero virtual y valores liquidativos históricos de cinco fondos reales publicados por la CNMV. Cada serie contiene 73 cierres mensuales observados, de diciembre de 2019 a diciembre de 2025: se usa la última observación real de cada mes, sin interpolación, ciclos ni extrapolación. El [frontend](frontend/README.md#práctica-guiada) explica cómo recorrerla. El [juego por turnos de compra y venta](docs/planning/historical-investment-game.md) sigue siendo una propuesta; no debe confundirse con la práctica existente.
+- **Se invierte sin entender.** Muchos clientes contratan fondos desde la app de su banco sin conocer su riesgo, sus costes ni el horizonte necesario.
+- **Pánico en las caídas.** Cuando el mercado baja, el cliente no sabe si es normal y vende en el peor momento: una pérdida temporal se vuelve definitiva.
+- **El test MiFID como trámite.** Se rellena para "aprobar", no para entender.
 
-Las aportaciones de la simulación se suman después de la variación del NAV del cierre: pueden ser mensuales o anuales; las anuales se producen en los meses 12, 24 y sucesivos desde el inicio. No se descuentan de nuevo los costes ya incorporados en el NAV, y no se inventan costes desconocidos. Las comparaciones no son recomendaciones ni garantizan resultados.
+Para el banco esto supone reembolsos por pánico, pérdida de patrimonio gestionado, reclamaciones y clientes desconfiados, y el asesoramiento humano no escala a todos los clientes.
 
-La [fuente CNMV](https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx) permite reutilización condicionada; consulta su [nota legal](https://www.cnmv.es/portal/Utilidades/NotaLegal) y la procedencia versionada en `shared/nav-history.json`. Las muestras y snapshots anteriores se conservan inmutables para reproducibilidad, separadas del catálogo activo.
+## La solución
 
-| Número | Área | Carpetas |
-| --- | --- | --- |
-| 1 | Interfaz y experiencia | [frontend](frontend/) |
-| 2 | Backend e integración | [backend](backend/) |
-| 3 | Simulador y motor | [simulador](simulador/) |
-| 4 | IA, voz y antipánico | [tutor-ia](tutor-ia/) |
-| 5 | Datos, pruebas y presentación | [datos](datos/), [tests](tests/), [presentacion](presentacion/) |
+| Funcionalidad | Qué hace |
+| --- | --- |
+| **Interfaz por niveles** | Básico, Intermedio y Avanzado, en tema claro y oscuro: de explicaciones sencillas a métricas profesionales (volatilidad, máxima caída, Sharpe, mapa de rentabilidad mensual). |
+| **Agente de IA (texto y voz, ES/EN)** | Explica la pantalla ("¿Qué estoy viendo?") y la situación de la cartera frente al objetivo ("¿Cómo van las cosas?"). |
+| **Pausa antipánico** | Ante una caída, muestra qué ha pasado y su contexto antes de vender, **sin bloquear la decisión** ni prometer recuperación. |
+| **Educación y Test MiFID** | Contenido por niveles y práctica del test de conveniencia con explicaciones de cada pregunta. |
+| **Simulador** | Recorrido guiado con fondos reales y "¿Y si vendo?", que compara mantener con vender en un mes concreto, más escenarios ilustrativos. |
+| **Mi cartera** | Posiciones, rentabilidad, riesgo y evolución de una cartera de ejemplo. |
+| **Modo presentación** | Recorrido guiado de 7 pasos por todo el producto (`?demo=1`). |
 
-Consulta [organización](docs/organizacion.md), [contratos](docs/contratos.md) y [agentes](docs/agentes.md). El repositorio contiene una demo implementada y documentación de las funcionalidades propuestas y pendientes.
+## Valor diferencial
 
-La [investigación de viabilidad empresarial](docs/investigacion/2026-11-10-viabilidad/informe.md) presenta evidencias, incertidumbres y recomendaciones pendientes de decisión; no acredita que exista un servicio bancario listo para producción.
+- **Acompaña en el momento del miedo.** Las apps bancarias y los neobrókers muestran datos y permiten operar; los robo-advisors deciden por el cliente. Tech2Finance **explica** para que el cliente decida mejor.
+- **Se adapta al cliente**: una interfaz que crece con su conocimiento.
+- **Datos reales y cifras fiables**: históricos oficiales de la CNMV; las métricas las calcula el código y la IA solo las explica.
+- **Prudente a nivel regulatorio**: información educativa, sin órdenes ni recomendaciones personalizadas.
 
-## Colaborar
+### Qué aporta al banco
 
-El propietario invita en GitHub desde Settings → Collaborators. Cada persona acepta, clona el repositorio y trabaja en una rama propia:
+- **Retención de patrimonio**: menos reembolsos por pánico.
+- **Cumplimiento**: clientes que entienden lo que contratan y menos reclamaciones.
+- **Escala**: acompañamiento personalizado sin un asesor por cliente.
+- **Modelo de negocio**: licencia SaaS por banco más tarifa por usuario activo. El banco es el cliente comercial y su usuario utiliza la herramienta. Esta hipótesis está pendiente de validar; ver la [investigación de viabilidad](docs/investigacion/2026-11-10-viabilidad/informe.md).
+
+## Uso de IA
+
+- **Modelos de lenguaje (Claude)** para explicar la cartera y analizar caídas con fuentes de contexto.
+- **Asistente de voz bilingüe** que mejora la accesibilidad y la interactividad.
+- **Garantías**: las cifras se calculan por código y un filtro del backend rechaza textos con números inventados. Sin servidor ni clave de IA, la app usa un tutor local por reglas, de modo que la demo siempre funciona.
+
+## Arquitectura
+
+```mermaid
+flowchart LR
+  CNMV[Datos CNMV<br/>valores liquidativos] --> Shared[shared/<br/>histórico y contratos]
+  Shared --> Backend[backend/<br/>API FastAPI]
+  Shared --> Frontend[frontend/<br/>React + TypeScript]
+  Backend --> IA[tutor-ia/<br/>tutor, voz y antipánico]
+  IA -->|LLM opcional| Claude[(Claude)]
+  Frontend <--> Backend
+```
+
+| Área | Carpetas |
+| --- | --- |
+| Interfaz y experiencia | [frontend](frontend/) |
+| Backend e integración | [backend](backend/) |
+| Simulador y motor | [simulador](simulador/) |
+| IA, voz y antipánico | [tutor-ia](tutor-ia/) |
+| Datos, pruebas y presentación | [datos](datos/), [tests](tests/), [presentacion](presentacion/) |
+
+Más detalle: [contexto del proyecto](docs/contexto-proyecto.md), [contratos](docs/contratos.md), [backend](docs/backend-contexto.md), [organización](docs/organizacion.md), [agentes](docs/agentes.md) y [plan](docs/planning/plan.md).
+
+## Requisitos
+
+- Node.js 20 o superior y npm
+- Python 3.11 o superior
+- Git
+
+## Instalación
 
 ```bash
 git clone https://github.com/JaimeMoscardoS/tech2finance.git
+cd tech2finance
+
+# Frontend y tutor
+npm install
+
+# Backend
+cd backend
+python -m venv .venv
+# Windows:      .venv\Scripts\activate
+# macOS/Linux:  source .venv/bin/activate
+pip install -r requirements.txt
+cd ..
 ```
 
-Abrir un pull request y pedir revisión antes de integrar. No subir claves ni datos privados.
+## Configuración (opcional)
 
-## Backend local de demostración
+La demo funciona sin configuración. Para activar la IA real, copia `.env.example` a `.env` y añade tu clave del proveedor de IA. **No subas nunca claves al repositorio.**
 
-Para habilitar servicios opcionales, copia `.env.example` a `.env` en la raíz y añade `ANTHROPIC_API_KEY` y `ELEVENLABS_API_KEY`. El servidor lee el archivo al arrancar; reinícialo después de guardarlo. `.env` es privado y está excluido de Git. Consulta [configuración del backend](backend/README.md#configuración-privada-local).
+## Ejecución
 
-La rama incluye una API FastAPI local para catálogo, simulación, caídas y tutor por reglas, con proveedores externos opcionales. `POST /api/game/compare` compara mantener con una venta en un mes seleccionado mediante NAV reales; no implementa decisiones de juego por turnos. El frontend utiliza el servidor por defecto y permite elegir demo local explícitamente. No conecta bancos. Véanse [backend-contexto](docs/backend-contexto.md) y [frontend/README](frontend/README.md) para contratos y ejecución.
+```bash
+npm run dev:full
+```
 
+Arranca el frontend y el backend a la vez. Abre **http://localhost:5173**.
 
-Plan de trabajo y puertas de decisión: [preparación de Tech2Finance](docs/planning/plan.md).
+- **Modo presentación**: http://localhost:5173/?demo=1
+- **Ver de nuevo la bienvenida**: borra el `localStorage` del navegador.
+
+## Pruebas
+
+```bash
+npm test                 # pruebas unitarias (frontend y tutor)
+cd backend && pytest     # pruebas del backend
+npx playwright test      # pruebas end-to-end
+```
+
+## Datos
+
+- **Reales**: valores liquidativos mensuales de cinco fondos publicados por la [CNMV](https://www.cnmv.es/portal/publicaciones/descarga-informacion-individual.aspx), con 73 cierres de diciembre de 2019 a diciembre de 2025. Se usa la última observación de cada mes, sin interpolación ni extrapolación. La procedencia está versionada en `shared/nav-history.json` y la reutilización está sujeta a la [nota legal de la CNMV](https://www.cnmv.es/portal/Utilidades/NotaLegal).
+- **Ficticios (DEMO)**: las participaciones, los importes y el objetivo de la cartera de ejemplo, y los perfiles de los fondos que no publica la CNMV. Se marcan siempre como DEMO.
+- Las simulaciones no son predicciones ni recomendaciones. Los costes desconocidos no se inventan.
+
+## Accesibilidad
+
+Contraste WCAG AA en los 6 temas (3 niveles × claro y oscuro), navegación por teclado, alternativas de texto en las gráficas, asistente por voz, diseño adaptable a móvil y respeto de la preferencia de movimiento reducido.
+
+## Limitaciones
+
+- Prototipo de demostración: sin conexión con bancos reales ni operaciones.
+- La cartera del usuario es de ejemplo.
+- La IA real requiere clave del proveedor; sin ella se usa el tutor local por reglas.
+
+## Colaborar
+
+Trabaja en una rama propia, abre un pull request y pide revisión antes de integrar. No subas claves ni datos privados.
+
+## Equipo
+
+Marta López, Jaime Moscardó, Ignacio Gil, Manu Carrasco, Diego Pérez
