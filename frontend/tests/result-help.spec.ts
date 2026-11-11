@@ -14,7 +14,8 @@ test("result help is prominent and opens the local tutor with the current result
   const button = help.getByRole("button", { name: "Explícame este resultado" });
   await expect(button).toBeVisible();
   expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(56);
-  await expect(page.locator(".sim-result .investment-chart")).toBeVisible();
+  // The chart now lives in step 3 (the month-by-month replay), not inside the step 2 result.
+  await expect(page.locator("#jr-step-3 .tm-plot")).toBeVisible();
   await page.screenshot({ path: "/tmp/t2f-result-help.png", fullPage: true });
   await button.focus();
   await page.keyboard.press("Enter");

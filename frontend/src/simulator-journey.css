@@ -1,19 +1,27 @@
-/* Guided simulator journey. Step colours are scoped tokens with light and dark values.
-   Text on its soft background / on the surface is >= 4.5:1 (checked in tests). Control boundaries (fund cards,
-   fields, details) use --jr-border, which is >= 3:1 against the surface in both themes (checked in tests);
-   the generic --border token is lighter and is not used for control boundaries here. */
+/* Guided simulator journey with the team-approved «Marea» palette, scoped to the Simulator only (the rest of the app keeps VALLE).
+   Marea: Azul noche #0E1B3D (text, headers), Turquesa electrico #00B3A4 (main action, "si mantengo"), Amarillo sol #FFC94D
+   (moments, questions, achievements), Coral suave #FF7A66 (falls, always with an icon or text), Fondo #F3F7FB.
+   Raw brand colours are used as fills; text and control boundaries use the darker *-ink / --jr-border tokens so that text is
+   >= 4.5:1 and control boundaries >= 3:1 against their surface in both themes (checked in tests). */
 .journey {
-  --j1: #1f4f7a; --j1-soft: #dbe8f4; --j1-line: #4a7aa6; --j1-on: #ffffff;
-  --j2: #0f645a; --j2-soft: #d6ede8; --j2-line: #3f8f84; --j2-on: #ffffff;
-  --j3: #5b3d99; --j3-soft: #e7defa; --j3-line: #8466bd; --j3-on: #ffffff;
-  --jr-border: #667b86;
+  --mr-night: #0E1B3D; --mr-teal: #00B3A4; --mr-sun: #FFC94D; --mr-coral: #FF7A66; --mr-bg: #F3F7FB;
+  --ink: #0E1B3D; --muted: #3d4a6b; --surface: #ffffff; --surface-raised: #F3F7FB; --border: #c9d5e6; --focus: #0057b8;
+  --error-ink: #9c2a17; --accent: #0e6f66;
+  --j1: #0E1B3D; --j1-soft: #e3ecf8; --j1-line: #5b6b8c; --j1-on: #ffffff;
+  --j2: #00665d; --j2-soft: #d4f3ef; --j2-line: #00867a; --j2-on: #ffffff;
+  --j3: #0E1B3D; --j3-soft: #fff0c4; --j3-line: #b78500; --j3-on: #ffffff;
+  --jr-border: #5b6b8c; --jr-grid: #c9d5e6;
+  --jr-line-hold: #007a70; --jr-line-paid: #5b6b8c; --jr-line-sell: #0E1B3D; --jr-coral: #FF7A66; --jr-coral-ink: #9c2a17; --jr-coral-soft: #ffe6e1; --jr-sun-soft: #fff0c4; --jr-sun-ink: #6b4a00;
   margin-top: 20px; min-width: 0; display: grid; gap: 16px;
 }
 html[data-theme='dark'] .journey {
-  --jr-border: #8aa2b0;
-  --j1: #9cc7f0; --j1-soft: #17334d; --j1-line: #6f9ccb; --j1-on: #0b2036;
-  --j2: #8fdccf; --j2-soft: #123b38; --j2-line: #5fb3a7; --j2-on: #082b27;
-  --j3: #cdb8f5; --j3-soft: #2f2349; --j3-line: #9c82d1; --j3-on: #24163f;
+  --ink: #e8eefb; --muted: #b9c5e0; --surface: #101c3a; --surface-raised: #16264d; --border: #3b4d7a; --focus: #9cc7ff;
+  --error-ink: #ffb3a6; --accent: #5ee0d3;
+  --jr-border: #8b9fd0; --jr-grid: #2c3d68;
+  --j1: #c7d7f7; --j1-soft: #16264d; --j1-line: #6f86bb; --j1-on: #0a1430;
+  --j2: #5ee0d3; --j2-soft: #0f3a3d; --j2-line: #2fb3a7; --j2-on: #03201f;
+  --j3: #ffd36b; --j3-soft: #3a2f12; --j3-line: #c9a13a; --j3-on: #1d1500;
+  --jr-line-hold: #2fd6c7; --jr-line-paid: #9fb0d8; --jr-line-sell: #ffd36b; --jr-coral: #ff9a8a; --jr-coral-ink: #ffb3a6; --jr-coral-soft: #4a2220; --jr-sun-soft: #3a2f12; --jr-sun-ink: #ffd36b;
 }
 .journey .jr-c1 { --jc: var(--j1); --jc-soft: var(--j1-soft); --jc-line: var(--j1-line); --jc-on: var(--j1-on); }
 .journey .jr-c2 { --jc: var(--j2); --jc-soft: var(--j2-soft); --jc-line: var(--j2-line); --jc-on: var(--j2-on); }
@@ -86,8 +94,8 @@ html[data-theme='dark'] .journey {
 .jr-field:has([aria-invalid='true']) { border: 2px solid var(--error-ink); }
 .jr-field > span { color: var(--muted); font-size: .85rem; white-space: nowrap; }
 .jr-slider { display: grid; gap: 8px; }
-.jr-slider label, .hsg-slider label { font-size: .85rem; font-weight: 600; color: var(--ink); }
-.jr-slider output, .hsg-slider output { font-weight: 700; color: var(--jc); font-variant-numeric: tabular-nums; }
+.jr-slider label { font-size: .85rem; font-weight: 600; color: var(--ink); }
+.jr-slider output { font-weight: 700; color: var(--jc); font-variant-numeric: tabular-nums; }
 .journey input[type='range'] { width: 100%; min-height: 32px; accent-color: var(--jc); }
 .jr-more { border: 1px solid var(--jr-border); border-radius: 12px; padding: 0 14px 12px; }
 .jr-more summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 600; font-size: .88rem; color: var(--jc); }
@@ -95,7 +103,7 @@ html[data-theme='dark'] .journey {
 .jr-refresh .button { margin: 0; min-height: 44px; font-size: .85rem; }
 
 /* Prediction */
-.jr-predict, .hsg-predict { margin-top: 20px; padding: 16px; background: var(--jc-soft); border: 1px solid var(--jc-line); border-radius: 16px; }
+.jr-predict { margin-top: 20px; padding: 16px; background: var(--jc-soft); border: 1px solid var(--jc-line); border-radius: 16px; }
 .jr-question { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--ink) !important; }
 .jr-answers { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; }
 .jr-answer { background: var(--surface); }
@@ -127,8 +135,7 @@ html[data-theme='dark'] .journey {
 .jr-split-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .jr-split-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 .jr-key-own { background: var(--jc-soft); border: 1px solid var(--jc); } .jr-key-gain { background: var(--chart-rise); } .jr-key-loss { background: repeating-linear-gradient(135deg, var(--chart-fall) 0 3px, transparent 3px 6px); border: 1px solid var(--chart-fall); }
-.jr-achievement, .hsg-achievement { margin: 44px 0 0; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; color: var(--jc) !important; background: var(--jc-soft); border: 1px solid var(--jc-line); border-radius: 999px; font-size: .85rem; font-weight: 700; }
-.hsg-achievement { margin-top: 10px; }
+.jr-achievement { margin: 44px 0 0; display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; color: var(--jc) !important; background: var(--jc-soft); border: 1px solid var(--jc-line); border-radius: 999px; font-size: .85rem; font-weight: 700; }
 .jr-next { margin-top: 18px; min-height: 44px; }
 .jr-step.jr-c2 .button.dark, .jr-step.jr-c2 .button.dark:hover { background: var(--j2); color: var(--j2-on); }
 
@@ -155,8 +162,16 @@ html[data-theme='dark'] .journey {
 
 .jr-more:not([open]) { padding-bottom: 0; }
 
-/* Step 3 fields live inside the journey too. */
-.journey .hsg-field input, .journey .hsg-field select, .journey .hsg-pick select, .journey .hsg-fees { border-color: var(--jr-border); }
-.journey .hsg-synced > div, .journey .hsg-notice { border-color: var(--jr-border); }
-.journey .hsg-toggle, .journey .jr-guide-toggle { border-color: var(--jr-border); }
-.journey .hsg-challenge .hsg-toggle { background: var(--surface); }
+/* Step 2 extras: bigger figures, answer icons and the info disclosure. */
+.jr-answer { display: inline-flex; align-items: center; gap: 8px; }
+.sim-result .sim-values dd strong { font-size: clamp(1.4rem, 4vw, 1.9rem); font-variant-numeric: tabular-nums; }
+.sim-result .sim-values > div:first-child strong { font-size: clamp(1.4rem, 4vw, 1.9rem); }
+.jr-info { margin-top: 16px; }
+.jr-info p { margin: 8px 0 0; font-size: .85rem; line-height: 1.5; }
+.jr-info .assumption { background: var(--surface-raised); color: var(--muted); }
+.jr-step.jr-c3 .jr-step-label { color: var(--jc) !important; }
+.jr-step-btn.jr-c3[aria-current='step'] { box-shadow: inset 0 -4px 0 var(--mr-sun); }
+@media (prefers-reduced-motion: no-preference) {
+  .jr-answer { transition: background-color .15s, transform .15s; }
+  .jr-answer:hover:not([aria-disabled='true']) { transform: translateY(-1px); }
+}

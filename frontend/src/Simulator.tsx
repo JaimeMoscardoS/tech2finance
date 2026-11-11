@@ -8,7 +8,9 @@ import {
   Lightbulb,
   Lock,
   MessageCircle,
+  Minus,
   TrendingDown,
+  TrendingUp,
 } from "lucide-react";
 import { type Instrument, type BankProfile } from "./catalog";
 import { ProductCosts } from "./BankInfo";
@@ -18,10 +20,10 @@ import type { NavHistory } from "./server-api";
 import { gameDates } from "./game-domain";
 import { journeyCopy } from "./journey-copy";
 import { PRESETS, evaluatePrediction, fundMetrics, matchesPreset, monthLabel, sliderMonths, sparklinePoints, navSeries, type Guess } from "./journey-domain";
-import InvestmentChart from "./LazyInvestmentChart";
+import { tmCopy } from "./time-machine-copy";
 import "./simulator-journey.css";
 
-const HoldSellGame = lazy(() => import("./HoldSellGame"));
+const TimeMachine = lazy(() => import("./TimeMachine"));
 
 export type FieldError = "initial" | "monthly" | "annual" | "amounts" | "general" | null;
 type Level = "beginner" | "intermediate" | "advanced";
@@ -76,17 +78,17 @@ export default function Simulator({
   setMonths, setResult, setError, selectInstrument, run, openAssistant, openSimulationDecline, euro,
 }: Props) {
   const j = journeyCopy[language];
+  const tm = tmCopy[language];
   const locale = language === "es" ? "es-ES" : "en-GB";
   const [chosen, setChosen] = useState(prechosen);
   const [guess, setGuess] = useState<Guess | null>(null);
   const [current, setCurrent] = useState<Step>(prechosen ? 2 : 1);
-  const [gameRevealed, setGameRevealed] = useState(false);
   const [pickedId, setPickedId] = useState(selected.instrumentId);
   useEffect(() => setPickedId(selected.instrumentId), [selected.instrumentId]);
   const [guideOpen, setGuideOpen] = useState(level !== "advanced");
   const [quiet, setQuiet] = useState(false);
   const [gameSeen, setGameSeen] = useState(false);
-  useEffect(() => { if (gameRevealed) setGameSeen(true); }, [gameRevealed]);
+  const onFinished = (finished: boolean) => { if (finished) setGameSeen(true); };
   useEffect(() => setGuideOpen(level !== "advanced"), [level]);
 
   const [exampleShown] = useState(example);
@@ -188,7 +190,7 @@ export default function Simulator({
     // Step 3 loads lazily: wait (a few frames at most) for its heading before moving focus.
     let frames = 0;
     const settle = () => {
-      const heading = document.getElementById(step === 3 ? "hsg-title" : `jr-h-${step}`);
+      const heading = document.getElementById(step === 3 ? "tm-title" : `jr-h-${step}`);
       if (!heading && frames++ < 90) { requestAnimationFrame(settle); return; }
       document.getElementById(`jr-step-${step}`)?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
       heading?.focus({ preventScroll: true });
@@ -406,9 +408,10 @@ export default function Simulator({
                 <p id="jr-q" className="jr-question">{j.question}</p>
                 <p className="jr-note">{error ? j.invalidAnswer : j.questionHelp}</p>
                 <div className="jr-answers">
-                  {(["more", "less", "same"] as const).map(g => (
-                    <button key={g} type="button" className="jr-answer" aria-disabled={error ? true : undefined} onClick={() => answer(g)}>{j.answers[g]}</button>
-                  ))}
+                  {(["more", "less", "same"] as const).map(g => {
+                    const Icon = g === "more" ? TrendingUp : g === "less" ? TrendingDown : Minus;
+                    return <button key={g} type="button" className="jr-answer" aria-disabled={error ? true : undefined} onClick={() => answer(g)}><Icon size={18} aria-hidden="true" />{j.answers[g]}</button>;
+                  })}
                 </div>
               </div>
             )}
@@ -461,33 +464,25 @@ export default function Simulator({
                       <div><strong>{t.explainResult}</strong><p>{j.helpText}</p></div>
                       <button className="button dark" type="button" onClick={openAssistant}>{j.explain}<ArrowRight size={17} /></button>
                     </div>
-                    {currentResult.timeline[0]?.date && currentResult.timeline.at(-1)?.date && <p>{j.observed}: {currentResult.timeline[0].date} – {currentResult.timeline.at(-1)!.date}</p>}
-                    <InvestmentChart
-                      language={language}
-                      title={t.chartTitle}
-                      description={t.chartDescription}
-                      data={currentResult.timeline.map(point => ({
-                        label: point.date ?? (point.period === 0 ? t.start : `${t.month} ${point.period}`),
-                        value: point.value,
-                        contributed: point.contributed,
-                        returnPercent: point.instrumentReturnPercent,
-                      }))}
-                    />
-                    <div className="source-details">
-                      <p>
-                        {t.managerLabel}: {selected.manager}
-                        {selected.identifier && <> · {t.identifierLabel}: {selected.identifier}</>}
-                        {selected.shareClass && <> · {t.classLabel}: {selected.shareClass}</>}
-                        {selected.currency && <> · {selected.currency}</>}
-                      </p>
-                      {selected.sourceUrl && (
+                    <details className="jr-more jr-info">
+                      <summary>{j.moreInfo}</summary>
+                      {currentResult.timeline[0]?.date && currentResult.timeline.at(-1)?.date && <p>{j.observed}: {currentResult.timeline[0].date} – {currentResult.timeline.at(-1)!.date}</p>}
+                      <div className="source-details">
                         <p>
-                          <a href={selected.sourceUrl} target="_blank" rel="noreferrer">CNMV <ArrowUpRight size={14} /></a> · {t.sourceChecked}: {selected.sourceDate}
+                          {t.managerLabel}: {selected.manager}
+                          {selected.identifier && <> · {t.identifierLabel}: {selected.identifier}</>}
+                          {selected.shareClass && <> · {t.classLabel}: {selected.shareClass}</>}
+                          {selected.currency && <> · {selected.currency}</>}
                         </p>
-                      )}
-                    </div>
+                        {selected.sourceUrl && (
+                          <p>
+                            <a href={selected.sourceUrl} target="_blank" rel="noreferrer">CNMV <ArrowUpRight size={14} /></a> · {t.sourceChecked}: {selected.sourceDate}
+                          </p>
+                        )}
+                      </div>
+                      <div className="assumption"><CircleHelp size={16} /><span>{j.assumption}</span></div>
+                    </details>
                     <button className="button outline decline-trigger" type="button" onClick={openSimulationDecline}><TrendingDown size={17} />{j.declines}</button>
-                    <div className="assumption"><CircleHelp size={16} /><span>{j.assumption}</span></div>
                     <button className="button dark jr-next" type="button" onClick={() => goTo(3)}>{j.goStep3}<ArrowRight size={16} /></button>
                   </div>
                 )}
@@ -497,15 +492,23 @@ export default function Simulator({
         )}
 
         {unlocked >= 3 && (
-          <section id="jr-step-3" className="jr-step jr-c3" aria-label={j.steps[2]} onFocusCapture={() => track(3)} onClickCapture={() => track(3)}>
-            <Suspense fallback={<p role="status">{language === "es" ? "Cargando ejercicio…" : "Loading exercise…"}</p>}>
-              <HoldSellGame
-                language={language} level={level} mode={mode} instruments={instruments} navHistory={navHistory}
-                fund={selected} initial={initial} monthly={monthly} months={months} frequency={contributionFrequency}
-                onSelectFund={chooseFund} onUseMonthly={() => edit(() => setContributionFrequency("monthly"))}
-                onRevealed={setGameRevealed}
-              />
-            </Suspense>
+          <section id="jr-step-3" className="jr-step jr-c3" aria-labelledby="tm-title" onFocusCapture={() => track(3)} onClickCapture={() => track(3)}>
+            {currentResult ? (
+              <Suspense fallback={<p role="status">{language === "es" ? "Cargando recorrido…" : "Loading journey…"}</p>}>
+                <TimeMachine
+                  key={`${selected.instrumentId}|${currentResult.initial}|${currentResult.monthly}|${currentResult.months}|${contributionFrequency}|${currentResult.value}`}
+                  language={language} mode={mode} fund={selected} instruments={instruments} navHistory={navHistory}
+                  result={{ initial: currentResult.initial, monthly: currentResult.monthly, months: currentResult.months, timeline: currentResult.timeline }}
+                  frequency={contributionFrequency} euro={euro} assumption={j.assumption} onFinished={onFinished}
+                />
+              </Suspense>
+            ) : (
+              <>
+                <p className="jr-step-label">{tm.stepLabel}</p>
+                <h2 id="tm-title" tabIndex={-1}>{tm.title}</h2>
+                <p role="status" className="jr-pending">{error ? t.amountError : tm.pending}</p>
+              </>
+            )}
           </section>
         )}
       </div>

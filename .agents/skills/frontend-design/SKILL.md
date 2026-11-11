@@ -16,6 +16,9 @@ precedence where the general guidance conflicts with the project's brief.
 
 - Preserve the existing VALLE-inspired palette and ensure sufficient contrast,
   including on navy surfaces and in both light and dark themes.
+- The Simulator uses the team-approved «Marea» palette (scoped to the Simulator
+  journey only, with light and dark values and the same contrast rules); the rest
+  of the app keeps VALLE.
 - Design for Spanish and English content and for mobile as well as desktop.
   Check longer translations, wrapping, keyboard focus and reduced motion.
 - Present financial information with a clear hierarchy and semantic relationships

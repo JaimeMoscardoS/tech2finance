@@ -226,7 +226,7 @@ test('tablet layout, modal scrolling and mobile menu background', async ({ brows
  await mobile.close();
 });
 
-test('monthly deposits, table and percentage view stay consistent across preferences', async ({page}) => {
+test('monthly deposits and the replay table stay consistent across preferences', async ({page}) => {
  await page.addInitScript(() => localStorage.setItem('t2f-data-mode', 'local'));
   await page.goto('http://127.0.0.1:5194/');
  await page.getByRole('button',{name:'Simulador',exact:true}).click();
@@ -239,21 +239,27 @@ test('monthly deposits, table and percentage view stay consistent across prefere
  await expect(panel.locator('.sim-values strong').nth(1)).toHaveText('1100,00 €');
  await expect(panel.locator('.sim-values strong').nth(2)).toHaveText('0,30 €');
  await expect(panel.locator('[role="status"][aria-atomic="true"]')).toContainText('Resultado actualizado');
- await panel.getByText('Ver datos', {exact:true}).click();
- const rows=panel.getByRole('table',{name:'Datos del gráfico: Evolución de la práctica'}).locator('tbody tr');
+ // The chart and its table / percentage view moved out of the step 2 result: the step 3 replay has its own table of visible months.
+ await expect(panel.locator('.investment-chart')).toHaveCount(0);
+ const tm=page.locator('#jr-step-3 .tm');
+ for(let i=0;i<12;i++){
+  await tm.getByRole('button',{name:'Siguiente mes'}).click();
+  const skip=tm.getByRole('button',{name:'Seguir sin responder'});
+  if(i<11&&await skip.count()) await skip.click();
+ }
+ await expect(tm).toContainText('Mes 12 de 12');
+ await tm.getByText('Ver tabla de los meses visibles').click();
+ const rows=tm.getByRole('table').locator('tbody tr');
  await expect(rows).toHaveCount(13);
- await expect(rows.nth(0)).toContainText('Importe inicial: 500,00 €');
+ await expect(rows.nth(0)).toContainText('500,00 €');
  await expect(rows.last()).toContainText('1100,30 €');
  await expect(rows.last()).toContainText('1100,00 €');
- await expect(rows.last()).toContainText('2020-12-31');
- await panel.getByRole('button',{name:'Evolución del instrumento (%)'}).click();
- await expect(rows.last()).toContainText('2020-12-31');
+ await expect(rows.last()).toContainText('dic 2020');
  await page.getByRole('button',{name:/Detalle: Principiante/}).click();
  await page.getByRole('button',{name:'Intermedio',exact:true}).click();
  await page.getByRole('button',{name:'Modo oscuro'}).click();
  await page.getByRole('button',{name:'English'}).click();
  await expect(panel.locator('.sim-values strong').nth(0)).toHaveText('€1,100.30');
- await expect(panel.getByRole('button',{name:'Instrument performance (%)'})).toHaveAttribute('aria-pressed','true');
  await page.getByLabel('Monthly contribution').fill('75');
  await expect(panel.getByText(/Your inputs changed/)).toBeVisible();
  await expect(panel.locator('.investment-chart')).toHaveCount(0);
