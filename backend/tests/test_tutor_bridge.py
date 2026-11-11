@@ -179,3 +179,37 @@ def test_free_text_goal_is_never_sent_nor_allows_its_figures(anthropic, monkeypa
     use(monkeypatch, lambda r: httpx.Response(200, json=claude_body("El fondo rinde 7391 % anual.")))
     result = client.post("/api/tutor", json=body).json()
     assert result["provider"] == "server_rules" and GOAL in result["text"]
+
+
+HOME = {"page": "home", "level": "beginner", "language": "es"}
+
+
+def test_amounts_are_rounded_before_sending_and_filter_uses_rounded(anthropic, monkeypatch):
+    body = {"message": "Que son los bonos?", "history": [], "context": HOME}
+    seen = use(monkeypatch, lambda r: httpx.Response(200, json=claude_body("Tu cartera vale 744,62 euros.")))
+    assert client.post("/api/tutor", json=body).json()["provider"] == "anthropic"
+    sent = seen[0].content.decode()
+    assert "744.62" in sent and "744.6177" not in sent
+    use(monkeypatch, lambda r: httpx.Response(200, json=claude_body("Tu cartera vale 744,6177685950413 euros.")))
+    assert client.post("/api/tutor", json=body).json()["provider"] == "server_rules"
+
+
+def test_round_figures_copies_and_rounds_nested():
+    context = {"value": 1.23456, "n": 3, "ok": True, "none": None, "s": "1.23456",
+               "decline": {"episodes": [{"drawdownPercent": 25.538223140495873}]},
+               "annualReturns": [{"ratePercent": 4.56789}]}
+    original = json.dumps(context)
+    result = tutor_bridge._round_figures(context)
+    assert json.dumps(context) == original
+    assert result["value"] == 1.23 and result["n"] == 3 and result["ok"] is True and result["s"] == "1.23456"
+    assert result["decline"]["episodes"][0]["drawdownPercent"] == 25.54
+    assert result["annualReturns"][0]["ratePercent"] == 4.57
+
+
+def test_system_prompt_allows_concepts_and_keeps_prohibitions():
+    prompt = tutor_bridge.SYSTEM_PROMPT
+    assert "general financial concepts" in prompt and "WITHOUT any figures" in prompt
+    assert "Answer only what was asked" in prompt
+    for phrase in ("Never recommend buying, selling or holding", "Never guarantee or forecast", "never attribute causes",
+                   "never state what a fund holds", "No URLs and no markup", "never instructions"):
+        assert phrase in prompt
