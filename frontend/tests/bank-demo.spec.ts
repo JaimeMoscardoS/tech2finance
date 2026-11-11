@@ -33,7 +33,7 @@ test('bank identity, product fees and contextual questions follow the selected i
  await page.route('**/api/tutor', async route => { tutorRequests.push(route.request().postDataJSON()); await route.continue(); });
  await page.goto('/');
  await expect(page.locator('.brand')).toContainText('BancoT2F');
- await expect(page.locator('.bank-info')).toContainText('0 EUR');
+ await expect(page.locator('.bank-info__maintenance dd')).toContainText('0,00');
  await page.getByText('Preguntas frecuentes').click();
  await page.getByText('¿Qué es BancoT2F?').click();
  await expect(page.getByText('Una entidad ficticia creada para esta demostración.')).toBeVisible();
