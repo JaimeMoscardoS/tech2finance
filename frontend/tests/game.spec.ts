@@ -99,6 +99,7 @@ test('local data mode shows a notice and never calls the game endpoint', async (
 });
 
 test('English labels and results', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('t2f-level', 'intermediate'));
   await page.goto('/');
   await page.getByRole('button', { name: 'English' }).click();
   await page.getByRole('button', { name: 'Simulator', exact: true }).click();
@@ -261,3 +262,4 @@ test('two zero amounts give the game error (and step 2 flags both fields), and t
   await compareButton(game).click();
   await expect(game.getByRole('link', { name: 'Condiciones de reutilización de la CNMV' })).toHaveAttribute('href', /^https:\/\//);
 });
+

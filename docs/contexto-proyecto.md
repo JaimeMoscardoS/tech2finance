@@ -32,7 +32,7 @@ En esta rama, el caso de caída usa BBVA MI INVERSION BOLSA ACUMULACION, FI, con
 
 Para la demo, los controles y acciones del guion deben funcionar de principio a fin; ante un fallo deben mostrar un error y permitir recuperación o reintento. La voz es opcional. El asistente utiliza los mismos hechos observados y distingue el evento público de una causa no verificada. Las comprobaciones específicas de caída no prueban por sí solas todos los controles de la aplicación.
 
-1. **Entrar y elegir nivel.** El usuario abre la sección ficticia de inversión y escoge principiante, intermedio o avanzado. Puede cambiarlo cuando quiera.
+1. **Entrar y elegir nivel.** El usuario abre la sección ficticia de inversión y escoge básico, intermedio o avanzado. Puede cambiarlo cuando quiera.
 2. **Explorar y preguntar.** Ve información de productos de ejemplo y pregunta al tutor qué significa un concepto o un dato de la pantalla. El tutor responde por texto y, si está disponible, por voz.
 3. **Practicar.** Introduce una cantidad y una aportación periódica ficticias. En la máquina del tiempo recorre un periodo histórico para observar subidas y caídas y comparar decisiones de juego. Debe quedar claro qué serie representa el gráfico y cuáles son los supuestos.
 4. **Comprender una caída.** En una cartera de ejemplo, el usuario puede encontrar una bajada y activar una pausa informativa. El asistente muestra el contexto disponible, recuerda el objetivo y el plazo si se conocen y pregunta si necesita liquidez. El usuario decide qué hacer.
@@ -48,9 +48,15 @@ La cabecera ofrece «Hablar con IA» para iniciar el dictado con una barra no mo
 
 | Nivel | Experiencia prevista |
 | --- | --- |
-| Principiante | Pocos elementos a la vez, palabras sencillas, explicaciones de conceptos, riesgos y costes en términos comprensibles. |
+| Básico (id interno `beginner`) | Pocos elementos a la vez, palabras sencillas, explicaciones de conceptos, riesgos y costes en términos comprensibles. |
 | Intermedio | Mayor detalle sobre distribución, evolución, costes y comparación de alternativas. |
 | Avanzado | Más información técnica y parámetros cuando existan datos fiables y métricas implementadas. |
+
+Rediseño del dashboard en la rama `mejora-ui` (detalle en [diseno-dashboard.md](diseno-dashboard.md)): la fase 2 añade componentes base, una cartera ficticia DEMO en `shared/mock/` con métricas calculadas por código probado (coste y serie con la misma base, volatilidad y Sharpe solo con 12 o más meses, escenario de sensibilidad que cuenta la renta variable del fondo mixto, rentabilidades DEMO netas de gastos y sin tipo de cambio), el nivel recordado en `localStorage` y la página temporal `/componentes` (sin enlace en la navegación). Aún no está integrado en `main` y los paneles reales del dashboard no cambian hasta la fase 3.
+
+Estado real del rediseño (11-11-2026): implementado en la rama `mejora-ui` (commits 613189a y 3213a38 más cambios sin commit), **sin integrar en `main`**. Incluye Inicio, Mi cartera, Educación (Test MiFID de práctica, 27 preguntas con aviso de contenido pendiente de verificación), una única sección Simulador (producto del catálogo y escenarios ilustrativos DEMO, ordenados por nivel), panel del agente y pausa por nivel, con correcciones de la revisión de accesibilidad (foco, gráficos sin paradas de tabulación, errores asociados, 320 px). La ruta temporal `/componentes` y el CSS antiguo sin uso se retiraron. Limitación: el servidor solo acepta cuatro páginas de tutor; el cliente envía `home` en `learn` (la página `game` se fusionó en el Simulador; parche propuesto en [propuestas/backend-learn-game.patch](propuestas/backend-learn-game.patch), no aplicado). No probado con lector de pantalla ni teclado reales.
+
+Integración con `main` (11-11-2026, fusionada en la rama `mejora-ui`; pendiente del pull request a `main`): Inicio, «Mi cartera», el panel del agente, la pausa y el tutor usan una sola cartera construida con los valores liquidativos reales de la CNMV (valor, rentabilidad, volatilidad, caída máxima y Sharpe calculados por código). Solo las participaciones son DEMO; riesgo, TER, clase y región se muestran como «No disponible» porque no constan en los datos publicados, y los agregados que dependen de ellos como «Sin dato». La referencia es la media simple de los fondos, no un índice. La pausa de cartera analiza esa misma serie: con servidor (`portfolio_cnmv`) incluye el análisis detallado de caídas; sin servidor, el análisis local. No bloquea ni presiona la venta. El selector de nivel es el de `main` con etiquetas Básico/Intermedio/Avanzado, y el Simulador único combina los escenarios ilustrativos DEMO por nivel con el recorrido guiado de 3 pasos de `main` (paso 3: «¿Y si vendo?»; sin servidor muestra aviso). Los fondos reales se muestran con nombres genéricos y el contexto del BCE acompaña a la serie de estudio («Probar una caída»). Detalle en [diseno-dashboard.md](diseno-dashboard.md).
 
 Cambian la presentación y la profundidad de la explicación. Los tres niveles comparten la misma base de datos y de cálculo; seleccionar principiante o avanzado no define la tolerancia al riesgo.
 

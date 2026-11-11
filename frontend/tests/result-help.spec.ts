@@ -65,7 +65,7 @@ test("result help fits and remains legible in each level and theme on mobile", a
   for (const theme of ["light", "dark"]) {
     if (theme === "dark")
       await page.getByRole("button", { name: "Modo oscuro" }).click();
-    for (const level of ["Principiante", "Intermedio", "Avanzado"]) {
+    for (const level of ["Básico", "Intermedio", "Avanzado"]) {
       await page.locator(".level-button").click();
       await page
         .locator(".level-menu")

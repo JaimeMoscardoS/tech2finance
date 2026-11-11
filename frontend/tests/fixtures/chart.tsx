@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import InvestmentChart from '../../src/components/InvestmentChart';
+import '../../src/styles/tokens.css';
 import '../../src/style.css';
 import '../../src/dark-theme.css';
 import '../../src/level-colors.css';

@@ -166,6 +166,8 @@ def test_oversized_chunked_body_is_rejected():
 
 @pytest.mark.parametrize("body", [
     {"basis": "portfolio_demo", "language": "es", "periods": 4},
+    {"basis": "portfolio_cnmv", "language": "es", "instrumentId": "x"},
+    {"basis": "portfolio_cnmv", "language": "es", "observations": [1, 2]},
     {"basis": "instrument", "language": "es", "instrumentId": "x"},
     {"basis": "instrument", "language": "es", "instrumentId": "x", "periods": 1, "observations": []},
 ])
@@ -338,3 +340,11 @@ def test_external_missing_history_through_tutor_bridge(language, question, expec
     assert answer['intent'] == 'bank_missing_history'
     assert expected in answer['text']
     assert '0,75' not in answer['text'] and '0.75' not in answer['text']
+
+
+def test_cnmv_portfolio_decline_endpoint():
+    response = client.post("/api/declines", json={"basis": "portfolio_cnmv", "language": "en"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["basisName"] == "My portfolio (CNMV NAVs; DEMO holdings)"
+    assert body["maxDrawdownPercent"] == pytest.approx(8.7857, abs=1e-3)

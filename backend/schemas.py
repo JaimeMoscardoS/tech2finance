@@ -23,7 +23,7 @@ class SimulationSpec(RequestModel):
 
 
 class DeclineSpec(RequestModel):
-    basis: Literal["instrument", "portfolio_demo"]
+    basis: Literal["instrument", "portfolio_demo", "portfolio_cnmv"]
     language: Language
     instrumentId: Identifier | None = None
     periods: Periods | None = None
@@ -33,8 +33,8 @@ class DeclineSpec(RequestModel):
     def validate_basis(self):
         if self.basis == "instrument" and (self.instrumentId is None or self.periods is None):
             raise ValueError("instrumentId and periods are required for instrument")
-        if self.basis == "portfolio_demo" and (self.instrumentId is not None or self.periods is not None or self.startDate is not None):
-            raise ValueError("portfolio_demo does not accept instrumentId or periods")
+        if self.basis in ("portfolio_demo", "portfolio_cnmv") and (self.instrumentId is not None or self.periods is not None or self.startDate is not None):
+            raise ValueError(f"{self.basis} does not accept instrumentId or periods")
         return self
 
 

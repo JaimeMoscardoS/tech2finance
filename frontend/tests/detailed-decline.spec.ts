@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 const ids = ['observed','context','mechanism','portfolio','decision','uncertainty'];
 const answer = (mode: 'demo'|'ai' = 'demo') => ({schemaVersion:'1.0',mode,provider:mode==='ai'?'anthropic':'local_rules',model:mode==='ai'?'claude-sonnet-5-5':null,language:'es',summary:'Resumen de prueba',sections:ids.map(id=>({id,title:`Sección ${id}`,paragraphs:[`Texto ${id}`],sourceIds:id==='context'?['who']:[]})),sources:[{id:'who',label:'OMS',url:'https://www.who.int/'}],news:{status:'empty',provider:'ecb_archive',checkedAt:'2026-01-01T00:00:00Z',periodStart:'2019-12-31',periodEnd:'2020-03-31',items:[],limitations:[]}});
-const open = async (page: import('@playwright/test').Page) => {await page.goto('/'); await page.getByRole('button',{name:/¿Te preocupa la caída\?/}).click(); return page.getByRole('dialog',{name:'Tomemos un momento'});};
+const open = async (page: import('@playwright/test').Page) => {await page.goto('/'); // El análisis detallado depende de la serie del servidor `portfolio_demo`: se abre con «Probar una caída» (Inicio), no con el enlace calm sobre la cartera DEMO.
+ await page.getByRole('button',{name:'Probar una caída'}).click(); return page.getByRole('dialog',{name:'Tomemos un momento'});};
 
 test('local mode builds six sections without calling the analysis API', async ({page}) => {
  let requests=0; page.on('request',r=>{if(r.url().endsWith('/api/decline-explanations'))requests++;});
@@ -51,7 +52,7 @@ test('closing a pending request cannot update the next opening', async ({page}) 
  await page.addInitScript(()=>localStorage.setItem('t2f-data-mode','server'));
  await page.route('**/api/decline-explanations',async route=>{attempts++; if(attempts===1){await wait; await route.fulfill({json:{...answer('ai'),summary:'Stale closed response'}}).catch(()=>{});} else await route.fulfill({json:answer()});});
  let dialog=await open(page); await expect(dialog.locator('.detailed-analysis')).toContainText('Preparando');
- await dialog.getByRole('button',{name:'Cerrar',exact:true}).click(); await page.getByRole('button',{name:/¿Te preocupa la caída\?/}).click();
+ await dialog.getByRole('button',{name:'Cerrar',exact:true}).click(); await page.getByRole('button',{name:'Inicio',exact:true}).click(); await page.getByRole('button',{name:'Probar una caída'}).click();
  dialog=page.getByRole('dialog',{name:'Tomemos un momento'}); await expect(dialog.locator('.detailed-analysis')).toContainText('Análisis educativo de demostración'); release();
  await expect(dialog.locator('.detailed-analysis')).not.toContainText('Stale closed response');
 });
@@ -66,12 +67,13 @@ test('analysis control keeps keyboard focus through cancellation, retry, error a
   else if(attempts===2){await second; await route.fulfill({status:503,body:'unavailable'});}
   else {await third; await route.fulfill({json:answer()});}
  });
- const card=page.getByRole('button',{name:/¿Te preocupa la caída\?/}); await page.goto('/'); await card.focus(); await page.keyboard.press('Enter');
+ const card=page.getByRole('button',{name:'Probar una caída'}); await page.goto('/'); await card.focus(); await page.keyboard.press('Enter');
  const dialog=page.getByRole('dialog',{name:'Tomemos un momento'}); const control=dialog.locator('.detailed-analysis > button');
  await expect(control).toHaveText('Cancelar análisis'); await control.focus(); await page.keyboard.press('Enter'); await expect(control).toHaveText('Reintentar análisis'); await expect(control).toBeFocused();
  await page.keyboard.press('Enter'); await expect(control).toHaveText('Cancelar análisis'); await expect(control).toBeFocused(); releaseSecond();
  await expect(control).toHaveText('Reintentar análisis'); await expect(control).toBeFocused();
  await page.keyboard.press('Enter'); await expect(control).toHaveText('Cancelar análisis'); releaseThird();
  await expect(control).toHaveText('Actualizar análisis con mi contexto'); await expect(control).toBeFocused(); releaseFirst();
- await page.keyboard.press('Escape'); await expect(card).toBeFocused();
+ await page.keyboard.press('Escape'); await expect(dialog).toBeHidden(); // «Probar una caída» cambia de página: el disparador ya no existe y el foco pasa al contenido principal.
+ await expect(page.locator('main')).toBeFocused();
 });
