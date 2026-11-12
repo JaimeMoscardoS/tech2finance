@@ -103,6 +103,10 @@ class TutorRequest(RequestModel):
     history: Annotated[list[HistoryMessage], Field(max_length=8)] = Field(default_factory=list)
     context: TutorContext
 
+class AgentSessionRequest(RequestModel):
+    context: TutorContext
+    textOnly: bool = False
+
 class SpeechTokenRequest(RequestModel):
     language: Language
 

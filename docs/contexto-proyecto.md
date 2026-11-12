@@ -4,6 +4,8 @@
 
 La configuración local opcional del servidor usa `.env` privado en la raíz, copiado de `.env.example`; contiene claves de Anthropic y ElevenLabs, selección de análisis y voces de respuesta en español e inglés. Se carga al arrancar y requiere reinicio tras cambios. La síntesis real devolvió MP3 para ambos idiomas; la audición y el micrófono siguen pendientes de comprobación. Véase [backend](../backend/README.md#configuración-privada-local).
 
+La voz conversacional puede usar un agente privado gestionado por ElevenLabs, con contexto calculado por el servidor y sesión firmada temporal. Los datos que pasan por el navegador pueden manipularse y la salida del modelo no se valida como cálculo financiero. El análisis detallado conserva su proveedor anterior. El contrato y la preparación del agente están en [contratos](contratos.md#agente-de-voz-elevenlabs).
+
 En la rama de trabajo, **BancoT2F** es la entidad ficticia anfitriona de la experiencia y Tech2Finance su tutor. Las condiciones del anfitrión, los costes de productos no disponibles y los límites se detallan en [BancoT2F](banco-t2f.md); el [guion de demo](../presentacion/demo-banco-t2f.md) recoge el recorrido histórico propuesto.
 
 Tech2Finance es una propuesta de asistente para la sección de inversión de la aplicación de un banco. Su propósito es ayudar al cliente a entender lo que ve, aprender cómo se comportan las inversiones y explorar decisiones con dinero ficticio antes de comprometer dinero real.
@@ -124,14 +126,14 @@ Una noticia que coincide con una caída no demuestra por sí misma que la haya c
 
 El tutor del servidor puede recibir los hechos calculados de la cartera histórica mostrada en Inicio y Mi cartera: periodo, capital aportado, valor, beneficio, rentabilidad simple y posiciones ficticias. Los valores liquidativos proceden de CNMV; las participaciones son DEMO y las causas de los movimientos no se conocen por estos datos. Si falla la construcción o la interfaz muestra la alternativa ficticia, se omite la cartera del contexto del servidor; la interfaz comunica solo la variante visual, no importes.
 
-En esta rama el tutor funciona con reglas o con Claude cuando está configurado, sin sustitución silenciosa ante errores. El dictado puede usar procesamiento local o ElevenLabs; el usuario inicia el micrófono y el chat escrito permite revisar el texto antes de enviarlo. Las etiquetas identifican el proveedor de la respuesta. Para ElevenLabs se normalizan cantidades, porcentajes y fechas en una copia hablada sin alterar lo mostrado; la voz local solo expande EUR. Los detalles y límites están en [contratos](contratos.md#conversación-voz-y-análisis).
+En el modo anterior el tutor funciona con reglas o Claude y el dictado usa procesamiento local o ElevenLabs. El modo de agente gestionado usa una sesión conversacional ElevenLabs para voz; su modelo responde directamente, sin pasar por el tutor anterior. Los detalles y límites están en [contratos](contratos.md#agente-de-voz-elevenlabs).
 
-La arquitectura de esta rama es:
+La arquitectura del modo anterior es:
 
 1. El usuario escribe o habla. Si se habilita el micrófono, ElevenLabs transcribe el audio.
 2. El backend prepara la pregunta y el contexto pertinente: pantalla, nivel y datos disponibles de la simulación o cartera ficticia; también plazo y necesidad de liquidez si existen; el objetivo libre del contexto se excluye de la petición al modelo. La pregunta y el historial pueden contener texto libre.
 3. La API de Claude genera una respuesta adaptada al nivel. Los datos y cálculos provienen de los componentes del proyecto, no de cifras inventadas por el modelo.
-4. La interfaz presenta el texto y puede leerlo con una voz local del navegador; la síntesis de voz de ElevenLabs no está implementada.
+4. La interfaz presenta el texto y puede leerlo con voz local o con síntesis ElevenLabs cuando está configurada.
 
 El chat escrito contextual y la entrada hablada están implementados en esta rama. La experiencia escrita debe seguir disponible si el proveedor de voz falla. Las claves permanecen en el servidor. El modelo conversacional usado por el producto es distinto de los agentes de desarrollo configurados para el equipo.
 
