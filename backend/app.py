@@ -23,6 +23,8 @@ from backend.insights import narrate
 from backend.tutor_bridge import TutorUnavailable, reply
 from backend.providers import ProviderError, speech_provider, tutor_provider, speech_token, tutor_reply
 from backend.speech_playback import tts_provider, synthesize
+from backend.agent_session import agent_configured, conversation_provider, create_session
+from backend.schemas import AgentSessionRequest
 
 MAX_BODY = 65536
 
@@ -48,7 +50,7 @@ class BodyLimit:
             size += len(event.get("body", b""))
             if size > MAX_BODY:
                 response = error(413, "request_too_large", "Request body is too large.")
-                if scope.get('path') in ('/api/speech/token', '/api/speech/synthesize'):
+                if scope.get('path') in ('/api/speech/token', '/api/speech/synthesize', '/api/agent/session'):
                     response.headers['Cache-Control'] = 'no-store'
                 await response(scope, receive, send)
                 return
@@ -66,7 +68,7 @@ class BodyLimit:
             return await receive()
 
         async def send_with_cache_control(event):
-            if scope.get('path') in ('/api/speech/token', '/api/speech/synthesize') and event['type'] == 'http.response.start':
+            if scope.get('path') in ('/api/speech/token', '/api/speech/synthesize', '/api/agent/session') and event['type'] == 'http.response.start':
                 headers = [(k, v) for k, v in event.get('headers', []) if k.lower() != b'cache-control']
                 event['headers'] = headers + [(b'cache-control', b'no-store')]
             await send(event)
@@ -77,7 +79,11 @@ class BodyLimit:
 app = FastAPI(title="Tech2Finance local demo", docs_url=None, redoc_url=None, openapi_url=None)
 app.add_middleware(BodyLimit)
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver"])
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
+frontend_port = os.environ.get('T2F_FRONTEND_PORT', '5173')
+if not frontend_port.isascii() or not frontend_port.isdigit() or not 1 <= int(frontend_port) <= 65535:
+    raise ValueError('Invalid T2F_FRONTEND_PORT')
+allowed_origins = [f'http://localhost:{frontend_port}', f'http://127.0.0.1:{frontend_port}']
+app.add_middleware(CORSMiddleware, allow_origins=allowed_origins, allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
 
 @app.exception_handler(RequestValidationError)
@@ -135,8 +141,8 @@ def health():
     news_provider = os.environ.get('T2F_NEWS_PROVIDER', 'ecb_archive')
     speech, tutor = speech_provider(), tutor_provider()
     return {"status": "ok", "mode": "demo", "tutorProvider": tutor, "speechProvider": speech, "ttsProvider": tts_provider(),
-            "speechKeyConfigured": bool(os.environ.get('ELEVENLABS_API_KEY')),
-            "externalProviders": provider() == "anthropic" or news_provider == 'ecb_archive' or speech == 'elevenlabs' or tutor == 'anthropic' or tts_provider() == 'elevenlabs', "newsProvider": news_provider}
+            "speechKeyConfigured": bool(os.environ.get('ELEVENLABS_API_KEY')), "conversationProvider": conversation_provider(), "agentConfigured": agent_configured(),
+            "externalProviders": provider() == "anthropic" or news_provider == 'ecb_archive' or speech == 'elevenlabs' or tutor == 'anthropic' or tts_provider() == 'elevenlabs' or conversation_provider() == 'elevenlabs', "newsProvider": news_provider}
 
 
 @app.get("/api/catalog")
@@ -197,7 +203,7 @@ async def tutor(request: TutorRequest):
 @app.post('/api/speech/token')
 async def token(request: SpeechTokenRequest, raw_request: Request):
     origin = raw_request.headers.get('origin')
-    if origin and origin not in ('http://localhost:5173', 'http://127.0.0.1:5173'):
+    if origin and origin not in allowed_origins:
         response = error(403, 'invalid_origin', 'Invalid origin.')
     else:
         response = JSONResponse(await speech_token(request.language))
@@ -205,10 +211,19 @@ async def token(request: SpeechTokenRequest, raw_request: Request):
     return response
 
 
+@app.post('/api/agent/session')
+async def agent_session(request: AgentSessionRequest, raw_request: Request):
+    origin = raw_request.headers.get('origin')
+    if origin and origin not in allowed_origins:
+        return error(403, 'invalid_origin', 'Invalid origin.')
+    context = build_tutor_context(request.context.model_dump(mode='json', exclude_none=True))
+    return await create_session(context, request.textOnly)
+
+
 @app.post('/api/speech/synthesize')
 async def synthesize_speech(request: SpeechSynthesisRequest, raw_request: Request):
     origin = raw_request.headers.get('origin')
-    if origin and origin not in ('http://localhost:5173', 'http://127.0.0.1:5173'):
+    if origin and origin not in allowed_origins:
         return error(403, 'invalid_origin', 'Invalid origin.')
     task = asyncio.create_task(synthesize(request.text, request.language))
     try:
